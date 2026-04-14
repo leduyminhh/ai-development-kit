@@ -1,0 +1,32 @@
+# Codex Workflow Kit project configuration
+
+model = "gpt-5.4"
+sandbox_mode = "workspace-write"
+approval_policy = "on-request"
+profile = "development"
+
+[profiles.conservative]
+sandbox_mode = "read-only"
+approval_policy = "untrusted"
+
+[profiles.development]
+sandbox_mode = "workspace-write"
+approval_policy = "on-request"
+
+[profiles.review]
+sandbox_mode = "read-only"
+approval_policy = "on-request"
+
+[profiles.ci]
+sandbox_mode = "read-only"
+approval_policy = "never"
+
+[agents.codex-structure-validator]
+description = "Validates Codex workflow repository structure and reports pass, warning, and fail findings."
+model = "gpt-5.4"
+config_file = "agents/codex-structure-validator.toml"
+
+[agents.java-spring-expert]
+description = "Handles Spring Boot + Maven ticket work through focused Java Spring workflow skills."
+model = "gpt-5.4"
+config_file = "agents/java-spring-expert.toml"
