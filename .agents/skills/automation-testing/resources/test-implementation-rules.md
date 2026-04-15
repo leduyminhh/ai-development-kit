@@ -17,6 +17,10 @@ Use this resource when adding or modifying tests.
 - Reset mocks, fake timers, databases, and temporary files.
 - Use transaction rollback, isolated schemas, temp directories, or factories when available.
 - Do not depend on test execution order.
+- For transactional tests, assert the behavior that matters: transaction rollback, committed state, propagation boundary, isolation level, lock timeout, or retry semantics.
+- If Testcontainers are used, keep container lifecycle centralized and reuse existing project conventions for startup, cleanup, ports, and migrations.
+- For concurrency tests, design the test around the race window, parallel trigger, idempotency key, lock, retry, or duplicate request risk.
+- For contract tests, prefer the existing consumer/provider tooling; verify schema, OpenAPI examples, Pact interactions, or mock-server stubs against real serialization.
 
 ## Test Data
 

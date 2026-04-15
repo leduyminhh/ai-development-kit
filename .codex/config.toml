@@ -1,6 +1,8 @@
-﻿[environment]
+# environment Global runtime access
+[environment]
 network_access = true
 
+# ------------ Behavior Global assistant behavior ------------ 
 [behavior]
 default_language = "vi"
 prefer_inline_output_over_file_write = true
@@ -10,10 +12,46 @@ disallow_unsafe_destructive_actions = true
 avoid_unrelated_file_changes = true
 require_pre_write_summary = true
 
+# ------------ Validation Global structure ------------ 
 [validation]
 run_after_structure_change = true
-validator_command = "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root ."
+validator_command = "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root . -Fix"
 
+# ------------ Policy Global scan scope ------------
+[scan.policy]
+skipProtectedPathsByDefault = true
+protectedScanPaths = ["docs/", "reports/"]
+requireExplicitAllow = true
+
+# ------------ Output ------------
+[output.file]
+filenamePattern = "filename_yyyyMMdd_HHmm"
+timezone = "Asia/Saigon"
+requireConfirmationForProtectedPaths = true
+
+[output.file.extensionsBySubpath]
+"docs/diagram" = "puml"
+"docs/specs" = "md"
+"docs/plans" = "md"
+"docs/reports" = "md"
+"reports" = "md"
+"audit/agent" = "log"
+
+# ------------ Writer ------------
+[documentation.writer]
+rootPath = "docs"
+createRootOnConfirm = true
+requireConfirmation = true
+
+[diagram.writer]
+rootPath = "docs/diagram"
+subagentPath = true
+filenamePattern = "filename_yyyyMMdd_HHmm"
+defaultExtension = "puml"
+createRootOnConfirm = true
+requireConfirmation = true
+
+# ------------ Audit ------------
 [audit.agent]
 enabled = true
 path = "audit/agent"
@@ -21,51 +59,7 @@ remainingDays = 30
 format = "text"
 hook = ".codex/hooks/agent-execution-audit.ps1"
 
-[documentation.writer]
-rootPath = "docs"
-createRootOnConfirm = true
-requireConfirmation = true
-
-[agents.codex-structure-validator]
-path = ".codex/agents/codex-structure-validator.toml"
-read_only = true
-enabled = true
-
-[agents.java-architect]
-path = ".codex/agents/java-architect.toml"
-read_only = false
-enabled = true
-
-[agents.qa-reviewer]
-path = ".codex/agents/qa-reviewer.toml"
-read_only = false
-enabled = true
-
-[agents.automation-testing]
-path = ".codex/agents/automation-testing.toml"
-read_only = false
-enabled = true
-
-[agents.react-js]
-path = ".codex/agents/react-js.toml"
-read_only = false
-enabled = true
-
-[agents.design-pattern]
-path = ".codex/agents/design-pattern.toml"
-read_only = false
-enabled = true
-
-[agents.documentation-writer]
-path = ".codex/agents/documentation-writer.toml"
-read_only = false
-enabled = true
-
-[agents.git-workflow]
-path = ".codex/agents/git-workflow.toml"
-read_only = false
-enabled = true
-
+# ------------ Guards Safety enforcement ------------
 [guards]
 block_danger_full_access = false
 block_never_approval_for_normal_dev = true
@@ -83,3 +77,48 @@ Proposed change:
 Confirm? (yes/no)
 """
 
+# ------------ Agents ------------
+[agents.codex-structure-validator]
+path = ".codex/agents/codex-structure-validator.toml"
+read_only = true
+enabled = true
+
+[agents.automation-testing]
+path = ".codex/agents/automation-testing.toml"
+read_only = false
+enabled = true
+
+[agents.design-pattern]
+path = ".codex/agents/design-pattern.toml"
+read_only = false
+enabled = true
+
+[agents.diagram-w]
+path = ".codex/agents/diagram-w.toml"
+read_only = false
+enabled = true
+
+[agents.documentation-writer]
+path = ".codex/agents/documentation-writer.toml"
+read_only = false
+enabled = true
+
+[agents.git-workflow]
+path = ".codex/agents/git-workflow.toml"
+read_only = false
+enabled = true
+
+[agents.java-architect]
+path = ".codex/agents/java-architect.toml"
+read_only = false
+enabled = true
+
+[agents.qa-reviewer]
+path = ".codex/agents/qa-reviewer.toml"
+read_only = false
+enabled = true
+
+[agents.react-js]
+path = ".codex/agents/react-js.toml"
+read_only = false
+enabled = true

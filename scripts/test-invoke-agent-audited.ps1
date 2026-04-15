@@ -75,4 +75,36 @@ Assert-True ($failedRow.Contains('cost=2.5')) 'Explicit cost mismatch.'
 Get-ChildItem -LiteralPath $auditRoot -Filter '*_action.*' -File -ErrorAction SilentlyContinue |
     Remove-Item -Force
 
+& powershell -NoProfile -ExecutionPolicy Bypass -File $script `
+    -Root $Root `
+    -AuditRoot $auditRoot `
+    -SessionId '77777777-7777-7777-7777-777777777777' `
+    -AgentName 'react-js' `
+    -SummaryJob 'Run audited agent from config' `
+    -Command "Write-Output 'agent ok'; exit 0" `
+    -RemainingDays 7
+
+Assert-Equal 0 $LASTEXITCODE 'Configured agent command should return exit code 0.'
+
+$configuredRows = @(Get-ChildItem -LiteralPath $auditRoot -Filter '*_action.log' -File | ForEach-Object { Get-Content -LiteralPath $_.FullName })
+Assert-Equal 1 $configuredRows.Count 'Configured agent command should create exactly one audit row.'
+Assert-True ($configuredRows[0].Contains('agentName=react-js')) 'Configured agent name should be logged.'
+Assert-True ($configuredRows[0].Contains('model=gpt-5.4')) 'Configured agent model should be loaded from .codex/agents.'
+Assert-True ($configuredRows[0].Contains('reasoning=high')) 'Configured agent reasoning should be loaded from .codex/agents.'
+
+Get-ChildItem -LiteralPath $auditRoot -Filter '*_action.*' -File -ErrorAction SilentlyContinue |
+    Remove-Item -Force
+
+& powershell -NoProfile -ExecutionPolicy Bypass -File $script `
+    -Root $Root `
+    -AuditRoot $auditRoot `
+    -AgentName 'missing-agent' `
+    -SummaryJob 'Run missing agent' `
+    -Command "Write-Output 'should not run'; exit 0" `
+    -RemainingDays 7
+
+Assert-Equal 1 $LASTEXITCODE 'Unknown agent should fail before running the command.'
+$missingRows = @(Get-ChildItem -LiteralPath $auditRoot -Filter '*_action.log' -File -ErrorAction SilentlyContinue | ForEach-Object { Get-Content -LiteralPath $_.FullName })
+Assert-Equal 0 $missingRows.Count 'Unknown agent should not create an audit row.'
+
 Write-Output 'invoke-agent-audited tests passed'

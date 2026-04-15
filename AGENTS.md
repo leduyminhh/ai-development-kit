@@ -42,6 +42,11 @@ The following paths are protected:
 - `docs/`
 - `reports/`
 
+Scan policy:
+- Do not recursively scan `docs/` or `reports/` by default.
+- Scan protected paths only after explicit user permission or when a command is intentionally run with an allow flag such as `-IncludeProtectedPaths`.
+- Prefer targeted reads over broad traversal to reduce token usage.
+
 Any action that creates, updates, overwrites, or deletes files under protected paths MUST require explicit user confirmation before execution.
 
 Before any write action under protected paths, the agent MUST present:
@@ -74,7 +79,10 @@ Strict prohibitions:
 
 ## Workflow Rules
 - After any structure change, run the validator:
-  `powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root .`
+  `powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root . -Fix`
+- Use selected tests instead of running every test by default:
+  `powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -FromGit`
+- When adding any `*test*.ps1` file, map it in `.codex/test-map.toml` under exactly one group: `test.always`, `test.core`, or `test.skill`.
 - Keep `AGENTS.md` concise, ideally under 150 lines.
 - Use `.codex/config.toml` for deterministic settings such as model, sandbox, approval policy, profile, and agent registration.
 

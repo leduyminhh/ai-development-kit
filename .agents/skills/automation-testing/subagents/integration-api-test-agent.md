@@ -1,20 +1,21 @@
 # Integration API Test Agent
 
-Implement integration, persistence, and API contract tests.
+Implement integration, persistence, and API tests. Route specialized Testcontainers, transactional, or contract work to their dedicated subagents when those risks dominate.
 
 ## Use When
 
 - repository/query behavior matters
-- transaction or rollback behavior matters
 - controller/API serialization matters
-- external adapter contract matters
+- framework wiring, validation, filters, middleware, or persistence side effects matter
 
 ## Rules
 
 - Use existing slice/integration test conventions.
-- Prefer test containers, in-memory adapters, mock servers, or framework fixtures already present.
+- Prefer existing framework fixtures, slice tests, in-memory adapters, mock servers, or Testcontainers conventions already present.
 - Assert status codes, response body, validation errors, and persistence side effects.
 - Keep test data isolated and repeatable.
+- If the main risk is transaction semantics, use `transactional-test-agent.md`.
+- If the main risk is consumer/provider compatibility, use `contract-test-agent.md`.
 
 ## Output
 

@@ -16,6 +16,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+. (Join-Path $PSScriptRoot 'lib/codex-config.ps1')
+
 if ([string]::IsNullOrWhiteSpace($SessionId)) {
     $SessionId = [guid]::NewGuid().ToString()
 }
@@ -23,6 +25,29 @@ if ([string]::IsNullOrWhiteSpace($SessionId)) {
 $auditScript = Join-Path $Root '.codex/hooks/agent-execution-audit.ps1'
 if (-not (Test-Path -LiteralPath $auditScript)) {
     throw "Audit script not found: $auditScript"
+}
+
+$agentConfigPath = Join-Path $Root (Join-Path '.codex/agents' "$AgentName.toml")
+if (-not (Test-Path -LiteralPath $agentConfigPath)) {
+    throw "Agent config not found for '$AgentName': $agentConfigPath"
+}
+
+$agentConfigText = Get-Content -LiteralPath $agentConfigPath -Raw
+$configuredAgentName = Get-CodexTomlStringValue -TomlText $agentConfigText -Key 'name'
+if ([string]::IsNullOrWhiteSpace($configuredAgentName)) {
+    throw "Agent config is missing required name: $agentConfigPath"
+}
+
+if ($configuredAgentName -ne $AgentName) {
+    throw "AgentName '$AgentName' does not match config name '$configuredAgentName': $agentConfigPath"
+}
+
+if ([string]::IsNullOrWhiteSpace($Model)) {
+    $Model = Get-CodexTomlStringValue -TomlText $agentConfigText -Key 'model'
+}
+
+if ([string]::IsNullOrWhiteSpace($Reasoning)) {
+    $Reasoning = Get-CodexTomlStringValue -TomlText $agentConfigText -Key 'model_reasoning_effort'
 }
 
 $startAt = [DateTimeOffset]::UtcNow

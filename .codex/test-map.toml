@@ -1,0 +1,106 @@
+# Test map groups commands by selection policy.
+# When adding a new test file, register it here in exactly one group:
+# - test.always: final safety gates that always run in selected verification.
+# - test.core.<name>: triggered by changed paths or low-level workflow components.
+# - test.skill.<name>: triggered by activated skill, agent, or mapped paths.
+
+[test.runner]
+parallel = true
+finalValidator = "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root ."
+
+[test.always.structure]
+description = "Final Codex structure validation"
+commands = [
+  "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root ."
+]
+
+[test.core.pwsh-lib]
+paths = [
+  "scripts/lib"
+]
+commands = [
+  "powershell -ExecutionPolicy Bypass -File scripts/test-codex-pwsh-lib.ps1"
+]
+
+[test.core.output-file]
+paths = [
+  "scripts/resolve-output-file.ps1",
+  "scripts/lib/codex-output-file.ps1",
+  ".codex/config.toml",
+  ".agents/skills/diagram-w"
+]
+commands = [
+  "powershell -ExecutionPolicy Bypass -File scripts/test-resolve-output-file.ps1"
+]
+
+[test.core.audit-hook]
+paths = [
+  ".codex/hooks/agent-execution-audit.ps1",
+  ".codex/config.toml"
+]
+commands = [
+  "powershell -ExecutionPolicy Bypass -File .codex/hooks/test-agent-execution-audit.ps1"
+]
+
+[test.core.audited-runner]
+paths = [
+  "scripts/invoke-agent-audited.ps1",
+  ".codex/hooks/agent-execution-audit.ps1",
+  ".codex/agents",
+  ".codex/config.toml"
+]
+commands = [
+  "powershell -ExecutionPolicy Bypass -File scripts/test-invoke-agent-audited.ps1"
+]
+
+[test.core.validator]
+paths = [
+  ".agents/skills/codex-best-practice-validator",
+  ".codex/config.toml",
+  ".codex/test-map.toml",
+  "scripts/resolve-test-plan.ps1",
+  "scripts/test-selected.ps1",
+  "scripts/test-test-map.ps1",
+  "AGENTS.md"
+]
+commands = [
+  "powershell -ExecutionPolicy Bypass -File scripts/test-test-map.ps1",
+  "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/test-validate-codex-structure.ps1"
+]
+
+[test.skill.automation-testing]
+agents = ["automation-testing"]
+skills = ["automation-testing"]
+paths = [
+  ".agents/skills/automation-testing",
+  ".codex/agents/automation-testing.toml"
+]
+commands = [
+  "powershell -ExecutionPolicy Bypass -File .agents/skills/automation-testing/scripts/test-automation-testing-strategy.ps1"
+]
+
+[test.skill.onion-architecture]
+agents = ["java-architect"]
+skills = ["onion-architecture", "shared-module-architecture"]
+paths = [
+  ".agents/skills/onion-architecture",
+  ".agents/skills/shared-module-architecture",
+  ".agents/skills/java-architect/SKILL.md",
+  ".codex/agents/java-architect.toml",
+  "scripts/test-architecture-skills.ps1"
+]
+commands = [
+  "powershell -ExecutionPolicy Bypass -File scripts/test-architecture-skills.ps1"
+]
+
+[test.skill.diagram-w]
+agents = ["diagram-w"]
+skills = ["diagram-w"]
+paths = [
+  ".agents/skills/diagram-w",
+  ".codex/agents/diagram-w.toml",
+  "scripts/resolve-output-file.ps1"
+]
+commands = [
+  "powershell -ExecutionPolicy Bypass -File scripts/test-resolve-output-file.ps1"
+]

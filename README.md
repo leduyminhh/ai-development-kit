@@ -26,6 +26,25 @@ Skills update immediately through the link. No per-project copy step is required
 
 Agents, hooks, and workflow config remain in this repository as project-local templates. Import them intentionally into a project when that project needs named agents or audit hooks.
 
+## Standard Codex Structure
+
+Run the validator with `-Fix` to create or synchronize the standard scaffold:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root . -Fix
+```
+
+The scaffold is organized in six layers:
+
+- Step 1 `codex-agents-md`: `AGENTS.md` keeps repository-level guidance concise.
+- Step 2 `codex.config`: `.codex/config.toml` stores deterministic behavior, validation, audit, guards, and agent registration.
+- Step 3 `codex-hook`: `.codex/hooks/` stores hook contracts such as agent execution audit logging.
+- Step 4 `codex-mcp`: `.codex/mcp/` stores MCP configuration snippets or templates.
+- Step 5 `codex-skill`: `.agents/skills/<name>/SKILL.md` stores reusable runtime procedures.
+- Step 6 `codex-subagent`: `.agents/skills/<name>/subagents/` stores focused subagent prompts owned by each skill.
+
+When `-Fix` is used, `.codex/config.toml` is synchronized from `.codex/agents/*.toml`, and missing scaffold directories are created with `.gitkeep` markers when needed.
+
 ## Audited Agent Runner
 
 Codex does not automatically execute custom keys such as `[audit.agent].hook` from `.codex/config.toml`. Use the audited wrapper when a workflow needs deterministic audit rows:
@@ -76,6 +95,29 @@ Current domain capabilities:
 - `documentation-writer`: technical documentation for architecture, features, flows, and database/schema knowledge.
 
 Every domain skill or agent must pass `codex-best-practice-validator` before it is considered complete.
+
+## Selected Test Routing
+
+Tests are mapped in `.codex/test-map.toml` so agents run only the checks related to changed files, activated skills, or selected agents.
+
+Run the selected plan for current git changes:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -FromGit
+```
+
+Run tests for one activated skill:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -ActivatedSkill onion-architecture
+```
+
+Rules:
+
+- `test.always` is for final safety gates.
+- `test.core` is for shared scripts, config, hooks, and validators.
+- `test.skill` is for skill/agent-specific tests.
+- Every new `*test*.ps1` file must be registered in `.codex/test-map.toml` when it is created.
 
 ## Reference Material
 
