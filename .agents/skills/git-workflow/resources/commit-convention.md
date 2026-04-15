@@ -3,11 +3,24 @@
 ## Format
 
 ```text
-<type> (<scope>): <short title>
-<vietnamese description>
+type(scope): short summary
+
+Why:
+- ...
+
+What:
+- ...
+
+Impact:
+- ...
+
+Verify:
+- ...
+
+Refs: ...
 ```
 
-If the user does not provide a message, generate both title and Vietnamese description from the staged or intended diff.
+If the user does not provide a message, generate both title and structured body from the staged or intended diff. Write the body in Vietnamese unless repository instructions say otherwise.
 
 ## Types
 
@@ -39,28 +52,73 @@ Prefer the smallest truthful scope. Use one scope only.
 - Use imperative English.
 - Keep it short and specific.
 - Do not end with a period.
-- Do not mention implementation noise unless it is the change.
+- Use `type(scope): short summary` without a space between `type` and `(`.
+- Keep the title under 72 characters when feasible.
 
 ## Body
 
-Write in Vietnamese. Include concise bullets when useful:
+Write in Vietnamese with the exact sections below. Keep it short and focused on the main point.
 
 ```text
-- mô tả thay đổi chính
-- nêu tác động hoặc lý do
-- nêu kiểm chứng nếu liên quan
+Why:
+- 1 cau ngan ve ly do chinh.
+
+What:
+- 1-2 y chinh da thay doi.
+
+Impact:
+- Tac dong chinh hoac `Khong dang ke`.
+
+Verify:
+- Lenh chinh da chay hoac ly do chua chay.
+
+Refs: ticket/link/issue/PR hoac `N/A`
 ```
+
+Rules:
+
+- Prefer one bullet per section; use two bullets only for two distinct points.
+- Keep each bullet under 120 characters when feasible.
+- Avoid background explanation, implementation narration, and repeated file lists.
+- Focus only on why it matters, what changed, impact, and verification.
+- Use `Refs: N/A` when there is no ticket, issue, PR, or external reference.
+- Do not invent verification; state `Chua chay` with reason when needed.
+- Do not include unrelated files or changes in the body.
 
 ## Examples
 
 ```text
-feat (workflow): add linked skill installer
-- thêm script tạo junction skill cho Codex native discovery
-- cập nhật README theo luồng clone + link
+feat(workflow): add linked skill installer
+
+Why:
+- Can dung lai skill tu repo ma khong copy thu cong.
+
+What:
+- Them installer tao link skill va cap nhat huong dan dung.
+
+Impact:
+- Session khac nhan skill moi sau khi repo duoc pull.
+
+Verify:
+- Chay scripts/test-install-skill-link.ps1 thanh cong.
+
+Refs: N/A
 ```
 
 ```text
-fix (audit): use Ho Chi Minh date for audit file names
-- đổi tên file audit theo ngày Asia/Ho_Chi_Minh
-- giữ startAt/endAt ở UTC để phục vụ truy vết
+fix(audit): use Ho Chi Minh date for audit file names
+
+Why:
+- Ten file audit can khop ngay van hanh tai Viet Nam.
+
+What:
+- Dat ten file theo Asia/Ho_Chi_Minh va giu timestamp UTC.
+
+Impact:
+- De doi chieu audit theo ngay van hanh.
+
+Verify:
+- Chay .codex/hooks/test-agent-execution-audit.ps1 thanh cong.
+
+Refs: N/A
 ```

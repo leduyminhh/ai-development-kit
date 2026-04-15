@@ -1,4 +1,4 @@
 interface:
   display_name: "Git Workflow"
-  short_description: "Commit, branch, merge, revert, release, and push workflow"
-  default_prompt: "Use $git-workflow to inspect changes, generate a conventional commit message and Vietnamese description when needed, avoid worktrees unless requested, and guide branch/commit/push flow safely."
+  short_description: "Auto branch, structured commits, merge, revert, release, and push workflow"
+  default_prompt: "Use $git-workflow to inspect changes, auto-generate a branch from commit type and scope/module, create structured conventional commits with Why/What/Impact/Verify/Refs, avoid worktrees unless requested, and guide branch/commit/push flow safely."

@@ -26,6 +26,29 @@ Skills update immediately through the link. No per-project copy step is required
 
 Agents, hooks, and workflow config remain in this repository as project-local templates. Import them intentionally into a project when that project needs named agents or audit hooks.
 
+## Audited Agent Runner
+
+Codex does not automatically execute custom keys such as `[audit.agent].hook` from `.codex/config.toml`. Use the audited wrapper when a workflow needs deterministic audit rows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/invoke-agent-audited.ps1 `
+  -AgentName react-js `
+  -Model gpt-5.4 `
+  -Reasoning medium `
+  -SummaryJob "Build checkout UI" `
+  -Command "npm test"
+```
+
+The wrapper writes one compact text row per execution through `.codex/hooks/agent-execution-audit.ps1`, preserving the wrapped command exit code. The default audit file name is `yyMMdd_action.log`.
+
+Log format follows a Logback-like shape with logfmt fields after `|`:
+
+```text
+2026-04-15T07:00:00+07:00 [INFO] [codex-agent] [react-js] [session-id] [-] [-] codex.agent.audit - Build checkout UI | timestamp=2026-04-15T00:05:00Z level=info service=codex-agent eventName=agent.execution eventVersion=1.0 sessionId=session-id agentName=react-js model=gpt-5.4 reasoning=medium summaryJob="Build checkout UI" startTime=2026-04-15T07:00:00+07:00 endTime=2026-04-15T07:05:00+07:00 startAt=2026-04-15T00:00:00Z endAt=2026-04-15T00:05:00Z durationMs=300000 status=completed cost=0 traceId=- spanId=- timezone=Asia/Ho_Chi_Minh schema=codex.agent.audit.v1
+```
+
+This keeps each row as a string while preserving the earlier audit fields for future Grafana Loki parsing.
+
 ## Core Validator
 
 The first core workflow is `codex-structure-validator`, an Agent -> Skill validator for Codex best-practice repository structure.
@@ -50,6 +73,7 @@ Current domain capabilities:
 - `qa-reviewer`: QA reviewer review across stacks.
 - `automation-testing`: automated unit, integration/API, E2E, fixture/data, coverage, and flaky test workflows.
 - `design-pattern`: design pattern advisor with approval gates before applying patterns.
+- `documentation-writer`: technical documentation for architecture, features, flows, and database/schema knowledge.
 
 Every domain skill or agent must pass `codex-best-practice-validator` before it is considered complete.
 

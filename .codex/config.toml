@@ -18,7 +18,13 @@ validator_command = "powershell -ExecutionPolicy Bypass -File .agents/skills/cod
 enabled = true
 path = "audit/agent"
 remainingDays = 30
+format = "text"
 hook = ".codex/hooks/agent-execution-audit.ps1"
+
+[documentation.writer]
+rootPath = "docs"
+createRootOnConfirm = true
+requireConfirmation = true
 
 [agents.codex-structure-validator]
 path = ".codex/agents/codex-structure-validator.toml"
@@ -47,6 +53,11 @@ enabled = true
 
 [agents.design-pattern]
 path = ".codex/agents/design-pattern.toml"
+read_only = false
+enabled = true
+
+[agents.documentation-writer]
+path = ".codex/agents/documentation-writer.toml"
 read_only = false
 enabled = true
 

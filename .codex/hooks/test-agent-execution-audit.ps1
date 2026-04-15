@@ -17,7 +17,7 @@ function Assert-Equal {
 $script = Join-Path $Root '.codex/hooks/agent-execution-audit.ps1'
 $auditRoot = Join-Path $Root '.codex/hooks'
 
-Get-ChildItem -LiteralPath $auditRoot -Filter '*_action.csv' -File -ErrorAction SilentlyContinue |
+Get-ChildItem -LiteralPath $auditRoot -Filter '*_action.*' -File -ErrorAction SilentlyContinue |
     Remove-Item -Force
 
 & $script `
@@ -31,24 +31,38 @@ Get-ChildItem -LiteralPath $auditRoot -Filter '*_action.csv' -File -ErrorAction 
     -EndAt '2026-04-15T00:05:00Z' `
     -Status 'completed' `
     -Cost 1.25 `
-    -RemainingDays 7
+    -RemainingDays 7 `
+    -TraceId 'trace-111' `
+    -SpanId 'span-111'
 
-$expectedFile = Join-Path $auditRoot '260415_action.csv'
-Assert-True (Test-Path -LiteralPath $expectedFile) 'Audit file was not created using yyMMdd_action.csv.'
+$expectedFile = Join-Path $auditRoot '260415_action.log'
+Assert-True (Test-Path -LiteralPath $expectedFile) 'Audit file was not created using yyMMdd_action.log.'
 
-$rows = @(Import-Csv -LiteralPath $expectedFile)
+$rows = @(Get-Content -LiteralPath $expectedFile)
 Assert-Equal 1 $rows.Count 'Audit file should contain exactly one row.'
-Assert-Equal '11111111-1111-1111-1111-111111111111' $rows[0].sessionId 'Session ID mismatch.'
-Assert-Equal 'java-architect' $rows[0].agentName 'Agent name mismatch.'
-Assert-Equal 'gpt-5.4' $rows[0].model 'Model mismatch.'
-Assert-Equal 'high' $rows[0].reasoning 'Reasoning mismatch.'
-Assert-Equal 'Review payment flow' $rows[0].summaryJob 'Summary job mismatch.'
-Assert-Equal '2026-04-15T07:00:00+07:00' $rows[0].startTime 'startTime should be Asia/Ho_Chi_Minh time.'
-Assert-Equal '2026-04-15T07:05:00+07:00' $rows[0].endTime 'endTime should be Asia/Ho_Chi_Minh time.'
-Assert-Equal '2026-04-15T00:00:00Z' $rows[0].startAt 'startAt should remain UTC.'
-Assert-Equal '2026-04-15T00:05:00Z' $rows[0].endAt 'endAt should remain UTC.'
-Assert-Equal 'completed' $rows[0].status 'Status mismatch.'
-Assert-Equal '1.25' $rows[0].cost 'Cost mismatch.'
+$line = $rows[0]
+Assert-True ($line.StartsWith('2026-04-15T07:00:00+07:00 [INFO] [codex-agent] [java-architect] [11111111-1111-1111-1111-111111111111] [trace-111] [span-111] codex.agent.audit - Review payment flow | ')) 'Text log prefix mismatch.'
+Assert-True ($line.Contains('schema=codex.agent.audit.v1')) 'Schema field mismatch.'
+Assert-True ($line.Contains('service=codex-agent')) 'Service field mismatch.'
+Assert-True ($line.Contains('eventName=agent.execution')) 'Event name field mismatch.'
+Assert-True ($line.Contains('eventVersion=1.0')) 'Event version field mismatch.'
+Assert-True ($line.Contains('level=info')) 'Level field mismatch.'
+Assert-True ($line.Contains('sessionId=11111111-1111-1111-1111-111111111111')) 'Session ID field mismatch.'
+Assert-True ($line.Contains('agentName=java-architect')) 'Agent name field mismatch.'
+Assert-True ($line.Contains('model=gpt-5.4')) 'Model field mismatch.'
+Assert-True ($line.Contains('reasoning=high')) 'Reasoning field mismatch.'
+Assert-True ($line.Contains('summaryJob="Review payment flow"')) 'Summary job field mismatch.'
+Assert-True ($line.Contains('startTime=2026-04-15T07:00:00+07:00')) 'startTime field mismatch.'
+Assert-True ($line.Contains('endTime=2026-04-15T07:05:00+07:00')) 'endTime field mismatch.'
+Assert-True ($line.Contains('startAt=2026-04-15T00:00:00Z')) 'startAt field mismatch.'
+Assert-True ($line.Contains('endAt=2026-04-15T00:05:00Z')) 'endAt field mismatch.'
+Assert-True ($line.Contains('timestamp=2026-04-15T00:05:00Z')) 'timestamp field mismatch.'
+Assert-True ($line.Contains('durationMs=300000')) 'durationMs field mismatch.'
+Assert-True ($line.Contains('status=completed')) 'Status field mismatch.'
+Assert-True ($line.Contains('cost=1.25')) 'Cost field mismatch.'
+Assert-True ($line.Contains('traceId=trace-111')) 'Trace ID field mismatch.'
+Assert-True ($line.Contains('spanId=span-111')) 'Span ID field mismatch.'
+Assert-True ($line.Contains('timezone=Asia/Ho_Chi_Minh')) 'Timezone field mismatch.'
 
 & $script `
     -AuditRoot $auditRoot `
@@ -60,10 +74,13 @@ Assert-Equal '1.25' $rows[0].cost 'Cost mismatch.'
     -Status 'started' `
     -RemainingDays 7
 
-$secondFile = Join-Path $auditRoot '260416_action.csv'
-$secondRows = @(Import-Csv -LiteralPath $secondFile)
-Assert-True ([guid]::TryParse($secondRows[0].sessionId, [ref]([guid]::Empty))) 'Missing sessionId should generate a UUID.'
-Assert-Equal '0' $secondRows[0].cost 'Missing cost should default to 0.'
+$secondFile = Join-Path $auditRoot '260416_action.log'
+$secondRows = @(Get-Content -LiteralPath $secondFile)
+Assert-True ($secondRows[0] -match 'sessionId=([0-9a-fA-F-]{36})') 'Missing sessionId should generate a UUID.'
+Assert-True ([guid]::TryParse($Matches[1], [ref]([guid]::Empty))) 'Generated sessionId should be a UUID.'
+Assert-True ($secondRows[0].Contains('cost=0')) 'Missing cost should default to 0.'
+Assert-True ($secondRows[0].Contains('traceId=-')) 'Missing traceId should default to dash.'
+Assert-True ($secondRows[0].Contains('spanId=-')) 'Missing spanId should default to dash.'
 
 & $script `
     -AuditRoot $auditRoot `
@@ -76,11 +93,11 @@ Assert-Equal '0' $secondRows[0].cost 'Missing cost should default to 0.'
     -Status 'completed' `
     -RemainingDays 7
 
-$localDateFile = Join-Path $auditRoot '260415_action.csv'
-$localDateRows = @(Import-Csv -LiteralPath $localDateFile)
-Assert-True ($localDateRows.sessionId -contains '22222222-2222-2222-2222-222222222222') 'Audit filename should use Asia/Ho_Chi_Minh local date, not UTC date.'
+$localDateFile = Join-Path $auditRoot '260415_action.log'
+$localDateRows = @(Get-Content -LiteralPath $localDateFile)
+Assert-True (($localDateRows -join "`n").Contains('sessionId=22222222-2222-2222-2222-222222222222')) 'Audit filename should use Asia/Ho_Chi_Minh local date, not UTC date.'
 
-$oldFile = Join-Path $auditRoot '260101_action.csv'
+$oldFile = Join-Path $auditRoot '260101_action.log'
 New-Item -ItemType File -Path $oldFile -Force | Out-Null
 (Get-Item -LiteralPath $oldFile).LastWriteTimeUtc = (Get-Date).ToUniversalTime().AddDays(-10)
 
@@ -96,7 +113,40 @@ New-Item -ItemType File -Path $oldFile -Force | Out-Null
 
 Assert-True (-not (Test-Path -LiteralPath $oldFile)) 'Old audit file should be deleted after remainingDays.'
 
-Get-ChildItem -LiteralPath $auditRoot -Filter '*_action.csv' -File -ErrorAction SilentlyContinue |
+& $script `
+    -AuditRoot $auditRoot `
+    -SessionId '66666666-6666-6666-6666-666666666666' `
+    -AgentName 'react-js' `
+    -Model 'gpt-5.4' `
+    -Reasoning 'medium' `
+    -SummaryJob 'Verify jsonl compatibility' `
+    -StartAt '2026-04-19T01:00:00Z' `
+    -Status 'completed' `
+    -RemainingDays 7 `
+    -Format jsonl
+
+$jsonFile = Join-Path $auditRoot '260419_action.jsonl'
+$jsonRows = @(Get-Content -LiteralPath $jsonFile | ForEach-Object { $_ | ConvertFrom-Json })
+Assert-Equal 'codex.agent.audit.v1' $jsonRows[0].schema 'JSONL compatibility should keep schema.'
+
+& $script `
+    -AuditRoot $auditRoot `
+    -SessionId '55555555-5555-5555-5555-555555555555' `
+    -AgentName 'qa-reviewer' `
+    -Model 'gpt-5.4' `
+    -Reasoning 'low' `
+    -SummaryJob 'Verify csv compatibility' `
+    -StartAt '2026-04-18T01:00:00Z' `
+    -Status 'failed' `
+    -RemainingDays 7 `
+    -Format csv
+
+$csvFile = Join-Path $auditRoot '260418_action.csv'
+$csvRows = @(Import-Csv -LiteralPath $csvFile)
+Assert-Equal 'error' $csvRows[0].level 'CSV compatibility should keep structured level.'
+Assert-Equal 'codex.agent.audit.v1' $csvRows[0].schema 'CSV compatibility should keep schema.'
+
+Get-ChildItem -LiteralPath $auditRoot -Filter '*_action.*' -File -ErrorAction SilentlyContinue |
     Remove-Item -Force
 
 Write-Output 'agent-execution-audit tests passed'
