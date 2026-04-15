@@ -12,11 +12,13 @@ Use this skill to design and review Java backend changes before coding deeply. T
 ## Operating Mode
 
 1. Identify the business flow, module boundary, and runtime stack.
-2. Load only the resource checklist needed for the task.
-3. Map the intended flow before proposing code changes.
-4. Review clean code and architecture risks before implementation.
-5. Choose targeted Maven or Gradle verification.
-6. Report trade-offs, risks, and verification evidence in Vietnamese.
+2. If the user explicitly forces an architecture, apply that architecture skill before Java-specific design. Use `onion-architecture` when the user asks for Onion Architecture.
+3. If the design includes reusable internal API, contract, or shared logic modules published through Nexus, apply `shared-module-architecture`.
+4. Load only the resource checklist needed for the task.
+5. Map the intended flow before proposing code changes.
+6. Review clean code and architecture risks before implementation.
+7. Choose targeted Maven or Gradle verification.
+8. Report trade-offs, risks, and verification evidence in Vietnamese.
 
 ## Resource Map
 
@@ -52,6 +54,8 @@ Use files in `subagents/` as role prompts when delegating or simulating speciali
 
 - Prefer feature/module boundaries over technical buckets.
 - Keep domain and application logic independent from web and persistence frameworks when the codebase allows it.
+- When `onion-architecture` is forced, use the rings `domain`, `application`, `infrastructure`, and `bootstrap`, and keep dependencies pointing inward.
+- When shared internal API, contract, or shared logic is required, keep those modules versioned, Nexus-published, and compatible with the selected architecture boundary.
 - Put transaction boundaries in application services, not controllers.
 - Avoid hidden side effects in mappers, getters, validators, or logging helpers.
 - Use ports/adapters for external systems when the dependency is volatile or hard to test.

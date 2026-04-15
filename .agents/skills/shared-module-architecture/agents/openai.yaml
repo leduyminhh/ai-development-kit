@@ -1,0 +1,4 @@
+interface:
+  display_name: "Shared Module Architecture"
+  short_description: "Design Nexus-published internal API, contract, and shared logic modules"
+  default_prompt: "Use $shared-module-architecture to design shared internal API, contract, or shared logic artifacts with clear consumers, dependency limits, Nexus versioning, and compatibility tests."
