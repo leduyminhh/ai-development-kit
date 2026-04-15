@@ -1,4 +1,4 @@
 interface:
   display_name: "Automation Testing"
   short_description: "Create, run, and stabilize automated tests across stacks"
-  default_prompt: "Use $automation-testing to implement automated tests, choose the right test level, run stack-appropriate verification, and report evidence in Vietnamese."
+  default_prompt: "Use $automation-testing to implement unit, integration/API, Testcontainers, transactional, edge case, concurrency, contract, E2E, fixture, coverage, or flaky-test workflows; choose the right test level first and report evidence in Vietnamese."

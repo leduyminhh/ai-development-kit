@@ -7,7 +7,7 @@ description: Use when creating, updating, running, debugging, or planning automa
 
 ## Overview
 
-Use this skill to turn requirements, QA review findings, bug reports, architecture notes, or code changes into executable automated tests. This skill is implementation-oriented; use `qa-reviewer` first when the work is only independent review or manual test planning.
+Use this skill to turn requirements, QA review findings, bug reports, architecture notes, or code changes into executable automated tests. It covers unit, integration/API, Testcontainers-backed persistence, transactional test behavior, edge case analysis, concurrency tests, contract tests, E2E, fixtures, coverage gaps, and flaky test stabilization. Use `qa-reviewer` first when the work is only independent review or manual test planning.
 
 ## Operating Mode
 
@@ -24,6 +24,18 @@ Use this skill to turn requirements, QA review findings, bug reports, architectu
 7. Run the narrowest useful command first, then broader commands when risk justifies it.
 8. Report commands, results, coverage gaps, and any remaining manual checks in Vietnamese.
 
+## Test Strategy Matrix
+
+| Capability | Use When | Preferred Subagent |
+|---|---|---|
+| Unit test | deterministic logic, validators, reducers, formatters, pure services | `unit-test-agent.md` |
+| Integration/API test | framework startup, HTTP serialization, repository behavior, adapter boundary | `integration-api-test-agent.md` |
+| Testcontainers | real database, broker, cache, or service semantics matter more than mock speed | `testcontainers-test-agent.md` |
+| Transactional test | commit/rollback, propagation, isolation level, optimistic/pessimistic lock behavior matters | `transactional-test-agent.md` |
+| Edge case test | boundary values, null/empty/invalid input, limits, timezone, precision, overflow | `edge-case-test-agent.md` |
+| Concurrency test | race condition, idempotency, duplicate request, lock, retry, parallel execution risk | `concurrency-test-agent.md` |
+| Contract test | consumer/provider compatibility, schema drift, OpenAPI/Pact/mock server contract | `contract-test-agent.md` |
+
 ## Resource Map
 
 - `resources/framework-detection.md`: identify stack, package manager, test runner, and command selection.
@@ -35,6 +47,11 @@ Use this skill to turn requirements, QA review findings, bug reports, architectu
 - `subagents/test-strategy-planner.md`: choose test level and execution order.
 - `subagents/unit-test-agent.md`: implement focused unit tests.
 - `subagents/integration-api-test-agent.md`: implement integration, persistence, and API contract tests.
+- `subagents/testcontainers-test-agent.md`: implement real dependency integration tests with Testcontainers or equivalent managed containers.
+- `subagents/transactional-test-agent.md`: verify transaction boundaries, rollback/commit semantics, propagation, and isolation.
+- `subagents/edge-case-test-agent.md`: identify and implement boundary, negative, malformed, and extreme-value tests.
+- `subagents/concurrency-test-agent.md`: expose race conditions, idempotency gaps, locking bugs, and retry hazards.
+- `subagents/contract-test-agent.md`: verify consumer/provider API contracts, schemas, and mock server compatibility.
 - `subagents/e2e-test-agent.md`: implement browser/user-flow tests.
 - `subagents/fixture-data-agent.md`: design fixtures, factories, mocks, and test data.
 - `subagents/coverage-gap-agent.md`: identify missing automated coverage.

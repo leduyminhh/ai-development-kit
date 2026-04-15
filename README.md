@@ -26,6 +26,25 @@ Skills update immediately through the link. No per-project copy step is required
 
 Agents, hooks, and workflow config remain in this repository as project-local templates. Import them intentionally into a project when that project needs named agents or audit hooks.
 
+## Standard Codex Structure
+
+Run the validator with `-Fix` to create or synchronize the standard scaffold:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root . -Fix
+```
+
+The scaffold is organized in six layers:
+
+- Step 1 `codex-agents-md`: `AGENTS.md` keeps repository-level guidance concise.
+- Step 2 `codex.config`: `.codex/config.toml` stores deterministic behavior, validation, audit, guards, and agent registration.
+- Step 3 `codex-hook`: `.codex/hooks/` stores hook contracts such as agent execution audit logging.
+- Step 4 `codex-mcp`: `.codex/mcp/` stores MCP configuration snippets or templates.
+- Step 5 `codex-skill`: `.agents/skills/<name>/SKILL.md` stores reusable runtime procedures.
+- Step 6 `codex-subagent`: `.agents/skills/<name>/subagents/` stores focused subagent prompts owned by each skill.
+
+When `-Fix` is used, `.codex/config.toml` is synchronized from `.codex/agents/*.toml`, and missing scaffold directories are created with `.gitkeep` markers when needed.
+
 ## Audited Agent Runner
 
 Codex does not automatically execute custom keys such as `[audit.agent].hook` from `.codex/config.toml`. Use the audited wrapper when a workflow needs deterministic audit rows:

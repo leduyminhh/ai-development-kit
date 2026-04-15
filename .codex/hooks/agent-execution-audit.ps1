@@ -20,27 +20,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-function Get-ConfigValue {
-    param([string]$ConfigText, [string]$Section, [string]$Key)
-
-    $sectionPattern = "(?ms)^\[$([regex]::Escape($Section))\]\s*(.*?)(?=^\[|\z)"
-    $sectionMatch = [regex]::Match($ConfigText, $sectionPattern)
-    if (-not $sectionMatch.Success) { return $null }
-
-    $keyPattern = "(?m)^\s*$([regex]::Escape($Key))\s*=\s*(.+?)\s*$"
-    $keyMatch = [regex]::Match($sectionMatch.Groups[1].Value, $keyPattern)
-    if (-not $keyMatch.Success) { return $null }
-
-    return $keyMatch.Groups[1].Value.Trim().Trim('"')
-}
-
-function Get-HoChiMinhTimeZone {
-    try {
-        return [TimeZoneInfo]::FindSystemTimeZoneById('SE Asia Standard Time')
-    } catch {
-        return [TimeZoneInfo]::CreateCustomTimeZone('Asia/Ho_Chi_Minh', [TimeSpan]::FromHours(7), 'Asia/Ho_Chi_Minh', 'Asia/Ho_Chi_Minh')
-    }
-}
+. (Join-Path $Root 'scripts/lib/codex-config.ps1')
 
 function Convert-ToUtcDateTimeOffset {
     param([string]$Value)
@@ -101,7 +81,7 @@ if (Test-Path -LiteralPath $configPath) {
 }
 
 if ([string]::IsNullOrWhiteSpace($AuditRoot)) {
-    $configuredRoot = Get-ConfigValue -ConfigText $configText -Section 'audit.agent' -Key 'path'
+    $configuredRoot = Get-CodexTomlStringValue -TomlText $configText -Section 'audit.agent' -Key 'path'
     if ([string]::IsNullOrWhiteSpace($configuredRoot)) {
         $configuredRoot = 'audit/agent'
     }
@@ -109,7 +89,7 @@ if ([string]::IsNullOrWhiteSpace($AuditRoot)) {
 }
 
 if ($RemainingDays -lt 0) {
-    $configuredRemainingDays = Get-ConfigValue -ConfigText $configText -Section 'audit.agent' -Key 'remainingDays'
+    $configuredRemainingDays = Get-CodexTomlStringValue -TomlText $configText -Section 'audit.agent' -Key 'remainingDays'
     if ([string]::IsNullOrWhiteSpace($configuredRemainingDays)) {
         $RemainingDays = 30
     } else {
@@ -118,7 +98,7 @@ if ($RemainingDays -lt 0) {
 }
 
 if ([string]::IsNullOrWhiteSpace($Format)) {
-    $configuredFormat = Get-ConfigValue -ConfigText $configText -Section 'audit.agent' -Key 'format'
+    $configuredFormat = Get-CodexTomlStringValue -TomlText $configText -Section 'audit.agent' -Key 'format'
     if ([string]::IsNullOrWhiteSpace($configuredFormat)) {
         $Format = 'text'
     } else {
@@ -132,7 +112,7 @@ if ([string]::IsNullOrWhiteSpace($SessionId)) {
 
 $startUtc = Convert-ToUtcDateTimeOffset -Value $StartAt
 $endUtc = if ([string]::IsNullOrWhiteSpace($EndAt)) { $startUtc } else { Convert-ToUtcDateTimeOffset -Value $EndAt }
-$timeZone = Get-HoChiMinhTimeZone
+$timeZone = Get-CodexHoChiMinhTimeZone
 $durationMs = [Math]::Max(0, [int64](($endUtc - $startUtc).TotalMilliseconds))
 $level = if ($Status -eq 'failed') { 'error' } else { 'info' }
 $traceValue = if ([string]::IsNullOrWhiteSpace($TraceId)) { '-' } else { $TraceId }
