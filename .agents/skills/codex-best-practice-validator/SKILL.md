@@ -9,7 +9,7 @@ Use this skill when asked to validate a Codex workflow repo, agent repo, skill r
 
 ## Scope
 
-Validate the repository's Codex concepts and structure. Do not implement domain workflows while validating. Domain workflows such as `java-spring-expert` must depend on this validator, not the other way around.
+Validate the repository's Codex concepts and structure. Do not implement domain skills while validating. Domain skills such as `java-architect` must depend on this validator, not the other way around.
 
 ## Validation Categories
 
@@ -19,7 +19,7 @@ Validate the repository's Codex concepts and structure. Do not implement domain 
 - Config: `.codex/config.toml` for deterministic harness settings, profiles, sandbox, approval policy, MCP, and agent registration.
 - Hooks: optional guardrails, not a replacement for core instructions.
 - Orchestration: prefer Codex Agent -> Skill; do not design around `.codex/commands/` as stable.
-- Domain separation: Java, React, DevOps, and other domain workflow packs stay outside the validator core.
+- Domain separation: Java, React, DevOps, and other domain skills stay outside the validator core; the validator may check skill shape but must not embed domain procedures.
 
 ## Report Format
 

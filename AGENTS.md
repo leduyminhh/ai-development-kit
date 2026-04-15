@@ -1,45 +1,110 @@
 # AGENTS.md
 
-## Repository Overview
+## Overview
+Repository: `codex-workflow-kit`
 
-This repository is `codex-workflow-kit`: a Codex workflow kit for validators, agents, skills, references, reports, and future domain workflow packs.
+Purpose:
+- Organize Codex validators, agents, skills, references, and generated artifacts.
+- Keep the core validation workflow reusable and independent from domain-specific skills.
 
-Use Vietnamese for user-facing responses.
+Language:
+- Use Vietnamese for all user-facing responses.
 
-## Key Components
-
-- `.agents/skills/codex-best-practice-validator/` contains the core validation skill and deterministic structure script.
+## Repository Structure
+Core validator:
+- `.agents/skills/codex-best-practice-validator/` contains the core validation skill and deterministic structure validation script.
 - `.codex/agents/codex-structure-validator.toml` is the read-only validator agent entry point.
-- `docs/specs/` stores approved design specs.
+
+Runtime skills:
+- `.agents/skills/<name>/SKILL.md` contains a single discoverable skill.
+- Keep skill folders flat under `.agents/skills/`; do not nest runtime skills under domain folders.
+- Use descriptive skill names such as `java-architect` for domain grouping.
+
+Documents and reports:
+- `docs/specs/` stores approved design specifications.
 - `docs/plans/` stores implementation plans.
-- `reports/` stores validation reports and other generated review artifacts.
-- `references/external/codex-cli-best-practice/` is reference material only.
+- `reports/` stores validation reports and generated review artifacts.
 
-## Critical Patterns
+## Architecture Rules
+- Keep the core validator independent from any domain skill.
+- Do not place long domain procedures in this file.
+- Put domain-specific reusable behavior in focused skills under `.agents/skills/<name>/SKILL.md`.
+- Avoid hidden coupling between the validator, domain skills, and external references.
 
-- Keep the core validator independent from domain workflow packs.
-- Domain workflows such as `java-spring-expert` must be validated by `codex-best-practice-validator` before being treated as complete.
-- Do not put long domain procedures in this file; create focused skills under `.agents/skills/<name>/SKILL.md`.
-- Do not treat `.codex/commands/` as a stable custom command system.
-- Read only targeted files from `references/external/`; do not bulk-load or modify the reference clone unless explicitly requested.
+## External References Policy
+- Read only targeted files from `references/external/`.
+- Do not bulk-load external references.
+- Do not modify the external reference clone unless explicitly requested.
+- Do not vendor external references into core source without approval.
+
+## Protected Paths Policy
+The following paths are protected:
+- `docs/`
+- `reports/`
+
+Any action that creates, updates, overwrites, or deletes files under protected paths MUST require explicit user confirmation before execution.
+
+Before any write action under protected paths, the agent MUST present:
+- target path
+- purpose
+- short content summary
+
+Confirmation template:
+
+```text
+Proposed change:
+- Path: docs/specs/payment-flow.md
+- Purpose: document payment orchestration design
+- Summary: scope, sequence flow, API contract, failure handling
+
+Confirm? (yes/no)
+```
+
+Execution rules:
+- Proceed only after explicit confirmation from the user.
+- No implicit approval.
+- No approval by assumption.
+- If confirmation is not granted, do not write files; return the draft inline in chat instead.
+
+Strict prohibitions:
+- No silent file generation.
+- No background file writes.
+- No auto-overwrite in protected paths.
+- No delete or cleanup in protected paths without confirmation.
 
 ## Workflow Rules
-
-- Run the validator after structure changes:
+- After any structure change, run the validator:
   `powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root .`
 - Keep `AGENTS.md` concise, ideally under 150 lines.
-- Use `.codex/config.toml` for deterministic model, sandbox, approval, profile, and agent registration settings.
+- Use `.codex/config.toml` for deterministic settings such as model, sandbox, approval policy, profile, and agent registration.
+
+## Change Safety Rules
+- Prefer non-destructive behavior by default.
+- Prefer inline drafts before persistent writes.
+- Prefer focused edits over broad restructuring.
+- Do not modify unrelated files.
+- Do not read more files than necessary for the current task.
 
 ## Git Commit Convention
 
-Use the user's conventional commit roles, for example:
-
-- `feat (validator): add structure validator`
-- `docs (readme): update workspace structure`
-- `refactor (structure): reorganize docs and references`
+Format:
+```text
+<type> (<scope>): <short title>
+<vietnamese description>
+```
 
 ## Do Not
 
-- Do not implement `java-spring-expert` while working on the validator core unless explicitly requested.
-- Do not vendor external references into core source without approval.
+- Do not mix domain workflow logic into the core validator.
+- Do not bypass confirmation for protected paths.
 - Do not use unsafe config defaults such as `danger-full-access` with `approval_policy = "never"` for normal development.
+- Do not modify external references without approval.
+- Do not generate persistent artifacts in protected paths without explicit confirmation.
+
+## Enforcement Intent
+
+Agents MUST:
+- follow confirmation rules for protected paths
+- default to safe and non-destructive behavior
+- keep the validator modular and domain-agnostic
+- avoid assumptions when a persistent change requires approval

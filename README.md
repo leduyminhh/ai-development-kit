@@ -1,6 +1,6 @@
 # Codex Workflow Kit
 
-This workspace stores reusable Codex workflow building blocks: validators, agents, skills, and domain workflow packs.
+This workspace stores reusable Codex workflow building blocks: validators, agents, skills, and domain-specific agent capabilities.
 
 ## Core Validator
 
@@ -13,17 +13,17 @@ It validates:
 - `.codex/agents/<name>.toml` agent structure.
 - `.codex/config.toml` safety defaults and profiles.
 - Optional hooks and reports.
-- Separation between core validator rules and domain workflows.
+- Separation between core validator rules and domain skills.
 
-## Domain Workflow Packs
+## Domain Skills And Agents
 
-Domain workflows live outside the validator core.
+Domain-specific skills and agents live outside the validator core.
 
-Workflow packs:
+Current domain capabilities:
 
-- `java-spring-expert`: Spring Boot + Maven ticket workflow for ticket intake, checkpointed implementation, Maven verification, and commit proposal.
+- `java-architect`: Java backend architecture review and design for flow, clean code, Spring patterns, persistence, async/concurrency, and test strategy.
 
-Every domain workflow pack must pass `codex-best-practice-validator` before it is considered complete.
+Every domain skill or agent must pass `codex-best-practice-validator` before it is considered complete.
 
 ## Reference Material
 
@@ -31,5 +31,5 @@ Every domain workflow pack must pass `codex-best-practice-validator` before it i
 
 ## Legacy Superpowers Aliases
 
-The earlier `superpowers-workflow` aliases are still useful as process references. Keep them until the validator and domain workflow packs replace the need for a dedicated alias list.
+The earlier `superpowers-workflow` aliases are still useful as process references. Keep them until the validator and domain skills replace the need for a dedicated alias list.
 

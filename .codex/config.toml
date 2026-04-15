@@ -1,32 +1,52 @@
-# Codex Workflow Kit project configuration
+[environment]
+network_access = true
 
-model = "gpt-5.4"
-sandbox_mode = "workspace-write"
-approval_policy = "on-request"
-profile = "development"
+[behavior]
+default_language = "vi"
+prefer_inline_output_over_file_write = true
+confirm_before_protected_write = true
+protected_paths = ["docs/", "reports/"]
+disallow_unsafe_destructive_actions = true
+avoid_unrelated_file_changes = true
+require_pre_write_summary = true
 
-[profiles.conservative]
-sandbox_mode = "read-only"
-approval_policy = "untrusted"
-
-[profiles.development]
-sandbox_mode = "workspace-write"
-approval_policy = "on-request"
-
-[profiles.review]
-sandbox_mode = "read-only"
-approval_policy = "on-request"
-
-[profiles.ci]
-sandbox_mode = "read-only"
-approval_policy = "never"
+[validation]
+run_after_structure_change = true
+validator_command = "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root ."
 
 [agents.codex-structure-validator]
-description = "Validates Codex workflow repository structure and reports pass, warning, and fail findings."
-model = "gpt-5.4"
-config_file = "agents/codex-structure-validator.toml"
+path = ".codex/agents/codex-structure-validator.toml"
+read_only = true
+enabled = true
 
-[agents.java-spring-expert]
-description = "Handles Spring Boot + Maven ticket work through focused Java Spring workflow skills."
-model = "gpt-5.4"
-config_file = "agents/java-spring-expert.toml"
+[agents.java-architect]
+path = ".codex/agents/java-architect.toml"
+read_only = false
+enabled = true
+
+[agents.independent-tester]
+path = ".codex/agents/independent-tester.toml"
+read_only = false
+enabled = true
+
+[agents.react-js]
+path = ".codex/agents/react-js.toml"
+read_only = false
+enabled = true
+
+[guards]
+block_danger_full_access = false
+block_never_approval_for_normal_dev = true
+require_explicit_confirmation_for_protected_paths = true
+block_silent_writes_to_protected_paths = true
+block_delete_without_confirmation = true
+
+[guards.confirmation]
+message_template = """
+Proposed change:
+- Path: {{path}}
+- Purpose: {{purpose}}
+- Summary: {{summary}}
+
+Confirm? (yes/no)
+"""

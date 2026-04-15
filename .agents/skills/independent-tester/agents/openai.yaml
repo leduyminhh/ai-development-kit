@@ -1,0 +1,4 @@
+interface:
+  display_name: "Independent Tester"
+  short_description: "Validate behavior, tests, and regressions across stacks"
+  default_prompt: "Use $independent-tester to independently derive test scenarios, inspect regression risk, choose stack-appropriate verification commands, and report evidence-backed findings in Vietnamese."
