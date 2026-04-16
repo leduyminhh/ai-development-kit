@@ -1,4 +1,4 @@
-# AGENTS.md
+﻿# AGENTS.md
 
 ## Overview
 Repository: `codex-workflow-kit`
@@ -12,13 +12,13 @@ Language:
 
 ## Repository Structure
 Core validator:
-- `.agents/skills/codex-best-practice-validator/` contains the core validation skill and deterministic structure validation script.
-- `.codex/agents/codex-structure-validator.toml` is the read-only validator agent entry point.
+- `.agents/skills/codex-structure-validate/` contains the core validation skill and deterministic structure validation script.
+- `.codex/agents/codex-structure-validate.toml` is the read-only validator agent entry point.
 
 Runtime skills:
 - `.agents/skills/<name>/SKILL.md` contains a single discoverable skill.
 - Keep skill folders flat under `.agents/skills/`; do not nest runtime skills under domain folders.
-- Use descriptive skill names such as `java-architect` for domain grouping.
+- Use descriptive skill names such as `java-analyze` for domain grouping.
 
 Documents and reports:
 - `docs/specs/` stores approved design specifications.
@@ -79,7 +79,7 @@ Strict prohibitions:
 
 ## Workflow Rules
 - After any structure change, run the validator:
-  `powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root . -Fix`
+  `powershell -ExecutionPolicy Bypass -File .agents/skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix`
 - Use selected tests instead of running every test by default:
   `powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -FromGit`
 - When adding any `*test*.ps1` file, map it in `.codex/test-map.toml` under exactly one group: `test.always`, `test.core`, or `test.skill`.
@@ -95,7 +95,7 @@ Strict prohibitions:
 
 ## Git Commit Convention
 
-Use the `git-workflow` skill for branch, commit, merge, revert, release, hotfix, staging, push, and PR preparation workflows.
+Use the `git-workflow-design` skill for branch, commit, merge, revert, release, hotfix, staging, push, and PR preparation workflows.
 
 If the user does not provide a commit message, automatically generate:
 - a conventional commit title
@@ -120,3 +120,4 @@ Agents MUST:
 - default to safe and non-destructive behavior
 - keep the validator modular and domain-agnostic
 - avoid assumptions when a persistent change requires approval
+

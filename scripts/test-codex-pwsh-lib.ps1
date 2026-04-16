@@ -22,7 +22,7 @@ function Assert-True {
 }
 
 $toml = @'
-name = "diagram-w"
+name = "diagram-generate"
 enabled = true
 
 [scan.policy]
@@ -35,7 +35,7 @@ protectedScanPaths = ["docs/", "reports/"]
 "reports" = "md"
 '@
 
-Assert-Equal 'diagram-w' (Get-CodexTomlStringValue -TomlText $toml -Key 'name') 'Root string TOML values should resolve.'
+Assert-Equal 'diagram-generate' (Get-CodexTomlStringValue -TomlText $toml -Key 'name') 'Root string TOML values should resolve.'
 Assert-Equal $true (Get-CodexTomlBoolValue -TomlText $toml -Section 'scan.policy' -Key 'skipProtectedPathsByDefault' -Default $false) 'Boolean TOML values should resolve.'
 Assert-Equal 'docs/' (Get-CodexTomlArrayValue -TomlText $toml -Section 'scan.policy' -Key 'protectedScanPaths')[0] 'Array TOML values should resolve.'
 

@@ -2,16 +2,15 @@
 # When adding a new test file, register it here in exactly one group:
 # - test.always: final safety gates that always run in selected verification.
 # - test.core.<name>: triggered by changed paths or low-level workflow components.
-# - test.skill.<name>: triggered by activated skill, agent, or mapped paths.
 
 [test.runner]
 parallel = true
-finalValidator = "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root ."
+finalValidator = "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root ."
 
 [test.always.structure]
 description = "Final Codex structure validation"
 commands = [
-  "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root ."
+  "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root ."
 ]
 
 [test.core.pwsh-lib]
@@ -27,7 +26,7 @@ paths = [
   "scripts/resolve-output-file.ps1",
   "scripts/lib/codex-output-file.ps1",
   ".codex/config.toml",
-  ".agents/skills/diagram-w"
+  ".agents/skills/diagram-generate"
 ]
 commands = [
   "powershell -ExecutionPolicy Bypass -File scripts/test-resolve-output-file.ps1"
@@ -35,17 +34,41 @@ commands = [
 
 [test.core.audit-hook]
 paths = [
-  ".codex/hooks/agent-execution-audit.ps1",
+  ".codex/hooks/write-agent-audit.ps1",
   ".codex/config.toml"
 ]
 commands = [
-  "powershell -ExecutionPolicy Bypass -File .codex/hooks/test-agent-execution-audit.ps1"
+  "powershell -ExecutionPolicy Bypass -File .codex/hooks/test-write-agent-audit.ps1"
+]
+
+[test.core.naming-rule]
+description = "Validate naming convention for new or changed Codex artifacts"
+paths = [
+  ".codex/agents",
+  ".agents/skills",
+  ".codex/hooks",
+  "scripts"
+]
+passChangedFiles = true
+commands = [
+  "powershell -ExecutionPolicy Bypass -File .agents/skills/naming-rule-validate/scripts/validate-naming-rule.ps1 -Root ."
+]
+
+[test.core.naming-rule-suite]
+paths = [
+  ".agents/skills/naming-rule-validate/scripts/validate-naming-rule.ps1",
+  ".agents/skills/naming-rule-validate/scripts/test-naming-rule-validate.ps1",
+  "scripts/resolve-test-plan.ps1",
+  ".codex/test-map.toml"
+]
+commands = [
+  "powershell -ExecutionPolicy Bypass -File .agents/skills/naming-rule-validate/scripts/test-naming-rule-validate.ps1"
 ]
 
 [test.core.audited-runner]
 paths = [
   "scripts/invoke-agent-audited.ps1",
-  ".codex/hooks/agent-execution-audit.ps1",
+  ".codex/hooks/write-agent-audit.ps1",
   ".codex/agents",
   ".codex/config.toml"
 ]
@@ -55,7 +78,7 @@ commands = [
 
 [test.core.validator]
 paths = [
-  ".agents/skills/codex-best-practice-validator",
+  ".agents/skills/codex-structure-validate",
   ".codex/config.toml",
   ".codex/test-map.toml",
   "scripts/resolve-test-plan.ps1",
@@ -65,42 +88,29 @@ paths = [
 ]
 commands = [
   "powershell -ExecutionPolicy Bypass -File scripts/test-test-map.ps1",
-  "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/test-validate-codex-structure.ps1"
+  "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-structure-validate/scripts/test-validate-codex-structure.ps1"
 ]
 
-[test.skill.automation-testing]
-agents = ["automation-testing"]
-skills = ["automation-testing"]
+[test.core.progressive-disclosure]
+description = "Ensure top-level skills defer broad context to selector resources"
 paths = [
-  ".agents/skills/automation-testing",
-  ".codex/agents/automation-testing.toml"
+  ".agents/skills/react-code-generate",
+  ".agents/skills/diagram-generate",
+  ".agents/skills/test-automation-validate",
+  "scripts/test-progressive-disclosure.ps1"
 ]
 commands = [
-  "powershell -ExecutionPolicy Bypass -File .agents/skills/automation-testing/scripts/test-automation-testing-strategy.ps1"
+  "powershell -ExecutionPolicy Bypass -File scripts/test-progressive-disclosure.ps1"
 ]
 
-[test.skill.onion-architecture]
-agents = ["java-architect"]
-skills = ["onion-architecture", "shared-module-architecture"]
+[test.core.readme-skill-catalog]
+description = "Ensure README skill catalogs stay synchronized when skills change"
 paths = [
-  ".agents/skills/onion-architecture",
-  ".agents/skills/shared-module-architecture",
-  ".agents/skills/java-architect/SKILL.md",
-  ".codex/agents/java-architect.toml",
-  "scripts/test-architecture-skills.ps1"
+  "README.md",
+  ".agents/README.md",
+  ".agents/skills",
+  "scripts/test-readme-skill-catalog.ps1"
 ]
 commands = [
-  "powershell -ExecutionPolicy Bypass -File scripts/test-architecture-skills.ps1"
-]
-
-[test.skill.diagram-w]
-agents = ["diagram-w"]
-skills = ["diagram-w"]
-paths = [
-  ".agents/skills/diagram-w",
-  ".codex/agents/diagram-w.toml",
-  "scripts/resolve-output-file.ps1"
-]
-commands = [
-  "powershell -ExecutionPolicy Bypass -File scripts/test-resolve-output-file.ps1"
+  "powershell -ExecutionPolicy Bypass -File scripts/test-readme-skill-catalog.ps1"
 ]

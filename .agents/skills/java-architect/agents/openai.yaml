@@ -1,4 +1,0 @@
-interface:
-  display_name: "Java Architect"
-  short_description: "Review Java architecture and flow"
-  default_prompt: "Use $java-architect to review Java backend architecture, clean code, persistence, async flows, and test strategy."

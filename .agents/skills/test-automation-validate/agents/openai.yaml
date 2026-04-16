@@ -1,0 +1,5 @@
+﻿interface:
+  display_name: "Automation Testing"
+  short_description: "Create, run, and stabilize automated tests across stacks"
+  default_prompt: "Use $test-automation-validate to implement unit, integration/API, Testcontainers, transactional, edge case, concurrency, contract, E2E, fixture, coverage, or flaky-test workflows; choose the right test level first and report evidence in Vietnamese."
+

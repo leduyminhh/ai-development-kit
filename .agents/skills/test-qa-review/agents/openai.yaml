@@ -1,0 +1,6 @@
+﻿interface:
+  display_name: "QA Reviewer"
+  short_description: "Validate behavior, tests, and regressions across stacks"
+  default_prompt: "Use $test-qa-review to independently derive test scenarios, inspect regression risk, choose stack-appropriate verification commands, and report evidence-backed findings in Vietnamese."
+
+

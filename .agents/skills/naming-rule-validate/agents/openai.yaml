@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Naming Rules"
+  short_description: "Apply repository naming conventions to Codex artifacts"
+  default_prompt: "Use $naming-rule-validate before creating or renaming agents, skills, subagents, workflows, hooks, scripts, or validators; choose kebab-case names from the approved domain/action/qualifier dictionaries and run targeted naming validation."

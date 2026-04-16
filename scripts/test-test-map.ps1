@@ -9,16 +9,24 @@ function Assert-True {
 
 $resolver = Join-Path $Root 'scripts/resolve-test-plan.ps1'
 
-$onion = @((& $resolver -Root $Root -IncludeCommands -ActivatedSkill 'onion-architecture') | ConvertFrom-Json)
-Assert-True ((@($onion.Command) -join "`n") -match 'scripts/test-architecture-skills\.ps1') 'Onion activation should select architecture skill tests.'
+$onion = @((& $resolver -Root $Root -IncludeCommands -ActivatedSkill 'architecture-onion-design') | ConvertFrom-Json)
+Assert-True ((@($onion.Command) -join "`n") -match '\.agents/skills/architecture-onion-design/scripts/test-architecture-skills\.ps1') 'Onion activation should select architecture skill-local tests.'
 Assert-True ((@($onion.Command) -join "`n") -match 'validate-codex-structure\.ps1 -Root \.') 'Every selected plan should include final structure validation.'
-Assert-True (-not ((@($onion.Command) -join "`n") -match 'test-automation-testing-strategy\.ps1')) 'Onion activation should not select automation-testing tests.'
+Assert-True (-not ((@($onion.Command) -join "`n") -match 'test-automation-validate-strategy\.ps1')) 'Onion activation should not select test-automation-validate tests.'
 
-$automation = @((& $resolver -Root $Root -IncludeCommands -AgentName 'automation-testing') | ConvertFrom-Json)
-Assert-True ((@($automation.Command) -join "`n") -match 'test-automation-testing-strategy\.ps1') 'Automation agent should select automation-testing strategy tests.'
+$automation = @((& $resolver -Root $Root -IncludeCommands -AgentName 'test-automation-validate') | ConvertFrom-Json)
+Assert-True ((@($automation.Command) -join "`n") -match 'test-automation-validate-strategy\.ps1') 'Automation agent should select test-automation-validate strategy tests.'
 
-$audit = @((& $resolver -Root $Root -IncludeCommands -ChangedFiles '.codex/hooks/agent-execution-audit.ps1') | ConvertFrom-Json)
-Assert-True ((@($audit.Command) -join "`n") -match '\.codex/hooks/test-agent-execution-audit\.ps1') 'Audit hook change should select audit hook tests.'
+$javaAnalyze = @((& $resolver -Root $Root -IncludeCommands -AgentName 'java-analyze') | ConvertFrom-Json)
+Assert-True (-not ((@($javaAnalyze.Command) -join "`n") -match 'architecture-onion-design/scripts/test-architecture-skills\.ps1')) 'Java analysis alone should not select Onion Architecture tests.'
+
+$audit = @((& $resolver -Root $Root -IncludeCommands -ChangedFiles '.codex/hooks/write-agent-audit.ps1') | ConvertFrom-Json)
+Assert-True ((@($audit.Command) -join "`n") -match '\.codex/hooks/test-write-agent-audit\.ps1') 'Audit hook change should select audit hook tests.'
+
+$naming = @((& $resolver -Root $Root -IncludeCommands -ChangedFiles '.codex/agents/java-review.toml') | ConvertFrom-Json)
+$namingCommands = @($naming.Command) -join "`n"
+Assert-True ($namingCommands -match '\.agents/skills/naming-rule-validate/scripts/validate-naming-rule\.ps1') 'Agent, skill, hook, or script changes should select skill-local naming validation.'
+Assert-True ($namingCommands -match "-PathList '\.codex/agents/java-review\.toml'") 'Naming validation should receive the changed path list.'
 
 $testFiles = @(Get-ChildItem -LiteralPath $Root -Recurse -File -Filter '*test*.ps1' |
     Where-Object { $_.FullName -notmatch '\\.git\\' } |

@@ -16,6 +16,11 @@ function Normalize-TestPath {
     return ($Value -replace '\\', '/').Trim('./')
 }
 
+function Normalize-ChangedFileArgument {
+    param([string]$Value)
+    return (($Value -replace '\\', '/') -replace '^[\/]+', '')
+}
+
 function Test-PathMatch {
     param([string]$ChangedPath, [string]$MappedPath)
 
@@ -28,18 +33,41 @@ function Get-TestMapEntry {
     param([string]$MapText, [string]$Section)
 
     [pscustomobject]@{
-        Section     = $Section
-        Description = Get-CodexTomlStringValue -TomlText $MapText -Section $Section -Key 'description'
-        Paths       = @(Get-CodexTomlArrayValue -TomlText $MapText -Section $Section -Key 'paths')
-        Skills      = @(Get-CodexTomlArrayValue -TomlText $MapText -Section $Section -Key 'skills')
-        Agents      = @(Get-CodexTomlArrayValue -TomlText $MapText -Section $Section -Key 'agents')
-        Commands    = @(Get-CodexTomlArrayValue -TomlText $MapText -Section $Section -Key 'commands')
+        Section          = $Section
+        Description      = Get-CodexTomlStringValue -TomlText $MapText -Section $Section -Key 'description'
+        Paths            = @(Get-CodexTomlArrayValue -TomlText $MapText -Section $Section -Key 'paths')
+        Skills           = @(Get-CodexTomlArrayValue -TomlText $MapText -Section $Section -Key 'skills')
+        Agents           = @(Get-CodexTomlArrayValue -TomlText $MapText -Section $Section -Key 'agents')
+        Commands         = @(Get-CodexTomlArrayValue -TomlText $MapText -Section $Section -Key 'commands')
+        PassChangedFiles = Get-CodexTomlBoolValue -TomlText $MapText -Section $Section -Key 'passChangedFiles' -Default $false
     }
 }
 
+function Convert-ToPowerShellSingleQuotedLiteral {
+    param([string]$Value)
+    return "'" + ($Value -replace "'", "''") + "'"
+}
+
 if ($FromGit) {
-    $gitFiles = & git -C $Root diff --name-only HEAD
-    $gitUntracked = & git -C $Root ls-files --others --exclude-standard
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        $gitFiles = & git -C $Root diff --name-only HEAD 2>$null
+        $gitDiffExitCode = $LASTEXITCODE
+        $gitUntracked = & git -C $Root ls-files --others --exclude-standard 2>$null
+        $gitUntrackedExitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+
+    if ($gitDiffExitCode -ne 0) {
+        throw "git diff --name-only HEAD failed with exit code $gitDiffExitCode"
+    }
+
+    if ($gitUntrackedExitCode -ne 0) {
+        throw "git ls-files --others --exclude-standard failed with exit code $gitUntrackedExitCode"
+    }
+
     $ChangedFiles = @($ChangedFiles + $gitFiles + $gitUntracked | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
 }
 
@@ -90,9 +118,10 @@ foreach ($section in $sections) {
 
     if ($null -ne $reason) {
         $selected.Add([pscustomobject]@{
-            Section  = $entry.Section
-            Reason   = $reason
-            Commands = $entry.Commands
+            Section          = $entry.Section
+            Reason           = $reason
+            Commands         = $entry.Commands
+            PassChangedFiles = $entry.PassChangedFiles
         })
     }
 }
@@ -101,10 +130,23 @@ if ($IncludeCommands) {
     $selected |
         ForEach-Object {
             foreach ($command in $_.Commands) {
+                $resolvedCommand = $command
+                if ($_.PassChangedFiles -and $ChangedFiles.Count -gt 0) {
+                    $pathList = @($ChangedFiles | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique | ForEach-Object {
+                        Normalize-ChangedFileArgument -Value $_
+                    })
+                    if ($pathList.Count -gt 0) {
+                        $joinedPathList = $pathList -join '|'
+                        if ($joinedPathList.Length -le 4000) {
+                            $resolvedCommand = "$resolvedCommand -PathList $(Convert-ToPowerShellSingleQuotedLiteral -Value $joinedPathList)"
+                        }
+                    }
+                }
+
                 [pscustomobject]@{
                     Section = $_.Section
                     Reason  = $_.Reason
-                    Command = $command
+                    Command = $resolvedCommand
                 }
             }
         } |
