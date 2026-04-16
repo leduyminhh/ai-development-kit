@@ -1,4 +1,4 @@
-﻿# environment Global runtime access
+# environment Global runtime access
 [environment]
 network_access = true
 
@@ -15,7 +15,7 @@ require_pre_write_summary = true
 # ------------ Validation Global structure ------------ 
 [validation]
 run_after_structure_change = true
-validator_command = "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix"
+validator_command = "powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix"
 
 # ------------ Policy Global scan scope ------------
 [scan.policy]
@@ -74,7 +74,7 @@ Proposed change:
 - Purpose: {{purpose}}
 - Summary: {{summary}}
 
-Confirm? (yes/no)
+Confirm- (yes/no)
 """
 
 # ------------ Agents ------------
@@ -122,7 +122,6 @@ enabled = true
 path = ".codex/agents/react-code-generate.toml"
 read_only = false
 enabled = true
-
 
 
 

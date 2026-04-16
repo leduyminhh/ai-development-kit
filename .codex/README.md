@@ -6,11 +6,11 @@ Thu muc `.codex/` chua cau hinh project-local cho Codex workflow kit: agent entr
 
 ```text
 .codex/
-├── agents/
-├── hooks/
-├── mcp/
-├── config.toml
-└── test-map.toml
+ agents/
+ hooks/
+ mcp/
+ config.toml
+ test-map.toml
 ```
 
 ## Thanh Phan
@@ -29,8 +29,16 @@ Moi `.codex/agents/<name>.toml` nen:
 
 - Co `name`, `description`, `model`, `model_reasoning_effort`, `sandbox_mode`.
 - Co `developer_instructions` ngan gon, dieu phoi skill thay vi nhung quy trinh domain qua dai.
-- Tham chieu skill tuong ung trong `.agents/skills/<name>` hoac skill lien quan.
+- Tham chieu skill tuong ung trong `skills/<name>` hoac skill lien quan.
 - Ton trong protected paths va khong commit/push khi user chua yeu cau.
+
+Runtime registration boundary:
+
+- `skills/` chua runtime skill assets.
+- `.codex/agents/*.toml` la agent entry points.
+- `.codex/config.toml` dang ky agent entry.
+- `skills/manifest.toml` la link contract de map skill <-> agent <-> UI metadata.
+- External Codex discovery van la boundary rieng, khong duoc dam bao chi boi repo structure.
 
 Agent hien co:
 

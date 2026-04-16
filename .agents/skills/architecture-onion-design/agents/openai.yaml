@@ -1,7 +1,0 @@
-﻿interface:
-  display_name: "Onion Architecture"
-  short_description: "Force domain-centered Onion Architecture boundaries"
-  default_prompt: "Use $architecture-onion-design to design or review a module with inward dependencies, domain-centered packages, infrastructure adapters, and explicit boundary risks."
-
-
-

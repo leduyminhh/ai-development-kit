@@ -1,4 +1,4 @@
-param([string]$Root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path)
+﻿param([string]$Root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path)
 
 $ErrorActionPreference = 'Stop'
 
@@ -25,22 +25,22 @@ function Assert-FileNotContains {
 
 $checks = @(
     @{
-        Skill = '.agents/skills/react-code-generate/SKILL.md'
-        Selector = '.agents/skills/react-code-generate/resources/context-loading-selector.md'
+        Skill = 'skills/react-code-generate/SKILL.md'
+        Selector = 'skills/react-code-generate/resources/context-loading-selector.md'
         SkillReference = 'resources/context-loading-selector.md'
         SelectorPattern = 'React Context Loading Selector'
         ForbiddenPattern = '## Must-Have Subagents'
     },
     @{
-        Skill = '.agents/skills/diagram-generate/SKILL.md'
-        Selector = '.agents/skills/diagram-generate/resources/diagram-prompt-selector.md'
+        Skill = 'skills/diagram-generate/SKILL.md'
+        Selector = 'skills/diagram-generate/resources/diagram-prompt-selector.md'
         SkillReference = 'resources/diagram-prompt-selector.md'
         SelectorPattern = 'Diagram Prompt Selector'
         ForbiddenPattern = 'Interaction flow: `subagents/diagram-sequence-generate.md`'
     },
     @{
-        Skill = '.agents/skills/test-automation-validate/SKILL.md'
-        Selector = '.agents/skills/test-automation-validate/resources/test-prompt-selector.md'
+        Skill = 'skills/test-automation-validate/SKILL.md'
+        Selector = 'skills/test-automation-validate/resources/test-prompt-selector.md'
         SkillReference = 'resources/test-prompt-selector.md'
         SelectorPattern = 'Test Prompt Selector'
         ForbiddenPattern = '## Must-Have Subagents'
@@ -57,3 +57,4 @@ foreach ($check in $checks) {
 }
 
 Write-Output 'progressive disclosure tests passed.'
+

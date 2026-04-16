@@ -1,7 +1,7 @@
-param(
+﻿param(
     [string]$SourceRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path,
     [string]$LinkName = 'codex-workflow-kit',
-    [string]$SkillsRoot = (Join-Path $env:USERPROFILE '.agents/skills'),
+    [string]$SkillsRoot = (Join-Path $env:USERPROFILE '.codex/skills'),
     [switch]$Force,
     [switch]$WhatIf
 )
@@ -32,7 +32,7 @@ function Remove-ExistingLink {
 }
 
 $resolvedSource = (Resolve-Path -LiteralPath $SourceRoot).Path
-$sourceSkills = Join-Path $resolvedSource '.agents/skills'
+$sourceSkills = Join-Path $resolvedSource 'skills'
 if (-not (Test-Path -LiteralPath $sourceSkills)) {
     throw "Source skills directory not found: $sourceSkills"
 }
@@ -55,3 +55,4 @@ if (Test-IsWindows) {
 }
 
 Write-Output "Skill link installed: $linkPath -> $sourceSkills"
+

@@ -23,7 +23,7 @@ E:\Mine\AI\codex-workflow-kit
 |---|---|
 | `AGENTS.md` | Quy tac lam viec cua agent trong repo: tieng Viet, protected paths, workflow, commit convention, safety rules. |
 | `README.md` | Tai lieu tong quan he thong. |
-| `.agents/` | Runtime skills, subagents, resources va scripts gan voi tung skill. Xem `.agents/README.md`. |
+| `skills/` | Runtime skills, manifest contract, subagents, resources va scripts gan voi tung skill. Xem `skills/README.md`. |
 | `.codex/` | Cau hinh Codex project-local: agent entry points, config, hooks, test map, MCP placeholders. Xem `.codex/README.md`. |
 | `scripts/` | Script tien ich va test runner dung chung cho repo. Xem `scripts/README.md`. |
 | `docs/` | Protected path cho specs/plans/docs duoc tao co chu dich. Can xac nhan truoc khi ghi. |
@@ -38,7 +38,7 @@ Luong chuan khi thay doi cau truc:
 3. Chay validator cau truc:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .agents/skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix
+powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix
 ```
 
 4. Chay selected tests cho thay doi hien tai:
@@ -54,11 +54,20 @@ He thong dung mo hinh:
 ```text
 .codex/agents/<agent>.toml
         -> applies
-.agents/skills/<skill>/SKILL.md
+skills/<skill>/SKILL.md
         -> selects
-.agents/skills/<skill>/resources/*.md
-.agents/skills/<skill>/subagents/*.md
-.agents/skills/<skill>/scripts/*.ps1
+skills/<skill>/resources/*.md
+skills/<skill>/subagents/*.md
+skills/<skill>/scripts/*.ps1
+```
+
+Manifest contract:
+
+```text
+skills/manifest.toml
+        -> links
+skills/<skill>/SKILL.md
+        -> ui metadata / linked agent entry / discovery notes
 ```
 
 Quy tac thiet ke:
@@ -82,16 +91,33 @@ Repo uu tien giam context bang cach:
   - Diagram: `resources/diagram-prompt-selector.md`
   - Test automation: `resources/test-prompt-selector.md`
 
+## Discovery Boundary
+
+Ba lop can tach ro:
+
+1. Repo structure
+   - `skills/` chua runtime skill assets.
+   - `.codex/` chua runtime registration va policy.
+2. Runtime registration
+   - `.codex/config.toml` dang ky agent.
+   - `.codex/agents/*.toml` la entry point cua agent.
+   - `skills/manifest.toml` la link contract giua agent va skill.
+3. External Codex discovery
+   - Codex khong tu discover skill chi vi repo co `skills/`.
+   - Can link hoac copy `skills/` vao external Codex skill loading path.
+   - `scripts/install-skill-link.ps1` mac dinh su dung `~/.codex/skills`.
+
 ## Skill Catalog Update Event
 
-Khi phat sinh skill moi trong `.agents/skills/<skill-name>/`, agent thuc hien thay doi phai xem day la su kien cap nhat catalog:
+Khi phat sinh skill moi trong `skills/<skill-name>/`, agent thuc hien thay doi phai xem day la su kien cap nhat catalog:
 
 1. Cap nhat danh sach skill trong `README.md`.
-2. Cap nhat danh sach skill va quy tac lien quan trong `.agents/README.md`.
+2. Cap nhat danh sach skill va quy tac lien quan trong `skills/README.md`.
 3. Tao hoac cap nhat agent/subagent tuong ung neu skill do can entry point runtime.
-4. Neu co test script moi, map vao `.codex/test-map.toml`.
-5. Chay `scripts/test-readme-skill-catalog.ps1` de dam bao catalog khong lech voi thu muc `.agents/skills`.
-6. Trong final response, bao lai cho user skill moi da duoc them va cac tai lieu catalog da cap nhat.
+4. Cap nhat `skills/manifest.toml`.
+5. Neu co test script moi, map vao `.codex/test-map.toml`.
+6. Chay `scripts/test-readme-skill-catalog.ps1` de dam bao catalog khong lech voi thu muc `skills/`.
+7. Trong final response, bao lai cho user skill moi da duoc them va cac tai lieu catalog da cap nhat.
 
 ## Cau Hinh Chinh
 
@@ -111,7 +137,7 @@ powershell -ExecutionPolicy Bypass -File scripts/install-skill-link.ps1 -Force
 Script tao junction/symlink:
 
 ```text
-~\.agents\skills\codex-workflow-kit -> <repo>\.agents\skills
+~\.codex\skills\codex-workflow-kit -> <repo>\skills
 ```
 
 Sau do cap nhat repo bang:

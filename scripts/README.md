@@ -1,4 +1,4 @@
-# Scripts
+﻿# Scripts
 
 Thu muc `scripts/` chua cac script dung chung cho workflow Codex trong repo. Script o day nen deterministic, co pham vi ro rang va uu tien chay duoc bang PowerShell tren Windows.
 
@@ -15,7 +15,7 @@ Thu muc `scripts/` chua cac script dung chung cho workflow Codex trong repo. Scr
 
 | File | Chuc nang |
 |---|---|
-| `install-skill-link.ps1` | Tao junction/symlink tu Codex skill discovery path toi `.agents/skills` cua repo. |
+| `install-skill-link.ps1` | Tao junction/symlink tu Codex skill discovery path toi `skills` cua repo. |
 | `invoke-agent-audited.ps1` | Boc mot command bang audit hook, doc agent config va giu exit code cua command goc. |
 | `resolve-output-file.ps1` | Resolve duong dan output theo `.codex/config.toml`, subpath, filename pattern va timezone. |
 | `resolve-test-plan.ps1` | Chon test command tu `.codex/test-map.toml` theo changed files, activated skills hoac agent names. |
@@ -59,3 +59,4 @@ Xem test plan kem commands:
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/resolve-test-plan.ps1 -FromGit -IncludeCommands
 ```
+

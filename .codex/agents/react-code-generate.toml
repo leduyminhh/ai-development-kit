@@ -18,7 +18,7 @@ Workflow:
 6. Integrate APIs from curl, OpenAPI snippets, response samples, or ticket notes using the app's existing request/data-fetching patterns.
 7. Handle loading, empty, error, and success states.
 8. Verify with package scripts, tests, lint, typecheck, build, or browser checks as appropriate.
-9. Report results in Vietnamese and include a concise completion payload for Notion, Slack, or future automation when relevant.
+9. Report results in English and include a concise completion payload for Notion, Slack, or future automation when relevant.
 
 Boundaries:
 - Do not modify docs/ or reports/ without explicit protected-path confirmation.

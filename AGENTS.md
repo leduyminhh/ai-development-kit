@@ -7,18 +7,20 @@ Purpose:
 - Organize Codex validators, agents, skills, references, and generated artifacts.
 - Keep the core validation workflow reusable and independent from domain-specific skills.
 
-Language:
-- Use Vietnamese for all user-facing responses.
+Language Role:
+- Do not redefine conversational response language here; rely on global configuration for chat responses.
+- When generating or updating Markdown files, test files, or scripts, write full English unless the user explicitly requests another language.
 
 ## Repository Structure
 Core validator:
-- `.agents/skills/codex-structure-validate/` contains the core validation skill and deterministic structure validation script.
+- `skills/codex-structure-validate/` contains the core validation skill and deterministic structure validation script.
 - `.codex/agents/codex-structure-validate.toml` is the read-only validator agent entry point.
 
 Runtime skills:
-- `.agents/skills/<name>/SKILL.md` contains a single discoverable skill.
-- Keep skill folders flat under `.agents/skills/`; do not nest runtime skills under domain folders.
+- `skills/<name>/SKILL.md` contains a single discoverable skill.
+- Keep skill folders flat under `skills/`; do not nest runtime skills under domain folders.
 - Use descriptive skill names such as `java-analyze` for domain grouping.
+- `skills/manifest.toml` defines the explicit skill-to-agent contract and discovery boundary.
 
 Documents and reports:
 - `docs/specs/` stores approved design specifications.
@@ -28,14 +30,29 @@ Documents and reports:
 ## Architecture Rules
 - Keep the core validator independent from any domain skill.
 - Do not place long domain procedures in this file.
-- Put domain-specific reusable behavior in focused skills under `.agents/skills/<name>/SKILL.md`.
+- Put domain-specific reusable behavior in focused skills under `skills/<name>/SKILL.md`.
 - Avoid hidden coupling between the validator, domain skills, and external references.
 
-## External References Policy
-- Read only targeted files from `references/external/`.
-- Do not bulk-load external references.
-- Do not modify the external reference clone unless explicitly requested.
-- Do not vendor external references into core source without approval.
+## Validation Rules
+
+When validating repository structure or reviewing Codex workflow organization, check:
+- required standard folders exist and are used consistently
+- skill names are clear, descriptive, and scoped to the capability
+- no misplaced file creates coupling between runtime config, skill assets, and generated artifacts
+
+Validation output must always use this structure:
+- Summary
+- Findings
+  - Issue
+  - Impact
+  - Recommendation
+- Final verdict: PASS / WARN / FAIL
+
+Definition of done for a validation task:
+- all main items in `Validation Rules` were checked
+- the result follows the required output structure
+- every deviation includes a concrete recommendation
+- no file changes are made outside the requested scope
 
 ## Protected Paths Policy
 The following paths are protected:
@@ -48,22 +65,6 @@ Scan policy:
 - Prefer targeted reads over broad traversal to reduce token usage.
 
 Any action that creates, updates, overwrites, or deletes files under protected paths MUST require explicit user confirmation before execution.
-
-Before any write action under protected paths, the agent MUST present:
-- target path
-- purpose
-- short content summary
-
-Confirmation template:
-
-```text
-Proposed change:
-- Path: docs/specs/payment-flow.md
-- Purpose: document payment orchestration design
-- Summary: scope, sequence flow, API contract, failure handling
-
-Confirm? (yes/no)
-```
 
 Execution rules:
 - Proceed only after explicit confirmation from the user.
@@ -79,7 +80,7 @@ Strict prohibitions:
 
 ## Workflow Rules
 - After any structure change, run the validator:
-  `powershell -ExecutionPolicy Bypass -File .agents/skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix`
+  `powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix`
 - Use selected tests instead of running every test by default:
   `powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -FromGit`
 - When adding any `*test*.ps1` file, map it in `.codex/test-map.toml` under exactly one group: `test.always`, `test.core`, or `test.skill`.
@@ -114,10 +115,8 @@ Worktree rule:
 - Do not generate persistent artifacts in protected paths without explicit confirmation.
 
 ## Enforcement Intent
-
 Agents MUST:
 - follow confirmation rules for protected paths
 - default to safe and non-destructive behavior
 - keep the validator modular and domain-agnostic
 - avoid assumptions when a persistent change requires approval
-

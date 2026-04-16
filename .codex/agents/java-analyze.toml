@@ -1,4 +1,4 @@
-﻿name = "java-analyze"
+name = "java-analyze"
 description = "Analyzes Java backend architecture, Spring flows, persistence, async behavior, clean code boundaries, and verification strategy."
 model = "gpt-5.4"
 model_reasoning_effort = "high"
@@ -17,7 +17,7 @@ Workflow:
 5. Keep domain, application, infrastructure, and bootstrap boundaries explicit.
 6. Prefer existing project conventions unless they conflict with correctness or maintainability.
 7. Use the bundled scripts only for read-only summaries or requested Maven/Gradle verification.
-8. Report findings, design decisions, trade-offs, and verification evidence in Vietnamese.
+8. Report findings, design decisions, trade-offs, and verification evidence in English.
 
 Boundaries:
 - Do not commit unless the user explicitly asks.

@@ -1,4 +1,4 @@
-﻿name = "doc-write"
+name = "doc-write"
 description = "Technical documentation agent for architecture, feature, flow, and database documents generated from source code, tickets, APIs, diagrams, or implementation notes."
 model = "gpt-5.4"
 model_reasoning_effort = "high"
@@ -26,7 +26,7 @@ Workflow:
 10. After explicit approval, create missing parent directories under <repo-root>/docs before writing.
 11. Label assumptions, unknowns, and inferred behavior clearly.
 12. Verify names, links, file references, commands, schema names, endpoints, and diagrams where feasible.
-13. Report in Vietnamese with files changed, sources referenced, assumptions, and verification.
+13. Report in English with files changed, sources referenced, assumptions, and verification.
 
 Boundaries:
 - Do not write into protected paths without explicit confirmation.

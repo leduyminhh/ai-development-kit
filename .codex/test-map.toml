@@ -5,12 +5,12 @@
 
 [test.runner]
 parallel = true
-finalValidator = "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root ."
+finalValidator = "powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root ."
 
 [test.always.structure]
 description = "Final Codex structure validation"
 commands = [
-  "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root ."
+  "powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root ."
 ]
 
 [test.core.pwsh-lib]
@@ -26,7 +26,7 @@ paths = [
   "scripts/resolve-output-file.ps1",
   "scripts/lib/codex-output-file.ps1",
   ".codex/config.toml",
-  ".agents/skills/diagram-generate"
+  "skills/diagram-generate"
 ]
 commands = [
   "powershell -ExecutionPolicy Bypass -File scripts/test-resolve-output-file.ps1"
@@ -45,24 +45,24 @@ commands = [
 description = "Validate naming convention for new or changed Codex artifacts"
 paths = [
   ".codex/agents",
-  ".agents/skills",
+  "skills",
   ".codex/hooks",
   "scripts"
 ]
 passChangedFiles = true
 commands = [
-  "powershell -ExecutionPolicy Bypass -File .agents/skills/naming-rule-validate/scripts/validate-naming-rule.ps1 -Root ."
+  "powershell -ExecutionPolicy Bypass -File skills/naming-rule-validate/scripts/validate-naming-rule.ps1 -Root ."
 ]
 
 [test.core.naming-rule-suite]
 paths = [
-  ".agents/skills/naming-rule-validate/scripts/validate-naming-rule.ps1",
-  ".agents/skills/naming-rule-validate/scripts/test-naming-rule-validate.ps1",
+  "skills/naming-rule-validate/scripts/validate-naming-rule.ps1",
+  "skills/naming-rule-validate/scripts/test-naming-rule-validate.ps1",
   "scripts/resolve-test-plan.ps1",
   ".codex/test-map.toml"
 ]
 commands = [
-  "powershell -ExecutionPolicy Bypass -File .agents/skills/naming-rule-validate/scripts/test-naming-rule-validate.ps1"
+  "powershell -ExecutionPolicy Bypass -File skills/naming-rule-validate/scripts/test-naming-rule-validate.ps1"
 ]
 
 [test.core.audited-runner]
@@ -78,7 +78,7 @@ commands = [
 
 [test.core.validator]
 paths = [
-  ".agents/skills/codex-structure-validate",
+  "skills/codex-structure-validate",
   ".codex/config.toml",
   ".codex/test-map.toml",
   "scripts/resolve-test-plan.ps1",
@@ -88,15 +88,15 @@ paths = [
 ]
 commands = [
   "powershell -ExecutionPolicy Bypass -File scripts/test-test-map.ps1",
-  "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-structure-validate/scripts/test-validate-codex-structure.ps1"
+  "powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/test-validate-codex-structure.ps1"
 ]
 
 [test.core.progressive-disclosure]
 description = "Ensure top-level skills defer broad context to selector resources"
 paths = [
-  ".agents/skills/react-code-generate",
-  ".agents/skills/diagram-generate",
-  ".agents/skills/test-automation-validate",
+  "skills/react-code-generate",
+  "skills/diagram-generate",
+  "skills/test-automation-validate",
   "scripts/test-progressive-disclosure.ps1"
 ]
 commands = [
@@ -107,10 +107,37 @@ commands = [
 description = "Ensure README skill catalogs stay synchronized when skills change"
 paths = [
   "README.md",
-  ".agents/README.md",
-  ".agents/skills",
+  "skills/README.md",
+  "skills",
+  "skills/manifest.toml",
   "scripts/test-readme-skill-catalog.ps1"
 ]
 commands = [
   "powershell -ExecutionPolicy Bypass -File scripts/test-readme-skill-catalog.ps1"
+]
+
+[test.skill.architecture-onion]
+description = "Validate onion architecture skill content and wiring"
+skills = [
+  "architecture-onion-design"
+]
+paths = [
+  "skills/architecture-onion-design",
+  ".codex/agents/java-analyze.toml"
+]
+commands = [
+  "powershell -ExecutionPolicy Bypass -File skills/architecture-onion-design/scripts/test-architecture-skills.ps1"
+]
+
+[test.skill.test-automation-strategy]
+description = "Validate automation testing skill strategy coverage"
+agents = [
+  "test-automation-validate"
+]
+paths = [
+  "skills/test-automation-validate",
+  ".codex/agents/test-automation-validate.toml"
+]
+commands = [
+  "powershell -ExecutionPolicy Bypass -File skills/test-automation-validate/scripts/test-automation-validate-strategy.ps1"
 ]

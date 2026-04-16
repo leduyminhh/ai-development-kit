@@ -1,4 +1,4 @@
-param([string]$Root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path)
+﻿param([string]$Root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path)
 
 $ErrorActionPreference = 'Stop'
 
@@ -10,7 +10,7 @@ function Assert-True {
 $resolver = Join-Path $Root 'scripts/resolve-test-plan.ps1'
 
 $onion = @((& $resolver -Root $Root -IncludeCommands -ActivatedSkill 'architecture-onion-design') | ConvertFrom-Json)
-Assert-True ((@($onion.Command) -join "`n") -match '\.agents/skills/architecture-onion-design/scripts/test-architecture-skills\.ps1') 'Onion activation should select architecture skill-local tests.'
+Assert-True ((@($onion.Command) -join "`n") -match 'skills/architecture-onion-design/scripts/test-architecture-skills\.ps1') 'Onion activation should select architecture skill-local tests.'
 Assert-True ((@($onion.Command) -join "`n") -match 'validate-codex-structure\.ps1 -Root \.') 'Every selected plan should include final structure validation.'
 Assert-True (-not ((@($onion.Command) -join "`n") -match 'test-automation-validate-strategy\.ps1')) 'Onion activation should not select test-automation-validate tests.'
 
@@ -25,7 +25,7 @@ Assert-True ((@($audit.Command) -join "`n") -match '\.codex/hooks/test-write-age
 
 $naming = @((& $resolver -Root $Root -IncludeCommands -ChangedFiles '.codex/agents/java-review.toml') | ConvertFrom-Json)
 $namingCommands = @($naming.Command) -join "`n"
-Assert-True ($namingCommands -match '\.agents/skills/naming-rule-validate/scripts/validate-naming-rule\.ps1') 'Agent, skill, hook, or script changes should select skill-local naming validation.'
+Assert-True ($namingCommands -match 'skills/naming-rule-validate/scripts/validate-naming-rule\.ps1') 'Agent, skill, hook, or script changes should select skill-local naming validation.'
 Assert-True ($namingCommands -match "-PathList '\.codex/agents/java-review\.toml'") 'Naming validation should receive the changed path list.'
 
 $testFiles = @(Get-ChildItem -LiteralPath $Root -Recurse -File -Filter '*test*.ps1' |
@@ -44,3 +44,4 @@ foreach ($testFile in $testFiles) {
 }
 
 Write-Output 'test map tests passed.'
+
