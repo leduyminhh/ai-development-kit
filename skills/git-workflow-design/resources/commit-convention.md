@@ -20,22 +20,22 @@ Verify:
 Refs: ...
 ```
 
-If the user does not provide a message, generate both title and structured body from the staged or intended diff. Write the body in Vietnamese unless repository instructions say otherwise.
+If the user does not provide a message, generate both title and structured body from the staged or intended diff. Write the body in concise Vietnamese with diacritics unless repository instructions say otherwise.
 
 ## Types
 
-- `feat`: new feature or functionality.
-- `fix`: bug fix.
-- `docs`: documentation updates or improvements.
-- `style`: formatting or style-only changes without behavior change.
-- `refactor`: code structure or readability changes without behavior change.
-- `perf`: performance improvement.
-- `test`: adding or modifying tests.
-- `chore`: routine maintenance, cleanup, or housekeeping.
-- `build`: build process or dependency changes.
-- `ci`: CI/CD pipeline or automation changes.
-- `revert`: revert a previous commit.
-- `merge`: merge branches or resolve merge conflicts.
+- `feat`: dùng khi thêm chức năng mới hoặc mở rộng hành vi mà người dùng hoặc hệ thống có thể sử dụng.
+- `fix`: dùng khi sửa lỗi, khôi phục hành vi đúng, hoặc xử lý regression.
+- `docs`: dùng khi chỉ thay đổi tài liệu, hướng dẫn, mô tả hoặc ví dụ mà không đổi hành vi chạy.
+- `style`: dùng khi chỉ chỉnh format, lint, naming style, hoặc trình bày mã mà không đổi logic.
+- `refactor`: dùng khi tổ chức lại mã, cấu trúc, tách lớp, đổi luồng nội bộ mà không đổi hành vi kỳ vọng.
+- `perf`: dùng khi tối ưu hiệu năng, giảm chi phí xử lý, hoặc cải thiện tài nguyên sử dụng.
+- `test`: dùng khi thêm, sửa, hoặc dọn test mà mục tiêu chính là độ bao phủ hay chất lượng kiểm thử.
+- `chore`: dùng cho việc bảo trì thường kỳ, dọn cấu hình, cập nhật metadata, hoặc housekeeping không thuộc nhóm trên.
+- `build`: dùng khi thay đổi build pipeline, dependency phục vụ build, bundling, packaging, hoặc release artifact.
+- `ci`: dùng khi thay đổi workflow CI/CD, runner, job, step, hoặc automation của hệ thống tích hợp.
+- `revert`: dùng khi hoàn tác một commit trước đó.
+- `merge`: dùng khi merge nhánh hoặc xử lý conflict của merge commit.
 
 ## Scope
 
@@ -57,20 +57,20 @@ Prefer the smallest truthful scope. Use one scope only.
 
 ## Body
 
-Write in Vietnamese with the exact sections below. Keep it short and focused on the main point.
+Write in Vietnamese with diacritics and the exact sections below. Keep it short, direct, and focused on grouped functional changes.
 
 ```text
 Why:
-- 1 cau ngan ve ly do chinh.
+- 1-2 câu ngắn về lý do chính.
 
 What:
-- 1-2 y chinh da thay doi.
+- Những ý chính, ưu tiên gom theo nhóm chức năng hoặc nhóm thay đổi liên quan.
 
 Impact:
-- Tac dong chinh hoac `Khong dang ke`.
+- Tác động chính hoặc `Không đáng kể`.
 
 Verify:
-- Lenh chinh da chay hoac ly do chua chay.
+- Lệnh chính đã chạy hoặc lý do chưa chạy.
 
 Refs: ticket/link/issue/PR or `N/A`
 ```
@@ -80,45 +80,8 @@ Rules:
 - Prefer one bullet per section; use two bullets only for two distinct points.
 - Keep each bullet under 120 characters when feasible.
 - Avoid background explanation, implementation narration, and repeated file lists.
+- In `What`, describe changes by functional group instead of enumerating files when possible.
 - Focus only on why it matters, what changed, impact, and verification.
 - Use `Refs: N/A` when there is no ticket, issue, PR, or external reference.
 - Do not invent verification; state `Not run` with a reason when needed.
 - Do not include unrelated files or changes in the body.
-
-## Examples
-
-```text
-feat(workflow): add linked skill installer
-
-Why:
-- Can dung lai skill tu repo ma khong copy thu cong.
-
-What:
-- Them installer tao link skill va cap nhat huong dan dung.
-
-Impact:
-- Session khac nhan skill moi sau khi repo duoc pull.
-
-Verify:
-- Chay `scripts/test-install-skill-link.ps1` thanh cong.
-
-Refs: N/A
-```
-
-```text
-fix(audit): use Ho Chi Minh date for audit file names
-
-Why:
-- Ten file audit can khop ngay van hanh tai Viet Nam.
-
-What:
-- Dat ten file theo `Asia/Ho_Chi_Minh` va giu timestamp UTC.
-
-Impact:
-- De doi chieu audit theo ngay van hanh.
-
-Verify:
-- Chay `.codex/hooks/test-write-agent-audit.ps1` thanh cong.
-
-Refs: N/A
-```

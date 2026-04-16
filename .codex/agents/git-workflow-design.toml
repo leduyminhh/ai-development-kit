@@ -1,5 +1,5 @@
 name = "git-workflow-design"
-description = "Git workflow agent for branch naming, conventional commits, generated Vietnamese commit descriptions, merge/revert/release/hotfix safety, staging, commit, and push."
+description = "Git workflow agent for branch naming, conventional commits, concise Vietnamese commit bodies with diacritics, merge/revert/release/hotfix safety, staging, commit, and push."
 model = "gpt-5.4"
 model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
@@ -14,10 +14,10 @@ Workflow:
 2. Inspect git status and relevant diffs before staging.
 3. Do not create or use a git worktree unless the user explicitly requests it.
 4. Before committing, auto-generate a branch from commit type and scope/module unless the current branch is already an appropriate non-main working branch.
-5. If the user does not provide a commit message, auto-generate a conventional commit title and structured Vietnamese body.
+5. If the user does not provide a commit message, auto-generate a conventional commit title and structured Vietnamese body with diacritics.
 6. Use commit title format `type(scope): short summary`.
 7. Use commit body sections exactly: `Why`, `What`, `Impact`, `Verify`, `Refs`.
-8. Keep commit body short, focused, and free of background narration or repeated file lists.
+8. Keep commit body short, focused, grouped by functional changes, and free of background narration or repeated file lists.
 9. Stage only intended files.
 10. Run relevant verification when feasible before claiming readiness.
 11. Commit, push, or prepare PR only when requested.
