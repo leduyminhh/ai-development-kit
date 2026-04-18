@@ -5,7 +5,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 
-. (Join-Path $PSScriptRoot '../../../../scripts/lib/codex-config.ps1')
+. (Join-Path $PSScriptRoot '../../../scripts/lib/codex-config.ps1')
 
 function New-Finding {
     param([string]$Severity, [string]$Message)
@@ -100,7 +100,7 @@ require_pre_write_summary = true
 # validation Global structure validation
 [validation]
 run_after_structure_change = true
-validator_command = "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root . -Fix"
+validator_command = "powershell -ExecutionPolicy Bypass -File skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root . -Fix"
 
 # scan.policy Global scan scope
 [scan.policy]
@@ -192,9 +192,7 @@ $skipProtectedPathsByDefault = Get-CodexTomlBoolValue -TomlText $configText -Sec
 $requireExplicitProtectedScanAllow = Get-CodexTomlBoolValue -TomlText $configText -Section 'scan.policy' -Key 'requireExplicitAllow' -Default $true
 
 $codexRoot = Join-Path $resolvedRoot '.codex'
-$agentsRoot = Join-Path $resolvedRoot '.agents'
 Ensure-ScaffoldDirectory -Path $codexRoot -Label 'Codex root' -TrackWhenEmpty $false
-Ensure-ScaffoldDirectory -Path $agentsRoot -Label 'Agents root' -TrackWhenEmpty $false
 
 $agentsPath = Join-Path $resolvedRoot 'AGENTS.md'
 if (Test-Path -LiteralPath $agentsPath) {
@@ -206,10 +204,10 @@ if (Test-Path -LiteralPath $agentsPath) {
 }
 
 $skillNames = New-Object System.Collections.Generic.HashSet[string]
-$skillsRoot = Join-Path $resolvedRoot '.agents/skills'
-Ensure-ScaffoldDirectory -Path $skillsRoot -Label 'Step 5 codex-skill root' -TrackWhenEmpty $true
+$skillsRoot = Join-Path $resolvedRoot 'skills'
+Ensure-ScaffoldDirectory -Path $skillsRoot -Label 'Skills root' -TrackWhenEmpty $true
 if (Test-Path -LiteralPath $skillsRoot) {
-    $skillFiles = Get-ChildItem -LiteralPath $skillsRoot -Recurse -Filter 'SKILL.md'
+    $skillFiles = Get-ChildItem -LiteralPath $skillsRoot -Filter 'SKILL.md' -Recurse
     foreach ($file in $skillFiles) {
         $content = Get-Content -LiteralPath $file.FullName -Raw
         $nameMatch = [regex]::Match($content, '(?m)^name:\s*(.+?)\s*$')
@@ -221,10 +219,24 @@ if (Test-Path -LiteralPath $skillsRoot) {
         }
 
         $subagentsPath = Join-Path $file.Directory.FullName 'subagents'
-        Ensure-ScaffoldDirectory -Path $subagentsPath -Label "Step 6 codex-subagent root for $($file.Directory.Name)" -TrackWhenEmpty $true
+        Ensure-ScaffoldDirectory -Path $subagentsPath -Label "Skill subagents root for $($file.Directory.Name)" -TrackWhenEmpty $true
     }
 } else {
-    $findings.Add((New-Finding 'warning' '.agents/skills is missing. This is acceptable only before skills are introduced.'))
+    $findings.Add((New-Finding 'warning' 'skills is missing. This is acceptable only before skills are introduced.'))
+}
+
+$workflowsRoot = Join-Path $resolvedRoot 'workflows'
+if (Test-Path -LiteralPath $workflowsRoot) {
+    $findings.Add((New-Finding 'pass' "Workflows root exists: $workflowsRoot"))
+    foreach ($file in @(Get-ChildItem -LiteralPath $workflowsRoot -Recurse -Filter 'WORKFLOW.md' -File -ErrorAction SilentlyContinue)) {
+        $content = Get-Content -LiteralPath $file.FullName -Raw
+        $nameMatch = [regex]::Match($content, '(?m)^name:\s*(.+?)\s*$')
+        if ($content -match '(?s)^---\s+.*?\s+---' -and $nameMatch.Success -and $content -match '(?m)^description:\s*\S+') {
+            $findings.Add((New-Finding 'pass' "Workflow frontmatter looks valid: $($file.FullName)"))
+        } else {
+            $findings.Add((New-Finding 'fail' "Workflow frontmatter must include name and description: $($file.FullName)"))
+        }
+    }
 }
 
 if ($IncludeProtectedPaths -or -not $skipProtectedPathsByDefault -or -not $requireExplicitProtectedScanAllow) {

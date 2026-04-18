@@ -1,0 +1,4 @@
+interface:
+  display_name: "Skill Maintenance Review"
+  short_description: "Review audit and feedback patterns, then propose guarded skill upgrades"
+  default_prompt: "Use $skill-maintenance-review to review audit logs and feedback notes, identify skill drift, propose focused updates, define validation steps, and stop at pending user approval instead of auto-applying changes."

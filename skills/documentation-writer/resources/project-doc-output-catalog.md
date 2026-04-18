@@ -8,7 +8,7 @@ Use this catalog when proposing documentation for a project. Every persistent pa
 - Default root path is `docs`.
 - Resolve the root path from the repository root, not from the current shell directory.
 - Create missing folders under `<repo-root>/docs` only after explicit user confirmation.
-- Do not write to `reports/`, `.agents/`, `.codex/`, or arbitrary folders for project documentation unless the user explicitly overrides the target path.
+- Do not write to `reports/`, `.codex/`, `skills/`, or arbitrary folders for project documentation unless the user explicitly overrides the target path.
 
 ## Standard Outputs
 

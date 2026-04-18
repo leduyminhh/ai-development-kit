@@ -1,4 +1,4 @@
-param([string]$Root = (Resolve-Path (Join-Path $PSScriptRoot '../../../..')).Path)
+param([string]$Root = (Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path)
 
 $ErrorActionPreference = 'Stop'
 
@@ -7,14 +7,15 @@ function Assert-True {
     if (-not $Condition) { throw $Message }
 }
 
-$validator = Join-Path $Root '.agents/skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1'
+$validator = Join-Path $Root 'skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1'
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("codex-validator-test-" + [guid]::NewGuid().ToString())
 $emptyRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("codex-validator-empty-test-" + [guid]::NewGuid().ToString())
 
 try {
     New-Item -ItemType Directory -Path $tempRoot -Force | Out-Null
-    New-Item -ItemType Directory -Path (Join-Path $tempRoot '.agents/skills/new-agent') -Force | Out-Null
-    New-Item -ItemType Directory -Path (Join-Path $tempRoot '.agents/skills/read-only-agent') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $tempRoot 'skills/new-agent') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $tempRoot 'skills/read-only-agent') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $tempRoot 'workflows/workflow-skill-maintenance-review') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.codex/agents') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot 'docs/ignored-skill') -Force | Out-Null
 
@@ -35,7 +36,7 @@ read_only = false
 enabled = true
 '@
 
-    Set-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/new-agent/SKILL.md') -Encoding utf8 -Value @'
+    Set-Content -LiteralPath (Join-Path $tempRoot 'skills/new-agent/SKILL.md') -Encoding utf8 -Value @'
 ---
 name: new-agent
 description: New agent test skill.
@@ -44,13 +45,22 @@ description: New agent test skill.
 # New Agent
 '@
 
-    Set-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/read-only-agent/SKILL.md') -Encoding utf8 -Value @'
+    Set-Content -LiteralPath (Join-Path $tempRoot 'skills/read-only-agent/SKILL.md') -Encoding utf8 -Value @'
 ---
 name: read-only-agent
 description: Read-only agent test skill.
 ---
 
 # Read Only Agent
+'@
+
+    Set-Content -LiteralPath (Join-Path $tempRoot 'workflows/workflow-skill-maintenance-review/WORKFLOW.md') -Encoding utf8 -Value @'
+---
+name: workflow-skill-maintenance-review
+description: Test workflow wrapper for skill maintenance review.
+---
+
+# Workflow Skill Maintenance Review
 '@
 
     Set-Content -LiteralPath (Join-Path $tempRoot '.codex/agents/new-agent.toml') -Encoding utf8 -Value @'
@@ -88,9 +98,9 @@ Use the read-only-agent skill.
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.codex/hooks/.gitkeep')) 'Validator -Fix should make empty hooks scaffold trackable.'
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.codex/mcp')) 'Validator -Fix should ensure Step 4 .codex/mcp exists.'
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.codex/mcp/.gitkeep')) 'Validator -Fix should make empty MCP scaffold trackable.'
-    Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.agents/skills')) 'Validator -Fix should ensure Step 5 .agents/skills exists.'
-    Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.agents/skills/new-agent/subagents')) 'Validator -Fix should ensure Step 6 skill subagents exists.'
-    Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.agents/skills/read-only-agent/subagents')) 'Validator -Fix should ensure read-only skill subagents exists.'
+    Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot 'skills')) 'Validator -Fix should ensure skills root exists.'
+    Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot 'skills/new-agent/subagents')) 'Validator -Fix should ensure skill subagents exists.'
+    Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot 'skills/read-only-agent/subagents')) 'Validator -Fix should ensure read-only skill subagents exists.'
 
     $config = Get-Content -LiteralPath (Join-Path $tempRoot '.codex/config.toml') -Raw
     Assert-True ($config.Contains('[agents.existing-agent]')) 'Existing agent registration should be preserved.'

@@ -2,7 +2,7 @@
 [environment]
 network_access = true
 
-# ------------ Behavior Global assistant behavior ------------ 
+# ------------ Behavior Global assistant behavior ------------
 [behavior]
 default_language = "vi"
 prefer_inline_output_over_file_write = true
@@ -12,10 +12,10 @@ disallow_unsafe_destructive_actions = true
 avoid_unrelated_file_changes = true
 require_pre_write_summary = true
 
-# ------------ Validation Global structure ------------ 
+# ------------ Validation Global structure ------------
 [validation]
 run_after_structure_change = true
-validator_command = "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root . -Fix"
+validator_command = "powershell -ExecutionPolicy Bypass -File skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root . -Fix"
 
 # ------------ Policy Global scan scope ------------
 [scan.policy]
@@ -58,6 +58,17 @@ path = "audit/agent"
 remainingDays = 30
 format = "text"
 hook = ".codex/hooks/agent-execution-audit.ps1"
+
+# ------------ Skill Upgrade Self-maintenance ------------
+[skill_upgrade]
+enabled = true
+intervalDays = 14
+reviewerAgent = "skill-maintenance-review"
+feedbackPath = "audit/skill-feedback"
+proposalPath = "audit/skill-upgrade"
+statePath = "audit/skill-upgrade-state"
+autoApply = false
+requireApproval = true
 
 # ------------ Guards Safety enforcement ------------
 [guards]
@@ -120,5 +131,10 @@ enabled = true
 
 [agents.react-js]
 path = ".codex/agents/react-js.toml"
+read_only = false
+enabled = true
+
+[agents.skill-maintenance-review]
+path = ".codex/agents/skill-maintenance-review.toml"
 read_only = false
 enabled = true

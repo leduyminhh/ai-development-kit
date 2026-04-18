@@ -24,10 +24,15 @@ function Assert-True {
 $toml = @'
 name = "diagram-w"
 enabled = true
+intervalDays = 14
 
 [scan.policy]
 skipProtectedPathsByDefault = true
 protectedScanPaths = ["docs/", "reports/"]
+
+[skill_upgrade]
+enabled = true
+intervalDays = 21
 
 [output.file.extensionsBySubpath]
 "docs/diagram" = "puml"
@@ -38,6 +43,8 @@ protectedScanPaths = ["docs/", "reports/"]
 Assert-Equal 'diagram-w' (Get-CodexTomlStringValue -TomlText $toml -Key 'name') 'Root string TOML values should resolve.'
 Assert-Equal $true (Get-CodexTomlBoolValue -TomlText $toml -Section 'scan.policy' -Key 'skipProtectedPathsByDefault' -Default $false) 'Boolean TOML values should resolve.'
 Assert-Equal 'docs/' (Get-CodexTomlArrayValue -TomlText $toml -Section 'scan.policy' -Key 'protectedScanPaths')[0] 'Array TOML values should resolve.'
+Assert-Equal 14 (Get-CodexTomlIntValue -TomlText $toml -Key 'intervalDays' -Default 0) 'Root integer TOML values should resolve.'
+Assert-Equal 21 (Get-CodexTomlIntValue -TomlText $toml -Section 'skill_upgrade' -Key 'intervalDays' -Default 0) 'Section integer TOML values should resolve.'
 
 $map = Get-CodexTomlStringMap -TomlText $toml -Section 'output.file.extensionsBySubpath'
 Assert-Equal 'plantuml' $map['docs/diagram/sequence'] 'String map TOML values should resolve.'

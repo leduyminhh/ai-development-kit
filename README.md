@@ -13,7 +13,7 @@ powershell -ExecutionPolicy Bypass -File scripts/install-skill-link.ps1 -Force
 The installer creates a Windows junction or symlink:
 
 ```text
-~\.agents\skills\codex-workflow-kit -> <repo>\.agents\skills
+~\.codex\skills\codex-workflow-kit -> <repo>\skills
 ```
 
 After that, update this repository with:
@@ -31,7 +31,7 @@ Agents, hooks, and workflow config remain in this repository as project-local te
 Run the validator with `-Fix` to create or synchronize the standard scaffold:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root . -Fix
+powershell -ExecutionPolicy Bypass -File skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root . -Fix
 ```
 
 The scaffold is organized in six layers:
@@ -40,8 +40,8 @@ The scaffold is organized in six layers:
 - Step 2 `codex.config`: `.codex/config.toml` stores deterministic behavior, validation, audit, guards, and agent registration.
 - Step 3 `codex-hook`: `.codex/hooks/` stores hook contracts such as agent execution audit logging.
 - Step 4 `codex-mcp`: `.codex/mcp/` stores MCP configuration snippets or templates.
-- Step 5 `codex-skill`: `.agents/skills/<name>/SKILL.md` stores reusable runtime procedures.
-- Step 6 `codex-subagent`: `.agents/skills/<name>/subagents/` stores focused subagent prompts owned by each skill.
+- Step 5 `codex-skill`: `skills/<name>/SKILL.md` stores reusable runtime procedures.
+- Step 6 `codex-subagent`: `skills/<name>/subagents/` stores focused subagent prompts owned by each skill.
 
 When `-Fix` is used, `.codex/config.toml` is synchronized from `.codex/agents/*.toml`, and missing scaffold directories are created with `.gitkeep` markers when needed.
 
@@ -66,6 +66,22 @@ Log format follows a Logback-like shape with logfmt fields after `|`:
 2026-04-15T07:00:00+07:00 [INFO] [codex-agent] [react-js] [session-id] [-] [-] codex.agent.audit - Build checkout UI | timestamp=2026-04-15T00:05:00Z level=info service=codex-agent eventName=agent.execution eventVersion=1.0 sessionId=session-id agentName=react-js model=gpt-5.4 reasoning=medium summaryJob="Build checkout UI" startTime=2026-04-15T07:00:00+07:00 endTime=2026-04-15T07:05:00+07:00 startAt=2026-04-15T00:00:00Z endAt=2026-04-15T00:05:00Z durationMs=300000 status=completed cost=0 traceId=- spanId=- timezone=Asia/Ho_Chi_Minh schema=codex.agent.audit.v1
 ```
 
+| Skill | Chuc nang |
+|---|---|
+| `codex-structure-validate` | Validator cau truc Codex repo. |
+| `naming-rule-validate` | Kiem tra naming convention va do khop metadata name cho agent, skill, subagent, hook va script. |
+| `java-analyze` | Phan tich Java/Spring backend, flow, persistence, async, clean code, test strategy. |
+| `react-code-generate` | Tao/sua React UI tu Figma, ticket, yeu cau text va API contract. |
+| `skill-maintenance-review` | Review drift cua skill/agent tu audit va feedback, de xuat nang cap co approval gate. |
+| `test-qa-review` | Review QA doc lap, scenario, regression risk, verification plan. |
+| `test-automation-validate` | Lap ke hoach va tao automated tests theo stack. |
+| `diagram-generate` | Chon va tao PlantUML diagrams. |
+| `doc-write` | Viet tai lieu ky thuat va README/doc artifacts. |
+| `git-workflow-design` | Ho tro branch, commit, merge, revert, release, hotfix. |
+| `code-design-pattern` | Tu van design pattern co approval gate. |
+| `architecture-onion-design` | Huong dan Onion Architecture va boundary review. |
+| `code-shared-design` | Thiet ke shared internal API, contract, shared logic module. |
+
 This keeps each row as a string while preserving the earlier audit fields for future Grafana Loki parsing.
 
 ## Core Validator
@@ -75,7 +91,7 @@ The first core workflow is `codex-structure-validator`, an Agent -> Skill valida
 It validates:
 
 - `AGENTS.md` guidance boundaries.
-- `.agents/skills/<name>/SKILL.md` skill structure.
+- `skills/<name>/SKILL.md` skill structure.
 - `.codex/agents/<name>.toml` agent structure.
 - `.codex/config.toml` safety defaults and profiles.
 - Optional hooks and reports.

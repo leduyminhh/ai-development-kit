@@ -16,7 +16,7 @@ function Assert-FileContains {
 }
 
 $skill = Join-Path $SkillRoot 'SKILL.md'
-$agent = Join-Path (Resolve-Path (Join-Path $SkillRoot '../../..')).Path '.codex/agents/automation-testing.toml'
+$agent = Join-Path (Resolve-Path (Join-Path $SkillRoot '../..')).Path '.codex/agents/automation-testing.toml'
 $rules = Join-Path $SkillRoot 'resources/test-implementation-rules.md'
 $strategy = Join-Path $SkillRoot 'subagents/test-strategy-planner.md'
 

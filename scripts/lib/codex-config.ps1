@@ -53,6 +53,20 @@ function Get-CodexTomlBoolValue {
     return $Default
 }
 
+function Get-CodexTomlIntValue {
+    param([string]$TomlText, [string]$Section, [string]$Key, [int]$Default = 0)
+
+    $raw = Get-CodexTomlRawValue -TomlText $TomlText -Section $Section -Key $Key
+    if ([string]::IsNullOrWhiteSpace($raw)) { return $Default }
+
+    $parsed = 0
+    if ([int]::TryParse($raw, [ref]$parsed)) {
+        return $parsed
+    }
+
+    return $Default
+}
+
 function Get-CodexTomlArrayValue {
     param([string]$TomlText, [string]$Section, [string]$Key, [string[]]$Default = @())
 

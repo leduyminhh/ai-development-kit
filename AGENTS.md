@@ -12,12 +12,12 @@ Language:
 
 ## Repository Structure
 Core validator:
-- `.agents/skills/codex-best-practice-validator/` contains the core validation skill and deterministic structure validation script.
+- `skills/codex-best-practice-validator/` contains the core validation skill and deterministic structure validation script.
 - `.codex/agents/codex-structure-validator.toml` is the read-only validator agent entry point.
 
 Runtime skills:
-- `.agents/skills/<name>/SKILL.md` contains a single discoverable skill.
-- Keep skill folders flat under `.agents/skills/`; do not nest runtime skills under domain folders.
+- `skills/<name>/SKILL.md` contains a single discoverable skill.
+- Keep skill folders flat under `skills/`; do not nest runtime skills under domain folders.
 - Use descriptive skill names such as `java-architect` for domain grouping.
 
 Documents and reports:
@@ -28,7 +28,7 @@ Documents and reports:
 ## Architecture Rules
 - Keep the core validator independent from any domain skill.
 - Do not place long domain procedures in this file.
-- Put domain-specific reusable behavior in focused skills under `.agents/skills/<name>/SKILL.md`.
+- Put domain-specific reusable behavior in focused skills under `skills/<name>/SKILL.md`.
 - Avoid hidden coupling between the validator, domain skills, and external references.
 
 ## External References Policy
@@ -79,7 +79,7 @@ Strict prohibitions:
 
 ## Workflow Rules
 - After any structure change, run the validator:
-  `powershell -ExecutionPolicy Bypass -File .agents/skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root . -Fix`
+  `powershell -ExecutionPolicy Bypass -File skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root . -Fix`
 - Use selected tests instead of running every test by default:
   `powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -FromGit`
 - When adding any `*test*.ps1` file, map it in `.codex/test-map.toml` under exactly one group: `test.always`, `test.core`, or `test.skill`.
