@@ -24,7 +24,7 @@ Get-ChildItem -LiteralPath $auditRoot -Filter '*_action.*' -File -ErrorAction Si
     -Root $Root `
     -AuditRoot $auditRoot `
     -SessionId '33333333-3333-3333-3333-333333333333' `
-    -AgentName 'react-js' `
+    -AgentName 'react-code-generate' `
     -Model 'gpt-5.4' `
     -Reasoning 'medium' `
     -SummaryJob 'Run audited success command' `
@@ -35,13 +35,13 @@ Assert-Equal 0 $LASTEXITCODE 'Successful audited command should return exit code
 
 $rows = @(Get-ChildItem -LiteralPath $auditRoot -Filter '*_action.log' -File | ForEach-Object { Get-Content -LiteralPath $_.FullName })
 Assert-Equal 1 $rows.Count 'Successful audited command should create one audit row.'
-Assert-True ($rows[0].Contains('[INFO] [codex-agent] [react-js] [33333333-3333-3333-3333-333333333333]')) 'Text log prefix mismatch.'
+Assert-True ($rows[0].Contains('[INFO] [codex-agent] [react-code-generate] [33333333-3333-3333-3333-333333333333]')) 'Text log prefix mismatch.'
 Assert-True ($rows[0].Contains('schema=codex.agent.audit.v1')) 'Schema field mismatch.'
 Assert-True ($rows[0].Contains('service=codex-agent')) 'Service field mismatch.'
 Assert-True ($rows[0].Contains('eventName=agent.execution')) 'Event name field mismatch.'
 Assert-True ($rows[0].Contains('level=info')) 'Success level mismatch.'
 Assert-True ($rows[0].Contains('sessionId=33333333-3333-3333-3333-333333333333')) 'Session ID field mismatch.'
-Assert-True ($rows[0].Contains('agentName=react-js')) 'Agent name field mismatch.'
+Assert-True ($rows[0].Contains('agentName=react-code-generate')) 'Agent name field mismatch.'
 Assert-True ($rows[0].Contains('model=gpt-5.4')) 'Model field mismatch.'
 Assert-True ($rows[0].Contains('reasoning=medium')) 'Reasoning field mismatch.'
 Assert-True ($rows[0].Contains('summaryJob="Run audited success command"')) 'Summary job field mismatch.'
@@ -53,7 +53,7 @@ Assert-True ($rows[0].Contains('timezone=Asia/Ho_Chi_Minh')) 'Timezone field mis
     -Root $Root `
     -AuditRoot $auditRoot `
     -SessionId '44444444-4444-4444-4444-444444444444' `
-    -AgentName 'qa-reviewer' `
+    -AgentName 'test-qa-review' `
     -Model 'gpt-5.4' `
     -Reasoning 'low' `
     -SummaryJob 'Run audited failed command' `
@@ -79,7 +79,7 @@ Get-ChildItem -LiteralPath $auditRoot -Filter '*_action.*' -File -ErrorAction Si
     -Root $Root `
     -AuditRoot $auditRoot `
     -SessionId '77777777-7777-7777-7777-777777777777' `
-    -AgentName 'react-js' `
+    -AgentName 'react-code-generate' `
     -SummaryJob 'Run audited agent from config' `
     -Command "Write-Output 'agent ok'; exit 0" `
     -RemainingDays 7
@@ -88,7 +88,7 @@ Assert-Equal 0 $LASTEXITCODE 'Configured agent command should return exit code 0
 
 $configuredRows = @(Get-ChildItem -LiteralPath $auditRoot -Filter '*_action.log' -File | ForEach-Object { Get-Content -LiteralPath $_.FullName })
 Assert-Equal 1 $configuredRows.Count 'Configured agent command should create exactly one audit row.'
-Assert-True ($configuredRows[0].Contains('agentName=react-js')) 'Configured agent name should be logged.'
+Assert-True ($configuredRows[0].Contains('agentName=react-code-generate')) 'Configured agent name should be logged.'
 Assert-True ($configuredRows[0].Contains('model=gpt-5.4')) 'Configured agent model should be loaded from .codex/agents.'
 Assert-True ($configuredRows[0].Contains('reasoning=high')) 'Configured agent reasoning should be loaded from .codex/agents.'
 

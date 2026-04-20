@@ -6,12 +6,12 @@
 
 [test.runner]
 parallel = true
-finalValidator = "powershell -ExecutionPolicy Bypass -File skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root ."
+finalValidator = "powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root ."
 
 [test.always.structure]
 description = "Final Codex structure validation"
 commands = [
-  "powershell -ExecutionPolicy Bypass -File skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root ."
+  "powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root ."
 ]
 
 [test.core.pwsh-lib]
@@ -27,7 +27,7 @@ paths = [
   "scripts/resolve-output-file.ps1",
   "scripts/lib/codex-output-file.ps1",
   ".codex/config.toml",
-  "skills/diagram-w"
+  "skills/diagram-generate"
 ]
 commands = [
   "powershell -ExecutionPolicy Bypass -File scripts/test-resolve-output-file.ps1"
@@ -35,17 +35,17 @@ commands = [
 
 [test.core.audit-hook]
 paths = [
-  ".codex/hooks/agent-execution-audit.ps1",
+  ".codex/hooks/write-agent-audit.ps1",
   ".codex/config.toml"
 ]
 commands = [
-  "powershell -ExecutionPolicy Bypass -File .codex/hooks/test-agent-execution-audit.ps1"
+  "powershell -ExecutionPolicy Bypass -File .codex/hooks/test-write-agent-audit.ps1"
 ]
 
 [test.core.audited-runner]
 paths = [
   "scripts/invoke-agent-audited.ps1",
-  ".codex/hooks/agent-execution-audit.ps1",
+  ".codex/hooks/write-agent-audit.ps1",
   ".codex/agents",
   ".codex/config.toml"
 ]
@@ -55,7 +55,7 @@ commands = [
 
 [test.core.validator]
 paths = [
-  "skills/codex-best-practice-validator",
+  "skills/codex-structure-validate",
   ".codex/config.toml",
   ".codex/test-map.toml",
   "scripts/resolve-test-plan.ps1",
@@ -65,12 +65,12 @@ paths = [
 ]
 commands = [
   "powershell -ExecutionPolicy Bypass -File scripts/test-test-map.ps1",
-  "powershell -ExecutionPolicy Bypass -File skills/codex-best-practice-validator/scripts/test-validate-codex-structure.ps1"
+  "powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/test-validate-codex-structure.ps1"
 ]
 
 [test.core.skill-feedback]
 paths = [
-  "scripts/add_skill_feedback.py",
+  "scripts/add-skill-feedback.py",
   "scripts/test-add-skill-feedback.ps1",
   "scripts/lib/codex_config.py",
   ".codex/config.toml"
@@ -81,9 +81,9 @@ commands = [
 
 [test.core.skill-upgrade-cycle]
 paths = [
-  "scripts/run_skill_upgrade_cycle.py",
-  "scripts/apply_skill_upgrade_proposal.py",
-  "scripts/write_skill_upgrade_proposal.py",
+  "scripts/run-skill-upgrade-cycle.py",
+  "scripts/apply-skill-upgrade-proposal.py",
+  "scripts/write-skill-upgrade-proposal.py",
   "scripts/test-run-skill-upgrade-cycle.ps1",
   "scripts/test-apply-skill-upgrade-proposal.ps1",
   ".codex/config.toml",
@@ -97,37 +97,37 @@ commands = [
   "powershell -ExecutionPolicy Bypass -File skills/naming-rule-validate/scripts/test-naming-rule-validate.ps1"
 ]
 
-[test.skill.automation-testing]
-agents = ["automation-testing"]
-skills = ["automation-testing"]
+[test.skill.test-automation-validate]
+agents = ["test-automation-validate"]
+skills = ["test-automation-validate"]
 paths = [
-  "skills/automation-testing",
-  ".codex/agents/automation-testing.toml"
+  "skills/test-automation-validate",
+  ".codex/agents/test-automation-validate.toml"
 ]
 commands = [
-  "powershell -ExecutionPolicy Bypass -File skills/automation-testing/scripts/test-automation-testing-strategy.ps1"
+  "powershell -ExecutionPolicy Bypass -File skills/test-automation-validate/scripts/test-automation-validate-strategy.ps1"
 ]
 
-[test.skill.onion-architecture]
-agents = ["java-architect"]
-skills = ["onion-architecture", "shared-module-architecture"]
+[test.skill.architecture-onion-design]
+agents = ["java-analyze"]
+skills = ["architecture-onion-design", "code-shared-design"]
 paths = [
-  "skills/onion-architecture",
-  "skills/shared-module-architecture",
-  "skills/java-architect/SKILL.md",
-  ".codex/agents/java-architect.toml",
+  "skills/architecture-onion-design",
+  "skills/code-shared-design",
+  "skills/java-analyze/SKILL.md",
+  ".codex/agents/java-analyze.toml",
   "scripts/test-architecture-skills.ps1"
 ]
 commands = [
   "powershell -ExecutionPolicy Bypass -File scripts/test-architecture-skills.ps1"
 ]
 
-[test.skill.diagram-w]
-agents = ["diagram-w"]
-skills = ["diagram-w"]
+[test.skill.diagram-generate]
+agents = ["diagram-generate"]
+skills = ["diagram-generate"]
 paths = [
-  "skills/diagram-w",
-  ".codex/agents/diagram-w.toml",
+  "skills/diagram-generate",
+  ".codex/agents/diagram-generate.toml",
   "scripts/resolve-output-file.ps1"
 ]
 commands = [

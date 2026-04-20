@@ -22,7 +22,7 @@ if ([string]::IsNullOrWhiteSpace($SessionId)) {
     $SessionId = [guid]::NewGuid().ToString()
 }
 
-$auditScript = Join-Path $Root '.codex/hooks/agent-execution-audit.ps1'
+$auditScript = Join-Path $Root '.codex/hooks/write-agent-audit.ps1'
 if (-not (Test-Path -LiteralPath $auditScript)) {
     throw "Audit script not found: $auditScript"
 }

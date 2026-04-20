@@ -16,7 +16,7 @@ function Assert-True {
     }
 }
 
-$scriptPath = Join-Path $PSScriptRoot 'add_skill_feedback.py'
+$scriptPath = Join-Path $PSScriptRoot 'add-skill-feedback.py'
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("codex-skill-feedback-" + [guid]::NewGuid().ToString())
 
 try {

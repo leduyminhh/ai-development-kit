@@ -22,7 +22,7 @@ function Assert-True {
 }
 
 $toml = @'
-name = "diagram-w"
+name = "diagram-generate"
 enabled = true
 intervalDays = 14
 
@@ -40,7 +40,7 @@ intervalDays = 21
 "reports" = "md"
 '@
 
-Assert-Equal 'diagram-w' (Get-CodexTomlStringValue -TomlText $toml -Key 'name') 'Root string TOML values should resolve.'
+Assert-Equal 'diagram-generate' (Get-CodexTomlStringValue -TomlText $toml -Key 'name') 'Root string TOML values should resolve.'
 Assert-Equal $true (Get-CodexTomlBoolValue -TomlText $toml -Section 'scan.policy' -Key 'skipProtectedPathsByDefault' -Default $false) 'Boolean TOML values should resolve.'
 Assert-Equal 'docs/' (Get-CodexTomlArrayValue -TomlText $toml -Section 'scan.policy' -Key 'protectedScanPaths')[0] 'Array TOML values should resolve.'
 Assert-Equal 14 (Get-CodexTomlIntValue -TomlText $toml -Key 'intervalDays' -Default 0) 'Root integer TOML values should resolve.'

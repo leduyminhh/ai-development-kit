@@ -16,7 +16,7 @@ function Assert-True {
     }
 }
 
-$scriptPath = Join-Path $PSScriptRoot 'apply_skill_upgrade_proposal.py'
+$scriptPath = Join-Path $PSScriptRoot 'apply-skill-upgrade-proposal.py'
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("codex-skill-apply-" + [guid]::NewGuid().ToString())
 
 try {

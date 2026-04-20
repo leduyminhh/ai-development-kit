@@ -98,7 +98,7 @@ Examples:
 - `doc-write`
 - `java-api-contract-review`
 - `java-spring-boundary-review`
-- `diagram-wireframe-generate`
+- `diagram-generateireframe-generate`
 - `sql-optimize`
 - `test-automation-validate`
 - `test-qa-review`
@@ -133,9 +133,9 @@ Current skill-only capabilities:
 Scripts and hooks may use command-style verbs when they are operational wrappers, for example:
 
 - `add-skill-feedback.ps1`
-- `add_skill_feedback.py`
+- `add-skill-feedback.py`
 - `apply-skill-upgrade-proposal.ps1`
-- `apply_skill_upgrade_proposal.py`
+- `apply-skill-upgrade-proposal.py`
 - `run-coverage-report.ps1`
 - `validate-workflow.ps1`
 - `test-naming-rule-validate.ps1`
@@ -163,10 +163,10 @@ Do not combine multiple actions:
 
 Do not use knowledge nouns as a capability name:
 
-- Wrong: `design-pattern`, `clean-code`
+- Wrong: `code-design-pattern`, `clean-code`
 - Right: `pattern-analyze`, `code-review`
 
-Exception: `code-design-pattern` is approved as the parent capability for design-pattern advisory workflow.
+Exception: `code-design-pattern` is approved as the parent capability for code-design-pattern advisory workflow.
 
 ## Validation
 

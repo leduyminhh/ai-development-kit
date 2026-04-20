@@ -1,4 +1,4 @@
-﻿# Codex Workflow Kit
+# Codex Workflow Kit
 
 This workspace stores reusable Codex workflow building blocks: validators, agents, skills, and domain-specific agent capabilities.
 
@@ -31,7 +31,7 @@ Agents, hooks, and workflow config remain in this repository as project-local te
 Run the validator with `-Fix` to create or synchronize the standard scaffold:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File skills/codex-best-practice-validator/scripts/validate-codex-structure.ps1 -Root . -Fix
+powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix
 ```
 
 The scaffold is organized in six layers:
@@ -51,19 +51,19 @@ Codex does not automatically execute custom keys such as `[audit.agent].hook` fr
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/invoke-agent-audited.ps1 `
-  -AgentName react-js `
+  -AgentName react-code-generate `
   -Model gpt-5.4 `
   -Reasoning medium `
   -SummaryJob "Build checkout UI" `
   -Command "npm test"
 ```
 
-The wrapper writes one compact text row per execution through `.codex/hooks/agent-execution-audit.ps1`, preserving the wrapped command exit code. The default audit file name is `yyMMdd_action.log`.
+The wrapper writes one compact text row per execution through `.codex/hooks/write-agent-audit.ps1`, preserving the wrapped command exit code. The default audit file name is `yyMMdd_action.log`.
 
 Log format follows a Logback-like shape with logfmt fields after `|`:
 
 ```text
-2026-04-15T07:00:00+07:00 [INFO] [codex-agent] [react-js] [session-id] [-] [-] codex.agent.audit - Build checkout UI | timestamp=2026-04-15T00:05:00Z level=info service=codex-agent eventName=agent.execution eventVersion=1.0 sessionId=session-id agentName=react-js model=gpt-5.4 reasoning=medium summaryJob="Build checkout UI" startTime=2026-04-15T07:00:00+07:00 endTime=2026-04-15T07:05:00+07:00 startAt=2026-04-15T00:00:00Z endAt=2026-04-15T00:05:00Z durationMs=300000 status=completed cost=0 traceId=- spanId=- timezone=Asia/Ho_Chi_Minh schema=codex.agent.audit.v1
+2026-04-15T07:00:00+07:00 [INFO] [codex-agent] [react-code-generate] [session-id] [-] [-] codex.agent.audit - Build checkout UI | timestamp=2026-04-15T00:05:00Z level=info service=codex-agent eventName=agent.execution eventVersion=1.0 sessionId=session-id agentName=react-code-generate model=gpt-5.4 reasoning=medium summaryJob="Build checkout UI" startTime=2026-04-15T07:00:00+07:00 endTime=2026-04-15T07:05:00+07:00 startAt=2026-04-15T00:00:00Z endAt=2026-04-15T00:05:00Z durationMs=300000 status=completed cost=0 traceId=- spanId=- timezone=Asia/Ho_Chi_Minh schema=codex.agent.audit.v1
 ```
 
 | Skill | Chuc nang |
@@ -86,7 +86,7 @@ This keeps each row as a string while preserving the earlier audit fields for fu
 
 ## Core Validator
 
-The first core workflow is `codex-structure-validator`, an Agent -> Skill validator for Codex best-practice repository structure.
+The first core workflow is `codex-structure-validate`, an Agent -> Skill validator for Codex best-practice repository structure.
 
 It validates:
 
@@ -103,14 +103,14 @@ Domain-specific skills and agents live outside the validator core.
 
 Current domain capabilities:
 
-- `java-architect`: Java backend architecture review and design for flow, clean code, Spring patterns, persistence, async/concurrency, and test strategy.
-- `react-js`: React UI implementation from Figma, requirements, tickets, and API contracts.
-- `qa-reviewer`: QA reviewer review across stacks.
-- `automation-testing`: automated unit, integration/API, E2E, fixture/data, coverage, and flaky test workflows.
-- `design-pattern`: design pattern advisor with approval gates before applying patterns.
-- `documentation-writer`: technical documentation for architecture, features, flows, and database/schema knowledge.
+- `java-analyze`: Java backend architecture review and design for flow, clean code, Spring patterns, persistence, async/concurrency, and test strategy.
+- `react-code-generate`: React UI implementation from Figma, requirements, tickets, and API contracts.
+- `test-qa-review`: QA reviewer review across stacks.
+- `test-automation-validate`: automated unit, integration/API, E2E, fixture/data, coverage, and flaky test workflows.
+- `code-design-pattern`: design pattern advisor with approval gates before applying patterns.
+- `doc-write`: technical documentation for architecture, features, flows, and database/schema knowledge.
 
-Every domain skill or agent must pass `codex-best-practice-validator` before it is considered complete.
+Every domain skill or agent must pass `codex-structure-validate` before it is considered complete.
 
 ## Selected Test Routing
 
@@ -125,7 +125,7 @@ powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -FromGit
 Run tests for one activated skill:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -ActivatedSkill onion-architecture
+powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -ActivatedSkill architecture-onion-design
 ```
 
 Rules:
@@ -142,5 +142,3 @@ Rules:
 ## Legacy Superpowers Aliases
 
 The earlier `superpowers-workflow` aliases are still useful as process references. Keep them until the validator and domain skills replace the need for a dedicated alias list.
-
-
