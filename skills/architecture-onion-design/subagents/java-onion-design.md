@@ -1,58 +1,52 @@
-# Java Onion Architecture
+# Java Onion Design
 
-Use this subagent when applying Onion Architecture to a Java or Spring Boot module.
+Use this prompt when applying Onion Architecture to a Java/Spring Boot service.
 
-## Default Package Shape
+## Required Reference
+
+Read `resources/java-package-template.md` before producing package layout. Use the `tenant-admin-service` extracted shape unless the target project already has a stricter convention.
+
+## Design Rules
+
+- Use four top-level rings under `com.example.<service>`: `bootstrap`, `application`, `domain`, `infrastructure`.
+- Keep dependencies inward: `bootstrap --> application --> domain`, `infrastructure --> application --> domain`, and `domain --> domain only`.
+- Use `bootstrap.api.<audience>.v1` with `admin`, `internal`, or `publicapi`; use `publicapi` because `public` is a Java keyword.
+- Put controllers, request DTOs, response DTOs, and API mappers in bootstrap.
+- Put service interfaces in `application.service.inf`.
+- Put service implementations in `application.service.<capability>` and suffix classes with `ServiceImpl`.
+- Put outbound ports and repository contracts in `application.port.out`.
+- Put domain models under `domain.model.<capability>` and domain exceptions under `domain.exception`.
+- Put JPA entities, Spring Data repositories, persistence adapters, and persistence mappers in infrastructure.
+- Do not create placeholder files. Create only files the capability needs.
+
+## Example Capability Shape
 
 ```text
 com.example.customer
-├── domain
-│   ├── model
-│   │   ├── Customer.java
-│   │   ├── CustomerId.java
-│   │   └── LoyaltyTier.java
-│   ├── repository
-│   │   └── CustomerRepository.java
-│   └── exception
-│
-├── application
-│   ├── service
-│   │   ├── CustomerRegistrationService.java
-│   │   ├── CustomerQueryService.java
-│   │   └── CustomerProfileService.java
-│   ├── dto
-│   └── assembler
-│
-├── infrastructure
-│   ├── persistence
-│   │   ├── entity
-│   │   ├── springdata
-│   │   └── CustomerRepositoryAdapter.java
-│   ├── external
-│   └── config
-│
-└── bootstrap
-    ├── controller
-    ├── request
-    ├── response
-    └── config
+|-- bootstrap/api/admin/v1/controller/CustomerController.java
+|-- bootstrap/api/admin/v1/request/CreateCustomerRequest.java
+|-- bootstrap/api/admin/v1/response/CustomerResponse.java
+|-- bootstrap/api/admin/v1/mapper/CustomerMapper.java
+|-- application/service/inf/CustomerService.java
+|-- application/service/customer/CustomerServiceImpl.java
+|-- application/result/customer/CustomerResult.java
+|-- application/port/out/repos/CustomerRepository.java
+|-- domain/model/customer/Customer.java
+|-- infrastructure/persistence/CustomerRepositoryJpaAdapter.java
+|-- infrastructure/persistence/jpa/entity/CustomerEntity.java
+|-- infrastructure/persistence/jpa/repository/SpringDataCustomerRepository.java
+`-- infrastructure/persistence/mapper/CustomerMapper.java
 ```
-
-## Java Rules
-
-- `domain` must not import Spring, JPA, Jackson, web, persistence entity, or HTTP client classes.
-- `application.service` owns use case orchestration and calls `domain.repository` contracts.
-- `infrastructure.persistence.springdata` may use Spring Data/JPA and is adapted through `CustomerRepositoryAdapter`.
-- `bootstrap.controller` maps request/response and delegates to application services.
-- Prefer constructor injection and package-private helpers where useful.
-- Keep Maven/Gradle module boundaries aligned with the same inward dependency direction when the project is multi-module.
 
 ## Output
 
 Return:
 
+- base package
+- API audience and package choice
 - package tree
 - class/interface responsibilities
 - dependency direction
+- outbound port and adapter placement
 - Spring/JPA boundary notes
-- tests to verify domain/application without infrastructure
+- architecture tests to verify package rules

@@ -1,83 +1,93 @@
 ---
 name: architecture-onion-design
-description: Use when a user explicitly requests Onion Architecture, Palermo-style inward dependencies, domain-centered module design, Java/Spring onion package layout, or architecture review for infrastructure leakage.
+description: Use when a user explicitly requests Onion Architecture, Palermo-style inward dependencies, domain-centered Java/Spring module design, tenant-admin-service style package structure, or architecture review for framework/infrastructure leakage.
 ---
 
 # Onion Architecture
 
 ## Overview
 
-Use this skill to force a design toward Onion Architecture: the domain model sits at the center, dependencies point inward, and infrastructure lives at the edge. This skill follows Jeffrey Palermo's Onion Architecture guidance and should be applied before language-specific architect skills choose packages, modules, or dependencies.
+Use this skill to design or review Java/Spring Boot services with Onion Architecture: domain stays at the center, dependencies point inward, and runtime/framework details stay at the edge. The Palermo rules are the baseline; the reusable Java package structure is extracted from `tenant-admin-service`.
 
 ## Source Baseline
 
-Jeffrey Palermo's Onion Architecture series defines these core rules:
+Preserve these Jeffrey Palermo rules:
 
 - The application is built around an independent object model.
 - Inner layers define interfaces. Outer layers implement interfaces.
 - Direction of coupling is toward the center.
 - All application core code can be compiled and run separate from infrastructure.
 
-Use these as hard constraints, not optional style preferences.
+Use `resources/java-package-template.md` when the target is a Java/Spring Boot service or when the user asks for the `tenant-admin-service` structure.
 
 ## Rings
 
 | Ring | Owns | Must Not Depend On |
 |---|---|---|
-| Domain | entities, value objects, domain rules, repository contracts, domain exceptions | application services, persistence, web, messaging, framework annotations when avoidable |
-| Application | use cases, orchestration services, commands/queries, DTOs, assemblers, transaction boundary intent | concrete database, HTTP client, message broker, UI/controller implementation |
-| Infrastructure | persistence adapters, external clients, messaging adapters, framework config | bootstrap/controller details |
-| Bootstrap | controllers, request/response models, dependency wiring, app startup config | direct persistence implementation except through configured dependencies |
+| Domain | business state, invariants, value objects, domain exceptions, framework-free domain services | application, infrastructure, bootstrap, Spring, JPA, messaging, HTTP clients |
+| Application | service interfaces, service implementations, result/view objects, outbound ports, repository contracts, events, flow coordination | bootstrap, infrastructure, Spring Web, Spring Data, JPA, Feign, Redis, Kafka, database classes |
+| Infrastructure | outbound port implementations, JPA entities, Spring Data repositories, persistence/client/messaging/cache adapters, technical mappers | bootstrap |
+| Bootstrap | controllers, request/response DTOs, API mappers, advice, filters, runtime configuration, bean wiring, OpenAPI annotations | repositories, JPA entities, infrastructure adapters, business rules |
 
 ## Dependency Rule
 
-- Code may depend on its own ring or an inner ring.
-- Code must not depend on an outer ring.
-- Interfaces/contracts needed by the core belong inward; implementations belong outward.
-- Database, filesystem, message broker, HTTP client, UI, framework startup, and tests are edge concerns.
-- Dependency injection wires outer implementations to inner contracts at runtime.
+Allowed:
+
+```text
+bootstrap --> application --> domain
+infrastructure --> application --> domain
+domain --> domain only
+```
+
+Forbidden:
+
+```text
+domain -X-> application
+domain -X-> infrastructure
+domain -X-> bootstrap
+application -X-> infrastructure
+application -X-> bootstrap
+infrastructure -X-> bootstrap
+```
+
+Interfaces/contracts needed by application belong inward. Implementations belong outward.
 
 ## Operating Mode
 
-1. Confirm the user explicitly requested Onion Architecture or an existing project already follows it.
-2. Identify module boundary and business capability before package names.
-3. Apply shared module rules if the design exposes internal API, contract, or shared logic artifacts.
-4. Choose the relevant subagent prompt:
+1. Confirm the user wants Onion Architecture or the service already follows it.
+2. Identify the service module, Java base package, API audience, and capability.
+3. Read `resources/java-package-template.md` before proposing Java package trees.
+4. Apply `code-shared-design` if the design exposes internal API, contracts, or shared logic.
+5. Choose only the relevant subagent prompt:
    - `subagents/onion-domain-design.md`
    - `subagents/onion-application-design.md`
    - `subagents/onion-infrastructure-design.md`
    - `subagents/onion-boundary-review.md`
-   - `subagents/java-architecture-onion-design.md`
-5. Produce package/module boundaries and dependency direction before implementation details.
-6. Call out any infrastructure leakage or misplaced interface immediately.
+   - `subagents/java-onion-design.md`
+6. Produce package/module boundaries before implementation details.
+7. Call out infrastructure leakage, misplaced interfaces, or controller-to-implementation wiring immediately.
 
-## Java Package Default
+## Java/Spring Rules
 
-For Java/Spring modules, prefer this shape unless the existing project has a stronger convention:
-
-```text
-com.example.<module>
-├── domain
-├── application
-├── infrastructure
-└── bootstrap
-```
-
-Read `resources/java-package-template.md` before producing Java package layouts.
-
-## Shared Module Compatibility
-
-If the architecture includes reusable internal APIs, contracts, or shared logic, apply `code-shared-design` as a companion skill. Onion modules may depend on published shared artifacts only when those artifacts remain framework-free, versioned, and do not pull infrastructure back into the domain/application core.
+- Use four top-level rings under the Java base package: `bootstrap`, `application`, `domain`, `infrastructure`.
+- Use `publicapi` as the Java package for public APIs because `public` is a Java keyword; HTTP routes may still expose `/api/public/...`.
+- Controllers call application service interfaces from `application.service.inf`, never `ServiceImpl`.
+- Service implementations live in `application.service.<capability>` and end with `ServiceImpl`.
+- Application returns result/view objects, not bootstrap response DTOs.
+- Repository contracts and outbound ports live in `application.port.out`.
+- JPA entities, Spring Data repositories, clients, messaging, and cache adapters stay in `infrastructure`.
+- Only create files that the capability actually needs. Do not create empty placeholders.
 
 ## Review Checklist
 
-- Domain model compiles without infrastructure.
-- Repository contracts live inward; repository implementations live outward.
-- Application services orchestrate use cases and transaction intent.
-- Bootstrap/controller code does not contain business rules.
-- Infrastructure adapters do not leak entities, clients, or framework types inward.
-- Shared modules expose contracts and internal API without depending on service implementation.
-- Tests can target domain/application without starting web or persistence infrastructure.
+1. Verify package rings: `bootstrap`, `application`, `domain`, `infrastructure`.
+2. Verify controller -> service interface -> service implementation flow.
+3. Verify application outbound ports and repository contracts live inward.
+4. Verify infrastructure adapters implement those ports outward.
+5. Verify request, response, and API mappers stay in bootstrap.
+6. Verify application returns result/view objects, not HTTP DTOs.
+7. Verify domain has no outer ring or framework dependency leakage.
+8. Verify architecture tests cover dependency direction and package placement.
 
 ## Output Format
 
@@ -85,8 +95,10 @@ Return:
 
 - Onion rings chosen.
 - Package/module layout.
+- Capability slice shape.
 - Dependency direction decisions.
-- Internal API/contract/shared logic module impact.
+- API audience and `publicapi` package decision.
+- Internal API/contract/shared logic impact.
 - Infrastructure adapter plan.
 - Boundary risks.
-- Verification or test strategy.
+- Architecture test strategy.

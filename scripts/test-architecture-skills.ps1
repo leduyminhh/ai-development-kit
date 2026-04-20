@@ -27,14 +27,23 @@ Assert-FileContains -Path (Join-Path $onionRoot 'SKILL.md') -Pattern 'Inner laye
 Assert-FileContains -Path (Join-Path $onionRoot 'SKILL.md') -Pattern 'toward the center' 'Onion skill must enforce inward dependency direction.'
 Assert-FileContains -Path (Join-Path $onionRoot 'SKILL.md') -Pattern 'compiled and run separate from infrastructure' 'Onion skill must enforce infrastructure-independent core.'
 Assert-FileContains -Path (Join-Path $onionRoot 'resources/java-package-template.md') -Pattern 'bootstrap\s+.*controller' 'Java onion template must include bootstrap controller layer.'
-Assert-FileContains -Path (Join-Path $onionRoot 'subagents/java-architecture-onion-design.md') -Pattern 'com\.example\.customer' 'Java onion subagent must include the provided example package shape.'
+Assert-FileContains -Path (Join-Path $onionRoot 'resources/java-package-template.md') -Pattern 'bootstrap --> application --> domain' 'Java onion template must include allowed dependency direction.'
+Assert-FileContains -Path (Join-Path $onionRoot 'resources/java-package-template.md') -Pattern 'publicapi' 'Java onion template must document publicapi package naming.'
+Assert-FileContains -Path (Join-Path $onionRoot 'resources/java-package-template.md') -Pattern 'application/service/inf/<Capability>Service\.java' 'Java onion template must define service interface placement.'
+Assert-FileContains -Path (Join-Path $onionRoot 'resources/java-package-template.md') -Pattern 'application/port/out/repos/<Capability>Repository\.java' 'Java onion template must define repository outbound port placement.'
+Assert-FileContains -Path (Join-Path $onionRoot 'resources/java-package-template.md') -Pattern 'SpringData<Capability>Repository\.java' 'Java onion template must define Spring Data repository placement.'
+Assert-FileContains -Path (Join-Path $onionRoot 'resources/java-package-template.md') -Pattern 'ServiceImpl' 'Java onion template must require service implementation suffix.'
+Assert-FileContains -Path (Join-Path $onionRoot 'resources/java-package-template.md') -Pattern 'Application must not import.*Spring Web.*Spring Data.*JPA' 'Java onion template must forbid framework leakage into application.'
+Assert-FileContains -Path (Join-Path $onionRoot 'SKILL.md') -Pattern 'tenant-admin-service' 'Onion skill must mention tenant-admin-service as the extracted reference source.'
+Assert-FileContains -Path (Join-Path $onionRoot 'SKILL.md') -Pattern 'Only create files that the capability actually needs' 'Onion skill must prevent empty placeholder generation.'
+Assert-FileContains -Path (Join-Path $onionRoot 'subagents/java-onion-design.md') -Pattern 'com\.example\.customer' 'Java onion subagent must include the provided example package shape.'
 
 $expectedOnionSubagents = @(
     'onion-boundary-review.md',
     'onion-domain-design.md',
     'onion-application-design.md',
     'onion-infrastructure-design.md',
-    'java-architecture-onion-design.md'
+    'java-onion-design.md'
 )
 foreach ($subagent in $expectedOnionSubagents) {
     Assert-True (Test-Path -LiteralPath (Join-Path $onionRoot "subagents/$subagent")) "Missing onion subagent: $subagent"
