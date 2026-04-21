@@ -68,32 +68,40 @@ commands = [
   "powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/test-validate-codex-structure.ps1"
 ]
 
-[test.core.skill-feedback]
+[test.skill.skill-maintenance-review-feedback]
+agents = ["skill-maintenance-review"]
+skills = ["skill-maintenance-review"]
 paths = [
-  "scripts/add-skill-feedback.py",
-  "scripts/test-add-skill-feedback.ps1",
+  "skills/skill-maintenance-review/scripts/add-skill-feedback.ps1",
+  "skills/skill-maintenance-review/scripts/add-skill-feedback.py",
+  "skills/skill-maintenance-review/scripts/test-add-skill-feedback.ps1",
   "scripts/lib/codex_config.py",
+  "skills/skill-maintenance-review/SKILL.md",
+  ".codex/agents/skill-maintenance-review.toml",
   ".codex/config.toml"
 ]
 commands = [
-  "powershell -ExecutionPolicy Bypass -File scripts/test-add-skill-feedback.ps1"
+  "powershell -ExecutionPolicy Bypass -File skills/skill-maintenance-review/scripts/test-add-skill-feedback.ps1"
 ]
 
-[test.core.skill-upgrade-cycle]
+[test.skill.skill-maintenance-review-cycle]
+agents = ["skill-maintenance-review"]
+skills = ["skill-maintenance-review"]
 paths = [
-  "scripts/run-skill-upgrade-cycle.py",
-  "scripts/apply-skill-upgrade-proposal.py",
-  "scripts/write-skill-upgrade-proposal.py",
-  "scripts/test-run-skill-upgrade-cycle.ps1",
-  "scripts/test-apply-skill-upgrade-proposal.ps1",
+  "skills/skill-maintenance-review/scripts/run-skill-upgrade-cycle.py",
+  "skills/skill-maintenance-review/scripts/apply-skill-upgrade-proposal.py",
+  "skills/skill-maintenance-review/scripts/write-skill-upgrade-proposal.ps1",
+  "skills/skill-maintenance-review/scripts/write-skill-upgrade-proposal.py",
+  "skills/skill-maintenance-review/scripts/test-run-skill-upgrade-cycle.ps1",
+  "skills/skill-maintenance-review/scripts/test-apply-skill-upgrade-proposal.ps1",
   ".codex/config.toml",
   ".codex/agents/skill-maintenance-review.toml",
   "skills/skill-maintenance-review",
   "skills/naming-rule-validate"
 ]
 commands = [
-  "powershell -ExecutionPolicy Bypass -File scripts/test-run-skill-upgrade-cycle.ps1",
-  "powershell -ExecutionPolicy Bypass -File scripts/test-apply-skill-upgrade-proposal.ps1",
+  "powershell -ExecutionPolicy Bypass -File skills/skill-maintenance-review/scripts/test-run-skill-upgrade-cycle.ps1",
+  "powershell -ExecutionPolicy Bypass -File skills/skill-maintenance-review/scripts/test-apply-skill-upgrade-proposal.ps1",
   "powershell -ExecutionPolicy Bypass -File skills/naming-rule-validate/scripts/test-naming-rule-validate.ps1"
 ]
 
@@ -115,11 +123,11 @@ paths = [
   "skills/architecture-onion-design",
   "skills/code-shared-design",
   "skills/java-analyze/SKILL.md",
+  "skills/java-analyze/scripts/test-architecture-skills.ps1",
   ".codex/agents/java-analyze.toml",
-  "scripts/test-architecture-skills.ps1"
 ]
 commands = [
-  "powershell -ExecutionPolicy Bypass -File scripts/test-architecture-skills.ps1"
+  "powershell -ExecutionPolicy Bypass -File skills/java-analyze/scripts/test-architecture-skills.ps1"
 ]
 
 [test.skill.diagram-generate]

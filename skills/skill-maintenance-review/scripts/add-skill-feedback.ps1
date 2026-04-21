@@ -1,5 +1,5 @@
 param(
-    [string]$Root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path,
+    [string]$Root = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path,
     [Parameter(Mandatory = $true)]
     [string]$AgentName,
     [string[]]$SkillNames = @(),
@@ -14,7 +14,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-. (Join-Path $PSScriptRoot 'lib/codex-config.ps1')
+. (Join-Path $Root 'scripts/lib/codex-config.ps1')
 
 if (
     [string]::IsNullOrWhiteSpace($CorrectNotes) -and

@@ -18,6 +18,11 @@ Use this skill before creating or renaming:
 - `.codex/hooks/*.ps1`
 - `scripts/*.(ps1|py)`
 
+Placement rule:
+
+- Root `scripts/` is only for shared project-wide scripts.
+- Skill-specific `scripts/tests/resources` belong under `skills/<skill>/`.
+
 The validator checks both filename/folder naming and declared metadata consistency:
 
 - agent `name = "..."` in `.toml` must match the filename
@@ -132,10 +137,9 @@ Current skill-only capabilities:
 
 Scripts and hooks may use command-style verbs when they are operational wrappers, for example:
 
-- `add-skill-feedback.ps1`
-- `add-skill-feedback.py`
-- `apply-skill-upgrade-proposal.ps1`
-- `apply-skill-upgrade-proposal.py`
+- `skills/skill-maintenance-review/scripts/add-skill-feedback.ps1`
+- `skills/skill-maintenance-review/scripts/add-skill-feedback.py`
+- `skills/skill-maintenance-review/scripts/apply-skill-upgrade-proposal.py`
 - `run-coverage-report.ps1`
 - `validate-workflow.ps1`
 - `test-naming-rule-validate.ps1`

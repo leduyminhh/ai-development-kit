@@ -35,6 +35,7 @@ Moi `.codex/agents/<name>.toml` nen:
 Runtime registration boundary:
 
 - `skills/` chua runtime skill assets.
+- `skills/<name>/{scripts,resources}` uu tien cho file chi thuoc mot skill.
 - `.codex/agents/*.toml` la agent entry points.
 - `.codex/config.toml` dang ky agent entry.
 - `skills/manifest.toml` la link contract de map skill <-> agent <-> UI metadata.
@@ -80,6 +81,7 @@ Agent hien co:
 - `test.skill`: chay khi skill/agent/path lien quan thay doi.
 
 Khi them file `*test*.ps1`, phai map vao dung mot group de validator chap nhan.
+Chi dat test hoac resource tai `scripts/` neu chung la shared cho toan repo; neu chi phuc vu mot skill thi dat duoi `skills/<skill>/`.
 
 Lenh:
 

@@ -6,7 +6,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-from lib.codex_config import CodexConfig, now_ho_chi_minh
+REPO_ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "lib"))
+
+from codex_config import CodexConfig, now_ho_chi_minh
 
 
 def write_state(root: Path, state_path: str, phase: str, status: str, reason: str = "", target_agent: str = "", proposal_file: str = "", feedback_count: int = 0, reviewer_agent: str = "") -> None:
@@ -31,7 +34,7 @@ def write_state(root: Path, state_path: str, phase: str, status: str, reason: st
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--root", default=str(Path(__file__).resolve().parent.parent))
+    parser.add_argument("--root", default=str(REPO_ROOT))
     args = parser.parse_args()
 
     root = Path(args.root).resolve()

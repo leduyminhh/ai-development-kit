@@ -15,6 +15,7 @@ try {
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.codex/agents') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.codex/hooks') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot 'skills/java-review/subagents') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $tempRoot 'skills/skill-maintenance-review/scripts') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot 'scripts') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot 'skills/workflow-validate/scripts') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot 'workflows/workflow-skill-maintenance-review') -Force | Out-Null
@@ -40,8 +41,8 @@ description: Valid workflow wrapper for skill maintenance review.
 
 # Workflow Skill Maintenance Review
 '@
-    Set-Content -LiteralPath (Join-Path $tempRoot 'scripts/add-skill-feedback.ps1') -Encoding utf8 -Value '# valid add script'
-    Set-Content -LiteralPath (Join-Path $tempRoot 'scripts/apply-skill-upgrade-proposal.ps1') -Encoding utf8 -Value '# valid apply script'
+    Set-Content -LiteralPath (Join-Path $tempRoot 'skills/skill-maintenance-review/scripts/add-skill-feedback.ps1') -Encoding utf8 -Value '# valid add script'
+    Set-Content -LiteralPath (Join-Path $tempRoot 'skills/skill-maintenance-review/scripts/apply-skill-upgrade-proposal.py') -Encoding utf8 -Value '# valid apply script'
     Set-Content -LiteralPath (Join-Path $tempRoot 'skills/workflow-validate/scripts/validate-workflow.ps1') -Encoding utf8 -Value '# valid skill-local script'
     New-Item -ItemType Directory -Path (Join-Path $tempRoot 'skills/diagram-wireframe-generate') -Force | Out-Null
     Set-Content -LiteralPath (Join-Path $tempRoot 'skills/diagram-wireframe-generate/SKILL.md') -Encoding utf8 -Value @'
@@ -99,7 +100,7 @@ description: Use when reviewing skill maintenance drift.
 '@
     Set-Content -LiteralPath (Join-Path $tempRoot 'skills/java-review/subagents/skill-drift-review.md') -Encoding utf8 -Value '# Valid drift subagent'
 
-    & powershell -NoProfile -ExecutionPolicy Bypass -File $validator -Root $tempRoot -PathList '.codex/agents/java-review.toml|.codex/agents/code-design-pattern.toml|skills/java-review/SKILL.md|skills/java-review/subagents/java-api-contract-review.md|skills/java-review/subagents/skill-drift-review.md|.codex/hooks/validate-workflow.ps1|scripts/run-workflow-validate.ps1|scripts/add-skill-feedback.ps1|scripts/apply-skill-upgrade-proposal.ps1|skills/workflow-validate/scripts/validate-workflow.ps1|skills/diagram-wireframe-generate/SKILL.md|skills/test-automation-validate/SKILL.md|skills/java-analyze/SKILL.md|skills/architecture-onion-design/SKILL.md|skills/code-design-pattern/SKILL.md|skills/skill-maintenance-review/SKILL.md|workflows/workflow-skill-maintenance-review/WORKFLOW.md' | Out-Null
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $validator -Root $tempRoot -PathList '.codex/agents/java-review.toml|.codex/agents/code-design-pattern.toml|skills/java-review/SKILL.md|skills/java-review/subagents/java-api-contract-review.md|skills/java-review/subagents/skill-drift-review.md|.codex/hooks/validate-workflow.ps1|scripts/run-workflow-validate.ps1|skills/skill-maintenance-review/scripts/add-skill-feedback.ps1|skills/skill-maintenance-review/scripts/apply-skill-upgrade-proposal.py|skills/workflow-validate/scripts/validate-workflow.ps1|skills/diagram-wireframe-generate/SKILL.md|skills/test-automation-validate/SKILL.md|skills/java-analyze/SKILL.md|skills/architecture-onion-design/SKILL.md|skills/code-design-pattern/SKILL.md|skills/skill-maintenance-review/SKILL.md|workflows/workflow-skill-maintenance-review/WORKFLOW.md' | Out-Null
     Assert-True ($LASTEXITCODE -eq 0) 'Naming validator should pass valid agent, skill, subagent, workflow, hook, and script names.'
 
     Set-Content -LiteralPath (Join-Path $tempRoot '.codex/agents/java-reviewer.toml') -Encoding utf8 -Value 'name = "java-reviewer"'

@@ -30,6 +30,13 @@ If audit or feedback flows are not yet implemented, perform a focused static rev
 ## Resource Map
 
 - `subagents/skill-drift-review.md`: classify repeated patterns, drift, and safe patch scope.
+- `scripts/test-run-skill-upgrade-cycle.ps1`: validate proposal generation flow from feedback intake to pending approval output.
+- `scripts/test-apply-skill-upgrade-proposal.ps1`: validate approval gate and in-scope apply behavior for approved proposals.
+
+## Validation Commands
+
+- `powershell -ExecutionPolicy Bypass -File skills/skill-maintenance-review/scripts/test-run-skill-upgrade-cycle.ps1`
+- `powershell -ExecutionPolicy Bypass -File skills/skill-maintenance-review/scripts/test-apply-skill-upgrade-proposal.ps1`
 
 ## Output Format
 

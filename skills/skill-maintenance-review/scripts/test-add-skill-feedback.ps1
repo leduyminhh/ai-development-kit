@@ -1,4 +1,4 @@
-param([string]$Root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path)
+param([string]$Root = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path)
 
 $ErrorActionPreference = 'Stop'
 

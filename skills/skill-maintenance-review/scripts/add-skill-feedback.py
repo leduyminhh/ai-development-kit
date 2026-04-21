@@ -5,12 +5,15 @@ import json
 import sys
 from pathlib import Path
 
-from lib.codex_config import CodexConfig, now_ho_chi_minh
+REPO_ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "lib"))
+
+from codex_config import CodexConfig, now_ho_chi_minh
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--root", default=str(Path(__file__).resolve().parent.parent))
+    parser.add_argument("--root", default=str(REPO_ROOT))
     parser.add_argument("--agent-name", required=True)
     parser.add_argument("--skill-names", nargs="*", default=[])
     parser.add_argument("--outcome", choices=["correct", "wrong", "mixed"], default="mixed")

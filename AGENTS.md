@@ -19,6 +19,8 @@ Runtime skills:
 - `skills/<name>/SKILL.md` contains a single discoverable skill.
 - Keep skill folders flat under `skills/`; do not nest runtime skills under domain folders.
 - Use descriptive skill names such as `java-analyze` for domain grouping.
+- Place `scripts/`, `tests/`, and `resources/` under `skills/<name>/` when they are owned by one skill only.
+- Reserve root `scripts/` for shared project-wide helpers, selectors, and runners used across multiple skills.
 
 Documents and reports:
 - `docs/specs/` stores approved design specifications.
@@ -83,6 +85,8 @@ Strict prohibitions:
 - Use selected tests instead of running every test by default:
   `powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -FromGit`
 - When adding any `*test*.ps1` file, map it in `.codex/test-map.toml` under exactly one group: `test.always`, `test.core`, or `test.skill`.
+- Assign one ownership role for each new `scripts/`, `tests/`, or `resources/` artifact:
+  `shared-project` for root `scripts/`; `skill-owned` for `skills/<skill>/...`.
 - Keep `AGENTS.md` concise, ideally under 150 lines.
 - Use `.codex/config.toml` for deterministic settings such as model, sandbox, approval policy, profile, and agent registration.
 
