@@ -10,9 +10,9 @@ Ownership rule:
 ## Vai Tro
 
 - Cai dat lien ket skill vao discovery path.
-- Chay agent co audit logging.
 - Resolve output file theo cau hinh.
 - Resolve va chay selected tests.
+- Chua service runtime de nhan va dispatch project hook events qua local TCP.
 - Cung cap test cho script, hook, validator va routing.
 - Chua library PowerShell dung chung trong `scripts/lib/`.
 
@@ -21,7 +21,7 @@ Ownership rule:
 | File | Chuc nang |
 |---|---|
 | `install-skill-link.ps1` | Tao junction/symlink tu Codex skill discovery path toi `skills` cua repo. |
-| `invoke-agent-audited.ps1` | Boc mot command bang audit hook, doc agent config va giu exit code cua command goc. |
+| `hook-service.ps1` | Start, stop, reload, status cho project hook runtime; service lang nghe local API va ghi runtime state/log vao `reports/audit/runtime/yyyyMMdd/`. |
 | `resolve-output-file.ps1` | Resolve duong dan output theo `.codex/config.toml`, subpath, filename pattern va timezone. |
 | `resolve-test-plan.ps1` | Chon test command tu `.codex/test-map.toml` theo changed files, activated skills hoac agent names. |
 | `test-selected.ps1` | Chay selected test plan; dung `-FromGit` de dua vao changed files/untracked files. |
@@ -39,7 +39,7 @@ Ownership rule:
 | File | Chuc nang |
 |---|---|
 | `test-codex-pwsh-lib.ps1` | Kiem tra PowerShell helper library. |
-| `test-invoke-agent-audited.ps1` | Kiem tra wrapper audited runner va negative cases. |
+| `test-hook-service.ps1` | Kiem tra hook service runtime: start, health, event dispatch, auto reload, retention va stop. |
 | `test-progressive-disclosure.ps1` | Kiem tra cac skill lon phai defer mapping rong sang selector resources. |
 | `test-resolve-output-file.ps1` | Kiem tra output path resolver. |
 | `test-test-map.ps1` | Kiem tra selected test routing va yeu cau map `*test*.ps1`. |
@@ -65,4 +65,10 @@ Xem test plan kem commands:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/resolve-test-plan.ps1 -FromGit -IncludeCommands
+```
+
+Khoi dong hook service runtime:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/hook-service.ps1 -Action start
 ```

@@ -44,10 +44,12 @@ function Get-AgentRegistrationBlock {
         [string]$AgentName,
         [string]$AgentPath,
         [bool]$ReadOnly,
-        [string]$Summary
+        [string]$Summary,
+        [bool]$HooksProjectEnabled = $false
     )
 
     $readOnlyValue = if ($ReadOnly) { 'true' } else { 'false' }
+    $hooksProjectEnabledValue = if ($HooksProjectEnabled) { 'true' } else { 'false' }
     if ([string]::IsNullOrWhiteSpace($Summary)) {
         $Summary = 'Registered Codex agent'
     }
@@ -58,6 +60,7 @@ function Get-AgentRegistrationBlock {
 path = "$AgentPath"
 read_only = $readOnlyValue
 enabled = true
+hooks_project_enabled = $hooksProjectEnabledValue
 "@
 }
 
@@ -67,10 +70,11 @@ function Sync-AgentRegistration {
         [string]$AgentName,
         [string]$AgentPath,
         [bool]$ReadOnly,
-        [string]$Summary
+        [string]$Summary,
+        [bool]$HooksProjectEnabled = $false
     )
 
-    $block = Get-AgentRegistrationBlock -AgentName $AgentName -AgentPath $AgentPath -ReadOnly $ReadOnly -Summary $Summary
+    $block = Get-AgentRegistrationBlock -AgentName $AgentName -AgentPath $AgentPath -ReadOnly $ReadOnly -Summary $Summary -HooksProjectEnabled $HooksProjectEnabled
     $sectionPattern = "(?ms)(?:^#\s*agents\.$([regex]::Escape($AgentName)).*?\r?\n)?^\[agents\.$([regex]::Escape($AgentName))\]\s*.*?(?=^#\s|\z)"
 
     if ([regex]::IsMatch($ConfigText, $sectionPattern)) {
@@ -121,7 +125,7 @@ requireConfirmationForProtectedPaths = true
 "docs/plans" = "md"
 "docs/reports" = "md"
 "reports" = "md"
-"audit/agent" = "log"
+"reports/audit" = "log"
 
 # documentation.writer Documentation output policy
 [documentation.writer]
@@ -138,13 +142,21 @@ defaultExtension = "puml"
 createRootOnConfirm = true
 requireConfirmation = true
 
-# audit.agent Agent execution logging
-[audit.agent]
+# hooks.project Project event logging
+[hooks.project]
 enabled = true
-path = "audit/agent"
+host = "127.0.0.1"
+port = 42890
+path = "reports/audit"
+runtimePath = "reports/audit/runtime"
+filenamePattern = "yyyyMMdd_filename"
 remainingDays = 30
 format = "text"
-hook = ".codex/hooks/write-agent-audit.ps1"
+serviceName = "codex-workflow-kit"
+defaultLogger = "codex.project"
+defaultTimezone = "Asia/Saigon"
+agentHook = ".codex/hooks/log-agent-event.ps1"
+reloadOnConfigChange = true
 
 # guards Safety enforcement
 [guards]
@@ -290,10 +302,11 @@ if (Test-Path -LiteralPath $codexAgentsRoot) {
             }
 
             $agentRegistrations.Add([pscustomobject]@{
-                Name     = $agentName
-                Path     = ".codex/agents/$($file.Name)"
-                ReadOnly = (Test-AgentReadOnly -TomlText $content)
-                Summary  = (Get-AgentRegistrationSummary -AgentName $agentName)
+                Name                = $agentName
+                Path                = ".codex/agents/$($file.Name)"
+                ReadOnly            = (Test-AgentReadOnly -TomlText $content)
+                Summary             = (Get-AgentRegistrationSummary -AgentName $agentName)
+                HooksProjectEnabled = $false
             })
         }
     }
@@ -346,7 +359,7 @@ if (Test-Path -LiteralPath $configPath) {
         if ($config -match $registrationPattern) {
             $findings.Add((New-Finding 'pass' "Agent config registration exists: $($registration.Name)"))
         } elseif ($Fix) {
-            $config = Sync-AgentRegistration -ConfigText $config -AgentName $registration.Name -AgentPath $registration.Path -ReadOnly $registration.ReadOnly -Summary $registration.Summary
+            $config = Sync-AgentRegistration -ConfigText $config -AgentName $registration.Name -AgentPath $registration.Path -ReadOnly $registration.ReadOnly -Summary $registration.Summary -HooksProjectEnabled $registration.HooksProjectEnabled
             $findings.Add((New-Finding 'pass' "Agent config registration synced: $($registration.Name)"))
         } else {
             $findings.Add((New-Finding 'warning' "Agent config registration missing: $($registration.Name). Run validator with -Fix to sync .codex/config.toml."))
@@ -361,7 +374,7 @@ if (Test-Path -LiteralPath $configPath) {
         New-Item -ItemType Directory -Path (Split-Path -Parent $configPath) -Force | Out-Null
         $config = Get-DefaultConfigText
         foreach ($registration in $agentRegistrations) {
-            $config = Sync-AgentRegistration -ConfigText $config -AgentName $registration.Name -AgentPath $registration.Path -ReadOnly $registration.ReadOnly -Summary $registration.Summary
+            $config = Sync-AgentRegistration -ConfigText $config -AgentName $registration.Name -AgentPath $registration.Path -ReadOnly $registration.ReadOnly -Summary $registration.Summary -HooksProjectEnabled $registration.HooksProjectEnabled
         }
         Set-Content -LiteralPath $configPath -Value $config -Encoding utf8
         $findings.Add((New-Finding 'pass' '.codex/config.toml was created and synced from the standard scaffold.'))

@@ -17,8 +17,12 @@ Assert-True (-not ((@($onion.Command) -join "`n") -match 'test-automation-valida
 $automation = @((& $resolver -Root $Root -IncludeCommands -AgentName 'test-automation-validate') | ConvertFrom-Json)
 Assert-True ((@($automation.Command) -join "`n") -match 'test-automation-validate-strategy\.ps1') 'Automation agent should select test-automation-validate strategy tests.'
 
-$audit = @((& $resolver -Root $Root -IncludeCommands -ChangedFiles '.codex/hooks/write-agent-audit.ps1') | ConvertFrom-Json)
-Assert-True ((@($audit.Command) -join "`n") -match '\.codex/hooks/test-write-agent-audit\.ps1') 'Audit hook change should select audit hook tests.'
+$hook = @((& $resolver -Root $Root -IncludeCommands -ChangedFiles '.codex/hooks/log-agent-event.ps1') | ConvertFrom-Json)
+Assert-True ((@($hook.Command) -join "`n") -match '\.codex/hooks/test-log-agent-event\.ps1') 'Project hook change should select hook tests.'
+Assert-True ((@($hook.Command) -join "`n") -match 'scripts/test-hook-service\.ps1') 'Project hook change should select hook service tests.'
+
+$hookService = @((& $resolver -Root $Root -IncludeCommands -ChangedFiles 'scripts/hook-service.ps1') | ConvertFrom-Json)
+Assert-True ((@($hookService.Command) -join "`n") -match 'scripts/test-hook-service\.ps1') 'Hook service change should select hook service tests.'
 
 $testFiles = @(Get-ChildItem -LiteralPath $Root -Recurse -File -Filter '*test*.ps1' |
     Where-Object { $_.FullName -notmatch '\\.git\\' } |

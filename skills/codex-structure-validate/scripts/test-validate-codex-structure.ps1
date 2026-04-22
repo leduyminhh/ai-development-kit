@@ -108,6 +108,7 @@ Use the read-only-agent skill.
     Assert-True ($config.Contains('path = ".codex/agents/new-agent.toml"')) 'New agent path should be synced.'
     Assert-True ($config.Contains('[agents.read-only-agent]')) 'Read-only agent should be registered in config.'
     Assert-True ($config.Contains('path = ".codex/agents/read-only-agent.toml"')) 'Read-only agent path should be synced.'
+    Assert-True ($config.Contains('hooks_project_enabled = false')) 'Validator should sync hooks_project_enabled = false by default for agents.'
     Assert-True ($config.Contains("read_only = true`r`nenabled = true") -or $config.Contains("read_only = true`nenabled = true")) 'Read-only agent should be synced as read_only true.'
     Assert-True ($config.Contains("read_only = false`r`nenabled = true") -or $config.Contains("read_only = false`nenabled = true")) 'Writable agent should be synced as read_only false.'
 
@@ -119,11 +120,17 @@ Use the read-only-agent skill.
     $emptyConfig = Get-Content -LiteralPath $emptyConfigPath -Raw
     Assert-True ($emptyConfig.Contains('[environment]')) 'Generated config should include environment section.'
     Assert-True ($emptyConfig.Contains('[validation]')) 'Generated config should include validation section.'
-    Assert-True ($emptyConfig.Contains('[audit.agent]')) 'Generated config should include audit agent section.'
+    Assert-True ($emptyConfig.Contains('[hooks.project]')) 'Generated config should include project hooks section.'
     Assert-True ($emptyConfig.Contains('[output.file]')) 'Generated config should include output file section.'
     Assert-True ($emptyConfig.Contains('[output.file.extensionsBySubpath]')) 'Generated config should include output extension mapping.'
     Assert-True ($emptyConfig.Contains('"docs/diagram" = "puml"')) 'Generated config should map docs/diagram to puml.'
-    Assert-True ($emptyConfig.Contains('"audit/agent" = "log"')) 'Generated config should map audit/agent to log.'
+    Assert-True ($emptyConfig.Contains('"reports/audit" = "log"')) 'Generated config should map reports/audit to log.'
+    Assert-True ($emptyConfig.Contains('host = "127.0.0.1"')) 'Generated config should include hook service host.'
+    Assert-True ($emptyConfig.Contains('port = 42890')) 'Generated config should include hook service port.'
+    Assert-True ($emptyConfig.Contains('path = "reports/audit"')) 'Generated config should write project hook logs into reports/audit.'
+    Assert-True ($emptyConfig.Contains('runtimePath = "reports/audit/runtime"')) 'Generated config should write hook runtime files into reports/audit/runtime.'
+    Assert-True ($emptyConfig.Contains('agentHook = ".codex/hooks/log-agent-event.ps1"')) 'Generated config should point to the agent hook wrapper.'
+    Assert-True ($emptyConfig.Contains('reloadOnConfigChange = true')) 'Generated config should enable hook config auto reload.'
     Assert-True ($emptyConfig.Contains('[diagram.writer]')) 'Generated config should include diagram writer section.'
 
     Write-Output 'validate-codex-structure tests passed'

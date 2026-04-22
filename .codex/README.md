@@ -17,10 +17,10 @@ Thu muc `.codex/` chua cau hinh project-local cho Codex workflow kit: agent entr
 
 | Path | Chuc nang |
 |---|---|
-| `config.toml` | Cau hinh deterministic: ngon ngu, protected paths, validation command, output writer, audit, guards, agent registrations. |
+| `config.toml` | Cau hinh deterministic: ngon ngu, protected paths, validation command, output writer, project hooks, guards, agent registrations. |
 | `test-map.toml` | Map selected tests theo changed paths, activated skills va agent names. |
 | `agents/*.toml` | Entry point cua agent: name, description, model, reasoning, sandbox, developer instructions. |
-| `hooks/*.ps1` | Hook deterministic, hien co dung cho audit logging. |
+| `hooks/*.ps1` | Hook deterministic cap project; wrapper event dung chung logic trong `hooks/lib/`. |
 | `mcp/` | Placeholder cho MCP config/template neu repo can. |
 
 ## Agents
@@ -67,10 +67,16 @@ Agent hien co:
 | `[output.file]` | Naming policy cho generated output. |
 | `[documentation.writer]` | Policy ghi documentation. |
 | `[diagram.writer]` | Policy ghi PlantUML diagram output. |
-| `[audit.agent]` | Audit log path, format, retention va hook. |
+| `[hooks.project]` | Project event log path, filename pattern, format, retention, service name va event wrappers. |
 | `[skill_upgrade]` | Cau hinh chu ky review/feedback/proposal cho co che tu de xuat nang cap skill. |
 | `[guards]` | Safety guards cho destructive/protected actions. |
 | `[agents.<name>]` | Dang ky agent config path, read_only va enabled. |
+
+Hook gating:
+
+- `hooks.project.enabled = true` la master switch cho project hook framework.
+- `agents.<name>.hooks_project_enabled = false` la mac dinh an toan; chi agent nao bat `true` moi duoc ghi event log.
+- `hooks.project.host`, `port`, `runtimePath`, `reloadOnConfigChange` dieu khien hook service runtime.
 
 ## Test Map
 
@@ -93,10 +99,27 @@ powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -FromGit
 
 | File | Chuc nang |
 |---|---|
-| `write-agent-audit.ps1` | Ghi audit row cho mot agent execution. |
-| `test-write-agent-audit.ps1` | Test format, retention va output behavior cua audit hook. |
+| `log-agent-event.ps1` | Ghi agent execution event bang framework hook chung cua project. |
+| `test-log-agent-event.ps1` | Test format, retention va output behavior cua agent event hook. |
 
-Hook khong tu dong chay chi vi xuat hien trong config. Dung `scripts/invoke-agent-audited.ps1` khi can audit deterministic.
+Hook khong tu dong chay chi vi xuat hien trong config. Dung wrapper event trong `.codex/hooks/` khi can ghi deterministic event log, hoac start `scripts/hook-service.ps1` de nhan local API events va dispatch theo gating trong `.codex/config.toml`.
+
+Runtime service:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/hook-service.ps1 -Action start
+powershell -ExecutionPolicy Bypass -File scripts/hook-service.ps1 -Action status
+powershell -ExecutionPolicy Bypass -File scripts/hook-service.ps1 -Action reload
+powershell -ExecutionPolicy Bypass -File scripts/hook-service.ps1 -Action stop
+```
+
+Khi dang chay, service lang nghe `http://127.0.0.1:<port>` va ho tro:
+
+- `GET /health`
+- `GET /status`
+- `POST /reload`
+- `POST /stop`
+- `POST /events`
 
 ## Quy Tac Cap Nhat
 

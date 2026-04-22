@@ -33,24 +33,17 @@ commands = [
   "powershell -ExecutionPolicy Bypass -File scripts/test-resolve-output-file.ps1"
 ]
 
-[test.core.audit-hook]
+[test.core.project-hook]
 paths = [
-  ".codex/hooks/write-agent-audit.ps1",
-  ".codex/config.toml"
+  ".codex/hooks/log-agent-event.ps1",
+  ".codex/hooks/lib",
+  ".codex/config.toml",
+  "scripts/hook-service.ps1",
+  "scripts/test-hook-service.ps1"
 ]
 commands = [
-  "powershell -ExecutionPolicy Bypass -File .codex/hooks/test-write-agent-audit.ps1"
-]
-
-[test.core.audited-runner]
-paths = [
-  "scripts/invoke-agent-audited.ps1",
-  ".codex/hooks/write-agent-audit.ps1",
-  ".codex/agents",
-  ".codex/config.toml"
-]
-commands = [
-  "powershell -ExecutionPolicy Bypass -File scripts/test-invoke-agent-audited.ps1"
+  "powershell -ExecutionPolicy Bypass -File .codex/hooks/test-log-agent-event.ps1",
+  "powershell -ExecutionPolicy Bypass -File scripts/test-hook-service.ps1"
 ]
 
 [test.core.validator]

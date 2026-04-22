@@ -38,32 +38,32 @@ The scaffold is organized in six layers:
 
 - Step 1 `codex-agents-md`: `AGENTS.md` keeps repository-level guidance concise.
 - Step 2 `codex.config`: `.codex/config.toml` stores deterministic behavior, validation, audit, guards, and agent registration.
-- Step 3 `codex-hook`: `.codex/hooks/` stores hook contracts such as agent execution audit logging.
+- Step 3 `codex-hook`: `.codex/hooks/` stores project hook wrappers and shared hook logic in `lib/`.
 - Step 4 `codex-mcp`: `.codex/mcp/` stores MCP configuration snippets or templates.
 - Step 5 `codex-skill`: `skills/<name>/SKILL.md` stores reusable runtime procedures.
 - Step 6 `codex-subagent`: `skills/<name>/subagents/` stores focused subagent prompts owned by each skill.
 
 When `-Fix` is used, `.codex/config.toml` is synchronized from `.codex/agents/*.toml`, and missing scaffold directories are created with `.gitkeep` markers when needed.
 
-## Audited Agent Runner
+## Project Event Hook
 
-Codex does not automatically execute custom keys such as `[audit.agent].hook` from `.codex/config.toml`. Use the audited wrapper when a workflow needs deterministic audit rows:
+Codex does not automatically execute custom keys from `.codex/config.toml`. Use the project hook wrappers when a workflow needs deterministic event rows:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/invoke-agent-audited.ps1 `
+powershell -ExecutionPolicy Bypass -File .codex/hooks/log-agent-event.ps1 `
   -AgentName react-code-generate `
   -Model gpt-5.4 `
   -Reasoning medium `
-  -SummaryJob "Build checkout UI" `
-  -Command "npm test"
+  -Message "Build checkout UI" `
+  -Status completed
 ```
 
-The wrapper writes one compact text row per execution through `.codex/hooks/write-agent-audit.ps1`, preserving the wrapped command exit code. The default audit file name is `yyMMdd_action.log`.
+The wrapper writes one compact text row per execution through the shared library in `.codex/hooks/lib/`. The default event file name is `yyyyMMdd_filename.log` under `reports/audit/`, and the hook runs only when `[hooks.project].enabled = true` and `agents.<name>.hooks_project_enabled = true`.
 
-Log format follows a Logback-like shape with logfmt fields after `|`:
+Log format follows a Log4j-like shape with logfmt fields after `|`:
 
 ```text
-2026-04-15T07:00:00+07:00 [INFO] [codex-agent] [react-code-generate] [session-id] [-] [-] codex.agent.audit - Build checkout UI | timestamp=2026-04-15T00:05:00Z level=info service=codex-agent eventName=agent.execution eventVersion=1.0 sessionId=session-id agentName=react-code-generate model=gpt-5.4 reasoning=medium summaryJob="Build checkout UI" startTime=2026-04-15T07:00:00+07:00 endTime=2026-04-15T07:05:00+07:00 startAt=2026-04-15T00:00:00Z endAt=2026-04-15T00:05:00Z durationMs=300000 status=completed cost=0 traceId=- spanId=- timezone=Asia/Ho_Chi_Minh schema=codex.agent.audit.v1
+2026-04-15T07:00:00+07:00 [INFO] [codex-workflow-kit] [react-code-generate] [trace-111] codex.project.agent - Build checkout UI | timestamp=2026-04-15T00:05:00Z level=info service=codex-workflow-kit eventName=agent.execution eventVersion=1.0 sessionId=session-id sourceType=agent sourceName=react-code-generate agentName=react-code-generate model=gpt-5.4 reasoning=medium message="Build checkout UI" status=completed startTime=2026-04-15T07:00:00+07:00 endTime=2026-04-15T07:05:00+07:00 startAt=2026-04-15T00:00:00Z endAt=2026-04-15T00:05:00Z durationMs=300000 cost=0 traceId=trace-111 spanId=- timezone=Asia/Saigon schema=codex.project.event.v1
 ```
 
 | Skill | Chuc nang |
@@ -82,7 +82,7 @@ Log format follows a Logback-like shape with logfmt fields after `|`:
 | `architecture-onion-design` | Huong dan Onion Architecture va boundary review. |
 | `code-shared-design` | Thiet ke shared internal API, contract, shared logic module. |
 
-This keeps each row as a string while preserving the earlier audit fields for future Grafana Loki parsing.
+This keeps each row as a string while preserving structured fields for future parsing and extension to validation or notification events.
 
 ## Core Validator
 

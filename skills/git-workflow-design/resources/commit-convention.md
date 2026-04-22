@@ -118,7 +118,7 @@ Impact:
 - De doi chieu audit theo ngay van hanh.
 
 Verify:
-- Chay .codex/hooks/test-write-agent-audit.ps1 thanh cong.
+- Chay .codex/hooks/test-log-agent-event.ps1 thanh cong.
 
 Refs: N/A
 ```

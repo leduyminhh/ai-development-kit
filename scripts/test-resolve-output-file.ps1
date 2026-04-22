@@ -25,7 +25,7 @@ requireConfirmationForProtectedPaths = true
 "docs/diagram/sequence" = "plantuml"
 "docs/specs" = "md"
 "reports" = "md"
-"audit/agent" = "log"
+"reports/audit" = "log"
 
 [diagram.writer]
 rootPath = "docs/diagram"
@@ -51,12 +51,12 @@ requireConfirmation = true
         -Now '2026-04-15T18:31:00+07:00'
     Assert-Equal 'docs/specs/payment-flow-spec_20260415_1831.md' $specPath 'Specs should use md extension from subpath mapping.'
 
-    $auditPath = & powershell -NoProfile -ExecutionPolicy Bypass -File $script `
+    $eventPath = & powershell -NoProfile -ExecutionPolicy Bypass -File $script `
         -Root $tempRoot `
-        -Subpath 'audit/agent' `
-        -Filename 'Agent Run' `
+        -Subpath 'reports/audit' `
+        -Filename 'Project Event' `
         -Now '2026-04-15T18:32:00+07:00'
-    Assert-Equal 'audit/agent/agent-run_20260415_1832.log' $auditPath 'Audit output should use log extension from subpath mapping.'
+    Assert-Equal 'reports/audit/project-event_20260415_1832.log' $eventPath 'Project event output should use log extension from subpath mapping.'
 
     $overridePath = & powershell -NoProfile -ExecutionPolicy Bypass -File $script `
         -Root $tempRoot `
