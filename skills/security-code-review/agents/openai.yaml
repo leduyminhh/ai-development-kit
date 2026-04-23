@@ -1,0 +1,4 @@
+interface:
+  display_name: "Security Code Review"
+  short_description: "Review code for security risks"
+  default_prompt: "Use $security-code-review to review source code, diffs, configs, and dependencies for security risks using OWASP, ASVS, and CWE guidance."

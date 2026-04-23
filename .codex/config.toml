@@ -156,3 +156,9 @@ path = ".codex/agents/skill-maintenance-review.toml"
 read_only = false
 enabled = true
 hooks_project_enabled = true
+
+[agents.security-code-review]
+path = ".codex/agents/security-code-review.toml"
+read_only = false
+enabled = true
+hooks_project_enabled = true

@@ -33,6 +33,7 @@ function Get-AgentRegistrationSummary {
         'doc-write' { return 'Documentation writer agent' }
         'git-workflow-design' { return 'Git workflow agent' }
         'java-analyze' { return 'Java architecture agent' }
+        'security-code-review' { return 'Security review agent' }
         'test-qa-review' { return 'QA reviewer agent' }
         'react-code-generate' { return 'React implementation agent' }
         default { return 'Registered Codex agent' }

@@ -98,9 +98,19 @@ description: Use when reviewing skill maintenance drift.
 
 # Skill Maintenance Review
 '@
+    New-Item -ItemType Directory -Path (Join-Path $tempRoot 'skills/security-code-review') -Force | Out-Null
+    Set-Content -LiteralPath (Join-Path $tempRoot 'skills/security-code-review/SKILL.md') -Encoding utf8 -Value @'
+---
+name: security-code-review
+description: Use when reviewing source code security.
+---
+
+# Security Code Review
+'@
+    Set-Content -LiteralPath (Join-Path $tempRoot '.codex/agents/security-code-review.toml') -Encoding utf8 -Value 'name = "security-code-review"'
     Set-Content -LiteralPath (Join-Path $tempRoot 'skills/java-review/subagents/skill-drift-review.md') -Encoding utf8 -Value '# Valid drift subagent'
 
-    & powershell -NoProfile -ExecutionPolicy Bypass -File $validator -Root $tempRoot -PathList '.codex/agents/java-review.toml|.codex/agents/code-design-pattern.toml|skills/java-review/SKILL.md|skills/java-review/subagents/java-api-contract-review.md|skills/java-review/subagents/skill-drift-review.md|.codex/hooks/validate-workflow.ps1|scripts/run-workflow-validate.ps1|skills/skill-maintenance-review/scripts/add-skill-feedback.ps1|skills/skill-maintenance-review/scripts/apply-skill-upgrade-proposal.py|skills/workflow-validate/scripts/validate-workflow.ps1|skills/diagram-wireframe-generate/SKILL.md|skills/test-automation-validate/SKILL.md|skills/java-analyze/SKILL.md|skills/architecture-onion-design/SKILL.md|skills/code-design-pattern/SKILL.md|skills/skill-maintenance-review/SKILL.md|workflows/workflow-skill-maintenance-review/WORKFLOW.md' | Out-Null
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $validator -Root $tempRoot -PathList '.codex/agents/java-review.toml|.codex/agents/code-design-pattern.toml|.codex/agents/security-code-review.toml|skills/java-review/SKILL.md|skills/java-review/subagents/java-api-contract-review.md|skills/java-review/subagents/skill-drift-review.md|.codex/hooks/validate-workflow.ps1|scripts/run-workflow-validate.ps1|skills/skill-maintenance-review/scripts/add-skill-feedback.ps1|skills/skill-maintenance-review/scripts/apply-skill-upgrade-proposal.py|skills/workflow-validate/scripts/validate-workflow.ps1|skills/diagram-wireframe-generate/SKILL.md|skills/test-automation-validate/SKILL.md|skills/java-analyze/SKILL.md|skills/architecture-onion-design/SKILL.md|skills/code-design-pattern/SKILL.md|skills/skill-maintenance-review/SKILL.md|skills/security-code-review/SKILL.md|workflows/workflow-skill-maintenance-review/WORKFLOW.md' | Out-Null
     Assert-True ($LASTEXITCODE -eq 0) 'Naming validator should pass valid agent, skill, subagent, workflow, hook, and script names.'
 
     Set-Content -LiteralPath (Join-Path $tempRoot '.codex/agents/java-reviewer.toml') -Encoding utf8 -Value 'name = "java-reviewer"'

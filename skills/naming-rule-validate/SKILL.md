@@ -63,6 +63,7 @@ Approved domains:
 | `pattern` | design pattern |
 | `protected` | protected path policy |
 | `react` | React frontend |
+| `security` | Security review and secure coding |
 | `skill` | skill structure |
 | `sql` | SQL or persistence query |
 | `test` | testing |
@@ -125,6 +126,7 @@ Current approved agents:
 - `git-workflow-design`
 - `java-analyze`
 - `react-code-generate`
+- `security-code-review`
 - `skill-maintenance-review`
 - `test-automation-validate`
 - `test-qa-review`

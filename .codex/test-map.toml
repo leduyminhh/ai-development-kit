@@ -134,3 +134,14 @@ paths = [
 commands = [
   "powershell -ExecutionPolicy Bypass -File scripts/test-resolve-output-file.ps1"
 ]
+
+[test.skill.security-code-review]
+agents = ["security-code-review"]
+skills = ["security-code-review"]
+paths = [
+  "skills/security-code-review",
+  ".codex/agents/security-code-review.toml"
+]
+commands = [
+  "powershell -ExecutionPolicy Bypass -File skills/security-code-review/scripts/test-security-code-review.ps1"
+]

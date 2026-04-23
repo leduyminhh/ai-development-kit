@@ -69,6 +69,7 @@ function Test-CapabilityName {
     $domains = @(
         'agent', 'architecture', 'code', 'codex', 'config', 'contract', 'diagram',
         'doc', 'git', 'hook', 'java', 'naming', 'onion', 'pattern', 'protected',
+        'security',
         'react', 'skill', 'sql', 'test', 'workflow'
     )
     $qualifiers = @($domains + @(
