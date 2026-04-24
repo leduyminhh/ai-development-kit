@@ -7,12 +7,16 @@ type(scope): short summary
 
 What changed:
 - ...
+  + ...
+  + ...
 - ...
 - ...
 Why changed:
 - ...
+  + ...
 Important notes / breaking impact:
 - ...
+  + ...
 ```
 
 If the user does not provide a message, generate both title and body from the staged or intended diff. Write the body in Vietnamese with diacritics unless repository instructions say otherwise.
@@ -57,28 +61,49 @@ Write in Vietnamese with diacritics using the sections below. Keep it concise, b
 ```text
 What changed:
 - ...
+  + ...
+  + ...
 - ...
 - ...
 Why changed:
 - ...
+  + ...
 Important notes / breaking impact:
 - ...
+  + ...
 ```
 
 Rules:
 
-- `What changed` is required and must contain at least 3 bullet rows.
-- `Why changed` is required and must contain at least 1 bullet row.
+- `What changed` is required and must contain at least 3 main bullet rows.
+- `Why changed` is required and must contain at least 1 main bullet row.
 - `Important notes / breaking impact` is optional.
+- Each main bullet may include extra detail lines prefixed with `+`.
+- Use `+` detail lines only when they add useful context, not to restate the parent bullet.
+- Prefer 0-3 detail lines under one main bullet.
 - If `Important notes / breaking impact` appears, each bullet must contain a real notable note, migration concern, compatibility impact, or breaking change.
 - Prefer 1-3 bullets for `Why changed`.
 - Prefer 1-3 bullets for `Important notes / breaking impact` when it is needed.
-- Keep each bullet under 140 characters when feasible.
+- Keep each main bullet under 140 characters when feasible.
+- Keep each `+` detail line short and specific.
 - Use proper Vietnamese diacritics. Do not write body bullets in ASCII-only Vietnamese.
 - Avoid background explanation, implementation narration, and repeated file lists.
 - Focus only on what changed, why it changed, and notable impact.
 - Do not add the `Important notes / breaking impact` section just to say there is no impact.
 - Do not include unrelated files or changes in the body.
+
+## Commit Splitting
+
+- When the working tree contains multiple independent change groups, split them into separate commits automatically.
+- Group by change goal rather than by file type alone.
+- Keep code, tests, and small supporting docs together if they belong to one logical change.
+- Separate commits when one diff mixes unrelated intents such as:
+  - repo structure refactor
+  - documentation rule updates
+  - bug fixes
+  - test-only changes
+  - configuration-only changes
+- Prefer fewer clean commits over one overloaded commit, but avoid artificial micro-commits with no review value.
 
 ## Encoding Safety
 
@@ -94,7 +119,9 @@ feat(workflow): add linked skill installer
 
 What changed:
 - Thêm installer để tạo link skill từ repo vào thư mục Codex local.
+  + Dùng lại script cài đặt hiện có để giảm trùng logic.
 - Cập nhật hướng dẫn sử dụng để phản ánh cách cài đặt mới.
+  + Đồng bộ ví dụ lệnh với đường dẫn runtime skill mới.
 - Giữ nguyên flow dùng skill mà không cần copy thủ công vào từng project.
 Why changed:
 - Cần tái sử dụng skill từ repo nhanh hơn và giảm thao tác cài đặt lặp lại.
@@ -105,6 +132,7 @@ fix(audit): use Ho Chi Minh date for audit file names
 
 What changed:
 - Đặt tên file audit theo Asia/Ho_Chi_Minh thay vì lệch theo timezone mặc định.
+  + Tránh đổi ngày ngoài ý muốn khi chạy gần nửa đêm UTC.
 - Giữ nguyên timestamp UTC trong nội dung log để không mất tính nhất quán hệ thống.
 - Đồng bộ cách sinh tên file giữa script ghi log và phần đọc log liên quan.
 Why changed:

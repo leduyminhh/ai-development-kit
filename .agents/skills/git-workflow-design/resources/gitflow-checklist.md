@@ -4,6 +4,8 @@
 
 - Inspect `git status --short`.
 - Inspect relevant diffs.
+- Group related changes before staging.
+- Split independent change goals into separate commits when reviewability improves.
 - Identify unrelated changes and leave them unstaged.
 - Confirm whether generated/test artifacts should be excluded.
 
@@ -12,6 +14,7 @@
 - Confirm commit type and scope.
 - Generate or validate branch name from type and scope/module.
 - If current branch is `main`, `master`, `develop`, or `dev`, create/switch to the generated working branch before committing.
+- Confirm the current staged set belongs to one logical commit group.
 - Generate message with `type(scope): short summary` if the user did not provide one.
 - Generate a Vietnamese body that follows the commit body rules in `commit-convention.md`.
 - If encoding looks corrupted, fix UTF-8 handling and regenerate before accepting the message.

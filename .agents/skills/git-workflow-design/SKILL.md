@@ -15,7 +15,11 @@ Use this skill for git operations and publishing flow. The agent should inspect 
 2. Do not create or use a git worktree unless the user explicitly requests it.
 3. If the user provides a commit message, preserve the user's intent and only normalize obvious format issues.
 4. Before committing, auto-generate a branch name from the selected commit type and scope/module unless the current branch is already an appropriate non-main working branch.
-5. If the user does not provide a commit message, generate:
+5. Before staging, group related changes into coherent commit units.
+   - Separate commits when the diff mixes different goals such as refactor, docs, tests, config, or workflow updates.
+   - Do not force a single commit when multiple clean commits would improve reviewability.
+   - Keep tightly coupled code, tests, and small supporting docs together when they serve one change goal.
+6. If the user does not provide a commit message, generate:
    - a commit title using `type(scope): short summary`
    - a structured body in Vietnamese with diacritics, in this order:
      - `What changed`
@@ -23,13 +27,14 @@ Use this skill for git operations and publishing flow. The agent should inspect 
      - `Important notes / breaking impact` only when there is something important to call out
    - `What changed` must contain at least 3 rows
    - `Why changed` must contain at least 1 row
+   - each main row may include additional detail lines prefixed with `+`
    - `Important notes / breaking impact` is optional, but if present it must contain real notable impact, migration note, compatibility note, or breaking note
    - if the environment shows encoding corruption, retry with UTF-8-safe read/write settings before changing the text
-6. Choose branch names from the configured branch roles when creating a branch.
-7. Stage only intended files. Do not use broad staging when unrelated changes exist.
-8. Run relevant verification before claiming the commit is ready when feasible.
-9. After a successful push, create a pull request when the user asks to publish or when the workflow naturally reaches PR preparation.
-10. Report commit, branch, push, PR, and verification evidence in Vietnamese.
+7. Choose branch names from the configured branch roles when creating a branch.
+8. Stage only intended files for the current commit group. Do not use broad staging when unrelated changes exist.
+9. Run relevant verification before claiming the commit is ready when feasible.
+10. After a successful push, create a pull request when the user asks to publish or when the workflow naturally reaches PR preparation.
+11. Report commit, branch, push, PR, and verification evidence in Vietnamese.
 
 ## Resource Map
 
@@ -59,10 +64,13 @@ Files se stage:
 Commit body:
 What changed:
 - ...
+  + ...
+  + ...
 - ...
 - ...
 Why changed:
 - ...
+  + ...
 Important notes / breaking impact:
 - ...
 Verification:
