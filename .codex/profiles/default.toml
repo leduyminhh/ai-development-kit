@@ -1,0 +1,6 @@
+name = "default"
+description = "Default working profile for codex-workflow-kit"
+
+[behavior]
+default_language = "vi"
+prefer_inline_output_over_file_write = true

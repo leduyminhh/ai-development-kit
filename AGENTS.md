@@ -1,4 +1,4 @@
-# AGENTS.md
+﻿# AGENTS.md
 
 ## Overview
 Repository: `codex-workflow-kit`
@@ -12,14 +12,14 @@ Language:
 
 ## Repository Structure
 Core validator:
-- `skills/codex-structure-validate/` contains the core validation skill and deterministic structure validation script.
+- `.agents/skills/codex-structure-validate/` contains the core validation skill and deterministic structure validation script.
 - `.codex/agents/codex-structure-validate.toml` is the read-only validator agent entry point.
 
 Runtime skills:
-- `skills/<name>/SKILL.md` contains a single discoverable skill.
-- Keep skill folders flat under `skills/`; do not nest runtime skills under domain folders.
+- `.agents/skills/<name>/SKILL.md` contains a single discoverable skill.
+- Keep skill folders flat under `.agents/skills/`; do not nest runtime skills under domain folders.
 - Use descriptive skill names such as `java-analyze` for domain grouping.
-- Place `scripts/`, `tests/`, and `resources/` under `skills/<name>/` when they are owned by one skill only.
+- Place `scripts/`, `tests/`, and `resources/` under `.agents/skills/<name>/` when they are owned by one skill only.
 - Reserve root `scripts/` for shared project-wide helpers, selectors, and runners used across multiple skills.
 
 Documents and reports:
@@ -30,7 +30,7 @@ Documents and reports:
 ## Architecture Rules
 - Keep the core validator independent from any domain skill.
 - Do not place long domain procedures in this file.
-- Put domain-specific reusable behavior in focused skills under `skills/<name>/SKILL.md`.
+- Put domain-specific reusable behavior in focused skills under `.agents/skills/<name>/SKILL.md`.
 - Avoid hidden coupling between the validator, domain skills, and external references.
 
 ## External References Policy
@@ -81,12 +81,12 @@ Strict prohibitions:
 
 ## Workflow Rules
 - After any structure change, run the validator:
-  `powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix`
+  `powershell -ExecutionPolicy Bypass -File .agents/skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix`
 - Use selected tests instead of running every test by default:
   `powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -FromGit`
 - When adding any `*test*.ps1` file, map it in `.codex/test-map.toml` under exactly one group: `test.always`, `test.core`, or `test.skill`.
 - Assign one ownership role for each new `scripts/`, `tests/`, or `resources/` artifact:
-  `shared-project` for root `scripts/`; `skill-owned` for `skills/<skill>/...`.
+  `shared-project` for root `scripts/`; `skill-owned` for `.agents/skills/<skill>/...`.
 - Keep `AGENTS.md` concise, ideally under 150 lines.
 - Use `.codex/config.toml` for deterministic settings such as model, sandbox, approval policy, profile, and agent registration.
 
@@ -124,3 +124,4 @@ Agents MUST:
 - default to safe and non-destructive behavior
 - keep the validator modular and domain-agnostic
 - avoid assumptions when a persistent change requires approval
+

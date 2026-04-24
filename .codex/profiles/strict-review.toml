@@ -1,0 +1,9 @@
+name = "strict-review"
+description = "Review-first profile with conservative write behavior"
+
+[behavior]
+prefer_inline_output_over_file_write = true
+avoid_unrelated_file_changes = true
+
+[review]
+focus = "bugs-risks-tests"

@@ -1,0 +1,134 @@
+﻿# Explicit contract between repo skill assets, runtime registration, and external Codex discovery.
+
+[repo_structure]
+skills_root = ".agents/skills"
+catalog = ".agents/skills/README.md"
+manifest_version = 1
+
+[runtime_registration]
+config = ".codex/config.toml"
+agents_root = ".codex/agents"
+
+[external_discovery]
+loader_root = "~/.codex/skills"
+install_script = "scripts/install-skill-link.ps1"
+link_name = "codex-workflow-kit"
+linked_source = ".agents/skills"
+notes = [
+  "Repository structure does not register agents by itself.",
+  "Agent runtime registration is controlled by .codex/config.toml and .codex/agents/*.toml.",
+  "Codex external discovery requires linking or copying .agents/skills/ into the user's Codex skills root."
+]
+
+[[skill]]
+name = "architecture-onion-design"
+skill_path = ".agents/skills/architecture-onion-design/SKILL.md"
+ui_metadata = ".agents/skills/architecture-onion-design/agents/openai.yaml"
+agent_entry = ""
+registered_agent = ""
+kind = "companion"
+
+[[skill]]
+name = "code-design-pattern"
+skill_path = ".agents/skills/code-design-pattern/SKILL.md"
+ui_metadata = ".agents/skills/code-design-pattern/agents/openai.yaml"
+agent_entry = ".codex/agents/code-design-pattern.toml"
+registered_agent = "code-design-pattern"
+kind = "entry"
+
+[[skill]]
+name = "code-shared-design"
+skill_path = ".agents/skills/code-shared-design/SKILL.md"
+ui_metadata = ".agents/skills/code-shared-design/agents/openai.yaml"
+agent_entry = ""
+registered_agent = ""
+kind = "companion"
+
+[[skill]]
+name = "codex-structure-validate"
+skill_path = ".agents/skills/codex-structure-validate/SKILL.md"
+ui_metadata = ""
+agent_entry = ".codex/agents/codex-structure-validate.toml"
+registered_agent = "codex-structure-validate"
+kind = "entry"
+
+[[skill]]
+name = "diagram-generate"
+skill_path = ".agents/skills/diagram-generate/SKILL.md"
+ui_metadata = ".agents/skills/diagram-generate/agents/openai.yaml"
+agent_entry = ".codex/agents/diagram-generate.toml"
+registered_agent = "diagram-generate"
+kind = "entry"
+
+[[skill]]
+name = "doc-write"
+skill_path = ".agents/skills/doc-write/SKILL.md"
+ui_metadata = ".agents/skills/doc-write/agents/openai.yaml"
+agent_entry = ".codex/agents/doc-write.toml"
+registered_agent = "doc-write"
+kind = "entry"
+
+[[skill]]
+name = "git-workflow-design"
+skill_path = ".agents/skills/git-workflow-design/SKILL.md"
+ui_metadata = ".agents/skills/git-workflow-design/agents/openai.yaml"
+agent_entry = ".codex/agents/git-workflow-design.toml"
+registered_agent = "git-workflow-design"
+kind = "entry"
+
+[[skill]]
+name = "java-analyze"
+skill_path = ".agents/skills/java-analyze/SKILL.md"
+ui_metadata = ".agents/skills/java-analyze/agents/openai.yaml"
+agent_entry = ".codex/agents/java-analyze.toml"
+registered_agent = "java-analyze"
+kind = "entry"
+
+[[skill]]
+name = "naming-rule-validate"
+skill_path = ".agents/skills/naming-rule-validate/SKILL.md"
+ui_metadata = ""
+agent_entry = ""
+registered_agent = ""
+kind = "support"
+
+[[skill]]
+name = "react-code-generate"
+skill_path = ".agents/skills/react-code-generate/SKILL.md"
+ui_metadata = ".agents/skills/react-code-generate/agents/openai.yaml"
+agent_entry = ".codex/agents/react-code-generate.toml"
+registered_agent = "react-code-generate"
+kind = "entry"
+
+[[skill]]
+name = "security-code-review"
+skill_path = ".agents/skills/security-code-review/SKILL.md"
+ui_metadata = ".agents/skills/security-code-review/agents/openai.yaml"
+agent_entry = ".codex/agents/security-code-review.toml"
+registered_agent = "security-code-review"
+kind = "entry"
+
+[[skill]]
+name = "skill-maintenance-review"
+skill_path = ".agents/skills/skill-maintenance-review/SKILL.md"
+ui_metadata = ".agents/skills/skill-maintenance-review/agents/openai.yaml"
+agent_entry = ".codex/agents/skill-maintenance-review.toml"
+registered_agent = "skill-maintenance-review"
+kind = "entry"
+
+[[skill]]
+name = "test-automation-validate"
+skill_path = ".agents/skills/test-automation-validate/SKILL.md"
+ui_metadata = ".agents/skills/test-automation-validate/agents/openai.yaml"
+agent_entry = ".codex/agents/test-automation-validate.toml"
+registered_agent = "test-automation-validate"
+kind = "entry"
+
+[[skill]]
+name = "test-qa-review"
+skill_path = ".agents/skills/test-qa-review/SKILL.md"
+ui_metadata = ".agents/skills/test-qa-review/agents/openai.yaml"
+agent_entry = ".codex/agents/test-qa-review.toml"
+registered_agent = "test-qa-review"
+kind = "entry"
+

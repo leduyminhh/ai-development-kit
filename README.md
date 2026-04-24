@@ -1,4 +1,4 @@
-# Codex Workflow Kit
+﻿# Codex Workflow Kit
 
 This workspace stores reusable Codex workflow building blocks: validators, agents, skills, and domain-specific agent capabilities.
 
@@ -13,7 +13,7 @@ powershell -ExecutionPolicy Bypass -File scripts/install-skill-link.ps1 -Force
 The installer creates a Windows junction or symlink:
 
 ```text
-~\.codex\skills\codex-workflow-kit -> <repo>\skills
+~\.codex\skills\codex-workflow-kit -> <repo>\.agents\skills
 ```
 
 After that, update this repository with:
@@ -31,7 +31,7 @@ Agents, hooks, and workflow config remain in this repository as project-local te
 Run the validator with `-Fix` to create or synchronize the standard scaffold:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix
+powershell -ExecutionPolicy Bypass -File .agents/skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix
 ```
 
 The scaffold is organized in six layers:
@@ -40,8 +40,8 @@ The scaffold is organized in six layers:
 - Step 2 `codex.config`: `.codex/config.toml` stores deterministic behavior, validation, audit, guards, and agent registration.
 - Step 3 `codex-hook`: `.codex/hooks/` stores project hook wrappers and shared hook logic in `lib/`.
 - Step 4 `codex-mcp`: `.codex/mcp/` stores MCP configuration snippets or templates.
-- Step 5 `codex-skill`: `skills/<name>/SKILL.md` stores reusable runtime procedures.
-- Step 6 `codex-subagent`: `skills/<name>/subagents/` stores focused subagent prompts owned by each skill.
+- Step 5 `codex-skill`: `.agents/skills/<name>/SKILL.md` stores reusable runtime procedures.
+- Step 6 `codex-subagent`: `.agents/skills/<name>/subagents/` stores focused subagent prompts owned by each skill.
 
 When `-Fix` is used, `.codex/config.toml` is synchronized from `.codex/agents/*.toml`, and missing scaffold directories are created with `.gitkeep` markers when needed.
 
@@ -91,7 +91,7 @@ The first core workflow is `codex-structure-validate`, an Agent -> Skill validat
 It validates:
 
 - `AGENTS.md` guidance boundaries.
-- `skills/<name>/SKILL.md` skill structure.
+- `.agents/skills/<name>/SKILL.md` skill structure.
 - `.codex/agents/<name>.toml` agent structure.
 - `.codex/config.toml` safety defaults and profiles.
 - Optional hooks and reports.
@@ -142,3 +142,4 @@ Rules:
 ## Legacy Superpowers Aliases
 
 The earlier `superpowers-workflow` aliases are still useful as process references. Keep them until the validator and domain skills replace the need for a dedicated alias list.
+

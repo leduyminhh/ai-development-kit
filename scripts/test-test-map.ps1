@@ -10,7 +10,7 @@ function Assert-True {
 $resolver = Join-Path $Root 'scripts/resolve-test-plan.ps1'
 
 $onion = @((& $resolver -Root $Root -IncludeCommands -ActivatedSkill 'architecture-onion-design') | ConvertFrom-Json)
-Assert-True ((@($onion.Command) -join "`n") -match 'skills/java-analyze/scripts/test-architecture-skills\.ps1') 'Onion activation should select architecture skill tests.'
+Assert-True ((@($onion.Command) -join "`n") -match '\.agents/skills/java-analyze/scripts/test-architecture-skills\.ps1') 'Onion activation should select architecture skill tests.'
 Assert-True ((@($onion.Command) -join "`n") -match 'validate-codex-structure\.ps1 -Root \.') 'Every selected plan should include final structure validation.'
 Assert-True (-not ((@($onion.Command) -join "`n") -match 'test-automation-validate-strategy\.ps1')) 'Onion activation should not select test-automation-validate tests.'
 

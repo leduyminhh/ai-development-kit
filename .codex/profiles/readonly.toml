@@ -1,0 +1,6 @@
+name = "readonly"
+description = "Read-only inspection profile"
+
+[capabilities]
+can_write = false
+can_delete = false

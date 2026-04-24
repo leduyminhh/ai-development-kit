@@ -33,7 +33,7 @@ can_generate_inline_report = true
 include = [
   "AGENTS.md",
   ".codex/",
-  "skills/",
+  ".agents/skills/",
   "docs/",
   "reports/"
 ]
