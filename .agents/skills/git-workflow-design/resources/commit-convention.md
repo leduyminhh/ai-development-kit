@@ -5,12 +5,17 @@
 ```text
 type(scope): short summary
 
-- What changed
-- Why changed
-- Important notes / breaking impact
+What changed:
+- ...
+- ...
+- ...
+Why changed:
+- ...
+Important notes / breaking impact:
+- ...
 ```
 
-If the user does not provide a message, generate both title and bullet body from the staged or intended diff. Write the body in Vietnamese with diacritics unless repository instructions say otherwise.
+If the user does not provide a message, generate both title and body from the staged or intended diff. Write the body in Vietnamese with diacritics unless repository instructions say otherwise.
 
 ## Types
 
@@ -47,22 +52,32 @@ Prefer the smallest truthful scope. Use one scope only.
 
 ## Body
 
-Write in Vietnamese with diacritics using exactly three bullets in the order below. Keep it short and focused on the main point.
+Write in Vietnamese with diacritics using the sections below. Keep it concise, but make the summary strong enough for medium-to-large commits.
 
 ```text
-- Đã thay đổi gì.
-- Vì sao thay đổi.
-- Ghi chú quan trọng hoặc ảnh hưởng breaking change; nếu không có, ghi `Không có breaking change`.
+What changed:
+- ...
+- ...
+- ...
+Why changed:
+- ...
+Important notes / breaking impact:
+- ...
 ```
 
 Rules:
 
-- Use exactly three bullets, one line each.
-- Keep each bullet under 120 characters when feasible.
+- `What changed` is required and must contain at least 3 bullet rows.
+- `Why changed` is required and must contain at least 1 bullet row.
+- `Important notes / breaking impact` is optional.
+- If `Important notes / breaking impact` appears, each bullet must contain a real notable note, migration concern, compatibility impact, or breaking change.
+- Prefer 1-3 bullets for `Why changed`.
+- Prefer 1-3 bullets for `Important notes / breaking impact` when it is needed.
+- Keep each bullet under 140 characters when feasible.
 - Use proper Vietnamese diacritics. Do not write body bullets in ASCII-only Vietnamese.
 - Avoid background explanation, implementation narration, and repeated file lists.
 - Focus only on what changed, why it changed, and notable impact.
-- Mention breaking impact only when it is real; otherwise state that there is no breaking change.
+- Do not add the `Important notes / breaking impact` section just to say there is no impact.
 - Do not include unrelated files or changes in the body.
 
 ## Encoding Safety
@@ -77,15 +92,23 @@ Rules:
 ```text
 feat(workflow): add linked skill installer
 
-- Thêm installer tạo link skill và cập nhật hướng dẫn sử dụng.
-- Cần tái sử dụng skill từ repo mà không copy thủ công.
-- Không có breaking change.
+What changed:
+- Thêm installer để tạo link skill từ repo vào thư mục Codex local.
+- Cập nhật hướng dẫn sử dụng để phản ánh cách cài đặt mới.
+- Giữ nguyên flow dùng skill mà không cần copy thủ công vào từng project.
+Why changed:
+- Cần tái sử dụng skill từ repo nhanh hơn và giảm thao tác cài đặt lặp lại.
 ```
 
 ```text
 fix(audit): use Ho Chi Minh date for audit file names
 
-- Đặt tên file audit theo Asia/Ho_Chi_Minh và giữ timestamp UTC.
-- Cần đồng bộ ngày vận hành audit theo múi giờ Việt Nam.
-- Không có breaking change.
+What changed:
+- Đặt tên file audit theo Asia/Ho_Chi_Minh thay vì lệch theo timezone mặc định.
+- Giữ nguyên timestamp UTC trong nội dung log để không mất tính nhất quán hệ thống.
+- Đồng bộ cách sinh tên file giữa script ghi log và phần đọc log liên quan.
+Why changed:
+- Cần đồng bộ ngày vận hành audit theo múi giờ Việt Nam để tránh lệch ngày khi đối soát.
+Important notes / breaking impact:
+- Các job hoặc script ngoài repo đang parse tên file cũ có thể cần cập nhật lại pattern.
 ```

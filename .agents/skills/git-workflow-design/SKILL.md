@@ -17,10 +17,13 @@ Use this skill for git operations and publishing flow. The agent should inspect 
 4. Before committing, auto-generate a branch name from the selected commit type and scope/module unless the current branch is already an appropriate non-main working branch.
 5. If the user does not provide a commit message, generate:
    - a commit title using `type(scope): short summary`
-   - a short bullet body in Vietnamese with diacritics, with exactly three items in this order:
+   - a structured body in Vietnamese with diacritics, in this order:
      - `What changed`
      - `Why changed`
-     - `Important notes / breaking impact`
+     - `Important notes / breaking impact` only when there is something important to call out
+   - `What changed` must contain at least 3 rows
+   - `Why changed` must contain at least 1 row
+   - `Important notes / breaking impact` is optional, but if present it must contain real notable impact, migration note, compatibility note, or breaking note
    - if the environment shows encoding corruption, retry with UTF-8-safe read/write settings before changing the text
 6. Choose branch names from the configured branch roles when creating a branch.
 7. Stage only intended files. Do not use broad staging when unrelated changes exist.
@@ -53,8 +56,13 @@ Commit de xuat:
 Ly do chon type/scope:
 Files se stage:
 Commit body:
+What changed:
 - ...
 - ...
+- ...
+Why changed:
+- ...
+Important notes / breaking impact:
 - ...
 Verification:
 ```
