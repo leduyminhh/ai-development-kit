@@ -17,7 +17,11 @@ Use this skill for git operations and publishing flow. The agent should inspect 
 4. Before committing, auto-generate a branch name from the selected commit type and scope/module unless the current branch is already an appropriate non-main working branch.
 5. If the user does not provide a commit message, generate:
    - a commit title using `type(scope): short summary`
-   - a structured body with `Why`, `What`, `Impact`, `Verify`, and `Refs`
+   - a short bullet body in Vietnamese with diacritics, with exactly three items in this order:
+     - `What changed`
+     - `Why changed`
+     - `Important notes / breaking impact`
+   - if the environment shows encoding corruption, retry with UTF-8-safe read/write settings before changing the text
 6. Choose branch names from the configured branch roles when creating a branch.
 7. Stage only intended files. Do not use broad staging when unrelated changes exist.
 8. Run relevant verification before claiming the commit is ready when feasible.
@@ -26,6 +30,7 @@ Use this skill for git operations and publishing flow. The agent should inspect 
 ## Resource Map
 
 - `resources/commit-convention.md`: commit type, scope, title, and Vietnamese body rules.
+  The body examples and rules must use Vietnamese with diacritics.
 - `resources/branch-convention.md`: branch role prefixes and branch naming.
 - `resources/gitflow-checklist.md`: staging, commit, push, merge, revert, release, and hotfix safety checks.
 
@@ -47,6 +52,10 @@ Branch de xuat:
 Commit de xuat:
 Ly do chon type/scope:
 Files se stage:
+Commit body:
+- ...
+- ...
+- ...
 Verification:
 ```
 

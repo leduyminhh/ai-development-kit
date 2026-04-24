@@ -13,7 +13,8 @@
 - Generate or validate branch name from type and scope/module.
 - If current branch is `main`, `master`, `develop`, or `dev`, create/switch to the generated working branch before committing.
 - Generate message with `type(scope): short summary` if the user did not provide one.
-- Generate structured Vietnamese body with `Why`, `What`, `Impact`, `Verify`, and `Refs`.
+- Generate a Vietnamese body with diacritics and exactly three bullets: `What changed`, `Why changed`, and `Important notes / breaking impact`.
+- If encoding looks corrupted, fix UTF-8 handling and regenerate before accepting the message.
 - Run relevant verification when feasible.
 - Do not commit failing work unless the user explicitly asks for a checkpoint commit.
 

@@ -5,22 +5,12 @@
 ```text
 type(scope): short summary
 
-Why:
-- ...
-
-What:
-- ...
-
-Impact:
-- ...
-
-Verify:
-- ...
-
-Refs: ...
+- What changed
+- Why changed
+- Important notes / breaking impact
 ```
 
-If the user does not provide a message, generate both title and structured body from the staged or intended diff. Write the body in Vietnamese unless repository instructions say otherwise.
+If the user does not provide a message, generate both title and bullet body from the staged or intended diff. Write the body in Vietnamese with diacritics unless repository instructions say otherwise.
 
 ## Types
 
@@ -57,68 +47,45 @@ Prefer the smallest truthful scope. Use one scope only.
 
 ## Body
 
-Write in Vietnamese with the exact sections below. Keep it short and focused on the main point.
+Write in Vietnamese with diacritics using exactly three bullets in the order below. Keep it short and focused on the main point.
 
 ```text
-Why:
-- 1 cau ngan ve ly do chinh.
-
-What:
-- 1-2 y chinh da thay doi.
-
-Impact:
-- Tac dong chinh hoac `Khong dang ke`.
-
-Verify:
-- Lenh chinh da chay hoac ly do chua chay.
-
-Refs: ticket/link/issue/PR hoac `N/A`
+- Đã thay đổi gì.
+- Vì sao thay đổi.
+- Ghi chú quan trọng hoặc ảnh hưởng breaking change; nếu không có, ghi `Không có breaking change`.
 ```
 
 Rules:
 
-- Prefer one bullet per section; use two bullets only for two distinct points.
+- Use exactly three bullets, one line each.
 - Keep each bullet under 120 characters when feasible.
+- Use proper Vietnamese diacritics. Do not write body bullets in ASCII-only Vietnamese.
 - Avoid background explanation, implementation narration, and repeated file lists.
-- Focus only on why it matters, what changed, impact, and verification.
-- Use `Refs: N/A` when there is no ticket, issue, PR, or external reference.
-- Do not invent verification; state `Chua chay` with reason when needed.
+- Focus only on what changed, why it changed, and notable impact.
+- Mention breaking impact only when it is real; otherwise state that there is no breaking change.
 - Do not include unrelated files or changes in the body.
+
+## Encoding Safety
+
+- Save and read commit convention files as UTF-8.
+- If the terminal or tool shows mojibake, fix encoding handling first and regenerate the text.
+- Do not silently strip Vietnamese diacritics just to avoid an encoding issue.
+- Only use a non-diacritic fallback if the user explicitly approves that compromise.
 
 ## Examples
 
 ```text
 feat(workflow): add linked skill installer
 
-Why:
-- Can dung lai skill tu repo ma khong copy thu cong.
-
-What:
-- Them installer tao link skill va cap nhat huong dan dung.
-
-Impact:
-- Session khac nhan skill moi sau khi repo duoc pull.
-
-Verify:
-- Chay scripts/test-install-skill-link.ps1 thanh cong.
-
-Refs: N/A
+- Thêm installer tạo link skill và cập nhật hướng dẫn sử dụng.
+- Cần tái sử dụng skill từ repo mà không copy thủ công.
+- Không có breaking change.
 ```
 
 ```text
 fix(audit): use Ho Chi Minh date for audit file names
 
-Why:
-- Ten file audit can khop ngay van hanh tai Viet Nam.
-
-What:
-- Dat ten file theo Asia/Ho_Chi_Minh va giu timestamp UTC.
-
-Impact:
-- De doi chieu audit theo ngay van hanh.
-
-Verify:
-- Chay .codex/hooks/test-log-agent-event.ps1 thanh cong.
-
-Refs: N/A
+- Đặt tên file audit theo Asia/Ho_Chi_Minh và giữ timestamp UTC.
+- Cần đồng bộ ngày vận hành audit theo múi giờ Việt Nam.
+- Không có breaking change.
 ```
