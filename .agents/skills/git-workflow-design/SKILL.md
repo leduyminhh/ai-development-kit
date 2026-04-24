@@ -28,7 +28,8 @@ Use this skill for git operations and publishing flow. The agent should inspect 
 6. Choose branch names from the configured branch roles when creating a branch.
 7. Stage only intended files. Do not use broad staging when unrelated changes exist.
 8. Run relevant verification before claiming the commit is ready when feasible.
-9. Report commit, branch, push, and verification evidence in Vietnamese.
+9. After a successful push, create a pull request when the user asks to publish or when the workflow naturally reaches PR preparation.
+10. Report commit, branch, push, PR, and verification evidence in Vietnamese.
 
 ## Resource Map
 
@@ -73,6 +74,7 @@ After commit/push:
 Branch:
 Commit:
 Push:
+PR:
 Verification:
 Ghi chu:
 ```

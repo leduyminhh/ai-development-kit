@@ -13,7 +13,7 @@
 - Generate or validate branch name from type and scope/module.
 - If current branch is `main`, `master`, `develop`, or `dev`, create/switch to the generated working branch before committing.
 - Generate message with `type(scope): short summary` if the user did not provide one.
-- Generate a Vietnamese body with diacritics and exactly three bullets: `What changed`, `Why changed`, and `Important notes / breaking impact`.
+- Generate a Vietnamese body that follows the commit body rules in `commit-convention.md`.
 - If encoding looks corrupted, fix UTF-8 handling and regenerate before accepting the message.
 - Run relevant verification when feasible.
 - Do not commit failing work unless the user explicitly asks for a checkpoint commit.
@@ -23,6 +23,13 @@
 - Push current branch only.
 - Use tracking when pushing a new branch.
 - Report remote and branch.
+
+## Pull Request
+
+- After a successful push, create a pull request when the user asks to publish or when the workflow naturally moves to PR preparation.
+- Reuse the pushed branch as the PR source branch.
+- Include the PR link in the final report.
+- If the remote indicates a moved repository URL, report the new URL and use the current canonical PR link.
 
 ## Merge
 
