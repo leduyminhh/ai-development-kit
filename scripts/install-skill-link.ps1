@@ -1,12 +1,14 @@
 param(
     [string]$SourceRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path,
     [string]$LinkName = 'codex-workflow-kit',
-[string]$SkillsRoot = (Join-Path $env:USERPROFILE '.codex/skills'),
+    [string]$SkillsRoot = (Join-Path $env:USERPROFILE '.codex/skills'),
     [switch]$Force,
     [switch]$WhatIf
 )
 
 $ErrorActionPreference = 'Stop'
+
+. (Join-Path $PSScriptRoot 'lib/codex-config.ps1')
 
 function Test-IsWindows {
     return $PSVersionTable.Platform -eq 'Win32NT' -or [string]::IsNullOrWhiteSpace($PSVersionTable.Platform)
@@ -31,13 +33,45 @@ function Remove-ExistingLink {
     Remove-Item -LiteralPath $Path -Recurse -Force
 }
 
+function Resolve-ExternalDiscoveryContract {
+    param(
+        [string]$ResolvedSourceRoot,
+        [string]$DefaultLinkName
+    )
+
+    $manifestPath = Join-Path $ResolvedSourceRoot '.agents/skills/manifest.toml'
+    $contract = @{
+        LinkName = $DefaultLinkName
+        LinkedSource = '.agents/skills'
+    }
+
+    if (-not (Test-Path -LiteralPath $manifestPath)) {
+        return $contract
+    }
+
+    $manifestText = Get-Content -LiteralPath $manifestPath -Raw
+    $manifestLinkName = Get-CodexTomlStringValue -TomlText $manifestText -Section 'external_discovery' -Key 'link_name'
+    $manifestLinkedSource = Get-CodexTomlStringValue -TomlText $manifestText -Section 'external_discovery' -Key 'linked_source'
+
+    if (-not [string]::IsNullOrWhiteSpace($manifestLinkName)) {
+        $contract.LinkName = $manifestLinkName
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($manifestLinkedSource)) {
+        $contract.LinkedSource = $manifestLinkedSource
+    }
+
+    return $contract
+}
+
 $resolvedSource = (Resolve-Path -LiteralPath $SourceRoot).Path
-$sourceSkills = Join-Path $resolvedSource '.agents/skills'
+$externalDiscovery = Resolve-ExternalDiscoveryContract -ResolvedSourceRoot $resolvedSource -DefaultLinkName $LinkName
+$sourceSkills = Join-Path $resolvedSource $externalDiscovery.LinkedSource
 if (-not (Test-Path -LiteralPath $sourceSkills)) {
     throw "Source skills directory not found: $sourceSkills"
 }
 
-$linkPath = Join-Path $SkillsRoot $LinkName
+$linkPath = Join-Path $SkillsRoot $externalDiscovery.LinkName
 
 if ($WhatIf) {
     Write-Output "WhatIf: ensure skills root $SkillsRoot"
