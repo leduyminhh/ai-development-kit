@@ -100,7 +100,7 @@ src/main/java/com/example/<service>
 |---|---|---|
 | Bootstrap | controllers, request DTOs, response DTOs, API mappers, exception advice, runtime config, filters, OpenAPI annotations | Controllers call application service interfaces only. Bootstrap must not inject service implementations, repositories, JPA entities, or infrastructure adapters. |
 | Application | service interfaces, service implementations, results, views, outbound ports, repository contracts, events, transaction intent, flow coordination | Application must not import bootstrap, infrastructure, Spring Web, Spring Data, JPA, Feign, Redis, Kafka, or database classes. |
-| Domain | domain models, value objects, domain exceptions, factory methods, invariant methods, framework-free domain services | Domain must not import Spring, JPA, Hibernate, Feign, Redis, Kafka, bootstrap, application service, or infrastructure types. |
+| Domain | domain models, value objects, domain exceptions, factory methods, invariant methods, framework-free domain services, domain policies, evaluators, calculators, and validators | Domain must not import Spring, JPA, Hibernate, Feign, Redis, Kafka, bootstrap, application service, or infrastructure types. |
 | Infrastructure | JPA entities, Spring Data repositories, persistence adapters, entity/domain mappers, HTTP/Feign clients, messaging adapters, cache adapters | Infrastructure implements application outbound ports and must not depend on bootstrap. JPA/client DTOs must not leak inward. |
 
 ## Application Ring Rules
@@ -113,6 +113,9 @@ src/main/java/com/example/<service>
 - Application methods return application result objects or application views, not bootstrap response DTOs.
 - Application services may call outbound ports and repository contracts.
 - Application services may build domain models and enforce flow-level decisions.
+- Put framework-free domain business logic in `domain.service.<capability>`.
+- Use `domain.service.<capability>` for policies, validators, evaluators, calculators, or other domain-rule components.
+- Keep orchestration, transaction boundaries, repository coordination, and external calls in `application.service.<capability>`.
 - Put interface contracts needed by the application inward; put implementations outward.
 
 ## Capability Slice Template
@@ -121,6 +124,7 @@ For a new capability named `<capability>`, create only the files that capability
 
 ```text
 domain/model/<capability>/<DomainModel>.java
+domain/service/<capability>/<CapabilityPolicy>.java
 application/service/inf/<Capability>Service.java
 application/service/<capability>/<Capability>ServiceImpl.java
 application/result/<capability>/<Capability>Result.java
@@ -144,6 +148,7 @@ API Controller
 -> bootstrap request DTO
 -> application service interface
 -> application service implementation
+-> domain service (when business rules need reusable domain logic)
 -> application outbound port or repository interface
 -> domain model
 -> application result
@@ -155,6 +160,7 @@ Mapping rules:
 
 - Bootstrap maps HTTP request DTOs into service method parameters or application commands when commands are explicitly introduced.
 - Application services return application result objects or views.
+- Application services call domain services when business rules should be isolated from orchestration.
 - Bootstrap mappers convert application results into HTTP response DTOs.
 - Domain models should not be returned directly from controllers.
 - HTTP response DTOs should not be returned from application services.

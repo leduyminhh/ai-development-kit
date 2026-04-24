@@ -24,7 +24,7 @@ Use `resources/java-package-template.md` when the target is a Java/Spring Boot s
 
 | Ring | Owns | Must Not Depend On |
 |---|---|---|
-| Domain | business state, invariants, value objects, domain exceptions, framework-free domain services | application, infrastructure, bootstrap, Spring, JPA, messaging, HTTP clients |
+| Domain | business state, invariants, value objects, domain exceptions, framework-free domain services, domain policies and validators | application, infrastructure, bootstrap, Spring, JPA, messaging, HTTP clients |
 | Application | service interfaces, service implementations, result/view objects, outbound ports, repository contracts, events, flow coordination | bootstrap, infrastructure, Spring Web, Spring Data, JPA, Feign, Redis, Kafka, database classes |
 | Infrastructure | outbound port implementations, JPA entities, Spring Data repositories, persistence/client/messaging/cache adapters, technical mappers | bootstrap |
 | Bootstrap | controllers, request/response DTOs, API mappers, advice, filters, runtime configuration, bean wiring, OpenAPI annotations | repositories, JPA entities, infrastructure adapters, business rules |
@@ -75,6 +75,9 @@ Interfaces/contracts needed by application belong inward. Implementations belong
 - Service implementations live in `application.service.<capability>` and end with `ServiceImpl`.
 - Application returns result/view objects, not bootstrap response DTOs.
 - Repository contracts and outbound ports live in `application.port.out`.
+- Put framework-free domain business logic in `domain.service.<capability>`.
+- Keep orchestration, transaction boundaries, and outbound coordination in `application.service.<capability>`.
+- Domain service classes may represent policies, validators, evaluators, calculators, or other business-rule components without framework dependencies.
 - JPA entities, Spring Data repositories, clients, messaging, and cache adapters stay in `infrastructure`.
 - Only create files that the capability actually needs. Do not create empty placeholders.
 
