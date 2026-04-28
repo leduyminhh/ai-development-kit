@@ -18,6 +18,7 @@ Use this skill for git operations and publishing flow. Inspect the worktree firs
 5. If the user did not provide a commit message, generate:
    - a title using `type(scope): short summary`
    - a Vietnamese body with sections `What changed`, `Why changed`, and optional `Important notes / breaking impact`
+   - keep the Vietnamese body in UTF-8 with diacritics; do not strip accents unless the user explicitly asks for that compromise
    - `What changed` and `Why changed` should each contain 1 to 5 main rows depending on the real change size
    - each main row may have optional detail lines prefixed with `•`; keep them only when the diff shows meaningful supporting behavior, side effects, constraints, or secondary flow
    - derive all rows from the real diff and nearby source context, from a developer's point of view: what they improved, fixed, simplified, or enabled
@@ -46,10 +47,10 @@ Use this skill for git operations and publishing flow. Inspect the worktree firs
 Before commit:
 
 ```text
-Branch de xuat:
-Commit de xuat:
-Ly do chon type/scope:
-Files se stage:
+Branch đề xuất:
+Commit đề xuất:
+Lý do chọn type/scope:
+Files sẽ stage:
 Commit body:
 What changed:
 - ...
@@ -72,5 +73,5 @@ Commit:
 Push:
 PR:
 Verification:
-Ghi chu:
+Ghi chú:
 ```
