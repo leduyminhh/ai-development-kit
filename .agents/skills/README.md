@@ -10,7 +10,7 @@ Thu muc `.agents/skills/` chua runtime skill assets cua repo. Moi skill la mot d
     README.md
     <skill-name>/
         SKILL.md
-        agents/
+        metadata/
             openai.yaml
         resources/
         scripts/
@@ -22,7 +22,7 @@ Thu muc `.agents/skills/` chua runtime skill assets cua repo. Moi skill la mot d
 | Thanh phan | Bat buoc | Vai tro |
 |---|---:|---|
 | `SKILL.md` | Co | Frontmatter `name`, `description` va workflow cot loi. |
-| `agents/openai.yaml` | Khuyen nghi | Metadata hien thi skill trong UI khi skill co prompt goi nhanh hoac integration metadata. |
+| `metadata/openai.yaml` | Khuyen nghi | Metadata hien thi skill trong UI khi skill co prompt goi nhanh hoac integration metadata. |
 | `resources/` | Tuy skill | Tai lieu chi tiet chi doc khi task can. |
 | `scripts/` | Tuy skill | Script deterministic gan voi skill. |
 | `subagents/` | Bat buoc cho skill runtime moi | Prompt vai tro chuyen biet duoc skill lua chon khi can. |
@@ -33,6 +33,7 @@ Thu muc `.agents/skills/` chua runtime skill assets cua repo. Moi skill la mot d
 
 - repo structure: `.agents/skills/<name>/...`
 - runtime registration: `.codex/agents/<name>.toml`
+- runtime governance metadata: `.codex/agent-metadata/<name>.toml`
 - external discovery: link `.agents/skills/` vao Codex skill loading path
 
 Manifest khong thay the `config.toml`. No chi lam ro skill nao co agent entry, skill nao chi la companion skill, va metadata UI cua skill nam o dau.
@@ -79,7 +80,7 @@ Khi co skill moi xuat hien trong `.agents/skills/`, workflow phai cap nhat lai t
 - Cap nhat bang "Domain Capabilities" trong `README.md`.
 - Cap nhat `.agents/skills/manifest.toml`.
 - Neu skill co runtime workflow, tao subagent prompt tuong ung trong `subagents/`.
-- Neu skill can agent entry point, tao `.codex/agents/<skill-name>.toml` va sync registration bang validator `-Fix`.
+- Neu skill can agent entry point, tao `.codex/agents/<skill-name>.toml`, tao `.codex/agent-metadata/<skill-name>.toml`, va sync registry bang validator `-Fix`.
 - Neu them test script, map vao `.codex/test-map.toml`.
 - Khi tra loi cuoi cung, thong bao ro skill moi nao da phat sinh va tai lieu nao da duoc cap nhat.
 
@@ -90,10 +91,11 @@ Khi tao skill moi trong `.agents/skills/<skill-name>/`:
 1. Tao `SKILL.md` voi frontmatter `name` va `description`.
 2. Tao `subagents/` va it nhat mot prompt `.md` neu skill co workflow runtime.
 3. Tao hoac cap nhat `.codex/agents/<skill-name>.toml` neu skill can agent entry point.
-4. Cap nhat `.agents/skills/manifest.toml` voi `skill_path`, `ui_metadata` va `agent_entry`.
-5. Cap nhat `.codex/config.toml` agent registration hoac chay validator voi `-Fix` de sync.
-6. Neu co script test, map vao `.codex/test-map.toml`.
-7. Chay validator va selected tests.
+4. Tao hoac cap nhat `.codex/agent-metadata/<skill-name>.toml` de giu read_only, hook gate, va governance metadata.
+5. Cap nhat `.agents/skills/manifest.toml` voi `skill_path`, `ui_metadata` va `agent_entry`.
+6. Chay validator voi `-Fix` de sync `agent_registry` vao `.codex/config.toml`.
+7. Neu co script test, map vao `.codex/test-map.toml`.
+8. Chay validator va selected tests.
 
 ## Kiem Tra
 

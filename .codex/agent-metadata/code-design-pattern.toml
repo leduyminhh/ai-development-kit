@@ -1,0 +1,4 @@
+name = "code-design-pattern"
+summary = "Design pattern agent"
+read_only = false
+hooks_project_enabled = true

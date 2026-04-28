@@ -7,6 +7,7 @@ Thu muc `.codex/` chua cau hinh project-local cho Codex workflow kit: agent entr
 ```text
 .codex/
  agents/
+ agent-metadata/
  hooks/
  mcp/
  config.toml
@@ -17,9 +18,10 @@ Thu muc `.codex/` chua cau hinh project-local cho Codex workflow kit: agent entr
 
 | Path | Chuc nang |
 |---|---|
-| `config.toml` | Cau hinh deterministic: ngon ngu, protected paths, validation command, output writer, project hooks, guards, agent registrations. |
+| `config.toml` | Cau hinh deterministic: ngon ngu, protected paths, validation command, output writer, project hooks, guards, agent registry entries. |
 | `test-map.toml` | Map selected tests theo changed paths, activated skills va agent names. |
-| `agents/*.toml` | Entry point cua agent: name, description, model, reasoning, sandbox, developer instructions. |
+| `agents/*.toml` | Entry point Desktop-facing cua agent: name, description, model, reasoning, sandbox, developer instructions. |
+| `agent-metadata/*.toml` | Governance metadata cua repo: read_only, hook gate, summary, va rule/pham vi custom neu can. |
 | `hooks/*.ps1` | Hook deterministic cap project; wrapper event dung chung logic trong `hooks/lib/`. |
 | `mcp/` | Placeholder cho MCP config/template neu repo can. |
 
@@ -37,7 +39,8 @@ Runtime registration boundary:
 - `.agents/skills/` chua runtime skill assets.
 - `.agents/skills/<name>/{scripts,resources}` uu tien cho file chi thuoc mot skill.
 - `.codex/agents/*.toml` la agent entry points.
-- `.codex/config.toml` dang ky agent entry.
+- `.codex/agent-metadata/*.toml` giu governance metadata cho validator va sync.
+- `.codex/config.toml` giu `agent_registry.<name>` thay vi khai bao agent role lan thu hai.
 - `.agents/skills/manifest.toml` la link contract de map skill <-> agent <-> UI metadata.
 - External Codex discovery van la boundary rieng, khong duoc dam bao chi boi repo structure.
 
@@ -70,12 +73,12 @@ Agent hien co:
 | `[hooks.project]` | Project event log path, filename pattern, format, retention, service name va event wrappers. |
 | `[skill_upgrade]` | Cau hinh chu ky observe/diagnose/proposal/apply cho co che skill evolution. |
 | `[guards]` | Safety guards cho destructive/protected actions. |
-| `[agents.<name>]` | Dang ky agent config path, read_only va enabled. |
+| `[agent_registry.<name>]` | Dang ky agent config path, read_only, enabled, va hook gate da duoc sync tu agent metadata. |
 
 Hook gating:
 
 - `hooks.project.enabled = true` la master switch cho project hook framework.
-- `agents.<name>.hooks_project_enabled = false` la mac dinh an toan; chi agent nao bat `true` moi duoc ghi event log.
+- `agent_registry.<name>.hooks_project_enabled = false` la mac dinh an toan; chi agent nao bat `true` moi duoc ghi event log.
 - `hooks.project.host`, `port`, `runtimePath`, `reloadOnConfigChange` dieu khien hook service runtime.
 
 ## Test Map
@@ -123,7 +126,7 @@ Khi dang chay, service lang nghe `http://127.0.0.1:<port>` va ho tro:
 
 ## Quy Tac Cap Nhat
 
-- Khi them agent config moi, chay validator voi `-Fix` de sync registration vao `config.toml`.
+- Khi them agent config moi, tao hoac cap nhat `.codex/agent-metadata/<name>.toml`, roi chay validator voi `-Fix` de sync registry vao `config.toml`.
 - Khi doi hook, cap nhat test lien quan trong `.codex/hooks/`.
 - Khi doi test routing, chay `scripts/test-test-map.ps1`.
 - Khi doi config, chay selected tests de bat output resolver, audit hook va validator side effects.

@@ -49,6 +49,7 @@ commands = [
 [test.core.validator]
 paths = [
   ".agents/skills/codex-structure-validate",
+  ".codex/agent-metadata",
   ".codex/config.toml",
   ".codex/test-map.toml",
   "scripts/install-skill-link.ps1",
@@ -85,6 +86,7 @@ commands = [
 agents = ["skill-evolution-review"]
 skills = ["skill-evolution-review"]
 paths = [
+  ".codex/agent-metadata",
   ".agents/skills/skill-evolution-review/scripts/run-skill-upgrade-cycle.py",
   ".agents/skills/skill-evolution-review/scripts/apply-skill-upgrade-proposal.py",
   ".agents/skills/skill-evolution-review/scripts/write-skill-upgrade-proposal.ps1",

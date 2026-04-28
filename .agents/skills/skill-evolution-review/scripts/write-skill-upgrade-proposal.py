@@ -208,6 +208,8 @@ def main() -> int:
     root = Path(args.root).resolve()
     snapshot = json.loads(Path(args.snapshot_file).read_text(encoding="utf-8-sig"))
     feedback_entries = list(snapshot.get("feedbackEntries", []))
+    target_name = str(snapshot.get("targetName") or snapshot.get("targetAgent") or "").strip()
+    evolution_policy = load_evolution_policy(root, target_name)
 
     correct_notes = collect_unique(feedback_entries, "correctNotes")
     wrong_notes = collect_unique(feedback_entries, "wrongNotes")
@@ -221,13 +223,15 @@ def main() -> int:
             severe_reproducible = True
 
     pattern_count = max(evidence_counts.values(), default=0)
-    repeated_pattern = pattern_count >= 3
-    evidence_basis = "severe-reproducible" if severe_reproducible and not repeated_pattern else "repeated-pattern" if repeated_pattern else "single-anecdote"
-    actionable = repeated_pattern or severe_reproducible
-    recommendation = "safe-auto-apply" if actionable else "insufficient-evidence"
-    target_name = str(snapshot.get("targetName") or snapshot.get("targetAgent") or "").strip()
-    evolution_policy = load_evolution_policy(root, target_name)
+    min_pattern_count = int(evolution_policy.get("min_pattern_count", 3) or 3)
+    allow_fast_track = bool(evolution_policy.get("allow_fast_track", True))
+    repeated_pattern = pattern_count >= min_pattern_count
+    fast_track = severe_reproducible and allow_fast_track
+    evidence_basis = "severe-reproducible" if fast_track and not repeated_pattern else "repeated-pattern" if repeated_pattern else "single-anecdote"
+    actionable = repeated_pattern or fast_track
     dominant_evidence_key = max(evidence_counts, key=evidence_counts.get) if evidence_counts else ""
+    mode = str(evolution_policy.get("mode", "hybrid")).strip() or "hybrid"
+    auto_apply = bool(evolution_policy.get("auto_apply", False))
 
     proposed_changes: list[str] = []
     updates: list[dict[str, str]] = []
@@ -237,6 +241,13 @@ def main() -> int:
         if not proposed_changes and correct_notes:
             proposed_changes.append("Preserve current guidance and review for overfitting before changing the skill.")
         updates = build_skill_patch(root, target_name, dominant_evidence_key)
+
+    if not actionable:
+        recommendation = "insufficient-evidence"
+    elif mode == "review-first" or not auto_apply or not updates:
+        recommendation = "manual-review"
+    else:
+        recommendation = "safe-auto-apply"
 
     validation_commands = [item for item in args.validation_commands if item.strip()]
     policy_validation_commands = [str(item).strip() for item in evolution_policy.get("validation_commands", []) if str(item).strip()]
@@ -254,9 +265,9 @@ def main() -> int:
         "feedbackCount": len(feedback_entries),
         "patternCount": pattern_count if actionable else 0,
         "evidenceBasis": evidence_basis,
-        "exceptionUsed": bool(severe_reproducible and not repeated_pattern),
+        "exceptionUsed": bool(fast_track and not repeated_pattern),
         "recommendation": recommendation,
-        "riskLevel": "low" if actionable else "unknown",
+        "riskLevel": "low" if recommendation == "safe-auto-apply" else "medium" if actionable else "unknown",
         "observedPatterns": [
             f"correct_notes={len(correct_notes)}",
             f"wrong_notes={len(wrong_notes)}",

@@ -112,11 +112,20 @@ function Get-ProjectHookAgentRegistration {
     }
 
     $configText = Get-Content -LiteralPath $configPath -Raw
-    $sectionName = "agents.$AgentName"
+    $sectionName = "agent_registry.$AgentName"
+    $legacySectionName = "agents.$AgentName"
+    $resolvedSectionName = if (-not [string]::IsNullOrWhiteSpace((Get-CodexTomlSection -TomlText $configText -Section $sectionName))) {
+        $sectionName
+    } elseif (-not [string]::IsNullOrWhiteSpace((Get-CodexTomlSection -TomlText $configText -Section $legacySectionName))) {
+        $legacySectionName
+    } else {
+        $null
+    }
+
     return [pscustomobject]@{
-        Exists              = -not [string]::IsNullOrWhiteSpace((Get-CodexTomlSection -TomlText $configText -Section $sectionName))
-        Enabled             = Get-CodexTomlBoolValue -TomlText $configText -Section $sectionName -Key 'enabled' -Default $false
-        HooksProjectEnabled = Get-CodexTomlBoolValue -TomlText $configText -Section $sectionName -Key 'hooks_project_enabled' -Default $false
+        Exists              = -not [string]::IsNullOrWhiteSpace($resolvedSectionName)
+        Enabled             = if ($resolvedSectionName) { Get-CodexTomlBoolValue -TomlText $configText -Section $resolvedSectionName -Key 'enabled' -Default $false } else { $false }
+        HooksProjectEnabled = if ($resolvedSectionName) { Get-CodexTomlBoolValue -TomlText $configText -Section $resolvedSectionName -Key 'hooks_project_enabled' -Default $false } else { $false }
     }
 }
 

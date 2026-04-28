@@ -29,6 +29,9 @@ try {
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.agents/skills/test-qa-review/resources') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.agents/skills/architecture-onion-design/resources') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.agents/skills/code-shared-design/resources') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $tempRoot '.agents/skills/review-first-skill') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $tempRoot '.agents/skills/no-auto-skill') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $tempRoot '.agents/skills/threshold-skill') -Force | Out-Null
 
     Set-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/security-code-review/SKILL.md') -Encoding utf8 -Value @'
 ---
@@ -98,6 +101,30 @@ description: Use when designing shared modules.
 
 - Publish via Nexus with semantic versioning.
 '@
+    Set-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/review-first-skill/SKILL.md') -Encoding utf8 -Value @'
+---
+name: review-first-skill
+description: Use when the skill always requires human review.
+---
+
+# Review First Skill
+'@
+    Set-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/no-auto-skill/SKILL.md') -Encoding utf8 -Value @'
+---
+name: no-auto-skill
+description: Use when repeated evidence should stop at manual review.
+---
+
+# No Auto Skill
+'@
+    Set-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/threshold-skill/SKILL.md') -Encoding utf8 -Value @'
+---
+name: threshold-skill
+description: Use when pattern threshold is higher than the default.
+---
+
+# Threshold Skill
+'@
 
     Set-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/manifest.toml') -Encoding utf8 -Value @'
 [repo_structure]
@@ -142,6 +169,22 @@ auto_apply = true
 allowed_paths = [".agents/skills/code-shared-design/SKILL.md", ".agents/skills/code-shared-design/resources"]
 max_patch_lines = 40
 validation_commands = ["powershell -ExecutionPolicy Bypass -File .agents/skills/java-analyze/scripts/test-architecture-skills.ps1"]
+
+[[evolution.profile]]
+skill = "review-first-skill"
+mode = "review-first"
+auto_apply = false
+
+[[evolution.profile]]
+skill = "no-auto-skill"
+mode = "hybrid"
+auto_apply = false
+
+[[evolution.profile]]
+skill = "threshold-skill"
+mode = "hybrid"
+auto_apply = true
+min_pattern_count = 4
 '@
 
     $cases = @(
@@ -211,6 +254,70 @@ validation_commands = ["powershell -ExecutionPolicy Bypass -File .agents/skills/
         Assert-True (($proposal.updates[0].content | Out-String) -match [regex]::Escape($case.snippets[0])) "$($case.target) skill patch should contain the expected snippet."
         Assert-True (($proposal.updates[1].content | Out-String) -match [regex]::Escape($case.snippets[1])) "$($case.target) resource patch should contain the expected snippet."
         Assert-True (($proposal.validationCommands -join "`n") -match [regex]::Escape($case.validation)) "$($case.target) should attach its policy validation command."
+    }
+
+    $policyCases = @(
+        @{ target = 'review-first-skill'; expectedRecommendation = 'manual-review'; expectedPatternCount = 3; expectedUpdates = 0 },
+        @{ target = 'no-auto-skill'; expectedRecommendation = 'manual-review'; expectedPatternCount = 3; expectedUpdates = 0 },
+        @{ target = 'threshold-skill'; expectedRecommendation = 'insufficient-evidence'; expectedPatternCount = 0; expectedUpdates = 0 }
+    )
+
+    foreach ($case in $policyCases) {
+        $snapshotPath = Join-Path $tempRoot ($case.target + '.snapshot.json')
+        $proposalPath = Join-Path $tempRoot ($case.target + '.proposal.json')
+        Set-Content -LiteralPath $snapshotPath -Encoding utf8 -Value @"
+{
+  "targetType": "skill",
+  "targetName": "$($case.target)",
+  "targetAgent": "$($case.target)",
+  "targetSkills": ["$($case.target)"],
+  "feedbackEntries": [
+    {
+      "agentName": "$($case.target)",
+      "skillNames": ["$($case.target)"],
+      "targetType": "skill",
+      "targetName": "$($case.target)",
+      "severity": "medium",
+      "reproducible": true,
+      "evidenceKey": "policy-drift",
+      "wrongNotes": "",
+      "missingNotes": "Repeated missing checklist",
+      "taskSummary": "Review target"
+    },
+    {
+      "agentName": "$($case.target)",
+      "skillNames": ["$($case.target)"],
+      "targetType": "skill",
+      "targetName": "$($case.target)",
+      "severity": "medium",
+      "reproducible": true,
+      "evidenceKey": "policy-drift",
+      "wrongNotes": "",
+      "missingNotes": "Repeated missing checklist",
+      "taskSummary": "Review target"
+    },
+    {
+      "agentName": "$($case.target)",
+      "skillNames": ["$($case.target)"],
+      "targetType": "skill",
+      "targetName": "$($case.target)",
+      "severity": "medium",
+      "reproducible": true,
+      "evidenceKey": "policy-drift",
+      "wrongNotes": "",
+      "missingNotes": "Repeated missing checklist",
+      "taskSummary": "Review target"
+    }
+  ]
+}
+"@
+
+        & python $scriptPath --root $tempRoot --snapshot-file $snapshotPath --proposal-file $proposalPath | Out-Null
+        Assert-Equal 0 $LASTEXITCODE "Writer should succeed for policy case $($case.target)."
+        $proposal = Get-Content -LiteralPath $proposalPath -Raw | ConvertFrom-Json
+        Assert-Equal $case.expectedRecommendation $proposal.recommendation "$($case.target) should respect manifest evolution policy."
+        Assert-Equal $case.expectedPatternCount $proposal.patternCount "$($case.target) should compute pattern count according to policy."
+        Assert-Equal $case.expectedUpdates $proposal.updates.Count "$($case.target) should not generate auto-apply patch updates."
     }
 
     Write-Output 'review-analyze evolution tests passed.'

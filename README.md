@@ -37,13 +37,13 @@ powershell -ExecutionPolicy Bypass -File .agents/skills/codex-structure-validate
 The scaffold is organized in six layers:
 
 - Step 1 `codex-agents-md`: `AGENTS.md` keeps repository-level guidance concise.
-- Step 2 `codex.config`: `.codex/config.toml` stores deterministic behavior, validation, audit, guards, and agent registration.
+- Step 2 `codex.config`: `.codex/config.toml` stores deterministic behavior, validation, audit, guards, and agent registry entries.
 - Step 3 `codex-hook`: `.codex/hooks/` stores project hook wrappers and shared hook logic in `lib/`.
 - Step 4 `codex-mcp`: `.codex/mcp/` stores MCP configuration snippets or templates.
 - Step 5 `codex-skill`: `.agents/skills/<name>/SKILL.md` stores reusable runtime procedures.
 - Step 6 `codex-subagent`: `.agents/skills/<name>/subagents/` stores focused subagent prompts owned by each skill.
 
-When `-Fix` is used, `.codex/config.toml` is synchronized from `.codex/agents/*.toml`, and missing scaffold directories are created with `.gitkeep` markers when needed.
+When `-Fix` is used, `.codex/config.toml` is synchronized from `.codex/agents/*.toml` plus `.codex/agent-metadata/*.toml`, and missing scaffold directories are created with `.gitkeep` markers when needed.
 
 ## Project Event Hook
 
@@ -58,7 +58,7 @@ powershell -ExecutionPolicy Bypass -File .codex/hooks/log-agent-event.ps1 `
   -Status completed
 ```
 
-The wrapper writes one compact text row per execution through the shared library in `.codex/hooks/lib/`. The default event file name is `yyyyMMdd_filename.log` under `reports/audit/`, and the hook runs only when `[hooks.project].enabled = true` and `agents.<name>.hooks_project_enabled = true`.
+The wrapper writes one compact text row per execution through the shared library in `.codex/hooks/lib/`. The default event file name is `yyyyMMdd_filename.log` under `reports/audit/`, and the hook runs only when `[hooks.project].enabled = true` and `agent_registry.<name>.hooks_project_enabled = true`.
 
 Log format follows a Log4j-like shape with logfmt fields after `|`:
 

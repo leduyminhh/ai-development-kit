@@ -1,4 +1,4 @@
-# environment Global runtime access
+﻿# environment Global runtime access
 [environment]
 network_access = true
 
@@ -97,68 +97,79 @@ Confirm? (yes/no)
 """
 
 # ------------ Agents ------------
-[agents.codex-structure-validate]
+# agent_registry.codex-structure-validate Structure validator agent
+[agent_registry.codex-structure-validate]
 path = ".codex/agents/codex-structure-validate.toml"
 read_only = true
 enabled = true
 hooks_project_enabled = false
-
-[agents.test-automation-validate]
-path = ".codex/agents/test-automation-validate.toml"
-read_only = false
-enabled = true
-hooks_project_enabled = true
-
-[agents.code-design-pattern]
+# agent_registry.code-design-pattern Design pattern agent
+[agent_registry.code-design-pattern]
 path = ".codex/agents/code-design-pattern.toml"
 read_only = false
 enabled = true
 hooks_project_enabled = true
 
-[agents.diagram-generate]
+# agent_registry.diagram-generate PlantUML diagram agent
+[agent_registry.diagram-generate]
 path = ".codex/agents/diagram-generate.toml"
 read_only = false
 enabled = true
 hooks_project_enabled = false
 
-[agents.doc-write]
+# agent_registry.doc-write Documentation writer agent
+[agent_registry.doc-write]
 path = ".codex/agents/doc-write.toml"
 read_only = false
 enabled = true
 hooks_project_enabled = false
 
-[agents.git-workflow-design]
+# agent_registry.git-workflow-design Git workflow agent
+[agent_registry.git-workflow-design]
 path = ".codex/agents/git-workflow-design.toml"
 read_only = false
 enabled = true
 hooks_project_enabled = false
 
-[agents.java-analyze]
+# agent_registry.java-analyze Java architecture agent
+[agent_registry.java-analyze]
 path = ".codex/agents/java-analyze.toml"
 read_only = false
 enabled = true
 hooks_project_enabled = true
 
-[agents.test-qa-review]
-path = ".codex/agents/test-qa-review.toml"
-read_only = false
-enabled = true
-hooks_project_enabled = true
-
-[agents.react-code-generate]
+# agent_registry.react-code-generate React implementation agent
+[agent_registry.react-code-generate]
 path = ".codex/agents/react-code-generate.toml"
 read_only = false
 enabled = true
 hooks_project_enabled = true
 
-[agents.skill-evolution-review]
+# agent_registry.security-code-review Security review agent
+[agent_registry.security-code-review]
+path = ".codex/agents/security-code-review.toml"
+read_only = false
+enabled = true
+hooks_project_enabled = true
+
+# agent_registry.skill-evolution-review Skill evolution review agent
+[agent_registry.skill-evolution-review]
 path = ".codex/agents/skill-evolution-review.toml"
 read_only = false
 enabled = true
 hooks_project_enabled = true
 
-[agents.security-code-review]
-path = ".codex/agents/security-code-review.toml"
+# agent_registry.test-automation-validate Test automation agent
+[agent_registry.test-automation-validate]
+path = ".codex/agents/test-automation-validate.toml"
 read_only = false
 enabled = true
 hooks_project_enabled = true
+
+# agent_registry.test-qa-review QA reviewer agent
+[agent_registry.test-qa-review]
+path = ".codex/agents/test-qa-review.toml"
+read_only = false
+enabled = true
+hooks_project_enabled = true
+

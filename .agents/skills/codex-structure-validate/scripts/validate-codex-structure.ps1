@@ -17,6 +17,7 @@ function Test-AgentReadOnly {
 
     return (
         $TomlText -match '(?m)^\s*mode\s*=\s*"read-only"\s*$' -or
+        $TomlText -match '(?m)^\s*sandbox_mode\s*=\s*"read-only"\s*$' -or
         $TomlText -match '(?m)^\s*can_write\s*=\s*false\s*$' -or
         $TomlText -match '(?m)^\s*must_remain_read_only\s*=\s*true\s*$'
     )
@@ -40,7 +41,7 @@ function Get-AgentRegistrationSummary {
     }
 }
 
-function Get-AgentRegistrationBlock {
+function Get-AgentRegistryBlock {
     param(
         [string]$AgentName,
         [string]$AgentPath,
@@ -56,8 +57,8 @@ function Get-AgentRegistrationBlock {
     }
 
     return @"
-# agents.$AgentName $Summary
-[agents.$AgentName]
+# agent_registry.$AgentName $Summary
+[agent_registry.$AgentName]
 path = "$AgentPath"
 read_only = $readOnlyValue
 enabled = true
@@ -65,7 +66,7 @@ hooks_project_enabled = $hooksProjectEnabledValue
 "@
 }
 
-function Sync-AgentRegistration {
+function Sync-AgentRegistryEntry {
     param(
         [string]$ConfigText,
         [string]$AgentName,
@@ -75,8 +76,8 @@ function Sync-AgentRegistration {
         [bool]$HooksProjectEnabled = $false
     )
 
-    $block = Get-AgentRegistrationBlock -AgentName $AgentName -AgentPath $AgentPath -ReadOnly $ReadOnly -Summary $Summary -HooksProjectEnabled $HooksProjectEnabled
-    $sectionPattern = "(?ms)(?:^#\s*agents\.$([regex]::Escape($AgentName)).*?\r?\n)?^\[agents\.$([regex]::Escape($AgentName))\]\s*.*?(?=^#\s|\z)"
+    $block = Get-AgentRegistryBlock -AgentName $AgentName -AgentPath $AgentPath -ReadOnly $ReadOnly -Summary $Summary -HooksProjectEnabled $HooksProjectEnabled
+    $sectionPattern = "(?ms)(?:^#\s*(?:agent_registry|agents)\.$([regex]::Escape($AgentName)).*?\r?\n)?^\[(?:agent_registry|agents)\.$([regex]::Escape($AgentName))\]\s*.*?(?=^#\s|\z)"
 
     if ([regex]::IsMatch($ConfigText, $sectionPattern)) {
         return [regex]::Replace($ConfigText, $sectionPattern, ($block.TrimEnd() + [Environment]::NewLine))
@@ -84,6 +85,28 @@ function Sync-AgentRegistration {
 
     $separator = if ($ConfigText.EndsWith("`r`n`r`n") -or $ConfigText.EndsWith("`n`n")) { '' } elseif ($ConfigText.EndsWith("`r`n") -or $ConfigText.EndsWith("`n")) { [Environment]::NewLine } else { [Environment]::NewLine + [Environment]::NewLine }
     return $ConfigText + $separator + $block.TrimEnd() + [Environment]::NewLine
+}
+
+function Get-AgentMetadataBlock {
+    param(
+        [string]$AgentName,
+        [bool]$ReadOnly,
+        [string]$Summary,
+        [bool]$HooksProjectEnabled = $false
+    )
+
+    $readOnlyValue = if ($ReadOnly) { 'true' } else { 'false' }
+    $hooksProjectEnabledValue = if ($HooksProjectEnabled) { 'true' } else { 'false' }
+    if ([string]::IsNullOrWhiteSpace($Summary)) {
+        $Summary = Get-AgentRegistrationSummary -AgentName $AgentName
+    }
+
+    return @"
+name = "$AgentName"
+summary = "$Summary"
+read_only = $readOnlyValue
+hooks_project_enabled = $hooksProjectEnabledValue
+"@
 }
 
 function Get-DefaultConfigText {
@@ -206,6 +229,8 @@ $requireExplicitProtectedScanAllow = Get-CodexTomlBoolValue -TomlText $configTex
 
 $codexRoot = Join-Path $resolvedRoot '.codex'
 Ensure-ScaffoldDirectory -Path $codexRoot -Label 'Codex root' -TrackWhenEmpty $false
+$agentMetadataRoot = Join-Path $resolvedRoot '.codex/agent-metadata'
+Ensure-ScaffoldDirectory -Path $agentMetadataRoot -Label 'Agent metadata root' -TrackWhenEmpty $true
 
 $agentsPath = Join-Path $resolvedRoot 'AGENTS.md'
 if (Test-Path -LiteralPath $agentsPath) {
@@ -305,6 +330,7 @@ if (Test-Path -LiteralPath $codexAgentsRoot) {
             $agentRegistrations.Add([pscustomobject]@{
                 Name                = $agentName
                 Path                = ".codex/agents/$($file.Name)"
+                MetadataPath        = ".codex/agent-metadata/$($file.BaseName).toml"
                 ReadOnly            = (Test-AgentReadOnly -TomlText $content)
                 Summary             = (Get-AgentRegistrationSummary -AgentName $agentName)
                 HooksProjectEnabled = $false
@@ -356,14 +382,47 @@ if (Test-Path -LiteralPath $configPath) {
     }
 
     foreach ($registration in $agentRegistrations) {
-        $registrationPattern = "(?ms)^\[agents\.$([regex]::Escape($registration.Name))\]\s*.*?path\s*=\s*`"$([regex]::Escape($registration.Path))`""
-        if ($config -match $registrationPattern) {
-            $findings.Add((New-Finding 'pass' "Agent config registration exists: $($registration.Name)"))
+        $metadataRelativePath = $registration.MetadataPath
+        $metadataAbsolutePath = Join-Path $resolvedRoot $metadataRelativePath
+        $summary = $registration.Summary
+        $readOnly = [bool]$registration.ReadOnly
+        $hooksProjectEnabled = [bool]$registration.HooksProjectEnabled
+
+        if (Test-Path -LiteralPath $metadataAbsolutePath) {
+            $metadataText = Get-Content -LiteralPath $metadataAbsolutePath -Raw
+            $metadataName = Get-CodexTomlStringValue -TomlText $metadataText -Key 'name'
+            if ([string]::IsNullOrWhiteSpace($metadataName)) {
+                $findings.Add((New-Finding 'fail' "Agent metadata is missing name: $metadataRelativePath"))
+                continue
+            }
+            if ($metadataName -ne $registration.Name) {
+                $findings.Add((New-Finding 'fail' "Agent metadata name '$metadataName' must match agent entry '$($registration.Name)': $metadataRelativePath"))
+                continue
+            }
+
+            $readOnly = Get-CodexTomlBoolValue -TomlText $metadataText -Key 'read_only' -Default $readOnly
+            $hooksProjectEnabled = Get-CodexTomlBoolValue -TomlText $metadataText -Key 'hooks_project_enabled' -Default $hooksProjectEnabled
+            $metadataSummary = Get-CodexTomlStringValue -TomlText $metadataText -Key 'summary'
+            if (-not [string]::IsNullOrWhiteSpace($metadataSummary)) {
+                $summary = $metadataSummary
+            }
+            $findings.Add((New-Finding 'pass' "Agent metadata exists: $metadataRelativePath"))
         } elseif ($Fix) {
-            $config = Sync-AgentRegistration -ConfigText $config -AgentName $registration.Name -AgentPath $registration.Path -ReadOnly $registration.ReadOnly -Summary $registration.Summary -HooksProjectEnabled $registration.HooksProjectEnabled
-            $findings.Add((New-Finding 'pass' "Agent config registration synced: $($registration.Name)"))
+            $metadataContent = Get-AgentMetadataBlock -AgentName $registration.Name -ReadOnly $readOnly -Summary $summary -HooksProjectEnabled $hooksProjectEnabled
+            Set-Content -LiteralPath $metadataAbsolutePath -Value ($metadataContent.TrimEnd() + [Environment]::NewLine) -Encoding utf8
+            $findings.Add((New-Finding 'pass' "Agent metadata scaffold created: $metadataRelativePath"))
         } else {
-            $findings.Add((New-Finding 'warning' "Agent config registration missing: $($registration.Name). Run validator with -Fix to sync .codex/config.toml."))
+            $findings.Add((New-Finding 'warning' "Agent metadata missing: $metadataRelativePath. Run validator with -Fix to create it."))
+        }
+
+        $registrationPattern = "(?ms)^\[agent_registry\.$([regex]::Escape($registration.Name))\]\s*.*?path\s*=\s*`"$([regex]::Escape($registration.Path))`""
+        if ($config -match $registrationPattern) {
+            $findings.Add((New-Finding 'pass' "Agent registry entry exists: $($registration.Name)"))
+        } elseif ($Fix) {
+            $config = Sync-AgentRegistryEntry -ConfigText $config -AgentName $registration.Name -AgentPath $registration.Path -ReadOnly $readOnly -Summary $summary -HooksProjectEnabled $hooksProjectEnabled
+            $findings.Add((New-Finding 'pass' "Agent registry entry synced: $($registration.Name)"))
+        } else {
+            $findings.Add((New-Finding 'warning' "Agent registry entry missing: $($registration.Name). Run validator with -Fix to sync .codex/config.toml."))
         }
     }
 
@@ -375,7 +434,13 @@ if (Test-Path -LiteralPath $configPath) {
         New-Item -ItemType Directory -Path (Split-Path -Parent $configPath) -Force | Out-Null
         $config = Get-DefaultConfigText
         foreach ($registration in $agentRegistrations) {
-            $config = Sync-AgentRegistration -ConfigText $config -AgentName $registration.Name -AgentPath $registration.Path -ReadOnly $registration.ReadOnly -Summary $registration.Summary -HooksProjectEnabled $registration.HooksProjectEnabled
+            $metadataPath = Join-Path $resolvedRoot $registration.MetadataPath
+            if (-not (Test-Path -LiteralPath $metadataPath)) {
+                $metadataContent = Get-AgentMetadataBlock -AgentName $registration.Name -ReadOnly ([bool]$registration.ReadOnly) -Summary $registration.Summary -HooksProjectEnabled ([bool]$registration.HooksProjectEnabled)
+                Set-Content -LiteralPath $metadataPath -Value ($metadataContent.TrimEnd() + [Environment]::NewLine) -Encoding utf8
+                $findings.Add((New-Finding 'pass' "Agent metadata scaffold created: $($registration.MetadataPath)"))
+            }
+            $config = Sync-AgentRegistryEntry -ConfigText $config -AgentName $registration.Name -AgentPath $registration.Path -ReadOnly $registration.ReadOnly -Summary $registration.Summary -HooksProjectEnabled $registration.HooksProjectEnabled
         }
         Set-Content -LiteralPath $configPath -Value $config -Encoding utf8
         $findings.Add((New-Finding 'pass' '.codex/config.toml was created and synced from the standard scaffold.'))

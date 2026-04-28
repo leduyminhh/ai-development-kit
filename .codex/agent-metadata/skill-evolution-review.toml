@@ -1,0 +1,4 @@
+name = "skill-evolution-review"
+summary = "Skill evolution review agent"
+read_only = false
+hooks_project_enabled = true

@@ -145,10 +145,39 @@ validation_commands = []
     }
     Assert-Equal 1 $LASTEXITCODE 'Apply should fail when proposal exceeds max_files_per_patch.'
 
+    $validationFailProposal = Join-Path $tempRoot 'validation-fail-proposal.json'
+    Set-Content -LiteralPath $validationFailProposal -Encoding utf8 -Value @'
+{
+  "approvalStatus": "approved",
+  "targetName": "demo-skill",
+  "validationCommands": ["exit 7"],
+  "updates": [
+    {
+      "path": ".agents/skills/demo-skill/SKILL.md",
+      "content": "# Broken content"
+    }
+  ]
+}
+'@
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        & python $scriptPath --root $tempRoot --proposal-file $validationFailProposal 2>$null | Out-Null
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+    Assert-Equal 1 $LASTEXITCODE 'Apply should fail when a proposal validation command fails.'
+    Assert-Equal '# Old content' (Get-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/demo-skill/SKILL.md') -Raw).Trim() 'Apply should roll back file content when validation fails.'
+    $failedProposal = Get-Content -LiteralPath $validationFailProposal -Raw | ConvertFrom-Json
+    Assert-Equal 'approved' $failedProposal.approvalStatus 'Validation failure should not mark the proposal as applied.'
+
     $goodProposal = Join-Path $tempRoot 'good-proposal.json'
     Set-Content -LiteralPath $goodProposal -Encoding utf8 -Value @'
 {
   "approvalStatus": "approved",
+  "targetName": "demo-skill",
+  "validationCommands": [],
   "updates": [
     {
       "path": ".agents/skills/demo-skill/SKILL.md",

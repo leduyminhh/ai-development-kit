@@ -89,8 +89,9 @@ def main() -> int:
         target_type = str(entries[0].get("targetType") or "skill")
 
         now = now_ho_chi_minh()
-        proposal_file = proposal_root / f"{now.strftime('%Y%m%d')}_{target_agent}.json"
-        snapshot_file = proposal_root / f"{now.strftime('%Y%m%d')}_{target_agent}.snapshot.json"
+        timestamp = now.strftime('%Y%m%d_%H%M%S_%f')
+        proposal_file = proposal_root / f"{timestamp}_{target_agent}.json"
+        snapshot_file = proposal_root / f"{timestamp}_{target_agent}.snapshot.json"
         write_state(root, state_path, "observe", "completed", "feedback_group_loaded", target_agent=target_agent, feedback_count=feedback_count, reviewer_agent=reviewer_agent)
         write_state(root, state_path, "diagnose", "completed", "feedback_grouped", target_agent=target_agent, feedback_count=feedback_count, reviewer_agent=reviewer_agent)
 

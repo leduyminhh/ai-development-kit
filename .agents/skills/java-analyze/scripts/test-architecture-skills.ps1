@@ -18,7 +18,7 @@ function Assert-FileContains {
 $onionRoot = Join-Path $Root '.agents/skills/architecture-onion-design'
 $sharedRoot = Join-Path $Root '.agents/skills/code-shared-design'
 $javaSkill = Join-Path $Root '.agents/skills/java-analyze/SKILL.md'
-$javaMetadata = Join-Path $Root '.agents/skills/java-analyze/agents/openai.yaml'
+$javaMetadata = Join-Path $Root '.agents/skills/java-analyze/metadata/openai.yaml'
 $javaAgent = Join-Path $Root '.codex/agents/java-analyze.toml'
 
 Assert-FileContains -Path (Join-Path $onionRoot 'SKILL.md') -Pattern 'name:\s*architecture-onion-design' 'Onion skill must have valid frontmatter.'

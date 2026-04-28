@@ -148,6 +148,9 @@ function Get-NameFromPath {
     if ($relativePath -match '^\.codex/agents/([^/]+)\.toml$') {
         return [pscustomobject]@{ Kind = 'agent'; Name = $Matches[1]; RelativePath = $relativePath }
     }
+    if ($relativePath -match '^\.codex/agent-metadata/([^/]+)\.toml$') {
+        return [pscustomobject]@{ Kind = 'agent-metadata'; Name = $Matches[1]; RelativePath = $relativePath }
+    }
     if ($relativePath -match '^\.codex/hooks/([^/]+)\.ps1$') {
         return [pscustomobject]@{ Kind = 'hook'; Name = $Matches[1]; RelativePath = $relativePath }
     }
@@ -180,7 +183,7 @@ function Get-TargetFiles {
         return
     }
 
-    foreach ($searchRoot in @('.codex/agents', '.codex/hooks', '.agents/skills', 'workflows', 'scripts')) {
+    foreach ($searchRoot in @('.codex/agents', '.codex/agent-metadata', '.codex/hooks', '.agents/skills', 'workflows', 'scripts')) {
         $fullSearchRoot = Join-Path $Root $searchRoot
         if (Test-Path -LiteralPath $fullSearchRoot) {
             Get-ChildItem -LiteralPath $fullSearchRoot -Recurse -File -Include '*.toml', '*.md', '*.ps1', '*.py' -ErrorAction SilentlyContinue
@@ -209,9 +212,9 @@ foreach ($file in $targets) {
         $findings.Add((New-Finding 'fail' $target.RelativePath "$($target.Kind) name violates project naming rules: $($target.Name)"))
     }
 
-    if ($target.Kind -in @('agent', 'skill', 'workflow')) {
+    if ($target.Kind -in @('agent', 'agent-metadata', 'skill', 'workflow')) {
         $content = Get-Content -LiteralPath $file.FullName -Raw
-        $declaredName = if ($target.Kind -eq 'agent') {
+        $declaredName = if ($target.Kind -in @('agent', 'agent-metadata')) {
             $match = [regex]::Match($content, '(?m)^\s*name\s*=\s*"([^"]+)"')
             if ($match.Success) { $match.Groups[1].Value } else { '' }
         } else {

@@ -113,10 +113,12 @@ requireApproval = true
     Add-Content -LiteralPath (Join-Path $tempRoot 'audit/skill-feedback/20260418_skill-feedback.jsonl') -Encoding utf8 -Value '{"timestamp":"2026-04-18T09:00:00+07:00","agentName":"java-analyze","skillNames":["java-analyze"],"targetType":"skill","targetName":"java-analyze","outcome":"mixed","severity":"medium","reproducible":true,"evidenceKey":"missing-async-transaction-checklist","taskSummary":"Review order orchestration","correctNotes":"Boundary review was useful","wrongNotes":"Missed transaction warning","missingNotes":"Need checklist for async retry"}'
     Add-Content -LiteralPath (Join-Path $tempRoot 'audit/skill-feedback/20260419_skill-feedback.jsonl') -Encoding utf8 -Value '{"timestamp":"2026-04-19T09:00:00+07:00","agentName":"java-analyze","skillNames":["java-analyze"],"targetType":"skill","targetName":"java-analyze","outcome":"mixed","severity":"medium","reproducible":true,"evidenceKey":"missing-async-transaction-checklist","taskSummary":"Review invoice orchestration","correctNotes":"Boundary review was useful","wrongNotes":"Missed transaction warning","missingNotes":"Need checklist for async retry"}'
 
+    Start-Sleep -Seconds 1
     $output = & python $scriptPath --root $tempRoot
     Assert-True (($output -join "`n") -match 'Created skill upgrade proposal') 'Cycle should still emit proposal output for repeated evidence.'
 
     $proposalFiles = @(Get-ChildItem -LiteralPath (Join-Path $tempRoot 'audit/skill-upgrade') -Filter '*.json' -File | Sort-Object LastWriteTime)
+    Assert-Equal 2 $proposalFiles.Count 'Cycle should keep both proposal files when the same target is reviewed multiple times on the same day.'
     $proposal = Get-Content -LiteralPath $proposalFiles[-1].FullName -Raw | ConvertFrom-Json
     Assert-Equal 'safe-auto-apply' $proposal.recommendation 'Repeated evidence should recommend safe auto apply when scope is small.'
     Assert-Equal 3 $proposal.patternCount 'Repeated evidence should count matching patterns.'

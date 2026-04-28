@@ -30,19 +30,19 @@ defaultLogger = "codex.project"
 defaultTimezone = "Asia/Saigon"
 agentHook = ".codex/hooks/log-agent-event.ps1"
 
-[agents.java-analyze]
+[agent_registry.java-analyze]
 path = ".codex/agents/java-analyze.toml"
 read_only = false
 enabled = true
 hooks_project_enabled = true
 
-[agents.react-code-generate]
+[agent_registry.react-code-generate]
 path = ".codex/agents/react-code-generate.toml"
 read_only = false
 enabled = true
 hooks_project_enabled = true
 
-[agents.test-qa-review]
+[agent_registry.test-qa-review]
 path = ".codex/agents/test-qa-review.toml"
 read_only = false
 enabled = true
@@ -159,7 +159,7 @@ defaultLogger = "codex.project"
 defaultTimezone = "Asia/Saigon"
 agentHook = ".codex/hooks/log-agent-event.ps1"
 
-[agents.java-analyze]
+[agent_registry.java-analyze]
 path = ".codex/agents/java-analyze.toml"
 read_only = false
 enabled = true
@@ -188,7 +188,7 @@ defaultLogger = "codex.project"
 defaultTimezone = "Asia/Saigon"
 agentHook = ".codex/hooks/log-agent-event.ps1"
 
-[agents.java-analyze]
+[agent_registry.java-analyze]
 path = ".codex/agents/java-analyze.toml"
 read_only = false
 enabled = true

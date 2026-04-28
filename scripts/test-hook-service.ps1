@@ -60,7 +60,7 @@ defaultTimezone = "Asia/Saigon"
 agentHook = ".codex/hooks/log-agent-event.ps1"
 reloadOnConfigChange = true
 
-[agents.java-analyze]
+[agent_registry.java-analyze]
 path = ".codex/agents/java-analyze.toml"
 read_only = false
 enabled = true
@@ -122,7 +122,7 @@ defaultTimezone = "Asia/Saigon"
 agentHook = ".codex/hooks/log-agent-event.ps1"
 reloadOnConfigChange = true
 
-[agents.java-analyze]
+[agent_registry.java-analyze]
 path = ".codex/agents/java-analyze.toml"
 read_only = false
 enabled = true

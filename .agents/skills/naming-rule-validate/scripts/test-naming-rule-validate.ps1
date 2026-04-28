@@ -13,6 +13,7 @@ $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("codex-naming-test-" + 
 try {
     New-Item -ItemType Directory -Path $tempRoot -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.codex/agents') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $tempRoot '.codex/agent-metadata') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.codex/hooks') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.agents/skills/java-review/subagents') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.agents/skills/skill-evolution-review/scripts') -Force | Out-Null
@@ -21,7 +22,9 @@ try {
     New-Item -ItemType Directory -Path (Join-Path $tempRoot 'workflows/workflow-skill-evolution-review') -Force | Out-Null
 
     Set-Content -LiteralPath (Join-Path $tempRoot '.codex/agents/java-review.toml') -Encoding utf8 -Value 'name = "java-review"'
+    Set-Content -LiteralPath (Join-Path $tempRoot '.codex/agent-metadata/java-review.toml') -Encoding utf8 -Value 'name = "java-review"'
     Set-Content -LiteralPath (Join-Path $tempRoot '.codex/agents/code-design-pattern.toml') -Encoding utf8 -Value 'name = "code-design-pattern"'
+    Set-Content -LiteralPath (Join-Path $tempRoot '.codex/agent-metadata/code-design-pattern.toml') -Encoding utf8 -Value 'name = "code-design-pattern"'
     Set-Content -LiteralPath (Join-Path $tempRoot '.codex/hooks/validate-workflow.ps1') -Encoding utf8 -Value '# valid hook'
     Set-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/java-review/SKILL.md') -Encoding utf8 -Value @'
 ---
@@ -108,14 +111,19 @@ description: Use when reviewing source code security.
 # Security Code Review
 '@
     Set-Content -LiteralPath (Join-Path $tempRoot '.codex/agents/security-code-review.toml') -Encoding utf8 -Value 'name = "security-code-review"'
+    Set-Content -LiteralPath (Join-Path $tempRoot '.codex/agent-metadata/security-code-review.toml') -Encoding utf8 -Value 'name = "security-code-review"'
     Set-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/java-review/subagents/skill-drift-review.md') -Encoding utf8 -Value '# Valid drift subagent'
 
-    & powershell -NoProfile -ExecutionPolicy Bypass -File $validator -Root $tempRoot -PathList '.codex/agents/java-review.toml|.codex/agents/code-design-pattern.toml|.codex/agents/security-code-review.toml|.agents/skills/java-review/SKILL.md|.agents/skills/java-review/subagents/java-api-contract-review.md|.agents/skills/java-review/subagents/skill-drift-review.md|.codex/hooks/validate-workflow.ps1|scripts/run-workflow-validate.ps1|.agents/skills/skill-evolution-review/scripts/add-skill-feedback.ps1|.agents/skills/skill-evolution-review/scripts/apply-skill-upgrade-proposal.py|.agents/skills/workflow-validate/scripts/validate-workflow.ps1|.agents/skills/diagram-wireframe-generate/SKILL.md|.agents/skills/test-automation-validate/SKILL.md|.agents/skills/java-analyze/SKILL.md|.agents/skills/architecture-onion-design/SKILL.md|.agents/skills/code-design-pattern/SKILL.md|.agents/skills/skill-evolution-review/SKILL.md|.agents/skills/security-code-review/SKILL.md|workflows/workflow-skill-evolution-review/WORKFLOW.md' | Out-Null
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $validator -Root $tempRoot -PathList '.codex/agents/java-review.toml|.codex/agents/code-design-pattern.toml|.codex/agents/security-code-review.toml|.codex/agent-metadata/java-review.toml|.codex/agent-metadata/code-design-pattern.toml|.codex/agent-metadata/security-code-review.toml|.agents/skills/java-review/SKILL.md|.agents/skills/java-review/subagents/java-api-contract-review.md|.agents/skills/java-review/subagents/skill-drift-review.md|.codex/hooks/validate-workflow.ps1|scripts/run-workflow-validate.ps1|.agents/skills/skill-evolution-review/scripts/add-skill-feedback.ps1|.agents/skills/skill-evolution-review/scripts/apply-skill-upgrade-proposal.py|.agents/skills/workflow-validate/scripts/validate-workflow.ps1|.agents/skills/diagram-wireframe-generate/SKILL.md|.agents/skills/test-automation-validate/SKILL.md|.agents/skills/java-analyze/SKILL.md|.agents/skills/architecture-onion-design/SKILL.md|.agents/skills/code-design-pattern/SKILL.md|.agents/skills/skill-evolution-review/SKILL.md|.agents/skills/security-code-review/SKILL.md|workflows/workflow-skill-evolution-review/WORKFLOW.md' | Out-Null
     Assert-True ($LASTEXITCODE -eq 0) 'Naming validator should pass valid agent, skill, subagent, workflow, hook, and script names.'
 
     Set-Content -LiteralPath (Join-Path $tempRoot '.codex/agents/java-reviewer.toml') -Encoding utf8 -Value 'name = "java-reviewer"'
     & powershell -NoProfile -ExecutionPolicy Bypass -File $validator -Root $tempRoot -Paths '.codex/agents/java-reviewer.toml' | Out-Null
     Assert-True ($LASTEXITCODE -eq 1) 'Naming validator should reject ambiguous role suffixes like java-reviewer.'
+
+    Set-Content -LiteralPath (Join-Path $tempRoot '.codex/agent-metadata/java-reviewer.toml') -Encoding utf8 -Value 'name = "java-reviewer"'
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $validator -Root $tempRoot -Paths '.codex/agent-metadata/java-reviewer.toml' | Out-Null
+    Assert-True ($LASTEXITCODE -eq 1) 'Naming validator should reject ambiguous role suffixes in agent metadata names.'
 
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.agents/skills/clean-code') -Force | Out-Null
     Set-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/clean-code/SKILL.md') -Encoding utf8 -Value @'

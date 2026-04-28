@@ -9,7 +9,7 @@ Review skill folders for Codex skill structure.
 - description contains trigger context
 - resources are progressively disclosed
 - no runtime skill nesting under domain folders
-- optional `agents/openai.yaml` aligns with the skill
+- optional `metadata/openai.yaml` aligns with the skill
 
 ## Output
 

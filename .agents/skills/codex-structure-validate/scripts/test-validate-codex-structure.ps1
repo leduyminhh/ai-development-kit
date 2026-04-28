@@ -17,6 +17,7 @@ try {
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.agents/skills/read-only-agent') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot 'workflows/workflow-skill-evolution-review') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.codex/agents') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $tempRoot '.codex/agent-metadata') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot 'docs/ignored-skill') -Force | Out-Null
 
     Set-Content -LiteralPath (Join-Path $tempRoot 'AGENTS.md') -Encoding utf8 -Value '# Test Agents'
@@ -30,10 +31,11 @@ skipProtectedPathsByDefault = true
 protectedScanPaths = ["docs/", "reports/"]
 requireExplicitAllow = true
 
-[agents.existing-agent]
+[agent_registry.existing-agent]
 path = ".codex/agents/existing-agent.toml"
 read_only = false
 enabled = true
+hooks_project_enabled = false
 '@
 
     Set-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/new-agent/SKILL.md') -Encoding utf8 -Value @'
@@ -75,11 +77,18 @@ Use the new-agent skill.
     Set-Content -LiteralPath (Join-Path $tempRoot '.codex/agents/read-only-agent.toml') -Encoding utf8 -Value @'
 name = "read-only-agent"
 description = "Read-only test agent"
-mode = "read-only"
+model = "gpt-5.4"
+sandbox_mode = "read-only"
 
 developer_instructions = """
 Use the read-only-agent skill.
 """
+'@
+    Set-Content -LiteralPath (Join-Path $tempRoot '.codex/agent-metadata/new-agent.toml') -Encoding utf8 -Value @'
+name = "new-agent"
+summary = "New agent metadata"
+read_only = false
+hooks_project_enabled = true
 '@
 
     & powershell -NoProfile -ExecutionPolicy Bypass -File $validator -Root $tempRoot -Fix | Out-Null
@@ -93,6 +102,7 @@ Use the read-only-agent skill.
     Assert-True ($LASTEXITCODE -eq 1) 'Validator should scan protected docs only when explicitly allowed.'
 
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.codex/agents')) 'Validator -Fix should ensure Step 1 .codex/agents exists.'
+    Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.codex/agent-metadata')) 'Validator -Fix should ensure agent metadata root exists.'
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.codex/config.toml')) 'Validator -Fix should ensure Step 2 .codex/config.toml exists.'
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.codex/hooks')) 'Validator -Fix should ensure Step 3 .codex/hooks exists.'
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.codex/hooks/.gitkeep')) 'Validator -Fix should make empty hooks scaffold trackable.'
@@ -101,16 +111,22 @@ Use the read-only-agent skill.
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.agents/skills')) 'Validator -Fix should ensure skills root exists.'
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.agents/skills/new-agent/subagents')) 'Validator -Fix should ensure skill subagents exists.'
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.agents/skills/read-only-agent/subagents')) 'Validator -Fix should ensure read-only skill subagents exists.'
+    Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.codex/agent-metadata/read-only-agent.toml')) 'Validator -Fix should create missing metadata from the read-only agent entry.'
 
     $config = Get-Content -LiteralPath (Join-Path $tempRoot '.codex/config.toml') -Raw
-    Assert-True ($config.Contains('[agents.existing-agent]')) 'Existing agent registration should be preserved.'
-    Assert-True ($config.Contains('[agents.new-agent]')) 'New agent should be registered in config.'
+    Assert-True ($config.Contains('[agent_registry.existing-agent]')) 'Existing agent registration should be preserved under agent_registry.'
+    Assert-True ($config.Contains('[agent_registry.new-agent]')) 'New agent should be registered in config.'
     Assert-True ($config.Contains('path = ".codex/agents/new-agent.toml"')) 'New agent path should be synced.'
-    Assert-True ($config.Contains('[agents.read-only-agent]')) 'Read-only agent should be registered in config.'
+    Assert-True ($config.Contains('[agent_registry.read-only-agent]')) 'Read-only agent should be registered in config.'
     Assert-True ($config.Contains('path = ".codex/agents/read-only-agent.toml"')) 'Read-only agent path should be synced.'
-    Assert-True ($config.Contains('hooks_project_enabled = false')) 'Validator should sync hooks_project_enabled = false by default for agents.'
+    Assert-True ($config.Contains('hooks_project_enabled = true')) 'Validator should sync hooks_project_enabled from agent metadata.'
+    Assert-True ($config.Contains('hooks_project_enabled = false')) 'Validator should sync hooks_project_enabled = false by default when metadata does not override it.'
     Assert-True ($config.Contains("read_only = true`r`nenabled = true") -or $config.Contains("read_only = true`nenabled = true")) 'Read-only agent should be synced as read_only true.'
     Assert-True ($config.Contains("read_only = false`r`nenabled = true") -or $config.Contains("read_only = false`nenabled = true")) 'Writable agent should be synced as read_only false.'
+
+    $generatedMetadata = Get-Content -LiteralPath (Join-Path $tempRoot '.codex/agent-metadata/read-only-agent.toml') -Raw
+    Assert-True ($generatedMetadata.Contains('name = "read-only-agent"')) 'Generated metadata should declare the agent name.'
+    Assert-True ($generatedMetadata.Contains('read_only = true')) 'Generated metadata should persist read-only state.'
 
     New-Item -ItemType Directory -Path $emptyRoot -Force | Out-Null
     & powershell -NoProfile -ExecutionPolicy Bypass -File $validator -Root $emptyRoot -Fix | Out-Null
@@ -132,6 +148,8 @@ Use the read-only-agent skill.
     Assert-True ($emptyConfig.Contains('agentHook = ".codex/hooks/log-agent-event.ps1"')) 'Generated config should point to the agent hook wrapper.'
     Assert-True ($emptyConfig.Contains('reloadOnConfigChange = true')) 'Generated config should enable hook config auto reload.'
     Assert-True ($emptyConfig.Contains('[diagram.writer]')) 'Generated config should include diagram writer section.'
+    Assert-True (Test-Path -LiteralPath (Join-Path $emptyRoot '.codex/agent-metadata')) 'Validator -Fix should scaffold the agent metadata root for empty repos.'
+    Assert-True (Test-Path -LiteralPath (Join-Path $emptyRoot '.codex/agent-metadata/.gitkeep')) 'Validator -Fix should make empty agent metadata scaffold trackable.'
 
     Write-Output 'validate-codex-structure tests passed'
 } finally {

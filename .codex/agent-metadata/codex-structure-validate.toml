@@ -1,0 +1,27 @@
+name = "codex-structure-validate"
+summary = "Structure validator agent"
+read_only = true
+hooks_project_enabled = false
+
+[capabilities]
+can_read = true
+can_write = false
+can_delete = false
+can_execute_validator = true
+can_generate_inline_report = true
+
+[scope]
+include = [
+  "AGENTS.md",
+  ".codex/",
+  ".agents/skills/",
+  "docs/",
+  "reports/"
+]
+
+[rules]
+must_remain_read_only = true
+must_not_modify_files = true
+must_report_findings_inline = true
+must_respect_protected_paths_policy = true
+must_not_generate_artifacts_in_protected_paths_without_confirmation = true

@@ -14,10 +14,11 @@ Validate the repository's Codex concepts and structure. Do not implement domain 
 ## Validation Categories
 
 - `AGENTS.md`: concise guidance, setup/test commands, no domain-heavy procedure dumps, no contradictions.
-- Skills: `.agents/skills/<name>/SKILL.md`, trigger-style `description`, progressive disclosure through `references/`, `scripts/`, `assets/`, and optional `agents/openai.yaml`.
+- Skills: `.agents/skills/<name>/SKILL.md`, trigger-style `description`, progressive disclosure through `references/`, `scripts/`, `assets/`, and optional `metadata/openai.yaml`.
 - Workflows: `workflows/<name>/WORKFLOW.md` with frontmatter `name`, `description`, and a stable entry contract for tasks or automation.
 - Agents: `.codex/agents/<name>.toml` with `name`, `description`, and `developer_instructions`; agents orchestrate and skills hold reusable procedures.
-- Config: `.codex/config.toml` for deterministic harness settings, profiles, sandbox, approval policy, MCP, and agent registration.
+- Agent metadata: `.codex/agent-metadata/<name>.toml` for repo governance such as `read_only`, hook gate, scope, or rules that should not break Desktop parsing.
+- Config: `.codex/config.toml` for deterministic harness settings, profiles, sandbox, approval policy, MCP, and `agent_registry` sync.
 - Hooks: optional guardrails, not a replacement for core instructions.
 - Orchestration: prefer Codex Agent -> Skill; do not design around `.codex/commands/` as stable.
 - Domain separation: Java, React, DevOps, and other domain skills stay outside the validator core; the validator may check skill shape but must not embed domain procedures.
