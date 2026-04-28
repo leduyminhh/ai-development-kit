@@ -155,3 +155,14 @@ paths = [
 commands = [
   "powershell -ExecutionPolicy Bypass -File .agents/skills/security-code-review/scripts/test-security-code-review.ps1"
 ]
+
+[test.skill.git-workflow-design]
+agents = ["git-workflow-design"]
+skills = ["git-workflow-design"]
+paths = [
+  ".agents/skills/git-workflow-design",
+  ".codex/agents/git-workflow-design.toml"
+]
+commands = [
+  "powershell -ExecutionPolicy Bypass -File .agents/skills/git-workflow-design/scripts/test-git-workflow-design.ps1"
+]
