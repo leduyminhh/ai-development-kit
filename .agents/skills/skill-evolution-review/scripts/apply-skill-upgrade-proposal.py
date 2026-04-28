@@ -165,6 +165,7 @@ def main() -> int:
         write_state(root, state_path, "upgrade", "completed", "proposal_applied", proposal_file=str(proposal_path), target_agent=str(proposal.get("targetAgent", "")), approved_by=args.approved_by)
     except Exception as exc:
         rollback_updates(root, backups)
+        write_state(root, state_path, "rollback", "completed", "proposal_updates_reverted", proposal_file=str(proposal_path), target_agent=str(proposal.get("targetAgent", "")), approved_by=args.approved_by)
         write_state(root, state_path, "upgrade", "failed", str(exc), proposal_file=str(proposal_path), target_agent=str(proposal.get("targetAgent", "")), approved_by=args.approved_by)
         raise SystemExit(str(exc))
 
