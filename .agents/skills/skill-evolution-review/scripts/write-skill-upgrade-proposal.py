@@ -265,6 +265,7 @@ def main() -> int:
         "feedbackCount": len(feedback_entries),
         "patternCount": pattern_count if actionable else 0,
         "evidenceBasis": evidence_basis,
+        "dominantEvidenceKey": dominant_evidence_key,
         "exceptionUsed": bool(fast_track and not repeated_pattern),
         "recommendation": recommendation,
         "riskLevel": "low" if recommendation == "safe-auto-apply" else "medium" if actionable else "unknown",

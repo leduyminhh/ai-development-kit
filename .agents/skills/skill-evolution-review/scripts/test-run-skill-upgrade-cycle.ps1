@@ -22,7 +22,7 @@ $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("codex-skill-cycle-" + 
 try {
     New-Item -ItemType Directory -Path $tempRoot -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.codex') -Force | Out-Null
-    New-Item -ItemType Directory -Path (Join-Path $tempRoot '.agents/skills/java-analyze') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $tempRoot '.agents/skills/java-analyze/scripts') -Force | Out-Null
     Set-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/java-analyze/SKILL.md') -Encoding utf8 -Value @'
 ---
 name: java-analyze
@@ -127,6 +127,60 @@ requireApproval = true
     Assert-True ($proposal.updates.Count -ge 1) 'Repeated evidence for java-analyze should generate a concrete update patch.'
     Assert-Equal '.agents/skills/java-analyze/SKILL.md' $proposal.updates[0].path 'Generated patch should stay within the java-analyze skill scope.'
     Assert-True (($proposal.updates[0].content | Out-String) -match 'async, retry, transaction, and idempotency') 'Generated patch should add the async transaction checklist guidance.'
+
+    Start-Sleep -Seconds 1
+    $output = & python $scriptPath --root $tempRoot
+    Assert-True (($output -join "`n") -match 'Skipped duplicate skill upgrade proposal') 'Cycle should skip creating a duplicate proposal for the same target and evidence.'
+    $proposalFiles = @(Get-ChildItem -LiteralPath (Join-Path $tempRoot 'audit/skill-upgrade') -Filter '*.json' -File | Sort-Object LastWriteTime)
+    Assert-Equal 2 $proposalFiles.Count 'Cycle should not create a third proposal when an equivalent pending proposal already exists.'
+
+    $stateFiles = @(Get-ChildItem -LiteralPath (Join-Path $tempRoot 'audit/skill-upgrade-state') -Filter '*.jsonl' -File | Sort-Object LastWriteTime)
+    $states = @()
+    foreach ($stateFile in $stateFiles) {
+        $states += @(Get-Content -LiteralPath $stateFile.FullName | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | ForEach-Object { $_ | ConvertFrom-Json })
+    }
+    Assert-True (@($states | Where-Object { $_.phase -eq 'notify' -and $_.status -eq 'pending' -and $_.reason -eq 'user_approval_required' }).Count -ge 1) 'Cycle should log a pending approval state for manual review flow.'
+    Assert-True (@($states | Where-Object { $_.phase -eq 'propose' -and $_.status -eq 'skipped' -and $_.reason -eq 'duplicate_proposal_skipped' }).Count -ge 1) 'Cycle should log duplicate proposal skips.'
+
+    Set-Content -LiteralPath (Join-Path $tempRoot '.codex/config.toml') -Encoding utf8 -Value @'
+[validation]
+validator_command = ""
+
+[skill_upgrade]
+enabled = true
+intervalDays = 14
+reviewerAgent = "skill-evolution-review"
+feedbackPath = "audit/skill-feedback"
+proposalPath = "audit/skill-upgrade"
+statePath = "audit/skill-upgrade-state"
+autoApply = true
+requireApproval = true
+'@
+    Set-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/java-analyze/scripts/test-architecture-skills.ps1') -Encoding utf8 -Value @'
+Write-Output "temp java architecture test passed"
+'@
+
+    Remove-Item -LiteralPath (Join-Path $tempRoot 'audit/skill-upgrade') -Recurse -Force
+    Remove-Item -LiteralPath (Join-Path $tempRoot 'audit/skill-upgrade-state') -Recurse -Force
+
+    $output = & python $scriptPath --root $tempRoot
+    Assert-True (($output -join "`n") -match 'Applied skill upgrade proposal') 'Cycle should auto-apply safe proposals when autoApply is enabled.'
+
+    $proposalFiles = @(Get-ChildItem -LiteralPath (Join-Path $tempRoot 'audit/skill-upgrade') -Filter '*.json' -File | Sort-Object LastWriteTime)
+    Assert-Equal 1 $proposalFiles.Count 'Auto-apply run should create one applied proposal file.'
+    $proposal = Get-Content -LiteralPath $proposalFiles[0].FullName -Raw | ConvertFrom-Json
+    Assert-Equal 'applied' $proposal.approvalStatus 'Auto-apply run should persist applied proposal status.'
+    Assert-Equal 'skill-evolution-review' $proposal.approvedBy 'Auto-apply run should mark the reviewer agent as approver.'
+    $javaSkill = Get-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/java-analyze/SKILL.md') -Raw
+    Assert-True ($javaSkill -match 'async, retry, transaction, and idempotency') 'Auto-apply run should write the approved skill patch.'
+
+    $stateFiles = @(Get-ChildItem -LiteralPath (Join-Path $tempRoot 'audit/skill-upgrade-state') -Filter '*.jsonl' -File | Sort-Object LastWriteTime)
+    $states = @()
+    foreach ($stateFile in $stateFiles) {
+        $states += @(Get-Content -LiteralPath $stateFile.FullName | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | ForEach-Object { $_ | ConvertFrom-Json })
+    }
+    Assert-True (@($states | Where-Object { $_.phase -eq 'approve' -and $_.status -eq 'completed' -and $_.reason -eq 'auto_approved_for_apply' }).Count -ge 1) 'Cycle should log auto approval when auto-apply is enabled.'
+    Assert-True (@($states | Where-Object { $_.phase -eq 'upgrade' -and $_.status -eq 'completed' -and $_.reason -eq 'proposal_auto_applied' }).Count -ge 1) 'Cycle should log completed auto-apply upgrades.'
 
     Write-Output 'run-skill-upgrade-cycle tests passed.'
 } finally {

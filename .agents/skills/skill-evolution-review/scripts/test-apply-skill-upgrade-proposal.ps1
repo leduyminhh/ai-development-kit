@@ -171,6 +171,12 @@ validation_commands = []
     Assert-Equal '# Old content' (Get-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/demo-skill/SKILL.md') -Raw).Trim() 'Apply should roll back file content when validation fails.'
     $failedProposal = Get-Content -LiteralPath $validationFailProposal -Raw | ConvertFrom-Json
     Assert-Equal 'approved' $failedProposal.approvalStatus 'Validation failure should not mark the proposal as applied.'
+    $stateFiles = @(Get-ChildItem -LiteralPath (Join-Path $tempRoot 'audit/skill-upgrade-state') -Filter '*.jsonl' -File -ErrorAction SilentlyContinue)
+    $applyStates = @()
+    foreach ($stateFile in $stateFiles) {
+        $applyStates += @(Get-Content -LiteralPath $stateFile.FullName | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | ForEach-Object { $_ | ConvertFrom-Json })
+    }
+    Assert-Equal 1 (@($applyStates | Where-Object { $_.phase -eq 'rollback' -and $_.status -eq 'completed' -and $_.reason -eq 'proposal_updates_reverted' })).Count 'Apply should log a completed rollback state when validation fails.'
 
     $goodProposal = Join-Path $tempRoot 'good-proposal.json'
     Set-Content -LiteralPath $goodProposal -Encoding utf8 -Value @'
