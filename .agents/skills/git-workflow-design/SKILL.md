@@ -1,13 +1,13 @@
 ---
 name: git-workflow-design
-description: Use when handling git branch, commit, merge, revert, release, hotfix, staging, push, or PR preparation workflows; must follow the repository commit and branch conventions, auto-generate commit message and Vietnamese description when the user does not provide them, avoid worktrees unless explicitly requested, and use subagent prompts for focused gitflow review.
+description: Use when the user asks to commit, push, create or switch branch, prepare PR, merge, revert, release, hotfix, or stage changes, even if `$git-workflow-design` is not explicitly named; must follow the repository commit and branch conventions, auto-generate commit message and Vietnamese description when the user does not provide them, avoid worktrees unless explicitly requested, and use subagent prompts for focused gitflow review.
 ---
 
 # Git Workflow
 
 ## Overview
 
-Use this skill for git operations and publishing flow. Inspect the worktree first, group related changes into sensible commit units, then generate branch, commit, push, and PR output without staging unrelated work.
+Use this skill for git operations and publishing flow. Trigger it both when the user explicitly invokes `$git-workflow-design` and when the request clearly implies git intent such as commit, push, branch creation or switching, PR preparation, merge, revert, release, hotfix, or staging. Inspect the worktree first, group related changes into sensible commit units, then generate branch, commit, push, and PR output without staging unrelated work.
 
 ## Operating Mode
 
