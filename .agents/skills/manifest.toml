@@ -125,3 +125,11 @@ ui_metadata = ".agents/skills/test-qa-review/agents/openai.yaml"
 agent_entry = ".codex/agents/test-qa-review.toml"
 registered_agent = "test-qa-review"
 kind = "entry"
+
+[[skill]]
+name = "youtube-transcript"
+skill_path = ".agents/skills/youtube-transcript/SKILL.md"
+ui_metadata = ".agents/skills/youtube-transcript/agents/openai.yaml"
+agent_entry = ""
+registered_agent = ""
+kind = "companion"

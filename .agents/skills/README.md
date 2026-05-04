@@ -55,6 +55,7 @@ Manifest khong thay the `config.toml`. No chi lam ro skill nao co agent entry, s
 | `security-code-review` | Review security risk theo OWASP/ASVS/CWE, auth, secrets, dependencies, va verification. |
 | `test-automation-validate` | Tao va verify automated tests. |
 | `test-qa-review` | QA review doc lap va regression/verification planning. |
+| `youtube-transcript` | Tai transcript, captions, subtitles, hoac transcript Whisper tu video YouTube. |
 
 ## Progressive Disclosure
 
