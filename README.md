@@ -80,6 +80,7 @@ Log format follows a Log4j-like shape with logfmt fields after `|`:
 | `code-design-pattern` | Tu van design pattern co approval gate. |
 | `architecture-onion-design` | Huong dan Onion Architecture va boundary review. |
 | `code-shared-design` | Thiet ke shared internal API, contract, shared logic module. |
+| `youtube-transcript` | Tai transcript, captions, subtitles, hoac transcript Whisper tu video YouTube. |
 
 This keeps each row as a string while preserving structured fields for future parsing and extension to validation or notification events.
 
@@ -108,6 +109,7 @@ Current domain capabilities:
 - `test-automation-validate`: automated unit, integration/API, E2E, fixture/data, coverage, and flaky test workflows.
 - `code-design-pattern`: design pattern advisor with approval gates before applying patterns.
 - `doc-write`: technical documentation for architecture, features, flows, and database/schema knowledge.
+- `youtube-transcript`: YouTube transcript, subtitle, caption, and Whisper fallback workflow using `yt-dlp`.
 
 Every domain skill or agent must pass `codex-structure-validate` before it is considered complete.
 
