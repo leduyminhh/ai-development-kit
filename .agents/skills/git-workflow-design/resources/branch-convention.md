@@ -41,6 +41,8 @@ Slug rules:
 
 - Use the commit scope/module first.
 - Add 2-5 words from the short summary.
+- Prefer English words for `<short-summary-slug>`, translating or summarizing Vietnamese intent into concise English when needed.
+- Use Vietnamese words in `<short-summary-slug>` only when the user explicitly asks to use Vietnamese branch names.
 - Use lowercase kebab-case.
 - Remove punctuation and unsafe shell characters.
 - Keep the branch short; prefer under 50 characters after the prefix.

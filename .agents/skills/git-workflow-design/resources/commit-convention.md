@@ -31,6 +31,7 @@ If the user does not provide a message, generate both title and body from the st
 
 - `What changed` and `Why changed` are required; each should contain 1 to 5 main bullets depending on the real size of the change
 - `Important notes / breaking impact` is optional and should appear only when there is a real migration note, compatibility concern, or breaking effect
+- Automatically include `Important notes / breaking impact` when the staged change adds, removes, renames, or changes configuration, environment variables, secrets placeholders, runtime flags, profiles, ports, URLs, credentials, feature toggles, deployment settings, or required local/CI setup values
 - Each main bullet may include optional detail lines prefixed with `•`
 - Leave one blank line between main bullets, but keep `•` detail lines directly under the parent bullet
 - Prefer 0 to 3 detail lines under a main bullet; if the main bullet is already clear, leave it without detail
