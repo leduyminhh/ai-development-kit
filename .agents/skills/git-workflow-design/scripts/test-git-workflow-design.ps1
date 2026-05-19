@@ -25,6 +25,10 @@ function Assert-FileNotContainsRegex {
 
 $skill = Join-Path $SkillRoot 'SKILL.md'
 $convention = Join-Path $SkillRoot 'resources/commit-convention.md'
+$bodyRules = Join-Path $SkillRoot 'resources/commit-convention/body-rules.md'
+$configEnvRules = Join-Path $SkillRoot 'resources/commit-convention/config-env-rules.md'
+$aiRules = Join-Path $SkillRoot 'resources/commit-convention/ai-generation-rules.md'
+$examples = Join-Path $SkillRoot 'resources/commit-convention/examples.md'
 
 Assert-FileContainsRegex -Path $skill -Pattern 'UTF-8 with diacritics' 'SKILL.md should require UTF-8 Vietnamese with diacritics.'
 Assert-FileContainsRegex -Path $skill -Pattern 'Branch \u0111\u1ec1 xu\u1ea5t:' 'SKILL.md should use Vietnamese labels with diacritics in the output format.'
@@ -32,8 +36,13 @@ Assert-FileContainsRegex -Path $skill -Pattern '\u2022' 'SKILL.md should use a r
 
 Assert-FileContainsRegex -Path $convention -Pattern 'Use Vietnamese with diacritics unless repository instructions say otherwise\.' 'Commit convention should explicitly require Vietnamese diacritics.'
 Assert-FileContainsRegex -Path $convention -Pattern 'Do not silently remove Vietnamese diacritics unless the user explicitly approves that compromise' 'Commit convention should forbid silently stripping diacritics.'
-Assert-FileContainsRegex -Path $convention -Pattern 'Th\u00eam installer \u0111\u1ec3 t\u1ea1o link skill t\u1eeb repo v\u00e0o th\u01b0 m\u1ee5c Codex local\.' 'Commit convention examples should be stored as readable UTF-8 Vietnamese.'
-Assert-FileContainsRegex -Path $convention -Pattern 'C\u00e1c job ho\u1eb7c script ngo\u00e0i repo \u0111ang parse t\u00ean file c\u0169 c\u00f3 th\u1ec3 c\u1ea7n c\u1eadp nh\u1eadt l\u1ea1i pattern\.' 'Commit convention examples should keep Vietnamese diacritics in impact notes.'
+Assert-FileContainsRegex -Path $bodyRules -Pattern 'Commit Body Rules' 'Commit convention body rules should be split into a focused resource.'
+Assert-FileContainsRegex -Path $configEnvRules -Pattern 'Mandatory Environment Disclosure' 'Commit convention config/env rules should be split into a focused resource.'
+Assert-FileContainsRegex -Path $aiRules -Pattern 'AI Generation And Encoding Rules' 'Commit convention AI generation rules should be split into a focused resource.'
+Assert-FileContainsRegex -Path $examples -Pattern 'Th\u00eam c\u1ea5u h\u00ecnh reconnect cho lu\u1ed3ng RTSP qua FFmpeg\.' 'Commit convention examples should be stored as readable UTF-8 Vietnamese.'
+Assert-FileContainsRegex -Path $examples -Pattern 'Script parse t\u00ean file c\u0169 c\u00f3 th\u1ec3 c\u1ea7n c\u1eadp nh\u1eadt l\u1ea1i pattern\.' 'Commit convention examples should keep Vietnamese diacritics in impact notes.'
+
+$commitConventionFiles = @($convention, $bodyRules, $configEnvRules, $aiRules, $examples)
 
 $badSnippets = @(
     'Branch de xuat:',
@@ -47,7 +56,9 @@ $badSnippets = @(
 
 foreach ($snippet in $badSnippets) {
     Assert-FileNotContainsRegex -Path $skill -Pattern $snippet "SKILL.md should not contain mojibake or stripped Vietnamese marker: $snippet"
-    Assert-FileNotContainsRegex -Path $convention -Pattern $snippet "Commit convention should not contain mojibake or stripped Vietnamese marker: $snippet"
+    foreach ($commitConventionFile in $commitConventionFiles) {
+        Assert-FileNotContainsRegex -Path $commitConventionFile -Pattern $snippet "Commit convention resources should not contain mojibake or stripped Vietnamese marker: $snippet"
+    }
 }
 
 Write-Output 'git-workflow-design tests passed.'
