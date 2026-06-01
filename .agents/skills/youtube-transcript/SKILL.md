@@ -61,8 +61,8 @@ pip3 install yt-dlp
 python3 -m pip install yt-dlp
 ```
 
-If installation fails, tell the user they need to install `yt-dlp` manually and point them to:
-`https://github.com/yt-dlp/yt-dlp#installation`
+If installation fails, tell the user they need to install `yt-dlp` manually and point them to
+[yt-dlp installation](https://github.com/yt-dlp/yt-dlp#installation).
 
 ## Check Available Subtitles
 

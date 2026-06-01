@@ -18,7 +18,7 @@ Preserve these Jeffrey Palermo rules:
 - Direction of coupling is toward the center.
 - All application core code can be compiled and run separate from infrastructure.
 
-Use `resources/java-package-template.md` when the target is a Java/Spring Boot service or when the user asks for the `tenant-admin-service` structure.
+Use [resources/java-package-template.md](resources/java-package-template.md) when the target is a Java/Spring Boot service or when the user asks for the `tenant-admin-service` structure.
 
 ## Rings
 
@@ -56,14 +56,14 @@ Interfaces/contracts needed by application belong inward. Implementations belong
 
 1. Confirm the user wants Onion Architecture or the service already follows it.
 2. Identify the service module, Java base package, API audience, and capability.
-3. Read `resources/java-package-template.md` before proposing Java package trees.
+3. Read [resources/java-package-template.md](resources/java-package-template.md) before proposing Java package trees.
 4. Apply `code-shared-design` if the design exposes internal API, contracts, or shared logic.
 5. Choose only the relevant subagent prompt:
-   - `subagents/onion-domain-design.md`
-   - `subagents/onion-application-design.md`
-   - `subagents/onion-infrastructure-design.md`
-   - `subagents/onion-boundary-review.md`
-   - `subagents/java-onion-design.md`
+   - [subagents/onion-domain-design.md](subagents/onion-domain-design.md)
+   - [subagents/onion-application-design.md](subagents/onion-application-design.md)
+   - [subagents/onion-infrastructure-design.md](subagents/onion-infrastructure-design.md)
+   - [subagents/onion-boundary-review.md](subagents/onion-boundary-review.md)
+   - [subagents/java-onion-design.md](subagents/java-onion-design.md)
 6. Produce package/module boundaries before implementation details.
 7. Call out infrastructure leakage, misplaced interfaces, or controller-to-implementation wiring immediately.
 

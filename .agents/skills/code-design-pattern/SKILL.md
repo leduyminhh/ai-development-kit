@@ -14,7 +14,7 @@ Source taxonomy: Baeldung Design Patterns Series, which organizes patterns into 
 ## Operating Mode
 
 1. Understand the code smell, feature requirement, existing conventions, and current coupling.
-2. Load `resources/pattern-selector.md`.
+2. Load [resources/pattern-selector.md](resources/pattern-selector.md).
 3. Rank the relevant subagent prompts by fit and risk.
 4. If no pattern is clearly needed, recommend the simpler refactor and stop.
 5. Before applying a pattern, present a concise decision note:
@@ -29,18 +29,18 @@ Source taxonomy: Baeldung Design Patterns Series, which organizes patterns into 
 
 ## Resource Map
 
-- `resources/pattern-selector.md`: parent selection workflow, subagent priority rules, and anti-overuse gate.
-- `resources/baeldung-pattern-catalog.md`: compact taxonomy inspired by the Baeldung series.
-- `resources/approval-and-report.md`: required approval prompt and final response template.
+- [resources/pattern-selector.md](resources/pattern-selector.md): parent selection workflow, subagent priority rules, and anti-overuse gate.
+- [resources/baeldung-pattern-catalog.md](resources/baeldung-pattern-catalog.md): compact taxonomy inspired by the Baeldung series.
+- [resources/approval-and-report.md](resources/approval-and-report.md): required approval prompt and final response template.
 
 ## Subagent Prompts
 
 Use files in `subagents/` as role prompts when evaluating a pattern group:
 
-- Priority 1 when object creation is the problem: `subagents/pattern-creation-design.md`
-- Priority 1 when object collaboration or interface shape is the problem: `subagents/pattern-structure-design.md`
-- Priority 1 when behavior variation or workflow decision is the problem: `subagents/pattern-behavior-design.md`
-- Priority 1 when application boundary or distributed flow is the problem: `subagents/architecture-pattern-design.md`
+- Priority 1 when object creation is the problem: [subagents/pattern-creation-design.md](subagents/pattern-creation-design.md)
+- Priority 1 when object collaboration or interface shape is the problem: [subagents/pattern-structure-design.md](subagents/pattern-structure-design.md)
+- Priority 1 when behavior variation or workflow decision is the problem: [subagents/pattern-behavior-design.md](subagents/pattern-behavior-design.md)
+- Priority 1 when application boundary or distributed flow is the problem: [subagents/architecture-pattern-design.md](subagents/architecture-pattern-design.md)
 
 The priority is contextual. Do not run every subagent by default. Select only the group whose trigger matches the problem.
 

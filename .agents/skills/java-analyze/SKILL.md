@@ -22,43 +22,43 @@ Use this skill to design and review Java backend changes before coding deeply. T
 
 ## Resource Map
 
-- `resources/java-review-checklist.md`: general Java architecture and clean code review.
-- `resources/spring-patterns.md`: Spring Boot layering, dependency direction, controllers, services, transactions.
-- `resources/persistence-checklist.md`: JPA, SQL, migration, N+1, locking, transaction risks.
-- `resources/async-patterns.md`: events, queues, scheduling, concurrency, retries, idempotency.
-- `resources/test-strategy.md`: test pyramid and verification selection.
-- `resources/clean-code-review.md`: Clean Code inspired review heuristics for naming, functions, classes, errors, tests, and maintainability.
-- `resources/api-contract-design.md`: backend API contract shaping for frontend integration.
-- `resources/workflow-handoff.md`: handoff from architecture to implementation and independent testing.
+- [resources/java-review-checklist.md](resources/java-review-checklist.md): general Java architecture and clean code review.
+- [resources/spring-patterns.md](resources/spring-patterns.md): Spring Boot layering, dependency direction, controllers, services, transactions.
+- [resources/persistence-checklist.md](resources/persistence-checklist.md): JPA, SQL, migration, N+1, locking, transaction risks.
+- [resources/async-patterns.md](resources/async-patterns.md): events, queues, scheduling, concurrency, retries, idempotency.
+- [resources/test-strategy.md](resources/test-strategy.md): test pyramid and verification selection.
+- [resources/clean-code-review.md](resources/clean-code-review.md): Clean Code inspired review heuristics for naming, functions, classes, errors, tests, and maintainability.
+- [resources/api-contract-design.md](resources/api-contract-design.md): backend API contract shaping for frontend integration.
+- [resources/workflow-handoff.md](resources/workflow-handoff.md): handoff from architecture to implementation and independent testing.
 
 ## Task To Resource Routing
 
-- Boundary or layering review: start with `resources/java-review-checklist.md`, then load `resources/spring-patterns.md` when Spring controller/service/transaction boundaries matter.
-- Persistence or query risk review: load `resources/persistence-checklist.md`.
-- Async, retry, scheduling, or concurrency review: load `resources/async-patterns.md`.
-- API request/response or frontend contract review: load `resources/api-contract-design.md`.
-- Test planning or regression scope review: load `resources/test-strategy.md`.
-- General maintainability review: load `resources/clean-code-review.md`.
-- Handoff from architecture to implementation or QA: load `resources/workflow-handoff.md`.
+- Boundary or layering review: start with [resources/java-review-checklist.md](resources/java-review-checklist.md), then load [resources/spring-patterns.md](resources/spring-patterns.md) when Spring controller/service/transaction boundaries matter.
+- Persistence or query risk review: load [resources/persistence-checklist.md](resources/persistence-checklist.md).
+- Async, retry, scheduling, or concurrency review: load [resources/async-patterns.md](resources/async-patterns.md).
+- API request/response or frontend contract review: load [resources/api-contract-design.md](resources/api-contract-design.md).
+- Test planning or regression scope review: load [resources/test-strategy.md](resources/test-strategy.md).
+- General maintainability review: load [resources/clean-code-review.md](resources/clean-code-review.md).
+- Handoff from architecture to implementation or QA: load [resources/workflow-handoff.md](resources/workflow-handoff.md).
 
 ## Scripts
 
-- `scripts/changed-files-summary.sh`: summarize changed Java/build files.
-- `scripts/verify-maven.sh`: run Maven wrapper or Maven verification.
-- `scripts/verify-gradle.sh`: run Gradle wrapper or Gradle verification.
+- [scripts/changed-files-summary.sh](scripts/changed-files-summary.sh): summarize changed Java/build files.
+- [scripts/verify-maven.sh](scripts/verify-maven.sh): run Maven wrapper or Maven verification.
+- [scripts/verify-gradle.sh](scripts/verify-gradle.sh): run Gradle wrapper or Gradle verification.
 
-Run scripts from a Java project root. Start with `scripts/changed-files-summary.sh` when the task begins from an existing diff and you need to scope the Java/build impact before reading code deeply. Scripts are read-only except for normal build/test outputs.
+Run scripts from a Java project root. Start with [scripts/changed-files-summary.sh](scripts/changed-files-summary.sh) when the task begins from an existing diff and you need to scope the Java/build impact before reading code deeply. Scripts are read-only except for normal build/test outputs.
 
 ## Subagent Prompts
 
 Use files in `subagents/` as role prompts when delegating or simulating specialist review:
 
-- `subagents/java-review.md`: code quality and architecture review.
-- `subagents/sql-optimize.md`: query, indexing, and persistence review.
-- `subagents/java-concurrency-review.md`: async, transaction, and race-condition review.
-- `subagents/java-spring-boundary-review.md`: Spring controller/service/domain/infrastructure boundary review.
-- `subagents/java-api-contract-review.md`: request/response, validation, and frontend integration contract review.
-- `subagents/test-strategy-review.md`: Java test level, Maven/Gradle verification, and regression strategy review.
+- [subagents/java-review.md](subagents/java-review.md): code quality and architecture review.
+- [subagents/sql-optimize.md](subagents/sql-optimize.md): query, indexing, and persistence review.
+- [subagents/java-concurrency-review.md](subagents/java-concurrency-review.md): async, transaction, and race-condition review.
+- [subagents/java-spring-boundary-review.md](subagents/java-spring-boundary-review.md): Spring controller/service/domain/infrastructure boundary review.
+- [subagents/java-api-contract-review.md](subagents/java-api-contract-review.md): request/response, validation, and frontend integration contract review.
+- [subagents/test-strategy-review.md](subagents/test-strategy-review.md): Java test level, Maven/Gradle verification, and regression strategy review.
 
 ## Architecture Defaults
 

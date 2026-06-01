@@ -38,10 +38,10 @@ Do not use this skill for generic code explanation when no git intent or release
 
 ## Rule Precedence
 
-When this skill is active, branch naming rules in `resources/branch-convention.md` override any generic Codex or app default branch prefix such as `codex/`.
+When this skill is active, branch naming rules in [resources/branch-convention.md](resources/branch-convention.md) override any generic Codex or app default branch prefix such as `codex/`.
 
 For commit, push, create branch, and switch branch flows:
-- Always load and apply `resources/branch-convention.md` before creating or switching branches.
+- Always load and apply [resources/branch-convention.md](resources/branch-convention.md) before creating or switching branches.
 - Do not use the global `codex/` prefix unless the user explicitly requests it.
 - If current branch is `main`, `master`, `develop`, or `dev`, generate the branch from the skill convention:
   `<role>/<scope-or-module>-<short-summary-slug>`.
@@ -56,7 +56,7 @@ Use this path when the user asks to:
 Basic expectation:
 1. Run `git status --short` and inspect the relevant diff.
 2. Decide whether the current diff is one logical change or several.
-3. If needed, load `resources/branch-convention.md`, then create or switch to the generated working branch from that convention.
+3. If needed, load [resources/branch-convention.md](resources/branch-convention.md), then create or switch to the generated working branch from that convention.
 4. Stage only the files for the current commit unit.
 5. Generate or normalize the commit message.
 6. Run relevant verification when feasible.
@@ -91,7 +91,7 @@ Basic expectation:
 1. Start with `git status --short` and the relevant diff or history range. Do not use a git worktree unless the user explicitly asks for it.
 2. Before staging, decide whether the diff is one logical change or several. Split commits when different goals are mixed, but keep code, tests, and small supporting docs together when they serve one change goal.
 3. If the user already gave a commit message, preserve its intent and only normalize obvious format issues.
-4. If the current branch is `main`, `master`, `develop`, or `dev`, load `resources/branch-convention.md` and create/switch to the generated branch from that convention before committing. This skill convention takes precedence over the Codex app default `codex/` branch prefix.
+4. If the current branch is `main`, `master`, `develop`, or `dev`, load [resources/branch-convention.md](resources/branch-convention.md) and create/switch to the generated branch from that convention before committing. This skill convention takes precedence over the Codex app default `codex/` branch prefix.
 5. If the user did not provide a commit message, generate:
    - a title using `type(scope): short summary`
    - a Vietnamese body with sections `What changed`, `Why changed`, and optional `Important notes / breaking impact`
@@ -133,16 +133,16 @@ Example categories:
 
 ## Resource Map
 
-- `resources/commit-convention.md`: commit type, scope, title, and Vietnamese body rules.
-- `resources/branch-convention.md`: branch role prefixes and naming rules.
-- `resources/gitflow-checklist.md`: concise safety checklist for staging, commit, push, merge, revert, release, and hotfix.
+- [resources/commit-convention.md](resources/commit-convention.md): commit type, scope, title, and Vietnamese body rules.
+- [resources/branch-convention.md](resources/branch-convention.md): branch role prefixes and naming rules.
+- [resources/gitflow-checklist.md](resources/gitflow-checklist.md): concise safety checklist for staging, commit, push, merge, revert, release, and hotfix.
 
 ## Subagent Prompts
 
-- `subagents/git-commit-write.md`: classify change intent and draft commit title/body.
-- `subagents/git-branch-design.md`: choose branch prefix/name and avoid worktree unless requested.
-- `subagents/git-release-design.md`: review release/hotfix expectations.
-- `subagents/git-merge-design.md`: review merge, conflict, and revert safety.
+- [subagents/git-commit-write.md](subagents/git-commit-write.md): classify change intent and draft commit title/body.
+- [subagents/git-branch-design.md](subagents/git-branch-design.md): choose branch prefix/name and avoid worktree unless requested.
+- [subagents/git-release-design.md](subagents/git-release-design.md): review release/hotfix expectations.
+- [subagents/git-merge-design.md](subagents/git-merge-design.md): review merge, conflict, and revert safety.
 
 ## Output Format
 

@@ -44,17 +44,17 @@ When used after `java-analyze` or another design agent:
 
 ## Resource Map
 
-- `resources/test-scenario-design.md`: derive behavior-first scenarios from requirements, tickets, designs, or code changes.
-- `resources/stack-verification.md`: choose verification commands for Java, React/Node, Python, Go, .NET, and fallback projects.
-- `resources/regression-review.md`: review regression risk, edge cases, and release confidence before handoff.
+- [resources/test-scenario-design.md](resources/test-scenario-design.md): derive behavior-first scenarios from requirements, tickets, designs, or code changes.
+- [resources/stack-verification.md](resources/stack-verification.md): choose verification commands for Java, React/Node, Python, Go, .NET, and fallback projects.
+- [resources/regression-review.md](resources/regression-review.md): review regression risk, edge cases, and release confidence before handoff.
 
 ## Must-Have Subagents
 
-- `subagents/test-risk-review.md`: inspect requirements, acceptance criteria, assumptions, and ambiguity.
-- `subagents/test-regression-review.md`: derive regression and edge-case scenarios from behavior changes.
-- `subagents/test-verification-review.md`: choose commands and verify evidence quality.
-- `subagents/test-release-review.md`: assess release readiness, residual risk, and manual checks.
-- `subagents/test-automation-handoff-review.md`: hand off gaps to `test-automation-validate` without generating tests directly.
+- [subagents/test-risk-review.md](subagents/test-risk-review.md): inspect requirements, acceptance criteria, assumptions, and ambiguity.
+- [subagents/test-regression-review.md](subagents/test-regression-review.md): derive regression and edge-case scenarios from behavior changes.
+- [subagents/test-verification-review.md](subagents/test-verification-review.md): choose commands and verify evidence quality.
+- [subagents/test-release-review.md](subagents/test-release-review.md): assess release readiness, residual risk, and manual checks.
+- [subagents/test-automation-handoff-review.md](subagents/test-automation-handoff-review.md): hand off gaps to `test-automation-validate` without generating tests directly.
 
 ## Review Focus
 

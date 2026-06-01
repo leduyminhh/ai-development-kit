@@ -11,11 +11,11 @@ Name new capabilities so a reader can infer scope and action from the filename a
 
 Use this skill before creating or renaming:
 
-- `.codex/agents/*.toml`
+- [.codex/agents/*.toml](../../../.codex/agents/*.toml)
 - `.agents/skills/<name>/SKILL.md`
 - `.agents/skills/<skill>/subagents/*.md`
 - `.agents/skills/<skill>/scripts/*.(ps1|py)`
-- `.codex/hooks/*.ps1`
+- [.codex/hooks/*.ps1](../../../.codex/hooks/*.ps1)
 - `scripts/*.(ps1|py)`
 
 Placement rule:
@@ -145,9 +145,9 @@ Scripts and hooks may use command-style verbs when they are operational wrappers
 
 - `.agents/skills/diagram-generate/scripts/validate-diagram-layout.ps1`
 - `.agents/skills/diagram-generate/scripts/run-diagram-export.py`
-- `.agents/skills/test-automation-validate/scripts/test-automation-validate-strategy.ps1`
-- `.codex/hooks/log-agent-event.ps1`
-- `scripts/hook-service.ps1`
+- [.agents/skills/test-automation-validate/scripts/test-automation-validate-strategy.ps1](../../../.agents/skills/test-automation-validate/scripts/test-automation-validate-strategy.ps1)
+- [.codex/hooks/log-agent-event.ps1](../../../.codex/hooks/log-agent-event.ps1)
+- [scripts/hook-service.ps1](../../../scripts/hook-service.ps1)
 - `run-coverage-report.ps1`
 - `validate-workflow.ps1`
 - `test-naming-rule-validate.ps1`
@@ -208,4 +208,3 @@ Current validator behavior:
 - rejects forbidden role suffixes and combined actions
 - rejects deprecated capability names kept only for regression tests
 - checks declared agent/skill name metadata matches the file or folder name
-

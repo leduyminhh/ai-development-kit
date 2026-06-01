@@ -20,7 +20,7 @@ Use this skill to produce accurate, maintainable technical documentation from co
    - database document
    - combined documentation when the user explicitly requests a broader artifact
 4. Load only the relevant resource or subagent prompt.
-5. Load `resources/project-doc-output-catalog.md` when proposing project documentation outputs, multi-file documentation, ERD, ADR, runbook, API docs, or docs folder structure.
+5. Load [resources/project-doc-output-catalog.md](resources/project-doc-output-catalog.md) when proposing project documentation outputs, multi-file documentation, ERD, ADR, runbook, API docs, or docs folder structure.
 6. Resolve the documentation root from config `[documentation.writer].rootPath`; default to `docs`.
 7. Every persistent documentation output must propose a `docs/`-prefixed target path before writing.
 8. Treat `docs/` as repository-root relative, meaning `<repo-root>/docs`, never current-shell relative from another folder.
@@ -33,15 +33,15 @@ Use this skill to produce accurate, maintainable technical documentation from co
 
 ## Resource Map
 
-- `resources/document-quality-rules.md`: documentation quality bar, source-of-truth rules, structure, tone, and verification checklist.
-- `resources/project-doc-output-catalog.md`: standard project documentation outputs, path conventions, confirmation template, and file selection rules.
+- [resources/document-quality-rules.md](resources/document-quality-rules.md): documentation quality bar, source-of-truth rules, structure, tone, and verification checklist.
+- [resources/project-doc-output-catalog.md](resources/project-doc-output-catalog.md): standard project documentation outputs, path conventions, confirmation template, and file selection rules.
 
 ## Must-Have Subagents
 
-- `subagents/doc-architecture-write.md`: create or update system, service, module, integration, and decision documentation.
-- `subagents/doc-feature-write.md`: document product features, user behavior, acceptance criteria, API/UI behavior, and release notes.
-- `subagents/doc-flow-write.md`: document business flows, sequence flows, state transitions, async jobs, error paths, and operational runbooks.
-- `subagents/doc-database-write.md`: document database schema, tables, relations, indexes, migrations, retention, and data ownership.
+- [subagents/doc-architecture-write.md](subagents/doc-architecture-write.md): create or update system, service, module, integration, and decision documentation.
+- [subagents/doc-feature-write.md](subagents/doc-feature-write.md): document product features, user behavior, acceptance criteria, API/UI behavior, and release notes.
+- [subagents/doc-flow-write.md](subagents/doc-flow-write.md): document business flows, sequence flows, state transitions, async jobs, error paths, and operational runbooks.
+- [subagents/doc-database-write.md](subagents/doc-database-write.md): document database schema, tables, relations, indexes, migrations, retention, and data ownership.
 
 ## Documentation Rules
 

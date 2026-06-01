@@ -29,42 +29,42 @@ Use this skill to review application code and configuration from a security pers
 
 ## Resource Map
 
-- `resources/security-review-checklist.md`: baseline review flow, severity calibration, and evidence standard.
-- `resources/owasp-asvs-cwe-mapping.md`: quick mapping between OWASP Top 10, ASVS control families, and common CWE categories.
-- `resources/auth-session-review.md`: authentication, authorization, session, token, and access-control checks.
-- `resources/input-validation-review.md`: injection, deserialization, SSRF, upload, and boundary validation checks.
-- `resources/crypto-secrets-review.md`: password handling, crypto choices, key storage, token signing, and secret management checks.
-- `resources/dependency-supply-chain-review.md`: package risk, lockfile drift, unsafe defaults, SBOM, and build-chain review.
-- `resources/logging-error-handling-review.md`: sensitive logging, exception exposure, auditability, and observability hardening.
-- `resources/java-spring-security-review.md`: Spring Security, method security, config, actuator, JPA, and Java-specific risk review.
+- [resources/security-review-checklist.md](resources/security-review-checklist.md): baseline review flow, severity calibration, and evidence standard.
+- [resources/owasp-asvs-cwe-mapping.md](resources/owasp-asvs-cwe-mapping.md): quick mapping between OWASP Top 10, ASVS control families, and common CWE categories.
+- [resources/auth-session-review.md](resources/auth-session-review.md): authentication, authorization, session, token, and access-control checks.
+- [resources/input-validation-review.md](resources/input-validation-review.md): injection, deserialization, SSRF, upload, and boundary validation checks.
+- [resources/crypto-secrets-review.md](resources/crypto-secrets-review.md): password handling, crypto choices, key storage, token signing, and secret management checks.
+- [resources/dependency-supply-chain-review.md](resources/dependency-supply-chain-review.md): package risk, lockfile drift, unsafe defaults, SBOM, and build-chain review.
+- [resources/logging-error-handling-review.md](resources/logging-error-handling-review.md): sensitive logging, exception exposure, auditability, and observability hardening.
+- [resources/java-spring-security-review.md](resources/java-spring-security-review.md): Spring Security, method security, config, actuator, JPA, and Java-specific risk review.
 
 ## Task To Resource Routing
 
-- General source review: start with `resources/security-review-checklist.md`.
-- Access control, login, JWT, session, or permission review: load `resources/auth-session-review.md`.
-- Request binding, validation, injection, upload, SSRF, or deserialization review: load `resources/input-validation-review.md`.
-- Secrets, passwords, tokens, key management, or cryptography review: load `resources/crypto-secrets-review.md`.
-- Dependency manifest, plugin, CI package install, or supply-chain review: load `resources/dependency-supply-chain-review.md`.
-- Error leakage, audit logging, or observability review: load `resources/logging-error-handling-review.md`.
-- Java or Spring review: load `resources/java-spring-security-review.md`.
-- Standards mapping or reporting normalization: load `resources/owasp-asvs-cwe-mapping.md`.
+- General source review: start with [resources/security-review-checklist.md](resources/security-review-checklist.md).
+- Access control, login, JWT, session, or permission review: load [resources/auth-session-review.md](resources/auth-session-review.md).
+- Request binding, validation, injection, upload, SSRF, or deserialization review: load [resources/input-validation-review.md](resources/input-validation-review.md).
+- Secrets, passwords, tokens, key management, or cryptography review: load [resources/crypto-secrets-review.md](resources/crypto-secrets-review.md).
+- Dependency manifest, plugin, CI package install, or supply-chain review: load [resources/dependency-supply-chain-review.md](resources/dependency-supply-chain-review.md).
+- Error leakage, audit logging, or observability review: load [resources/logging-error-handling-review.md](resources/logging-error-handling-review.md).
+- Java or Spring review: load [resources/java-spring-security-review.md](resources/java-spring-security-review.md).
+- Standards mapping or reporting normalization: load [resources/owasp-asvs-cwe-mapping.md](resources/owasp-asvs-cwe-mapping.md).
 
 ## Scripts
 
-- `scripts/changed-files-summary.sh`: summarize security-relevant changed files from git diff.
-- `scripts/detect-stack-files.sh`: print stack and build/security signals from the current repository.
-- `scripts/test-security-code-review.ps1`: verify the skill scaffold, core resources, and agent wiring.
+- [scripts/changed-files-summary.sh](scripts/changed-files-summary.sh): summarize security-relevant changed files from git diff.
+- [scripts/detect-stack-files.sh](scripts/detect-stack-files.sh): print stack and build/security signals from the current repository.
+- [scripts/test-security-code-review.ps1](scripts/test-security-code-review.ps1): verify the skill scaffold, core resources, and agent wiring.
 
 Run scripts from the target repository root. Scripts are read-only except for normal command output.
 
 ## Must-Have Subagents
 
-- `subagents/security-review.md`: core security reviewer that scopes risk, findings, and evidence.
-- `subagents/auth-review.md`: authn/authz, session, token, and access-control review.
-- `subagents/secrets-review.md`: secrets, crypto, token signing, and config leak review.
-- `subagents/dependency-review.md`: dependency manifest, lockfile, package source, and CI supply-chain review.
-- `subagents/java-spring-security-review.md`: Java/Spring-focused security review.
-- `subagents/security-verification-review.md`: verification commands, confidence, and residual risk review.
+- [subagents/security-review.md](subagents/security-review.md): core security reviewer that scopes risk, findings, and evidence.
+- [subagents/auth-review.md](subagents/auth-review.md): authn/authz, session, token, and access-control review.
+- [subagents/secrets-review.md](subagents/secrets-review.md): secrets, crypto, token signing, and config leak review.
+- [subagents/dependency-review.md](subagents/dependency-review.md): dependency manifest, lockfile, package source, and CI supply-chain review.
+- [subagents/java-spring-security-review.md](subagents/java-spring-security-review.md): Java/Spring-focused security review.
+- [subagents/security-verification-review.md](subagents/security-verification-review.md): verification commands, confidence, and residual risk review.
 
 ## Review Defaults
 

@@ -82,13 +82,3 @@ Examples:
 Avoid broad scopes such as `system`, `core`, or `misc` unless truly
 unavoidable.
 
-## Detail References
-
-- `commit-convention/body-rules.md`: body sections, bullet style, splitting, and
-  change-type-specific guidance.
-- `commit-convention/config-env-rules.md`: mandatory config/environment
-  disclosure and breaking-impact rules.
-- `commit-convention/ai-generation-rules.md`: automatic message generation,
-  supported inference, and encoding safety.
-- `commit-convention/examples.md`: complete examples for feature, fix, and
-  refactor commits.
