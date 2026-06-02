@@ -31,17 +31,17 @@ Moi `.codex/agents/<name>.toml` nen:
 
 - Co `name`, `description`, `model`, `model_reasoning_effort`, `sandbox_mode`.
 - Co `developer_instructions` ngan gon, dieu phoi skill thay vi nhung quy trinh domain qua dai.
-- Tham chieu skill tuong ung trong `.agents/skills/<name>` hoac skill lien quan.
+- Tham chieu skill tuong ung trong `skills/<name>` hoac skill lien quan.
 - Ton trong protected paths va khong commit/push khi user chua yeu cau.
 
 Runtime registration boundary:
 
-- `.agents/skills/` chua runtime skill assets.
-- `.agents/skills/<name>/{scripts,resources}` uu tien cho file chi thuoc mot skill.
+- `skills/` chua runtime skill assets.
+- `skills/<name>/{scripts,resources}` uu tien cho file chi thuoc mot skill.
 - `.codex/agents/*.toml` la agent entry points.
 - `.codex/agent-metadata/*.toml` giu governance metadata cho validator va sync.
 - `.codex/config.toml` giu `agent_registry.<name>` thay vi khai bao agent role lan thu hai.
-- `.agents/skills/manifest.toml` la link contract de map skill <-> agent <-> UI metadata.
+- `skills/manifest.toml` la link contract de map skill <-> agent <-> UI metadata.
 - External Codex discovery van la boundary rieng, khong duoc dam bao chi boi repo structure.
 
 Agent hien co:
@@ -88,7 +88,7 @@ Hook gating:
 - `test.skill`: chay khi skill/agent/path lien quan thay doi.
 
 Khi them file `*test*.ps1`, phai map vao dung mot group de validator chap nhan.
-Chi dat test hoac resource tai `scripts/` neu chung la shared cho toan repo; neu chi phuc vu mot skill thi dat duoi `.agents/skills/<skill>/`.
+Chi dat test hoac resource tai `scripts/` neu chung la shared cho toan repo; neu chi phuc vu mot skill thi dat duoi `skills/<skill>/`.
 
 Lenh:
 

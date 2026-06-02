@@ -39,10 +39,10 @@ function Resolve-ExternalDiscoveryContract {
         [string]$DefaultLinkName
     )
 
-    $manifestPath = Join-Path $ResolvedSourceRoot '.agents/skills/manifest.toml'
+    $manifestPath = Join-Path $ResolvedSourceRoot 'skills/manifest.toml'
     $contract = @{
         LinkName = $DefaultLinkName
-        LinkedSource = '.agents/skills'
+        LinkedSource = 'skills'
     }
 
     if (-not (Test-Path -LiteralPath $manifestPath)) {
