@@ -45,8 +45,7 @@ If any command is missing, install Node.js LTS from the official installer or th
 Step 2. Set the repository URL:
 
 ```powershell
-$repo = "https://github.com/leduyminhh/ai-codex-development-kit"
-$short_url: "leduyminhh/ai-codex-development-kit"
+$repo: "leduyminhh/ai-codex-development-kit"
 ```
 
 Step 3. Confirm the `skills` CLI is available through `npx`:
@@ -62,47 +61,14 @@ Step 4. List available skills without installing:
 
 ```powershell
 npx skills add $repo --list
-or short url:
-npx skills add leduyminhh/ai-codex-development-kit --list
 ```
-
-Default allowed skills:
-
-- `agent-operating-rules`
-- `diagram-generate`
-- `doc-write`
-- `git-workflow-design`
-- `security-code-review`
-
-Step 5. Install the default allowed skills into Codex:
+Step 5. Install the skills into Codex:
 
 ```powershell
-npx skills add $short_url --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review --agent codex -y
+npx skills add $repo
 ```
 
-Step 6. Optionally install one allowed skill instead:
-
-```powershell
-npx skills add $short_url --skill security-code-review --agent codex -y
-```
-
-Step 7. Add `--copy` when the target agent should receive physical files instead of links:
-
-```powershell
-npx skills add $short_url --skill security-code-review --agent codex -y --copy
-```
-
-Install rule: use `--list` for discovery, then install only the default allowed skills above unless the repository owner explicitly approves another skill.
-
-Useful aliases:
-
-```powershell
-npx skills a $short_url --skill security-code-review --agent codex -y
-npx skills ls --agent codex
-npx skills upgrade security-code-review
-```
-
-Step 8. Verify from the target machine:
+Step 6. Verify from the target machine:
 
 ```powershell
 npx skills list --agent codex
