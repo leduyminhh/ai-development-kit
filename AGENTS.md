@@ -80,6 +80,9 @@ Strict prohibitions:
 - No delete or cleanup in protected paths without confirmation.
 
 ## Workflow Rules
+- Use the `agent-operating-rules` skill for repository-wide execution discipline before broad planning, editing, validation, or conflict resolution.
+- Enforce its `mustHave` rules: think before coding, prefer simplicity, make surgical changes, surface conflicts, read before writing, test intent, match conventions, and fail loud.
+- Apply its `optional` rules to strengthen weak spots in ambiguous or long-running work: goal framing, deterministic checks before judgment, token discipline, and significant-step checkpoints.
 - After any structure change, run the validator:
   `powershell -ExecutionPolicy Bypass -File .agents/skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix`
 - Use selected tests instead of running every test by default:

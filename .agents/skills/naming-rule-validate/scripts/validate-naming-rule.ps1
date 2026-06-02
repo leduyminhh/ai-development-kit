@@ -59,6 +59,7 @@ function Test-CapabilityName {
     }
 
     $approvedCapabilityNames = @(
+        'agent-operating-rules',
         'code-design-pattern'
     )
     if ($approvedCapabilityNames -contains $Name) {

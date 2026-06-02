@@ -113,8 +113,17 @@ description: Use when reviewing source code security.
     Set-Content -LiteralPath (Join-Path $tempRoot '.codex/agents/security-code-review.toml') -Encoding utf8 -Value 'name = "security-code-review"'
     Set-Content -LiteralPath (Join-Path $tempRoot '.codex/agent-metadata/security-code-review.toml') -Encoding utf8 -Value 'name = "security-code-review"'
     Set-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/java-review/subagents/skill-drift-review.md') -Encoding utf8 -Value '# Valid drift subagent'
+    New-Item -ItemType Directory -Path (Join-Path $tempRoot '.agents/skills/agent-operating-rules') -Force | Out-Null
+    Set-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/agent-operating-rules/SKILL.md') -Encoding utf8 -Value @'
+---
+name: agent-operating-rules
+description: Use when applying repository-wide agent operating rules.
+---
 
-    & powershell -NoProfile -ExecutionPolicy Bypass -File $validator -Root $tempRoot -PathList '.codex/agents/java-review.toml|.codex/agents/code-design-pattern.toml|.codex/agents/security-code-review.toml|.codex/agent-metadata/java-review.toml|.codex/agent-metadata/code-design-pattern.toml|.codex/agent-metadata/security-code-review.toml|.agents/skills/java-review/SKILL.md|.agents/skills/java-review/subagents/java-api-contract-review.md|.agents/skills/java-review/subagents/skill-drift-review.md|.codex/hooks/validate-workflow.ps1|scripts/run-workflow-validate.ps1|.agents/skills/diagram-generate/scripts/validate-diagram-layout.ps1|.agents/skills/diagram-generate/scripts/run-diagram-export.py|.agents/skills/workflow-validate/scripts/validate-workflow.ps1|.agents/skills/diagram-wireframe-generate/SKILL.md|.agents/skills/test-automation-validate/SKILL.md|.agents/skills/java-analyze/SKILL.md|.agents/skills/architecture-onion-design/SKILL.md|.agents/skills/code-design-pattern/SKILL.md|.agents/skills/test-qa-review/SKILL.md|.agents/skills/security-code-review/SKILL.md|workflows/workflow-java-architecture-review/WORKFLOW.md' | Out-Null
+# Agent Operating Rules
+'@
+
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $validator -Root $tempRoot -PathList '.codex/agents/java-review.toml|.codex/agents/code-design-pattern.toml|.codex/agents/security-code-review.toml|.codex/agent-metadata/java-review.toml|.codex/agent-metadata/code-design-pattern.toml|.codex/agent-metadata/security-code-review.toml|.agents/skills/java-review/SKILL.md|.agents/skills/java-review/subagents/java-api-contract-review.md|.agents/skills/java-review/subagents/skill-drift-review.md|.agents/skills/agent-operating-rules/SKILL.md|.codex/hooks/validate-workflow.ps1|scripts/run-workflow-validate.ps1|.agents/skills/diagram-generate/scripts/validate-diagram-layout.ps1|.agents/skills/diagram-generate/scripts/run-diagram-export.py|.agents/skills/workflow-validate/scripts/validate-workflow.ps1|.agents/skills/diagram-wireframe-generate/SKILL.md|.agents/skills/test-automation-validate/SKILL.md|.agents/skills/java-analyze/SKILL.md|.agents/skills/architecture-onion-design/SKILL.md|.agents/skills/code-design-pattern/SKILL.md|.agents/skills/test-qa-review/SKILL.md|.agents/skills/security-code-review/SKILL.md|workflows/workflow-java-architecture-review/WORKFLOW.md' | Out-Null
     Assert-True ($LASTEXITCODE -eq 0) 'Naming validator should pass valid agent, skill, subagent, workflow, hook, and script names.'
 
     Set-Content -LiteralPath (Join-Path $tempRoot '.codex/agents/java-reviewer.toml') -Encoding utf8 -Value 'name = "java-reviewer"'

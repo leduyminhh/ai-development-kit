@@ -119,6 +119,7 @@ Examples:
 
 Approved capability noun exceptions:
 
+- `agent-operating-rules`
 - `code-design-pattern`
 
 Current approved agents:
@@ -137,6 +138,7 @@ Current approved agents:
 
 Current skill-only capabilities:
 
+- `agent-operating-rules`
 - `architecture-onion-design`
 - `code-shared-design`
 - `naming-rule-validate`
