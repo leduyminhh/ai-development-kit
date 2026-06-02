@@ -68,10 +68,12 @@ Log format follows a Log4j-like shape with logfmt fields after `|`:
 
 | Skill | Chuc nang |
 |---|---|
+| `agent-operating-rules` | Ap dung rule van hanh agent cap repo: think before coding, surgical changes, read before write, verify before claim, va 3 mode apply sang AGENTS.md/CLAUDE.md project khac. |
 | `codex-structure-validate` | Validator cau truc Codex repo. |
 | `naming-rule-validate` | Kiem tra naming convention va do khop metadata name cho agent, skill, subagent, hook va script. |
 | `java-analyze` | Phan tich Java/Spring backend, flow, persistence, async, clean code, test strategy. |
 | `react-code-generate` | Tao/sua React UI tu Figma, ticket, yeu cau text va API contract. |
+| `security-code-review` | Review va scan security theo scope voi Rule Engine bat buoc, optional SonarQube/Trivy, report contract, cost log, va `/fix` workflow tu scan report. |
 | `test-qa-review` | Review QA doc lap, scenario, regression risk, verification plan. |
 | `test-automation-validate` | Lap ke hoach va tao automated tests theo stack. |
 | `diagram-generate` | Chon va tao PlantUML diagrams. |
@@ -103,8 +105,10 @@ Domain-specific skills and agents live outside the validator core.
 
 Current domain capabilities:
 
+- `agent-operating-rules`: repository-wide execution discipline for planning, editing, validation, conflict handling, and applying the same operating rules to another project's `AGENTS.md` or `CLAUDE.md`.
 - `java-analyze`: Java backend architecture review and design for flow, clean code, Spring patterns, persistence, async/concurrency, and test strategy.
 - `react-code-generate`: React UI implementation from Figma, requirements, tickets, and API contracts.
+- `security-code-review`: source-code security review plus scoped `/security-scan` guidance with required Rule Engine checks, optional SonarQube/Trivy enrichment, Markdown/JSON/SARIF report contracts, `cost-log.json`, rule freshness, and safe `/fix` workflow from previous scan reports.
 - `test-qa-review`: QA reviewer review across stacks.
 - `test-automation-validate`: automated unit, integration/API, E2E, fixture/data, coverage, and flaky test workflows.
 - `code-design-pattern`: design pattern advisor with approval gates before applying patterns.

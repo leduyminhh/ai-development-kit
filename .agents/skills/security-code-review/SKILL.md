@@ -1,19 +1,24 @@
 ---
 name: security-code-review
-description: Use when acting as a security reviewer for source code, diffs, configs, or dependency manifests across stacks; identify risks using OWASP Top 10, ASVS, and CWE Top 25; route to focused subagents for auth, secrets, dependency, verification, and Java/Spring-specific security review.
+description: Use when acting as a security reviewer or security scan agent for source code, diffs, configs, dependencies, or scoped project scans; supports `/security-scan`, source-first Rule Engine review, optional SonarQube and Trivy enrichment, Markdown/JSON/SARIF report guidance, `/fix` from prior scan reports, OWASP Top 10, ASVS, CWE Top 25, and Java/Spring-focused review.
 ---
 
 # Security Code Review
 
 ## Overview
 
-Use this skill to review application code and configuration from a security perspective before or after implementation. The reviewer should stay evidence-driven, map findings to recognized standards, and keep the output actionable for engineers.
+Use this skill to review or scan application code and configuration from a security perspective before or after implementation. The reviewer should stay evidence-driven, map findings to recognized standards, keep the output actionable for engineers, and never expand beyond the user-provided scope.
 
 ## Operating Mode
 
-1. Identify the review scope: changed files, module, service, repository, config, or dependency manifest.
-2. Detect the stack from project files such as `pom.xml`, `build.gradle`, `package.json`, `requirements.txt`, `pyproject.toml`, `go.mod`, `Dockerfile`, CI config, and framework-specific security config.
-3. Map the main attack surfaces before going deep:
+1. Identify the task mode:
+   - Review mode: source-code, diff, config, dependency, or architecture security review.
+   - Scan mode: `/security-scan` with a strict `--scope`.
+   - Fix mode: `/fix` from an existing security scan report.
+2. Identify the review or scan scope: changed files, module, service, repository, config, dependency manifest, or the exact `--scope` folder.
+3. For scan or fix mode, load [resources/security-scan-workflow.md](resources/security-scan-workflow.md), validate scope with [scripts/resolve-security-scan-scope.ps1](scripts/resolve-security-scan-scope.ps1), and do not read outside that scope.
+4. Detect the stack from project files such as `pom.xml`, `build.gradle`, `package.json`, `requirements.txt`, `pyproject.toml`, `go.mod`, `Dockerfile`, CI config, and framework-specific security config.
+5. Map the main attack surfaces before going deep:
    - auth and authorization
    - input validation and injection
    - secrets and configuration
@@ -22,10 +27,73 @@ Use this skill to review application code and configuration from a security pers
    - deserialization, file handling, and SSRF-style sinks
    - dependency and supply-chain exposure
    - logging, error handling, and observability leakage
-4. Load only the resources needed for the current risk area.
-5. Start with the core security review subagent, then route to specialist subagents when signals justify it.
-6. Prefer read-only review. Propose fixes and verification steps unless the user explicitly asks for implementation.
-7. Report findings in Vietnamese with severity, evidence, and mapping to `OWASP`, `ASVS`, and `CWE`.
+6. Load only the resources needed for the current risk area.
+7. Start with the core security review subagent, then route to specialist subagents when signals justify it.
+8. For scan mode, always run the Rule Engine path first; use SonarQube and Trivy only as optional enrichment when available.
+9. Prefer read-only review. Do not auto-fix security issues unless the user explicitly requests `/fix` or implementation.
+10. Report findings in Vietnamese with severity, evidence, and mapping to `OWASP`, `ASVS`, and `CWE`.
+
+## Scan Commands
+
+Supported command intent:
+
+```text
+/security-scan
+/security-scan --help
+/security-scan --scope .
+/security-scan --scope backend/auth-service
+/security-scan --tool all|rule-engine|sonar|trivy
+/security-scan --report md,json,sarif
+/security-scan --severity CRITICAL,HIGH,MEDIUM
+/security-scan --fail-on CRITICAL,HIGH|none
+/security-rules --help
+/fix --report security-reports/<scan-id>
+/fix --help
+```
+
+Defaults:
+
+```text
+--scope .
+--tool all
+--report md,json
+--severity CRITICAL,HIGH,MEDIUM
+--fail-on CRITICAL,HIGH
+```
+
+Scan invariants:
+
+- Rule Engine is required for every scan.
+- SonarQube is optional and runs only with `SONAR_HOST_URL` plus `SONAR_TOKEN`, or explicit user-provided host/token.
+- Trivy is optional and runs only when `trivy --version` succeeds.
+- Report export is required for scan mode.
+- Cost logging is required for scan and fix mode; every scan or fix report must include `cost-log.json`.
+- Never print Sonar tokens or full secret values.
+- Never scan outside requested scope.
+
+Command help and aliases:
+
+- Use [resources/security-command-reference.md](resources/security-command-reference.md) when the user asks for `--help`, command usage, aliases, or compatibility with older command names.
+- Canonical commands are `/security-scan`, `/security-rules`, and `/fix`.
+- Recognize aliases but report canonical command names in summaries and generated reports.
+
+## Scope Rules
+
+- `--scope <folder>` means scan that folder and descendants only.
+- If `--scope` is not `.`, do not scan sibling modules, parent folders, or the full repository.
+- Validate that the scope exists, is readable, resolves inside the repository, and is not a dangerous symlink.
+- If a referenced dependency is outside scope, warn and do not analyze it.
+
+Use [scripts/resolve-security-scan-scope.ps1](scripts/resolve-security-scan-scope.ps1) before scanning or fixing a scoped report.
+
+## Scan And Fix Resources
+
+- [resources/security-scan-workflow.md](resources/security-scan-workflow.md): `/security-scan` command flow, tool defaults, scope boundaries, SonarQube/Trivy optional logic, and final response.
+- [resources/security-command-reference.md](resources/security-command-reference.md): `--help` output contract and aliases for scan, rules, review, and fix commands.
+- [resources/security-rule-engine.md](resources/security-rule-engine.md): required rule-engine categories, source-first checks, rule freshness, and masking rules.
+- [resources/security-report-contract.md](resources/security-report-contract.md): report folder naming, summary/findings/metadata/cost-log shape, build gate, and export expectations.
+- [resources/security-fix-workflow.md](resources/security-fix-workflow.md): `/fix` report validation, grouping, safe-fix policy, validation, rescan, commit, and fix summary contract.
+- [resources/rule-pack.lock.json](resources/rule-pack.lock.json): local rule-pack freshness baseline for agent-first scan reporting.
 
 ## Resource Map
 
@@ -53,9 +121,11 @@ Use this skill to review application code and configuration from a security pers
 
 - [scripts/changed-files-summary.sh](scripts/changed-files-summary.sh): summarize security-relevant changed files from git diff.
 - [scripts/detect-stack-files.sh](scripts/detect-stack-files.sh): print stack and build/security signals from the current repository.
+- [scripts/resolve-security-scan-scope.ps1](scripts/resolve-security-scan-scope.ps1): validate and normalize a requested scan or fix scope.
+- [scripts/generate-security-report-id.ps1](scripts/generate-security-report-id.ps1): generate timestamped report folder IDs using `HHmmss_ddMMyyyy_normalized-scope`.
 - [scripts/test-security-code-review.ps1](scripts/test-security-code-review.ps1): verify the skill scaffold, core resources, and agent wiring.
 
-Run scripts from the target repository root. Scripts are read-only except for normal command output.
+Run scripts from the target repository root. Scripts are read-only except for normal command output and report files explicitly requested by scan or fix mode.
 
 ## Must-Have Subagents
 
@@ -74,6 +144,9 @@ Run scripts from the target repository root. Scripts are read-only except for no
 - Distinguish proven findings from suspicious patterns that need verification.
 - Follow existing project conventions unless they weaken security or correctness.
 - Prefer narrow evidence-backed findings over generic policy advice.
+- Mask all secret values in reports and logs.
+- Do not claim rule packs are latest when freshness checks fail or run offline.
+- Do not commit scan fixes unless `/fix --commit true` is requested, validation passes, and changes stay inside the original report scope.
 
 ## Validation Commands
 
