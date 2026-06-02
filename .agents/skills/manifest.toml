@@ -20,6 +20,35 @@ notes = [
   "Codex external discovery requires linking or copying .agents/skills/ into the user's Codex skills root."
 ]
 
+[skills_cli]
+supported = true
+help_command = "npx skills --help"
+list_command = "npx skills add . --list"
+install_one_command = "npx skills add . --skill security-code-review --agent codex -y"
+source_layout = ".agents/skills/<name>/SKILL.md"
+allowed_default_skills = [
+  "agent-operating-rules",
+  "diagram-generate",
+  "doc-write",
+  "git-workflow-design",
+  "security-code-review"
+]
+alias_commands = [
+  "npx skills a . --skill security-code-review --agent codex -y",
+  "npx skills ls --agent codex",
+  "npx skills update security-code-review",
+  "npx skills upgrade security-code-review",
+  "npx skills rm security-code-review"
+]
+notes = [
+  "The skills CLI discovers repository skills from the existing .agents/skills layout.",
+  "Agents may list available skills, but default install commands must only install allowed_default_skills.",
+  "Do not use --all for the default install flow.",
+  "Do not store a bulk default install command; generate explicit --skill commands from allowed_default_skills when needed.",
+  "Use --skill <name> to install a single skill from this multi-skill repository when the skill is in allowed_default_skills.",
+  "Use --copy when the target agent should receive physical files instead of links."
+]
+
 # Skill registry
 
 [[skill]]

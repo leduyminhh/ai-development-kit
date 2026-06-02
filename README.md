@@ -26,6 +26,124 @@ Skills update immediately through the link. No per-project copy step is required
 
 Agents, hooks, and workflow config remain in this repository as project-local templates. Import them intentionally into a project when that project needs named agents or audit hooks.
 
+## Install From GitHub URL
+
+Use this path on another machine when you only have the GitHub repository link:
+
+Step 1. Install Node.js LTS.
+
+`npx` is bundled with `npm`, so installing Node.js LTS is enough for the `npx skills` flow. Verify the tools:
+
+```powershell
+node --version
+npm --version
+npx --version
+```
+
+If any command is missing, install Node.js LTS from the official installer or the target machine's package manager, then open a new terminal and run the checks again.
+
+Step 2. Set the repository URL:
+
+```powershell
+$repo = "https://github.com/leduyminhh/ai-codex-development-kit"
+```
+
+Step 3. Confirm the `skills` CLI is available through `npx`:
+
+```powershell
+npx skills --help
+npx skills -h
+```
+
+Do not append `--help` after a `skills add <source>` command; the CLI treats `<source>` as an install target.
+
+Step 4. List available skills without installing:
+
+```powershell
+npx skills add $repo --list
+```
+
+Default allowed skills:
+
+- `agent-operating-rules`
+- `diagram-generate`
+- `doc-write`
+- `git-workflow-design`
+- `security-code-review`
+
+Step 5. Install the default allowed skills into Codex:
+
+```powershell
+npx skills add $repo --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review --agent codex -y
+```
+
+Step 6. Optionally install one allowed skill instead:
+
+```powershell
+npx skills add $repo --skill security-code-review --agent codex -y
+```
+
+Step 7. Add `--copy` when the target agent should receive physical files instead of links:
+
+```powershell
+npx skills add $repo --skill security-code-review --agent codex -y --copy
+```
+
+Install rule: use `--list` for discovery, then install only the default allowed skills above unless the repository owner explicitly approves another skill.
+
+Useful aliases:
+
+```powershell
+npx skills a $repo --skill security-code-review --agent codex -y
+npx skills ls --agent codex
+npx skills upgrade security-code-review
+```
+
+Step 8. Verify from the target machine:
+
+```powershell
+npx skills list --agent codex
+```
+
+## Install With Local Skills CLI
+
+The repository is compatible with the `skills` CLI. List available skills without installing:
+
+```powershell
+npx skills add . --list
+```
+
+Show CLI help:
+
+```powershell
+npx skills --help
+npx skills -h
+```
+
+Install the default allowed skills into Codex:
+
+```powershell
+npx skills add . --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review --agent codex -y
+```
+
+Install one allowed skill into Codex:
+
+```powershell
+npx skills add . --skill security-code-review --agent codex -y
+```
+
+Add `--copy` when the target agent should receive physical files instead of links.
+
+Local aliases:
+
+```powershell
+npx skills a . --skill security-code-review --agent codex -y
+npx skills ls --agent codex
+npx skills update security-code-review
+```
+
+Do not append `--help` after a local `skills add .` command; the CLI treats `.` as an install target.
+
 ## Standard Codex Structure
 
 Run the validator with `-Fix` to create or synchronize the standard scaffold:

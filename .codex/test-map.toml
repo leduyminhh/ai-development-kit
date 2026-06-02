@@ -55,6 +55,7 @@ paths = [
   "scripts/install-skill-link.ps1",
   "scripts/install.ps1",
   "scripts/test-install-skill-link.ps1",
+  "scripts/test-skills-cli-compat.ps1",
   "scripts/resolve-test-plan.ps1",
   "scripts/test-selected.ps1",
   "scripts/test-test-map.ps1",
@@ -62,6 +63,7 @@ paths = [
 ]
 commands = [
   "powershell -ExecutionPolicy Bypass -File scripts/test-install-skill-link.ps1",
+  "powershell -ExecutionPolicy Bypass -File scripts/test-skills-cli-compat.ps1",
   "powershell -ExecutionPolicy Bypass -File scripts/test-test-map.ps1",
   "powershell -ExecutionPolicy Bypass -File .agents/skills/codex-structure-validate/scripts/test-validate-codex-structure.ps1"
 ]

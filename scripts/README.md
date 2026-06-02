@@ -42,6 +42,7 @@ Ownership rule:
 | `test-hook-service.ps1` | Kiem tra hook service runtime: start, health, event dispatch, auto reload, retention va stop. |
 | `test-progressive-disclosure.ps1` | Kiem tra cac skill lon phai defer mapping rong sang selector resources. |
 | `test-resolve-output-file.ps1` | Kiem tra output path resolver. |
+| `test-skills-cli-compat.ps1` | Kiem tra `npx skills add . --list` discover duoc skill package cua repo. |
 | `test-test-map.ps1` | Kiem tra selected test routing va yeu cau map `*test*.ps1`. |
 
 ## Quy Tac Khi Them Script
