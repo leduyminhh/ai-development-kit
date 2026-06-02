@@ -4,7 +4,7 @@ Thu muc `scripts/` chi chua cac script dung chung cho workflow Codex trong repo.
 
 Ownership rule:
 
-- Script, test, resource chi phuc vu mot skill thi dat duoi `.agents/skills/<skill>/`.
+- Script, test, resource chi phuc vu mot skill thi dat duoi `skills/<skill>/`.
 - Chi dat file o `scripts/` khi file do duoc dung chung cho nhieu skill hoac cho toan bo project.
 
 ## Vai Tro
@@ -50,7 +50,7 @@ Ownership rule:
 - Dat ten kebab-case va co action ro rang, vi du `resolve-*`, `validate-*`, `test-*`.
 - Neu them file `*test*.ps1`, phai map vao `.codex/test-map.toml` trong dung mot group.
 - Dung `scripts/lib/` cho helper lap lai thay vi copy logic.
-- Neu file chi dung cho mot skill, dat duoi `.agents/skills/<skill>/{scripts,resources}` thay vi root.
+- Neu file chi dung cho mot skill, dat duoi `skills/<skill>/{scripts,resources}` thay vi root.
 - Script khong nen ghi vao `docs/` hoac `reports/` neu chua co confirmation theo `AGENTS.md`.
 - Uu tien tham so ro rang, exit code dung, output ngan va parse duoc.
 

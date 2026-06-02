@@ -15,10 +15,10 @@ $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("codex-install-skill-li
 $tempSkillsRoot = Join-Path $tempRoot 'skills-home'
 
 try {
-    New-Item -ItemType Directory -Path (Join-Path $tempRoot '.agents/skills') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $tempRoot 'skills') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot 'runtime/skills') -Force | Out-Null
 
-    Set-Content -LiteralPath (Join-Path $tempRoot '.agents/skills/manifest.toml') -Encoding utf8 -Value @'
+    Set-Content -LiteralPath (Join-Path $tempRoot 'skills/manifest.toml') -Encoding utf8 -Value @'
 [external_discovery]
 link_name = "custom-skill-pack"
 linked_source = "runtime/skills"
