@@ -62,6 +62,14 @@ notes = [
 # Skill registry
 
 [[skill]]
+name = "agent-operating-rules"
+skill_path = "skills/agent-operating-rules/SKILL.md"
+ui_metadata = "skills/agent-operating-rules/agents/openai.yaml"
+agent_entry = ""
+registered_agent = ""
+kind = "support"
+
+[[skill]]
 name = "architecture-onion-design"
 skill_path = "skills/architecture-onion-design/SKILL.md"
 ui_metadata = "skills/architecture-onion-design/agents/openai.yaml"

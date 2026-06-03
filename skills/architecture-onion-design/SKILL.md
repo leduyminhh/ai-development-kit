@@ -51,11 +51,16 @@ Use this skill when the user asks for Onion Architecture, Palermo-style inward d
 
 ## Resource Map
 
-- None; this skill does not require additional resource files.
+- [resources/java-package-template.md](resources/java-package-template.md): Java package layout reference for Onion Architecture module design.
+- [resources/source-notes.md](resources/source-notes.md): source notes and architecture reference context for this skill.
 
 ## Subagent Prompts
 
-- None; this skill does not require dedicated subagent prompts.
+- [subagents/java-onion-design.md](subagents/java-onion-design.md): Java/Spring oriented Onion Architecture design prompt.
+- [subagents/onion-application-design.md](subagents/onion-application-design.md): application-layer orchestration and use-case prompt.
+- [subagents/onion-boundary-review.md](subagents/onion-boundary-review.md): dependency and framework leakage review prompt.
+- [subagents/onion-domain-design.md](subagents/onion-domain-design.md): domain model and business-rule prompt.
+- [subagents/onion-infrastructure-design.md](subagents/onion-infrastructure-design.md): infrastructure adapter and persistence boundary prompt.
 
 ## Scripts
 

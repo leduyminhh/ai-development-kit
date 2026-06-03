@@ -51,11 +51,11 @@ Use this skill when designing or reviewing shared internal APIs, contracts, SDKs
 
 ## Resource Map
 
-- None; this skill does not require additional resource files.
+- [resources/module-boundary-rules.md](resources/module-boundary-rules.md): shared module boundary rules for contracts, SDKs, and reusable internal APIs.
 
 ## Subagent Prompts
 
-- None; this skill does not require dedicated subagent prompts.
+- None; this skill does not currently own dedicated subagent prompt files.
 
 ## Scripts
 
