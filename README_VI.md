@@ -225,6 +225,28 @@ description: Third-person trigger description that says what the skill does and 
 ---
 ```
 
+Template top-level bắt buộc trong `SKILL.md`:
+
+```text
+YAML frontmatter
+# Skill Name
+
+## Overview
+## When to Use
+## Core Process
+## Examples
+## Common Rationalizations
+## Red Flags
+## Verification
+## Resource Map
+## Subagent Prompts
+## Scripts
+## Output Format
+## Notes
+```
+
+Dùng [skills/SKILL_TEMPLATE.md](skills/SKILL_TEMPLATE.md) khi tạo hoặc cập nhật skill. Validator sẽ fail nếu runtime skill có H2 heading không khớp đúng thứ tự template này.
+
 Design rules:
 
 - **Progressive disclosure.** `SKILL.md` là entry point; supporting references chỉ load khi cần.
@@ -322,10 +344,11 @@ Khi thêm hoặc thay đổi skill:
 
 1. Giữ `SKILL.md` dưới 500 dòng khi có thể.
 2. Dùng lowercase hyphenated skill names và để directory name khớp skill name.
-3. Đặt skill-owned scripts, tests, resources, và subagents dưới folder skill đó.
-4. Register PowerShell test file mới trong `.codex/test-map.toml`.
-5. Chạy validator và selected tests trước khi publish.
-6. Nếu cập nhật `README.md`, cập nhật `README_VI.md` trong cùng change.
+3. Tuân thủ [skills/SKILL_TEMPLATE.md](skills/SKILL_TEMPLATE.md) đúng thứ tự top-level H2.
+4. Đặt skill-owned scripts, tests, resources, và subagents dưới folder skill đó.
+5. Register PowerShell test file mới trong `.codex/test-map.toml`.
+6. Chạy validator và selected tests trước khi publish.
+7. Nếu cập nhật `README.md`, cập nhật `README_VI.md` trong cùng change.
 
 ---
 

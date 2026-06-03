@@ -11,7 +11,7 @@ This skill handles practical git publishing flow for the repository: inspect the
 
 It also supports release-facing output from git history such as changelog drafts, release notes, and customer-facing summaries when the user asks for updates between commits, tags, branches, or time windows.
 
-## When to Use This Skill
+## When to Use
 
 Activate this skill when the user:
 - asks to commit, push, stage, branch, merge, revert, release, or hotfix
@@ -22,7 +22,108 @@ Activate this skill when the user:
 
 Do not use this skill for generic code explanation when no git intent or release-history intent is present.
 
-## What This Skill Does
+Use this skill when the user asks to commit, push, stage, create or switch branch, prepare PR, merge, revert, release, hotfix, or generate changelog/release notes from git history.
+
+## Core Process
+
+1. Inspect `git status --short` and identify unrelated changes.
+2. Read relevant diffs before staging or committing.
+3. Generate or validate a conventional commit title and Vietnamese body when the user does not provide one.
+4. Stage only files that belong to the requested scope.
+5. Run required validation before commit or push when the diff includes code, config, skills, or structure.
+6. Push only after commit succeeds and the target branch is known.
+
+## Examples
+
+- For skill structure changes, run validator and selected tests before committing.
+- For README-only changes, run CLI compatibility tests if install commands changed.
+- For unrelated dirty files, leave them unstaged unless the user explicitly includes them.
+
+## Common Rationalizations
+
+| Rationalization | Rebuttal |
+|---|---|
+| "Just commit everything." | Unrelated changes must not be swept into the commit. |
+| "No tests are needed for a commit." | Verification depends on risk and changed files; structure and command changes require checks. |
+| "The commit message can be vague." | Conventional title and useful Vietnamese body make history reviewable. |
+
+## Red Flags
+
+- Staging includes files outside the user's requested scope.
+- Commit happens before reading the diff.
+- Push happens without confirming the current branch.
+- Validation is skipped after structure, config, or command changes.
+
+## Verification
+
+- `git status --short` and relevant diffs were inspected.
+- Staged files match the requested scope.
+- Required validators/tests passed or skipped checks are reported.
+- Commit, push, or PR actions are reported only after they actually succeed.
+
+## Resource Map
+
+- [resources/commit-convention.md](resources/commit-convention.md): commit type, scope, title, and Vietnamese body rules.
+- [resources/branch-convention.md](resources/branch-convention.md): branch role prefixes and naming rules.
+- [resources/gitflow-checklist.md](resources/gitflow-checklist.md): concise safety checklist for staging, commit, push, merge, revert, release, and hotfix.
+
+## Subagent Prompts
+
+- [subagents/git-commit-write.md](subagents/git-commit-write.md): classify change intent and draft commit title/body.
+- [subagents/git-branch-design.md](subagents/git-branch-design.md): choose branch prefix/name and avoid worktree unless requested.
+- [subagents/git-release-design.md](subagents/git-release-design.md): review release/hotfix expectations.
+- [subagents/git-merge-design.md](subagents/git-merge-design.md): review merge, conflict, and revert safety.
+
+## Scripts
+
+- None; this skill does not require dedicated scripts.
+
+## Output Format
+
+Before commit:
+
+```text
+Branch đề xuất:
+Commit đề xuất:
+Lý do chọn type/scope:
+Files sẽ stage:
+Commit body:
+What changed:
+- ...
+  • ...
+
+- ...
+
+Why changed:
+- ...
+Important notes / breaking impact:
+- ...
+Verification:
+```
+
+After commit/push:
+
+```text
+Branch:
+Commit:
+Push:
+PR:
+Verification:
+Ghi chú:
+```
+
+For changelog or release notes:
+
+```text
+Phạm vi:
+Đối tượng đọc:
+Tóm tắt:
+Changelog / Release notes:
+```
+
+## Notes
+
+### What This Skill Does
 
 - Inspects git state before taking action.
 - Groups changes into sensible commit units instead of staging everything blindly.
@@ -32,11 +133,11 @@ Do not use this skill for generic code explanation when no git intent or release
 - Summarizes commit history into structured changelog or release-note drafts when the user asks.
 - Filters low-signal internal churn when producing user-facing update notes.
 
-## How to Use
+### How to Use
 
 ### Commit And Push Flow
 
-## Rule Precedence
+### Rule Precedence
 
 When this skill is active, branch naming rules in [resources/branch-convention.md](resources/branch-convention.md) override any generic Codex or app default branch prefix such as `codex/`.
 
@@ -86,7 +187,7 @@ Basic expectation:
 4. Translate technical commits into user-facing language when the user wants release notes rather than raw engineering notes.
 5. Keep internal-only noise out unless the user explicitly wants engineering-facing notes.
 
-## Operating Mode
+### Operating Mode
 
 1. Start with `git status --short` and the relevant diff or history range. Do not use a git worktree unless the user explicitly asks for it.
 2. Before staging, decide whether the diff is one logical change or several. Split commits when different goals are mixed, but keep code, tests, and small supporting docs together when they serve one change goal.
@@ -107,7 +208,7 @@ Basic expectation:
 8. After a successful push, create a pull request when the user asks to publish or when the workflow naturally reaches PR preparation.
 9. Report branch, commit, push, PR, verification, changelog scope, and relevant notes in Vietnamese.
 
-## Changelog Guidance
+### Changelog Guidance
 
 When producing a user-facing changelog:
 - prefer customer language over raw implementation detail
@@ -123,106 +224,10 @@ Example categories:
 - `⚠ Breaking Changes`
 - `🔒 Security`
 
-## Tips
+### Tips
 
 - Work from the repository root when possible.
 - Prefer non-interactive git commands.
 - Verify branch context before committing.
 - Use user-provided style guides for changelog or release-note formatting when available.
 - For user-facing release notes, rewrite terse commit text into outcome-focused language instead of echoing commit subjects.
-
-## Resource Map
-
-- [resources/commit-convention.md](resources/commit-convention.md): commit type, scope, title, and Vietnamese body rules.
-- [resources/branch-convention.md](resources/branch-convention.md): branch role prefixes and naming rules.
-- [resources/gitflow-checklist.md](resources/gitflow-checklist.md): concise safety checklist for staging, commit, push, merge, revert, release, and hotfix.
-
-## Subagent Prompts
-
-- [subagents/git-commit-write.md](subagents/git-commit-write.md): classify change intent and draft commit title/body.
-- [subagents/git-branch-design.md](subagents/git-branch-design.md): choose branch prefix/name and avoid worktree unless requested.
-- [subagents/git-release-design.md](subagents/git-release-design.md): review release/hotfix expectations.
-- [subagents/git-merge-design.md](subagents/git-merge-design.md): review merge, conflict, and revert safety.
-
-## Output Format
-
-Before commit:
-
-```text
-Branch đề xuất:
-Commit đề xuất:
-Lý do chọn type/scope:
-Files sẽ stage:
-Commit body:
-What changed:
-- ...
-  • ...
-
-- ...
-
-Why changed:
-- ...
-Important notes / breaking impact:
-- ...
-Verification:
-```
-
-After commit/push:
-
-```text
-Branch:
-Commit:
-Push:
-PR:
-Verification:
-Ghi chú:
-```
-
-For changelog or release notes:
-
-```text
-Phạm vi:
-Đối tượng đọc:
-Tóm tắt:
-Changelog / Release notes:
-```
-## When to Use
-
-Use this skill when the user asks to commit, push, stage, create or switch branch, prepare PR, merge, revert, release, hotfix, or generate changelog/release notes from git history.
-
-## Core Process
-
-1. Inspect `git status --short` and identify unrelated changes.
-2. Read relevant diffs before staging or committing.
-3. Generate or validate a conventional commit title and Vietnamese body when the user does not provide one.
-4. Stage only files that belong to the requested scope.
-5. Run required validation before commit or push when the diff includes code, config, skills, or structure.
-6. Push only after commit succeeds and the target branch is known.
-
-## Examples
-
-- For skill structure changes, run validator and selected tests before committing.
-- For README-only changes, run CLI compatibility tests if install commands changed.
-- For unrelated dirty files, leave them unstaged unless the user explicitly includes them.
-
-## Common Rationalizations
-
-| Rationalization | Rebuttal |
-|---|---|
-| "Just commit everything." | Unrelated changes must not be swept into the commit. |
-| "No tests are needed for a commit." | Verification depends on risk and changed files; structure and command changes require checks. |
-| "The commit message can be vague." | Conventional title and useful Vietnamese body make history reviewable. |
-
-## Red Flags
-
-- Staging includes files outside the user's requested scope.
-- Commit happens before reading the diff.
-- Push happens without confirming the current branch.
-- Validation is skipped after structure, config, or command changes.
-
-## Verification
-
-- `git status --short` and relevant diffs were inspected.
-- Staged files match the requested scope.
-- Required validators/tests passed or skipped checks are reported.
-- Commit, push, or PR actions are reported only after they actually succeed.

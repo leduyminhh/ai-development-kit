@@ -225,6 +225,28 @@ description: Third-person trigger description that says what the skill does and 
 ---
 ```
 
+Required top-level `SKILL.md` template:
+
+```text
+YAML frontmatter
+# Skill Name
+
+## Overview
+## When to Use
+## Core Process
+## Examples
+## Common Rationalizations
+## Red Flags
+## Verification
+## Resource Map
+## Subagent Prompts
+## Scripts
+## Output Format
+## Notes
+```
+
+Use [skills/SKILL_TEMPLATE.md](skills/SKILL_TEMPLATE.md) when creating or updating a skill. The validator fails any runtime skill whose H2 headings do not match this template order.
+
 Design rules:
 
 - **Progressive disclosure.** `SKILL.md` is the entry point; supporting references load only when needed.
@@ -317,9 +339,10 @@ When adding or changing a skill:
 
 1. Keep `SKILL.md` under 500 lines when possible.
 2. Use lowercase hyphenated skill names and match the directory name.
-3. Put skill-owned scripts, tests, resources, and subagents under that skill folder.
-4. Register new PowerShell test files in `.codex/test-map.toml`.
-5. Run the validator and selected tests before publishing.
+3. Follow [skills/SKILL_TEMPLATE.md](skills/SKILL_TEMPLATE.md) exactly for top-level H2 order.
+4. Put skill-owned scripts, tests, resources, and subagents under that skill folder.
+5. Register new PowerShell test files in `.codex/test-map.toml`.
+6. Run the validator and selected tests before publishing.
 
 ---
 

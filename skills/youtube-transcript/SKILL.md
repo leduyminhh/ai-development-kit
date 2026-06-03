@@ -5,11 +5,15 @@ description: Use when the user provides a YouTube URL or asks to download, fetch
 
 # YouTube Transcript Downloader
 
+## Overview
+
 Imported and adapted from `michalparkola/tapestry-skills` for this repository's skill layout.
 
 This skill helps download transcripts (subtitles/captions) from YouTube videos using `yt-dlp`.
 
-## When to Use This Skill
+This skill retrieves, downloads, transcribes, and cleans YouTube transcript material while preserving source language, timing, and tool limitations.
+
+## When to Use
 
 Activate this skill when the user:
 - Provides a YouTube URL and wants the transcript
@@ -17,7 +21,65 @@ Activate this skill when the user:
 - Wants to transcribe a YouTube video
 - Needs readable text content from a YouTube video
 
-## How It Works
+Use this skill when the user provides a YouTube URL or asks to download, fetch, transcribe, clean, summarize, or convert YouTube captions, subtitles, or transcripts.
+
+## Core Process
+
+1. Inspect the YouTube URL and requested output format.
+2. Check available subtitles or captions before choosing a download strategy.
+3. Prefer official or automatic captions before Whisper transcription.
+4. Run the smallest command that retrieves the requested language and format.
+5. Clean, summarize, or preserve timestamps according to the user request.
+6. Report unavailable languages, missing ranges, or tool errors explicitly.
+
+## Examples
+
+- Use `yt-dlp --list-subs <url>` to inspect available subtitle tracks.
+- Download VTT/SRT captions when the user wants timestamped transcript output.
+- Use Whisper only when captions are unavailable or unacceptable for the task.
+
+## Common Rationalizations
+
+| Rationalization | Rebuttal |
+|---|---|
+| "Whisper is always better." | Existing captions are faster, cheaper, and often closer to the uploaded source. |
+| "A summary is enough." | If the user asks for transcript, preserve transcript content unless they request summarization. |
+| "Missing captions means impossible." | Try translated/automatic captions or confirm Whisper fallback before stopping. |
+
+## Red Flags
+
+- The agent promises a transcript before checking caption availability.
+- Language, timestamp, or format requirements are ignored.
+- Whisper fallback is claimed without checking local tool availability.
+- Missing or low-confidence segments are not labeled.
+
+## Verification
+
+- Available captions/subtitles were checked.
+- The chosen command matches requested language and format.
+- Transcript completeness or missing ranges are reported.
+- Tool errors are surfaced with exact command context.
+
+## Resource Map
+
+- None; this skill does not require additional resource files.
+
+## Subagent Prompts
+
+- None; this skill does not require dedicated subagent prompts.
+
+## Scripts
+
+- None; this skill does not require dedicated scripts.
+
+## Output Format
+
+- `.vtt`: keeps timestamps and caption structure
+- `.txt`: plain text for reading or analysis
+
+## Notes
+
+### How It Works
 
 ### Priority Order
 
@@ -29,7 +91,7 @@ Activate this skill when the user:
 6. Confirm where the output file is saved.
 7. Optionally convert VTT to deduplicated plain text.
 
-## Installation Check
+### Installation Check
 
 Always check if `yt-dlp` is installed first:
 
@@ -64,7 +126,7 @@ python3 -m pip install yt-dlp
 If installation fails, tell the user they need to install `yt-dlp` manually and point them to
 [yt-dlp installation](https://github.com/yt-dlp/yt-dlp#installation).
 
-## Check Available Subtitles
+### Check Available Subtitles
 
 Always do this before attempting to download:
 
@@ -77,7 +139,7 @@ Look for:
 - Auto-generated subtitles
 - Available languages
 
-## Download Strategy
+### Download Strategy
 
 ### Option 1: Manual Subtitles
 
@@ -97,7 +159,7 @@ yt-dlp --write-auto-sub --skip-download --output "OUTPUT_NAME" "YOUTUBE_URL"
 
 Both commands create a `.vtt` file.
 
-## Option 3: Whisper Transcription
+### Option 3: Whisper Transcription
 
 Use this only if manual and auto-generated subtitles are both unavailable.
 
@@ -150,7 +212,7 @@ After transcription, ask whether the audio file should be deleted to save space:
 rm audio_VIDEO_ID.mp3
 ```
 
-## Getting Video Information
+### Getting Video Information
 
 ### Extract Video Title
 
@@ -160,7 +222,7 @@ yt-dlp --print "%(title)s" "YOUTUBE_URL"
 
 Sanitize the title for filenames by replacing characters such as `/`, `:`, `?`, and `"`.
 
-## Post-Processing
+### Post-Processing
 
 ### Convert To Plain Text
 
@@ -206,19 +268,14 @@ echo "Saved to: ${VIDEO_TITLE}.txt"
 rm "$VTT_FILE"
 ```
 
-## Output Formats
-
-- `.vtt`: keeps timestamps and caption structure
-- `.txt`: plain text for reading or analysis
-
-## Tips
+### Tips
 
 - Output files usually look like `{output_name}.{language_code}.vtt`
 - Many videos have auto-generated English subtitles
 - Some videos provide multiple language choices
 - If auto subtitles are unavailable, retry with manual subtitles first
 
-## Error Handling
+### Error Handling
 
 ### Common Issues
 
@@ -241,48 +298,3 @@ rm "$VTT_FILE"
 - Confirm large downloads and Whisper installation with the user.
 - Keep the user updated about file locations and chosen fallback path.
 - Clean up temporary files when the user wants plain-text output or disk-space cleanup.
-
-## Overview
-
-This skill retrieves, downloads, transcribes, and cleans YouTube transcript material while preserving source language, timing, and tool limitations.
-
-## When to Use
-
-Use this skill when the user provides a YouTube URL or asks to download, fetch, transcribe, clean, summarize, or convert YouTube captions, subtitles, or transcripts.
-
-## Core Process
-
-1. Inspect the YouTube URL and requested output format.
-2. Check available subtitles or captions before choosing a download strategy.
-3. Prefer official or automatic captions before Whisper transcription.
-4. Run the smallest command that retrieves the requested language and format.
-5. Clean, summarize, or preserve timestamps according to the user request.
-6. Report unavailable languages, missing ranges, or tool errors explicitly.
-
-## Examples
-
-- Use `yt-dlp --list-subs <url>` to inspect available subtitle tracks.
-- Download VTT/SRT captions when the user wants timestamped transcript output.
-- Use Whisper only when captions are unavailable or unacceptable for the task.
-
-## Common Rationalizations
-
-| Rationalization | Rebuttal |
-|---|---|
-| "Whisper is always better." | Existing captions are faster, cheaper, and often closer to the uploaded source. |
-| "A summary is enough." | If the user asks for transcript, preserve transcript content unless they request summarization. |
-| "Missing captions means impossible." | Try translated/automatic captions or confirm Whisper fallback before stopping. |
-
-## Red Flags
-
-- The agent promises a transcript before checking caption availability.
-- Language, timestamp, or format requirements are ignored.
-- Whisper fallback is claimed without checking local tool availability.
-- Missing or low-confidence segments are not labeled.
-
-## Verification
-
-- Available captions/subtitles were checked.
-- The chosen command matches requested language and format.
-- Transcript completeness or missing ranges are reported.
-- Tool errors are surfaced with exact command context.

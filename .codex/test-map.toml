@@ -61,7 +61,8 @@ paths = [
   "scripts/test-test-map.ps1",
   "AGENTS.md",
   "README.md",
-  "README_VI.md"
+  "README_VI.md",
+  "skills/SKILL_TEMPLATE.md"
 ]
 commands = [
   "powershell -ExecutionPolicy Bypass -File scripts/test-install-skill-link.ps1",

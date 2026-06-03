@@ -58,6 +58,15 @@ function Get-LineCountMatching {
     return @(($Text -split '\r?\n') | Where-Object { $_ -match $Pattern }).Count
 }
 
+function Get-MarkdownH2Headings {
+    param([string]$Text)
+
+    return @(
+        [regex]::Matches($Text, '(?m)^##\s+(.+?)\s*$') |
+            ForEach-Object { $_.Groups[1].Value.Trim() }
+    )
+}
+
 function Get-ConfiguredSkillsRoot {
     param([string]$ResolvedRoot)
 
@@ -256,6 +265,80 @@ block_delete_without_confirmation = true
 '@
 }
 
+function Get-DefaultSkillTemplateText {
+    return @'
+---
+name: lowercase-hyphen-name
+description: Third-person trigger description that says what the skill does and when to use it.
+---
+
+# Skill Name
+
+## Overview
+
+State what the skill does, the outcome it helps produce, and the boundary of responsibility.
+
+## When to Use
+
+List the user requests, project states, or signals that should trigger this skill.
+
+## Core Process
+
+1. Read the minimum relevant context.
+2. Apply the skill-specific workflow.
+3. Run the relevant deterministic checks.
+4. Report the result, evidence, and remaining risk.
+
+## Examples
+
+- Example request or situation where the skill should be used.
+- Example output, decision, or artifact the skill should produce.
+
+## Common Rationalizations
+
+| Rationalization | Rebuttal |
+|---|---|
+| "This skill can skip the standard structure." | All runtime skills must follow this template so agents can consume them consistently. |
+| "A new skill only needs frontmatter." | Frontmatter triggers the skill, but the body defines the workflow contract. |
+
+## Red Flags
+
+- The skill omits required template headings.
+- The skill mixes unrelated domain workflows into one entry point.
+- The skill requires loading large references before the user request needs them.
+
+## Verification
+
+- YAML frontmatter includes `name` and `description`.
+- The first Markdown H1 is the skill name.
+- H2 headings match this template in order.
+- Skill-owned resources, scripts, and subagents are referenced only when needed.
+
+## Resource Map
+
+- `resources/<file>.md`: when to load this reference.
+
+## Subagent Prompts
+
+- `subagents/<file>.md`: focused prompt and when to use it.
+
+## Scripts
+
+- `scripts/<file>`: deterministic helper and when to run it.
+
+## Output Format
+
+```text
+Recommended response or artifact shape.
+```
+
+## Notes
+
+- Keep `SKILL.md` concise and move detailed variants into `resources/`.
+- Avoid duplicate headings and auxiliary README-style files inside a skill folder.
+'@
+}
+
 function Ensure-ScaffoldDirectory {
     param(
         [string]$Path,
@@ -320,6 +403,18 @@ if (Test-Path -LiteralPath $readmePath) {
     } else {
         $findings.Add((New-Finding 'fail' 'README_VI.md is required when README.md exists.'))
     }
+}
+
+$skillTemplatePath = Join-Path $resolvedRoot 'skills/SKILL_TEMPLATE.md'
+if (Test-Path -LiteralPath $skillTemplatePath) {
+    $findings.Add((New-Finding 'pass' 'Skill template exists: skills/SKILL_TEMPLATE.md'))
+} elseif ($Fix) {
+    $skillTemplateParent = Split-Path -Parent $skillTemplatePath
+    New-Item -ItemType Directory -Path $skillTemplateParent -Force | Out-Null
+    [System.IO.File]::WriteAllText($skillTemplatePath, (Get-DefaultSkillTemplateText), [System.Text.UTF8Encoding]::new($false))
+    $findings.Add((New-Finding 'pass' 'Skill template scaffold created: skills/SKILL_TEMPLATE.md'))
+} else {
+    $findings.Add((New-Finding 'fail' 'Skill template is required: skills/SKILL_TEMPLATE.md'))
 }
 
 $skillNames = New-Object System.Collections.Generic.HashSet[string]
@@ -390,8 +485,22 @@ if (Test-Path -LiteralPath $skillsRoot) {
             'Examples',
             'Common Rationalizations',
             'Red Flags',
-            'Verification'
+            'Verification',
+            'Resource Map',
+            'Subagent Prompts',
+            'Scripts',
+            'Output Format',
+            'Notes'
         )
+
+        $h2Headings = Get-MarkdownH2Headings -Text $content
+        $actualTemplateOrder = $h2Headings -join ' | '
+        $expectedTemplateOrder = $requiredSections -join ' | '
+        if ($actualTemplateOrder -eq $expectedTemplateOrder) {
+            $findings.Add((New-Finding 'pass' "Skill H2 headings match template order: $($file.FullName)"))
+        } else {
+            $findings.Add((New-Finding 'fail' "Skill H2 headings must match skills/SKILL_TEMPLATE.md order. Expected: $expectedTemplateOrder. Actual: $actualTemplateOrder. File: $($file.FullName)"))
+        }
 
         $sectionTexts = @{}
         foreach ($section in $requiredSections) {

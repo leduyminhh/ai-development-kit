@@ -5,7 +5,69 @@ description: Use when creating or renaming Codex project artifacts such as agent
 
 # Project Naming Rules
 
-## Core Rule
+## Overview
+
+This skill keeps Codex project artifact names predictable so agents, skills, subagents, tests, scripts, and metadata can be discovered and validated consistently.
+
+## When to Use
+
+Use this skill before creating or renaming skills, agents, subagents, workflows, hooks, scripts, validators, test files, or metadata entries in this repository.
+
+## Core Process
+
+1. Identify the artifact type and expected owner.
+2. Apply the dictionary, naming pattern, and prohibitions before creating files.
+3. Ensure metadata `name` fields match directory or file identity where required.
+4. Run `validate-naming-rule.ps1` for deterministic checks.
+5. Report exact rename or metadata fixes when validation fails.
+
+## Examples
+
+- A runtime skill folder uses lowercase hyphen names such as `security-code-review`.
+- A skill-owned script lives under `skills/<skill>/scripts/`.
+- A shared project script lives under root `scripts/` and is named for its action.
+
+## Common Rationalizations
+
+| Rationalization | Rebuttal |
+|---|---|
+| "The name is understandable enough." | Discoverability requires predictable naming, not just human intuition. |
+| "Metadata can differ from folder name." | Name drift breaks validation and skill discovery. |
+| "This helper can live anywhere." | Ownership determines whether the file belongs under a skill or root scripts. |
+
+## Red Flags
+
+- Names contain underscores, spaces, mixed case, or ambiguous prefixes.
+- Metadata `name` does not match the folder or agent identity.
+- A skill-owned artifact is placed in root scripts without shared ownership.
+- A new test file is not mapped.
+
+## Verification
+
+- Names match the allowed pattern for the artifact type.
+- Metadata and folder/file identity agree.
+- Ownership is classified as `skill-owned` or `shared-project`.
+- Naming validator exits successfully.
+
+## Resource Map
+
+- None; this skill does not require additional resource files.
+
+## Subagent Prompts
+
+- None; this skill does not require dedicated subagent prompts.
+
+## Scripts
+
+- None; this skill does not require dedicated scripts.
+
+## Output Format
+
+Report concise findings, actions, verification, and remaining risk.
+
+## Notes
+
+### Core Rule
 
 Name new capabilities so a reader can infer scope and action from the filename alone. Prefer deterministic names that are easy to validate with regex and whitelist dictionaries.
 
@@ -28,7 +90,7 @@ The validator checks both filename/folder naming and declared metadata consisten
 - agent `name = "..."` in `.toml` must match the filename
 - skill `name: ...` in `SKILL.md` frontmatter must match the skill folder name
 
-## Dictionary
+### Dictionary
 
 Approved actions:
 
@@ -87,7 +149,7 @@ Additional qualifier tokens:
 `sequence`, `spring`, `state`, `strategy`, `structure`, `timing`, `transaction`, `unit`,
 `usecase`, `verification`, `wbs`, `wireframe`, `yaml`
 
-## Naming Pattern
+### Naming Pattern
 
 For agents, skills, and subagents, use:
 
@@ -154,7 +216,7 @@ Scripts and hooks may use command-style verbs when they are operational wrappers
 - `validate-workflow.ps1`
 - `test-naming-rule-validate.ps1`
 
-## Prohibitions
+### Prohibitions
 
 Use only kebab-case:
 
@@ -182,7 +244,7 @@ Do not use knowledge nouns as a capability name:
 
 Exception: `code-design-pattern` is approved as the parent capability for code-design-pattern advisory workflow.
 
-## Validation
+### Validation
 
 Run targeted naming validation for changed artifacts:
 
@@ -210,47 +272,3 @@ Current validator behavior:
 - rejects forbidden role suffixes and combined actions
 - rejects deprecated capability names kept only for regression tests
 - checks declared agent/skill name metadata matches the file or folder name
-
-## Overview
-
-This skill keeps Codex project artifact names predictable so agents, skills, subagents, tests, scripts, and metadata can be discovered and validated consistently.
-
-## When to Use
-
-Use this skill before creating or renaming skills, agents, subagents, workflows, hooks, scripts, validators, test files, or metadata entries in this repository.
-
-## Core Process
-
-1. Identify the artifact type and expected owner.
-2. Apply the dictionary, naming pattern, and prohibitions before creating files.
-3. Ensure metadata `name` fields match directory or file identity where required.
-4. Run `validate-naming-rule.ps1` for deterministic checks.
-5. Report exact rename or metadata fixes when validation fails.
-
-## Examples
-
-- A runtime skill folder uses lowercase hyphen names such as `security-code-review`.
-- A skill-owned script lives under `skills/<skill>/scripts/`.
-- A shared project script lives under root `scripts/` and is named for its action.
-
-## Common Rationalizations
-
-| Rationalization | Rebuttal |
-|---|---|
-| "The name is understandable enough." | Discoverability requires predictable naming, not just human intuition. |
-| "Metadata can differ from folder name." | Name drift breaks validation and skill discovery. |
-| "This helper can live anywhere." | Ownership determines whether the file belongs under a skill or root scripts. |
-
-## Red Flags
-
-- Names contain underscores, spaces, mixed case, or ambiguous prefixes.
-- Metadata `name` does not match the folder or agent identity.
-- A skill-owned artifact is placed in root scripts without shared ownership.
-- A new test file is not mapped.
-
-## Verification
-
-- Names match the allowed pattern for the artifact type.
-- Metadata and folder/file identity agree.
-- Ownership is classified as `skill-owned` or `shared-project`.
-- Naming validator exits successfully.

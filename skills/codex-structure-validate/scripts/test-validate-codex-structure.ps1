@@ -85,6 +85,28 @@ Use when the validator test needs a valid writable skill.
 - Frontmatter is valid.
 - Required sections are present.
 - Validator exits successfully.
+
+## Resource Map
+
+- None; this fixture has no owned resources.
+
+## Subagent Prompts
+
+- None; this fixture has no subagent prompts.
+
+## Scripts
+
+- None; this fixture has no owned scripts.
+
+## Output Format
+
+```text
+validator fixture result
+```
+
+## Notes
+
+- Keep this fixture aligned with skills/SKILL_TEMPLATE.md.
 '@,
         [System.Text.UTF8Encoding]::new($false)
     )
@@ -136,6 +158,28 @@ Use when the validator test needs a valid read-only skill.
 - Read-only metadata is generated.
 - Required sections are present.
 - Validator exits successfully.
+
+## Resource Map
+
+- None; this fixture has no owned resources.
+
+## Subagent Prompts
+
+- None; this fixture has no subagent prompts.
+
+## Scripts
+
+- None; this fixture has no owned scripts.
+
+## Output Format
+
+```text
+read-only validator fixture result
+```
+
+## Notes
+
+- Keep this fixture aligned with skills/SKILL_TEMPLATE.md.
 '@,
         [System.Text.UTF8Encoding]::new($false)
     )
@@ -193,6 +237,7 @@ hooks_project_enabled = true
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.codex/mcp')) 'Validator -Fix should ensure Step 4 .codex/mcp exists.'
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.codex/mcp/.gitkeep')) 'Validator -Fix should make empty MCP scaffold trackable.'
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot 'skills')) 'Validator -Fix should ensure skills root exists.'
+    Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot 'skills/SKILL_TEMPLATE.md')) 'Validator -Fix should create the canonical skill template.'
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot 'skills/new-agent/subagents')) 'Validator -Fix should ensure skill subagents exists.'
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot 'skills/read-only-agent/subagents')) 'Validator -Fix should ensure read-only skill subagents exists.'
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.codex/agent-metadata/read-only-agent.toml')) 'Validator -Fix should create missing metadata from the read-only agent entry.'
@@ -306,6 +351,7 @@ description: Bad skill name format test.
     Assert-True ($emptyConfig.Contains('[diagram.writer]')) 'Generated config should include diagram writer section.'
     Assert-True (Test-Path -LiteralPath (Join-Path $emptyRoot '.codex/agent-metadata')) 'Validator -Fix should scaffold the agent metadata root for empty repos.'
     Assert-True (Test-Path -LiteralPath (Join-Path $emptyRoot '.codex/agent-metadata/.gitkeep')) 'Validator -Fix should make empty agent metadata scaffold trackable.'
+    Assert-True (Test-Path -LiteralPath (Join-Path $emptyRoot 'skills/SKILL_TEMPLATE.md')) 'Validator -Fix should create the skill template for empty repos.'
 
     Write-Output 'validate-codex-structure tests passed'
 } finally {
