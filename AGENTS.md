@@ -81,7 +81,7 @@ Strict prohibitions:
 
 ## Workflow Rules
 - Use the `agent-operating-rules` skill for repository-wide execution discipline before broad planning, editing, validation, or conflict resolution.
-- Enforce its `mustHave` rules: think before coding, prefer simplicity, make surgical changes, surface conflicts, read before writing, test intent, match conventions, and fail loud.
+- Enforce its `mustHave` rules: think before coding, prefer simplicity, make surgical changes, surface conflicts, read before writing, test intent, match conventions, generated code comment discipline, keep solutions production-ready, and fail loud.
 - Apply its `optional` rules to strengthen weak spots in ambiguous or long-running work: goal framing, deterministic checks before judgment, token discipline, and significant-step checkpoints.
 - After any structure change, run the validator:
   `powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix`

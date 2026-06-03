@@ -15,6 +15,8 @@ This skill is the execution discipline layer for repository work. It does not re
 
 Use this skill before broad planning, multi-file edits, structure validation, conflict resolution, skill authoring, protected-path decisions, or any task where the agent might otherwise skip reading, testing, or surfacing trade-offs.
 
+Also use this skill when the user invokes `init` or `agents.md` with this skill; those commands run the project-start `AGENTS.md`/`CLAUDE.md` setup flow.
+
 ## Core Process
 
 1. Classify the task and identify the minimum relevant files, skills, and repo rules.
@@ -53,7 +55,7 @@ Use this skill before broad planning, multi-file edits, structure validation, co
 
 ## Resource Map
 
-- None; this skill does not require additional resource files.
+- [resources/agents-project-start-template.md](resources/agents-project-start-template.md): project-start `AGENTS.md` template and merge procedure for repositories that already have `AGENTS.md` or `CLAUDE.md`.
 
 ## Subagent Prompts
 
@@ -75,6 +77,13 @@ Report concise findings, actions, verification, and remaining risk.
 - `optional`: apply when it improves clarity, safety, or long-running execution without adding noise.
 - `none`: do not carry the rule into this repository.
 
+### Commands
+
+- `init`: run the project-start setup flow from [resources/agents-project-start-template.md](resources/agents-project-start-template.md). Check the target root for `AGENTS.md` and `CLAUDE.md`, merge missing sections when an instruction file exists, or create `AGENTS.md` from the template when none exists.
+- `agents.md`: same as `init`; use this alias when the user's intent is specifically to create, inspect, or update project agent instructions.
+
+Command execution must still follow protected-path confirmation rules, preserve existing project-specific instructions, and avoid silent overwrites.
+
 ### Must-Have Rules
 
 1. Think before coding.
@@ -93,12 +102,18 @@ Report concise findings, actions, verification, and remaining risk.
    Read targeted source files before modifying them. Do not bulk-scan protected paths or external references.
 
 6. Test intent, not only behavior.
-   Prefer tests and validation that prove the requested requirement, regression risk, or invariant. Reuse selected tests and mapped skill tests.
+   Prefer tests and validation that prove the requested requirement, regression risk, or invariant. Reuse selected tests and mapped skill tests. For production-facing changes, report relevant operational, security, rollback, and maintainability risks.
 
 7. Match codebase conventions.
    Follow local naming, folder placement, validation, commit, and protected-path rules before introducing a new convention.
 
-8. Fail loud.
+8. Generated code comment discipline.
+   For each generated function or method, evaluate complexity before finalizing it. For simple functions, add a concise comment describing purpose when the purpose is not obvious from the name and surrounding context. For complex functions, add a concise purpose comment and inline comments at each major flow so readers can follow the logic. Do not add comments that merely restate the implementation.
+
+9. Keep solutions production-ready.
+   For production-facing work, do not present a solution as production-ready unless validation, residual risks, and rollback considerations have been addressed or explicitly scoped out.
+
+10. Fail loud.
    Do not claim completion without evidence. Report blockers, skipped verification, uncertainty, and residual risk explicitly.
 
 ### Optional Rules
@@ -118,6 +133,8 @@ Report concise findings, actions, verification, and remaining risk.
 ### Apply To Other Projects
 
 Use this action when the user wants to apply these operating rules to another repository's `AGENTS.md` or `CLAUDE.md`.
+
+For project-start setup, load [resources/agents-project-start-template.md](resources/agents-project-start-template.md). Check the target root for `AGENTS.md` and `CLAUDE.md`; if an instruction file exists, read it and merge only missing template sections; if none exists, create `AGENTS.md` from the template. Never overwrite existing instruction files silently.
 
 Choose one of three modes:
 
