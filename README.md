@@ -2,6 +2,8 @@
 
 **Production-grade workflow skills for Codex, Claude Code, Cursor, and other AI coding agents.**
 
+Vietnamese version: [README_VI.md](README_VI.md)
+
 This repository packages reusable agent skills, validators, test routing, and project-local agent templates. The goal is to make AI coding agents follow consistent engineering workflows: read before writing, make surgical changes, validate structure, run selected tests, review security, and ship through a predictable git workflow.
 
 ---

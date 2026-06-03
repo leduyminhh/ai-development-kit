@@ -301,8 +301,25 @@ if (Test-Path -LiteralPath $agentsPath) {
     $lineCount = (Get-Content -LiteralPath $agentsPath).Count
     if ($lineCount -gt 150) { $findings.Add((New-Finding 'warning' "AGENTS.md has $lineCount lines; keep it concise.")) }
     else { $findings.Add((New-Finding 'pass' "AGENTS.md exists and has $lineCount lines.")) }
+
+    $agentsText = Get-Content -LiteralPath $agentsPath -Raw
+    if ($agentsText.Contains('README.md') -and $agentsText.Contains('README_VI.md')) {
+        $findings.Add((New-Finding 'pass' 'AGENTS.md documents the README_VI.md sync rule.'))
+    } else {
+        $findings.Add((New-Finding 'warning' 'AGENTS.md should state that README_VI.md must be updated when README.md changes.'))
+    }
 } else {
     $findings.Add((New-Finding 'warning' 'AGENTS.md is missing. Add it when repository-level Codex guidance is needed.'))
+}
+
+$readmePath = Join-Path $resolvedRoot 'README.md'
+$readmeViPath = Join-Path $resolvedRoot 'README_VI.md'
+if (Test-Path -LiteralPath $readmePath) {
+    if (Test-Path -LiteralPath $readmeViPath) {
+        $findings.Add((New-Finding 'pass' 'README_VI.md exists as the Vietnamese README companion.'))
+    } else {
+        $findings.Add((New-Finding 'fail' 'README_VI.md is required when README.md exists.'))
+    }
 }
 
 $skillNames = New-Object System.Collections.Generic.HashSet[string]

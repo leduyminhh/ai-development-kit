@@ -17,6 +17,23 @@ function Remove-AnsiEscape {
     return [regex]::Replace($Text, "$escape\[[0-9;?]*[ -/]*[@-~]", '')
 }
 
+function Invoke-NativeOutput {
+    param([scriptblock]$Command)
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $output = & $Command 2>&1
+        $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { $LASTEXITCODE }
+        return [pscustomobject]@{
+            Output = @($output)
+            ExitCode = $exitCode
+        }
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+}
+
 . (Join-Path $Root 'scripts/lib/codex-config.ps1')
 
 function Get-ManifestPath {
@@ -72,8 +89,9 @@ function Invoke-WithTempHome {
 
 Push-Location $Root
 try {
-    $output = & npx skills add . --list 2>&1
-    $exitCode = if ($null -eq $LASTEXITCODE) { 0 } else { $LASTEXITCODE }
+    $listResult = Invoke-NativeOutput { npx skills add . --list }
+    $output = $listResult.Output
+    $exitCode = $listResult.ExitCode
     Assert-True ($exitCode -eq 0) 'npx skills add . --list should complete successfully.'
 
     $plainOutput = Remove-AnsiEscape -Text (@($output) -join "`n")
@@ -110,7 +128,10 @@ try {
     }
 
     $readmePath = Join-Path $Root 'README.md'
+    $readmeViPath = Join-Path $Root 'README_VI.md'
     $readmeText = Get-Content -LiteralPath $readmePath -Raw
+    Assert-True (Test-Path -LiteralPath $readmeViPath) 'README_VI.md should exist as the Vietnamese README companion.'
+    $readmeViText = Get-Content -LiteralPath $readmeViPath -Raw
     Assert-True ($readmeText.Contains('npx skills --help')) 'README should document the safe help command.'
     Assert-True ($readmeText.Contains('npx skills -h')) 'README should document the short help alias.'
     Assert-True ($readmeText.Contains('npx skills a ')) 'README should document the add alias.'
@@ -121,6 +142,33 @@ try {
     Assert-True ($readmeText.Contains('~\.claude\skills\security-code-review\SKILL.md')) 'README should document the expected Claude Code skill path.'
     Assert-True (-not $readmeText.Contains('npx skills add --help')) 'README should not document unsafe add --help usage.'
     Assert-True (-not $readmeText.Contains('npx skills add . --help')) 'README should not document unsafe local add help usage.'
+    Assert-True ($readmeText.Contains('[README_VI.md](README_VI.md)')) 'README should link to README_VI.md.'
+    Assert-True ($readmeViText.Contains('npx skills --help')) 'README_VI should document the safe help command.'
+    Assert-True ($readmeViText.Contains('npx skills -h')) 'README_VI should document the short help alias.'
+    Assert-True ($readmeViText.Contains('npx skills a ')) 'README_VI should document the add alias.'
+    Assert-True ($readmeViText.Contains('npx skills ls')) 'README_VI should document the list alias.'
+    Assert-True ($readmeViText.Contains("`$repo = `"$repoSlug`"")) 'README_VI should use the repository slug from manifest.'
+    Assert-True ($readmeViText.Contains('--agent claude-code -g -y --copy')) 'README_VI should document Claude Code global install flags.'
+    Assert-True ($readmeViText.Contains('~\.claude\skills\security-code-review\SKILL.md')) 'README_VI should document the expected Claude Code skill path.'
+    Assert-True (-not $readmeViText.Contains('npx skills add --help')) 'README_VI should not document unsafe add --help usage.'
+    Assert-True (-not $readmeViText.Contains('npx skills add . --help')) 'README_VI should not document unsafe local add help usage.'
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $changedFiles = @(
+            & git -C $Root diff --name-only HEAD 2>$null
+            & git -C $Root ls-files --others --exclude-standard 2>$null
+        ) | Where-Object {
+            -not [string]::IsNullOrWhiteSpace($_) -and
+            -not $_.StartsWith('warning:')
+        } | Select-Object -Unique
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+    if ($LASTEXITCODE -eq 0 -and ($changedFiles -contains 'README.md')) {
+        Assert-True ($changedFiles -contains 'README_VI.md') 'README_VI.md must be updated in the same change when README.md changes.'
+    }
 
     Invoke-WithTempHome -Root $Root -Script {
         param([string]$SourceRoot, [string]$TempHome)
@@ -130,8 +178,9 @@ try {
         $codexTargetRoot = Get-CodexTomlStringValue -TomlText $manifestText -Section 'skills_cli.target_paths' -Key 'codex'
         $claudeTargetRoot = Get-CodexTomlStringValue -TomlText $manifestText -Section 'skills_cli.target_paths' -Key 'claude_code'
 
-        $installOutput = & npx skills add $SourceRoot --skill @allowedSkills --agent codex claude-code cursor -y --copy 2>&1
-        $installExitCode = if ($null -eq $LASTEXITCODE) { 0 } else { $LASTEXITCODE }
+        $installResult = Invoke-NativeOutput { npx skills add $SourceRoot --skill @allowedSkills --agent codex claude-code cursor -y --copy }
+        $installOutput = $installResult.Output
+        $installExitCode = $installResult.ExitCode
         Assert-True ($installExitCode -eq 0) 'skills CLI should install allowed skills for Codex, Claude Code, and Cursor.'
 
         $plainInstallOutput = Remove-AnsiEscape -Text (@($installOutput) -join "`n")
@@ -164,8 +213,9 @@ try {
         $codexTargetRoot = Get-CodexTomlStringValue -TomlText $manifestText -Section 'skills_cli.target_paths' -Key 'codex'
         $claudeTargetRoot = Get-CodexTomlStringValue -TomlText $manifestText -Section 'skills_cli.target_paths' -Key 'claude_code'
 
-        $installOutput = & npx skills add $SourceRoot --skill $singleSkill --agent claude-code -g -y --copy 2>&1
-        $installExitCode = if ($null -eq $LASTEXITCODE) { 0 } else { $LASTEXITCODE }
+        $installResult = Invoke-NativeOutput { npx skills add $SourceRoot --skill $singleSkill --agent claude-code -g -y --copy }
+        $installOutput = $installResult.Output
+        $installExitCode = $installResult.ExitCode
         Assert-True ($installExitCode -eq 0) 'skills CLI should install one skill globally for Claude Code.'
 
         $plainInstallOutput = Remove-AnsiEscape -Text (@($installOutput) -join "`n")

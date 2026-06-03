@@ -87,6 +87,7 @@ Strict prohibitions:
   `powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix`
 - Use selected tests instead of running every test by default:
   `powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -FromGit`
+- If `README.md` changes, update `README_VI.md` in the same change so the Vietnamese version stays aligned.
 - When adding any `*test*.ps1` file, map it in `.codex/test-map.toml` under exactly one group: `test.always`, `test.core`, or `test.skill`.
 - Assign one ownership role for each new `scripts/`, `tests/`, or `resources/` artifact:
   `shared-project` for root `scripts/`; `skill-owned` for `skills/<skill>/...`.
