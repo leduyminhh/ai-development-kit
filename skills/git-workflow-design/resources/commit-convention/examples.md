@@ -1,5 +1,7 @@
 # Commit Message Examples
 
+These examples intentionally use Vietnamese commit bodies because this repository generates Vietnamese commit descriptions by default. The surrounding guidance remains English-only.
+
 ## Feature
 
 ```text

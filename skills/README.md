@@ -1,13 +1,14 @@
 # Skills Runtime Assets
 
-Thu muc `skills/` chua runtime skill assets cua repo. Moi skill la mot don vi co the duoc Codex kich hoat khi user request phu hop.
+The `skills/` directory contains runtime skill assets for this repository. Each skill is a discoverable unit that Codex, Claude Code, Cursor, or another agent can load when the user request matches the skill trigger.
 
-## Cau Truc
+## Structure
 
 ```text
 skills/
     manifest.toml
     README.md
+    SKILL_TEMPLATE.md
     <skill-name>/
         SKILL.md
         agents/
@@ -17,99 +18,107 @@ skills/
         subagents/
 ```
 
-## Thanh Phan
+## Components
 
-| Thanh phan | Bat buoc | Vai tro |
+| Component | Required | Purpose |
 |---|---:|---|
-| `SKILL.md` | Co | Frontmatter `name`, `description` va workflow cot loi. |
-| `agents/openai.yaml` | Khuyen nghi | Metadata hien thi skill trong UI khi skill co prompt goi nhanh hoac integration metadata. |
-| `resources/` | Tuy skill | Tai lieu chi tiet chi doc khi task can. |
-| `scripts/` | Tuy skill | Script deterministic gan voi skill. |
-| `subagents/` | Bat buoc cho skill runtime moi | Prompt vai tro chuyen biet duoc skill lua chon khi can. |
+| `SKILL.md` | Yes | Frontmatter `name`, `description`, and the core workflow contract. |
+| `agents/openai.yaml` | Recommended | UI metadata when the skill has quick prompts or integration metadata. |
+| `resources/` | Skill-dependent | Detailed references loaded only when the task needs them. |
+| `scripts/` | Skill-dependent | Deterministic helpers owned by one skill. |
+| `subagents/` | Required for new runtime skills | Focused prompts that the skill may select when useful. |
 
 ## Manifest Contract
 
-`skills/manifest.toml` la hop dong ro rang giua:
+`skills/manifest.toml` is the contract between:
 
-- repo structure: `skills/<name>/...`
+- repository structure: `skills/<name>/...`
 - runtime registration: `.codex/agents/<name>.toml`
 - runtime governance metadata: `.codex/agent-metadata/<name>.toml`
-- external discovery: link `skills/` vao Codex skill loading path
+- external discovery: linking or copying `skills/` into an agent skill loading path
 
-Manifest khong thay the `config.toml`. No chi lam ro skill nao co agent entry, skill nao chi la companion skill, va metadata UI cua skill nam o dau.
+The manifest does not replace `.codex/config.toml`. It documents which skills have agent entry points, which skills are companion skills, and where UI metadata lives.
 
-## Danh Sach Skill Hien Co
+## Current Skill Catalog
 
-| Skill | Chuc nang |
+| Skill | Purpose |
 |---|---|
-| `architecture-onion-design` | Thiet ke/review Onion Architecture, package layout va boundary risk. |
-| `code-design-pattern` | Chon design pattern phu hop, tranh overuse, can approval truoc khi ap dung. |
-| `code-shared-design` | Thiet ke shared internal API, contract va shared logic module. |
-| `codex-structure-validate` | Validator cau truc Codex repo. |
-| `diagram-generate` | Tao PlantUML diagram theo selector/subagent phu hop. |
-| `doc-write` | Viet tai lieu ky thuat, README, architecture/feature/flow/database docs. |
-| `git-workflow-design` | Ho tro branch, commit, merge, revert, release, hotfix. |
-| `java-analyze` | Phan tich Java/Spring architecture, persistence, async, test strategy. |
-| `naming-rule-validate` | Kiem tra naming convention cho artifacts. |
-| `react-code-generate` | Tao/sua React UI, API integration, accessibility/performance review. |
-| `security-code-review` | Review security risk theo OWASP/ASVS/CWE, auth, secrets, dependencies, va verification. |
-| `test-automation-validate` | Tao va verify automated tests. |
-| `test-qa-review` | QA review doc lap va regression/verification planning. |
-| `youtube-transcript` | Tai transcript, captions, subtitles, hoac transcript Whisper tu video YouTube. |
+| `agent-operating-rules` | Applies repository-wide execution discipline: read first, keep changes surgical, test intent, and fail loud. |
+| `architecture-onion-design` | Designs and reviews Onion Architecture, package layout, and boundary risk. |
+| `code-design-pattern` | Selects suitable design patterns, avoids overuse, and requires approval before applying a pattern. |
+| `code-shared-design` | Designs shared internal APIs, contracts, SDKs, and shared logic modules. |
+| `codex-structure-validate` | Validates Codex repository structure, skills, agents, config, hooks, and test mapping. |
+| `diagram-generate` | Generates PlantUML diagrams through the appropriate selector or focused subagent. |
+| `doc-write` | Writes technical documentation, README sections, architecture notes, feature docs, flow docs, and database docs. |
+| `git-workflow-design` | Handles branch, commit, merge, revert, release, hotfix, staging, push, and PR workflows. |
+| `java-analyze` | Reviews Java/Spring architecture, persistence, async behavior, API contracts, and test strategy. |
+| `naming-rule-validate` | Validates naming conventions for agents, skills, subagents, workflows, hooks, scripts, and validators. |
+| `react-code-generate` | Creates or updates React UI, API integration, accessibility checks, performance review, and handoff notes. |
+| `security-code-review` | Reviews security risks across OWASP/ASVS/CWE, auth, secrets, dependencies, logging, and verification. |
+| `test-automation-validate` | Plans, creates, runs, and stabilizes automated tests across stacks. |
+| `test-qa-review` | Performs QA review, regression analysis, verification planning, and automation handoff. |
+| `youtube-transcript` | Downloads, fetches, transcribes, or cleans YouTube transcripts, captions, and subtitles. |
 
 ## Progressive Disclosure
 
-Quy tac tiet kiem context:
+Use these context rules:
 
-- `SKILL.md` chi giu trigger, operating mode va resource map ngan.
-- Noi dung dai hoac mapping nhieu lua chon phai nam trong `resources/`.
-- Chi doc subagent prompt duoc chon, khong doc ca thu muc `subagents/`.
-- Skill co nhieu bien the nen co selector resource rieng.
+- `SKILL.md` keeps only triggers, operating mode, and a short resource map.
+- Long procedures and variant-specific details belong in `resources/`.
+- Load only the selected subagent prompt, not the entire `subagents/` directory.
+- Skills with many variants should provide a selector resource.
 
-Vi du:
+Examples:
 
-- `react-code-generate/resources/context-loading-selector.md`
-- `diagram-generate/resources/diagram-prompt-selector.md`
-- `test-automation-validate/resources/test-prompt-selector.md`
+- `react-code-generate/resources/frontend-composition-guidelines.md`
+- `diagram-generate/resources/plantuml-diagram-selection.md`
+- `test-automation-validate/resources/framework-detection.md`
 
 ## Skill Catalog Update Event
 
-Khi co skill moi xuat hien trong `skills/`, workflow phai cap nhat lai thong tin cho user va tai lieu catalog:
+When a new skill appears under `skills/`, update the catalog and runtime metadata:
 
-- Them skill moi vao bang "Danh Sach Skill Hien Co" cua file nay.
-- Cap nhat bang "Domain Capabilities" trong `README.md`.
-- Cap nhat `skills/manifest.toml`.
-- Neu skill co runtime workflow, tao subagent prompt tuong ung trong `subagents/`.
-- Neu skill can agent entry point, tao `.codex/agents/<skill-name>.toml`, tao `.codex/agent-metadata/<skill-name>.toml`, va sync registry bang validator `-Fix`.
-- Neu them test script, map vao `.codex/test-map.toml`.
-- Khi tra loi cuoi cung, thong bao ro skill moi nao da phat sinh va tai lieu nao da duoc cap nhat.
+1. Add the skill to the `Current Skill Catalog` table in this file.
+2. Update the `Skill Catalog` section in `README.md`.
+3. Update `README_VI.md` when `README.md` changes.
+4. Update `skills/manifest.toml`.
+5. Create at least one `subagents/*.md` prompt for runtime workflow skills.
+6. Create `.codex/agents/<skill-name>.toml` and `.codex/agent-metadata/<skill-name>.toml` when the skill needs an agent entry point.
+7. Run the validator with `-Fix` to sync `.codex/config.toml` agent registry entries.
+8. Map new PowerShell test files in `.codex/test-map.toml`.
+9. Report which skill and catalog files changed in the final response.
 
-## Quy Tac Tao Skill Moi
+## New Skill Rules
 
-Khi tao skill moi trong `skills/<skill-name>/`:
+When creating a new skill under `skills/<skill-name>/`:
 
-1. Tao `SKILL.md` voi frontmatter `name` va `description`.
-2. Tao `subagents/` va it nhat mot prompt `.md` neu skill co workflow runtime.
-3. Tao hoac cap nhat `.codex/agents/<skill-name>.toml` neu skill can agent entry point.
-4. Tao hoac cap nhat `.codex/agent-metadata/<skill-name>.toml` de giu read_only, hook gate, va governance metadata.
-5. Cap nhat `skills/manifest.toml` voi `skill_path`, `ui_metadata`, va `agent_entry`.
-6. Chay validator voi `-Fix` de sync `agent_registry` vao `.codex/config.toml`.
-7. Neu co script test, map vao `.codex/test-map.toml`.
-8. Chay validator va selected tests.
+1. Create `SKILL.md` with YAML frontmatter containing `name` and `description`.
+2. Follow `skills/SKILL_TEMPLATE.md` exactly for top-level H2 order.
+3. Create `subagents/` and at least one prompt `.md` when the skill has runtime workflow behavior.
+4. Create or update `.codex/agents/<skill-name>.toml` when the skill needs an agent entry point.
+5. Create or update `.codex/agent-metadata/<skill-name>.toml` for governance metadata.
+6. Update `skills/manifest.toml` with `skill_path`, `ui_metadata`, and `agent_entry`.
+7. Run the structure validator with `-Fix`.
+8. Map any new `*test*.ps1` script in `.codex/test-map.toml`.
+9. Run the validator and selected tests.
 
-## Kiem Tra
+## Validation
 
-Validator cau truc:
+Run the structure validator:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix
 ```
 
-Naming rule:
+Run naming validation:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File skills/naming-rule-validate/scripts/validate-naming-rule.ps1 -Root .
 ```
 
-Script nay kiem tra ca ten artifact va declared name metadata trong agent/skill.
+The structure validator also checks:
 
+- `skills/README.md` catalog consistency against `skills/*/SKILL.md`
+- `README.md` install command contract for `npx skills`
+- `README.md` and `README_VI.md` same-diff sync when root README changes
+- project-level markdown quality outside protected paths and outside skill `resources/` or `subagents/`

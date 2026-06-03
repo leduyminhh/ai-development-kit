@@ -56,6 +56,7 @@ Use this skill when the task requires choosing, reviewing, or applying a Java/JV
 - [resources/pattern-selector.md](resources/pattern-selector.md): parent selection workflow, subagent priority rules, and anti-overuse gate.
 - [resources/baeldung-pattern-catalog.md](resources/baeldung-pattern-catalog.md): compact taxonomy inspired by the Baeldung series.
 - [resources/approval-and-report.md](resources/approval-and-report.md): required approval prompt and final response template.
+- [resources/output-template-vi.md](resources/output-template-vi.md): Vietnamese approval, completion, and no-pattern response templates.
 
 ## Subagent Prompts
 
@@ -74,24 +75,7 @@ The priority is contextual. Do not run every subagent by default. Select only th
 
 ## Output Format
 
-Before applying:
-
-```text
-Pattern được đề xuất:
-Cơ sở lựa chọn:
-Rủi ro nếu áp dụng không phù hợp:
-Yêu cầu phê duyệt: vui lòng xác nhận trước khi triển khai.
-```
-
-After applying:
-
-```text
-Pattern đã áp dụng:
-Kết quả đạt được:
-Files changed:
-Verification:
-Rủi ro / khuyến nghị tiếp theo:
-```
+Use [resources/output-template-vi.md](resources/output-template-vi.md) for user-facing Vietnamese approval, completion, and no-pattern response templates.
 
 ## Notes
 
@@ -101,11 +85,7 @@ Rủi ro / khuyến nghị tiếp theo:
 2. Load [resources/pattern-selector.md](resources/pattern-selector.md).
 3. Rank the relevant subagent prompts by fit and risk.
 4. If no pattern is clearly needed, recommend the simpler refactor and stop.
-5. Before applying a pattern, present a concise decision note:
-   - `Pattern được đề xuất:`
-   - `Cơ sở lựa chọn:`
-   - `Rủi ro nếu áp dụng không phù hợp:`
-   - `Yêu cầu phê duyệt: vui lòng xác nhận trước khi triển khai.`
+5. Before applying a pattern, present the Vietnamese approval template from [resources/output-template-vi.md](resources/output-template-vi.md).
 6. Proceed only after explicit approval.
 7. Apply the smallest pattern implementation that fits the codebase.
 8. Verify behavior with targeted tests or existing project commands.

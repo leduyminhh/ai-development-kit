@@ -66,6 +66,7 @@ Use this skill when the user asks to commit, push, stage, create or switch branc
 - [resources/commit-convention.md](resources/commit-convention.md): commit type, scope, title, and Vietnamese body rules.
 - [resources/branch-convention.md](resources/branch-convention.md): branch role prefixes and naming rules.
 - [resources/gitflow-checklist.md](resources/gitflow-checklist.md): concise safety checklist for staging, commit, push, merge, revert, release, and hotfix.
+- [resources/output-template-vi.md](resources/output-template-vi.md): Vietnamese git workflow response templates.
 
 ## Subagent Prompts
 
@@ -80,46 +81,7 @@ Use this skill when the user asks to commit, push, stage, create or switch branc
 
 ## Output Format
 
-Before commit:
-
-```text
-Branch đề xuất:
-Commit đề xuất:
-Lý do chọn type/scope:
-Files sẽ stage:
-Commit body:
-What changed:
-- ...
-  • ...
-
-- ...
-
-Why changed:
-- ...
-Important notes / breaking impact:
-- ...
-Verification:
-```
-
-After commit/push:
-
-```text
-Branch:
-Commit:
-Push:
-PR:
-Verification:
-Ghi chú:
-```
-
-For changelog or release notes:
-
-```text
-Phạm vi:
-Đối tượng đọc:
-Tóm tắt:
-Changelog / Release notes:
-```
+Use [resources/output-template-vi.md](resources/output-template-vi.md) for user-facing Vietnamese git workflow templates, including before-commit, after commit/push, and changelog/release-note output.
 
 ## Notes
 
@@ -198,7 +160,7 @@ Basic expectation:
    - a Vietnamese body with sections `What changed`, `Why changed`, and optional `Important notes / breaking impact`
    - keep the Vietnamese body in UTF-8 with diacritics; do not strip accents unless the user explicitly asks for that compromise
    - `What changed` and `Why changed` should each contain 1 to 5 main rows depending on the real change size
-   - each main row may have optional detail lines prefixed with `•`; keep them only when the diff shows meaningful supporting behavior, side effects, constraints, or secondary flow
+   - each main row may have optional detail lines prefixed with `-`; keep them only when the diff shows meaningful supporting behavior, side effects, constraints, or secondary flow
    - derive all rows from the real diff and nearby source context, from a developer's point of view: what they improved, fixed, simplified, or enabled
    - summarize the main flow first, then the supporting flow
    - avoid file-by-file narration when the deeper workflow or maintenance intent is visible
@@ -218,11 +180,11 @@ When producing a user-facing changelog:
 - use exact tags, commit ranges, or dates when the user asks for a bounded release summary
 
 Example categories:
-- `✨ New Features`
-- `🔧 Improvements`
-- `🐛 Fixes`
-- `⚠ Breaking Changes`
-- `🔒 Security`
+- `New Features`
+- `Improvements`
+- `Fixes`
+- `Breaking Changes`
+- `Security`
 
 ### Tips
 

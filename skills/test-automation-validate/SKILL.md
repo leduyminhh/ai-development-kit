@@ -54,6 +54,7 @@ Use this skill when creating, updating, running, debugging, or planning automate
 - [resources/framework-detection.md](resources/framework-detection.md): identify stack, package manager, test runner, and command selection.
 - [resources/test-implementation-rules.md](resources/test-implementation-rules.md): rules for deterministic, behavior-first automated tests.
 - [resources/verification-report.md](resources/verification-report.md): final test result and evidence format.
+- [resources/output-template-vi.md](resources/output-template-vi.md): Vietnamese automated test verification response template.
 
 ## Subagent Prompts
 
@@ -76,15 +77,7 @@ Use this skill when creating, updating, running, debugging, or planning automate
 
 ## Output Format
 
-```text
-Pham vi automation:
-Test level da chon:
-Files changed:
-Commands run:
-Ket qua:
-Coverage gaps:
-Rui ro / manual checks:
-```
+Use [resources/output-template-vi.md](resources/output-template-vi.md) for the user-facing Vietnamese test automation response template.
 
 ## Notes
 

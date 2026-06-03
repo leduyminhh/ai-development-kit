@@ -54,6 +54,7 @@ Use this skill after architecture, implementation, bug fix, or release preparati
 - [resources/test-scenario-design.md](resources/test-scenario-design.md): derive behavior-first scenarios from requirements, tickets, designs, or code changes.
 - [resources/stack-verification.md](resources/stack-verification.md): choose verification commands for Java, React/Node, Python, Go, .NET, and fallback projects.
 - [resources/regression-review.md](resources/regression-review.md): review regression risk, edge cases, and release confidence before handoff.
+- [resources/output-template-vi.md](resources/output-template-vi.md): Vietnamese QA review response template.
 
 ## Subagent Prompts
 
@@ -69,16 +70,7 @@ Use this skill after architecture, implementation, bug fix, or release preparati
 
 ## Output Format
 
-Return in Vietnamese:
-
-- Scope tested.
-- Test scenarios derived.
-- Existing coverage found.
-- Gaps or risks.
-- Verification commands run and results.
-- Recommended next tests or fixes.
-
-For code review findings, lead with concrete issues and file references before summary.
+Use [resources/output-template-vi.md](resources/output-template-vi.md) for the user-facing Vietnamese QA review response template.
 
 ## Notes
 

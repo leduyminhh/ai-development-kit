@@ -59,6 +59,7 @@ Do not claim completion without fresh verification evidence. If a command cannot
 - [resources/frontend-composition-guidelines.md](resources/frontend-composition-guidelines.md): frontend-skill inspired art direction, hierarchy, copy, imagery, app surface, and motion rules.
 - [resources/api-integration-from-curl.md](resources/api-integration-from-curl.md): convert curl/API examples into app data flows without leaking secrets.
 - [resources/completion-handoff.md](resources/completion-handoff.md): summarize completed UI/API work for Notion, Slack, or future automation.
+- [resources/output-template-vi.md](resources/output-template-vi.md): Vietnamese React implementation response template.
 
 ## Subagent Prompts
 
@@ -76,14 +77,7 @@ Do not claim completion without fresh verification evidence. If a command cannot
 
 ## Output Format
 
-Respond in Vietnamese with:
-
-- UI/source interpreted.
-- API contract interpreted, if any.
-- Files changed.
-- Verification run and result.
-- Ticket/automation handoff summary, if relevant.
-- Risks or next checks.
+Use [resources/output-template-vi.md](resources/output-template-vi.md) for the user-facing Vietnamese React implementation template.
 
 ## Notes
 

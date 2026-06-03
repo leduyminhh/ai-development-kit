@@ -54,6 +54,7 @@ Use this skill when creating, updating, reviewing, or planning README sections, 
 
 - [resources/document-quality-rules.md](resources/document-quality-rules.md): documentation quality bar, source-of-truth rules, structure, tone, and verification checklist.
 - [resources/project-doc-output-catalog.md](resources/project-doc-output-catalog.md): standard project documentation outputs, path conventions, confirmation template, and file selection rules.
+- [resources/output-template-vi.md](resources/output-template-vi.md): Vietnamese documentation handoff template.
 
 ## Subagent Prompts
 
@@ -68,15 +69,7 @@ Use this skill when creating, updating, reviewing, or planning README sections, 
 
 ## Output Format
 
-```text
-Loai tai lieu:
-Target docs/ path:
-Nguon da tham chieu:
-Noi dung da tao/cap nhat:
-Gia dinh / cau hoi mo:
-Verification:
-Files changed:
-```
+Use [resources/output-template-vi.md](resources/output-template-vi.md) for the user-facing Vietnamese documentation handoff template.
 
 ## Notes
 
@@ -100,7 +93,7 @@ Files changed:
 11. Prefer diagrams or structured sections only when they improve comprehension.
 12. Mark assumptions, open questions, and source gaps clearly.
 13. Verify links, file references, commands, schema names, API names, and terminology where feasible.
-14. Respond in Vietnamese with a concise summary of the documentation created or drafted.
+14. Use [resources/output-template-vi.md](resources/output-template-vi.md) for the user-facing Vietnamese documentation handoff response.
 
 ### Documentation Rules
 

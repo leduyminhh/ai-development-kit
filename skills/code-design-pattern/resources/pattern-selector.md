@@ -44,13 +44,6 @@ For each candidate pattern, answer:
 
 ## Approval Requirement
 
-Before implementation, produce:
-
-```text
-Pattern được đề xuất:
-Cơ sở lựa chọn:
-Rủi ro nếu áp dụng không phù hợp:
-Yêu cầu phê duyệt: vui lòng xác nhận trước khi triển khai.
-```
+Before implementation, use [output-template-vi.md](output-template-vi.md) to produce the Vietnamese approval template.
 
 Proceed only after explicit approval.

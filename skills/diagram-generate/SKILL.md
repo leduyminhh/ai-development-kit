@@ -55,6 +55,7 @@ Use this skill when the user asks to design, generate, review, or select a Plant
 
 - [resources/plantuml-diagram-selection.md](resources/plantuml-diagram-selection.md): diagram type selection rules and subagent mapping.
 - [resources/plantuml-output-rules.md](resources/plantuml-output-rules.md): PlantUML output contract, naming, style, and rendering guidance.
+- [resources/output-template-vi.md](resources/output-template-vi.md): Vietnamese diagram response template.
 
 ## Subagent Prompts
 
@@ -85,20 +86,7 @@ Use the most relevant prompt only:
 
 ## Output Format
 
-```text
-Diagram type:
-Output file:
-Assumptions:
-
-```plantuml
-@startuml
-' diagram source
-@enduml
-```
-
-Render:
-Rui ro / ghi chu:
-```
+Use [resources/output-template-vi.md](resources/output-template-vi.md) for the user-facing Vietnamese diagram response template.
 
 ## Notes
 

@@ -67,6 +67,128 @@ function Get-MarkdownH2Headings {
     )
 }
 
+function Get-MarkdownH1Headings {
+    param([string]$Text)
+
+    return @(
+        [regex]::Matches($Text, '(?m)^#\s+(.+?)\s*$') |
+            ForEach-Object { $_.Groups[1].Value.Trim() }
+    )
+}
+
+function Remove-MarkdownFencedCodeBlocks {
+    param([string]$Text)
+
+    return [regex]::Replace($Text, '(?ms)^```.*?^```', '')
+}
+
+function Get-RelativeRepoPath {
+    param([string]$ResolvedRoot, [string]$FullPath)
+
+    return ($FullPath.Substring($ResolvedRoot.Length).TrimStart('\', '/') -replace '\\', '/')
+}
+
+function Get-GitChangedRootMarkdown {
+    param([string]$ResolvedRoot)
+
+    try {
+        $insideWorkTree = (& git -C $ResolvedRoot rev-parse --is-inside-work-tree 2>$null)
+        if ($LASTEXITCODE -ne 0 -or $insideWorkTree -ne 'true') {
+            return @()
+        }
+
+        $changed = New-Object System.Collections.Generic.HashSet[string]
+        foreach ($mode in @('', '--cached')) {
+            $args = @('-C', $ResolvedRoot, 'diff', '--name-only')
+            if ($mode -eq '--cached') {
+                $args += '--cached'
+            }
+            $args += @('--', 'README.md', 'README_VI.md')
+            $items = & git @args 2>$null
+            foreach ($item in $items) {
+                if (-not [string]::IsNullOrWhiteSpace($item)) {
+                    [void]$changed.Add(($item -replace '\\', '/'))
+                }
+            }
+        }
+
+        return @($changed)
+    } catch {
+        return @()
+    }
+}
+
+function Get-SkillsReadmeCatalogNames {
+    param([string]$ReadmeText)
+
+    return @(
+        [regex]::Matches($ReadmeText, '(?m)^\|\s*`([a-z0-9]+(?:-[a-z0-9]+)*)`\s*\|') |
+            ForEach-Object { $_.Groups[1].Value.Trim() }
+    )
+}
+
+function Test-ReadmeContainsInstallCommandContract {
+    param(
+        [string]$ReadmeText,
+        [string[]]$AllowedSkillNames
+    )
+
+    $missing = New-Object System.Collections.Generic.List[string]
+    $requiredSnippets = @(
+        'leduyminhh/ai-development-kit',
+        'npx skills --help',
+        'npx skills -h',
+        'npx skills add',
+        'npx skills a',
+        'npx skills ls',
+        '--agent codex',
+        '--agent claude-code',
+        '--agent cursor',
+        '--list'
+    )
+
+    foreach ($snippet in $requiredSnippets) {
+        if (-not $ReadmeText.Contains($snippet)) {
+            $missing.Add($snippet)
+        }
+    }
+
+    foreach ($skillName in $AllowedSkillNames) {
+        if (-not $ReadmeText.Contains($skillName)) {
+            $missing.Add("allowlist skill: $skillName")
+        }
+    }
+
+    return @($missing)
+}
+
+function Test-ProjectMarkdownQuality {
+    param(
+        [string]$ResolvedRoot,
+        [string]$FullPath
+    )
+
+    $relativePath = Get-RelativeRepoPath -ResolvedRoot $ResolvedRoot -FullPath $FullPath
+    if ($relativePath -match '^(docs|reports)/') {
+        return $null
+    }
+    if ($relativePath -match '^skills/[^/]+/(resources|subagents)/') {
+        return $null
+    }
+    if ($relativePath -match '^references/external/') {
+        return $null
+    }
+
+    $text = Get-Content -LiteralPath $FullPath -Raw
+    $textForHeadings = Remove-MarkdownFencedCodeBlocks -Text $text
+    $h1Count = (Get-MarkdownH1Headings -Text $textForHeadings).Count
+    return [pscustomobject]@{
+        RelativePath = $relativePath
+        HasBom       = (Test-HasUtf8Bom -Path $FullPath)
+        H1Count      = $h1Count
+    }
+}
+
 function Get-ConfiguredSkillsRoot {
     param([string]$ResolvedRoot)
 
@@ -403,6 +525,30 @@ if (Test-Path -LiteralPath $readmePath) {
     } else {
         $findings.Add((New-Finding 'fail' 'README_VI.md is required when README.md exists.'))
     }
+
+    $readmeText = Get-Content -LiteralPath $readmePath -Raw
+    $defaultInstallAllowlist = @(
+        'agent-operating-rules',
+        'diagram-generate',
+        'doc-write',
+        'git-workflow-design',
+        'security-code-review'
+    )
+    $missingInstallContract = Test-ReadmeContainsInstallCommandContract -ReadmeText $readmeText -AllowedSkillNames $defaultInstallAllowlist
+    if ($missingInstallContract.Count -eq 0) {
+        $findings.Add((New-Finding 'pass' 'README.md documents the required npx skills install command contract.'))
+    } else {
+        $findings.Add((New-Finding 'fail' "README.md must document repo URI, allowlist, help, alias, and Codex/Claude/Cursor install commands. Missing: $($missingInstallContract -join ', ')"))
+    }
+
+    $changedRootReadmes = @(Get-GitChangedRootMarkdown -ResolvedRoot $resolvedRoot)
+    if (($changedRootReadmes -contains 'README.md') -and -not ($changedRootReadmes -contains 'README_VI.md')) {
+        $findings.Add((New-Finding 'fail' 'README.md changed without README_VI.md in the same git diff. Update README_VI.md in the same change.'))
+    } elseif (($changedRootReadmes -contains 'README.md') -and ($changedRootReadmes -contains 'README_VI.md')) {
+        $findings.Add((New-Finding 'pass' 'README.md and README_VI.md are changing together in the current git diff.'))
+    } else {
+        $findings.Add((New-Finding 'pass' 'No pending README.md change requires README_VI.md sync.'))
+    }
 }
 
 $skillTemplatePath = Join-Path $resolvedRoot 'skills/SKILL_TEMPLATE.md'
@@ -545,8 +691,49 @@ if (Test-Path -LiteralPath $skillsRoot) {
         $subagentsPath = Join-Path $file.Directory.FullName 'subagents'
         Ensure-ScaffoldDirectory -Path $subagentsPath -Label "Skill subagents root for $($file.Directory.Name)" -TrackWhenEmpty $true
     }
+
+    $skillsReadmePath = Join-Path $skillsRoot 'README.md'
+    if (Test-Path -LiteralPath $skillsReadmePath) {
+        $skillsReadmeText = Get-Content -LiteralPath $skillsReadmePath -Raw
+        $catalogNames = @(Get-SkillsReadmeCatalogNames -ReadmeText $skillsReadmeText | Sort-Object -Unique)
+        $actualSkillNames = @($skillNames | Sort-Object)
+        $missingCatalogNames = @($actualSkillNames | Where-Object { $catalogNames -notcontains $_ })
+        $extraCatalogNames = @($catalogNames | Where-Object { $actualSkillNames -notcontains $_ })
+        if ($catalogNames.Count -eq $actualSkillNames.Count -and $missingCatalogNames.Count -eq 0 -and $extraCatalogNames.Count -eq 0) {
+            $findings.Add((New-Finding 'pass' "skills/README.md catalog matches runtime skills ($($actualSkillNames.Count) skills)."))
+        } else {
+            $findings.Add((New-Finding 'fail' "skills/README.md catalog must match $skillsRootRelative/*/SKILL.md. Expected $($actualSkillNames.Count), found $($catalogNames.Count). Missing: $($missingCatalogNames -join ', '). Extra: $($extraCatalogNames -join ', ')."))
+        }
+    } elseif ($skillNames.Count -gt 0) {
+        $findings.Add((New-Finding 'fail' 'skills/README.md is required to catalog runtime skills.'))
+    } else {
+        $findings.Add((New-Finding 'pass' 'skills/README.md catalog check skipped because no runtime skills exist yet.'))
+    }
 } else {
     $findings.Add((New-Finding 'warning' 'skills is missing. This is acceptable only before skills are introduced.'))
+}
+
+$projectMarkdownFiles = @(Get-ChildItem -LiteralPath $resolvedRoot -Recurse -File -Filter '*.md' -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch '\\.git\\' })
+$projectMarkdownChecked = 0
+foreach ($markdownFile in $projectMarkdownFiles) {
+    $quality = Test-ProjectMarkdownQuality -ResolvedRoot $resolvedRoot -FullPath $markdownFile.FullName
+    if ($null -eq $quality) {
+        continue
+    }
+
+    $projectMarkdownChecked++
+    if ($quality.HasBom) {
+        $findings.Add((New-Finding 'fail' "Project markdown must not start with UTF-8 BOM: $($quality.RelativePath)"))
+    }
+    if ($quality.H1Count -eq 0) {
+        $findings.Add((New-Finding 'warning' "Project markdown should include one H1 heading: $($quality.RelativePath)"))
+    } elseif ($quality.H1Count -gt 1) {
+        $findings.Add((New-Finding 'warning' "Project markdown should include only one H1 heading: $($quality.RelativePath)"))
+    }
+}
+if ($projectMarkdownChecked -gt 0) {
+    $findings.Add((New-Finding 'pass' "Project markdown quality checked for $projectMarkdownChecked files; protected paths and skill resources/subagents were excluded."))
 }
 
 $workflowsRoot = Join-Path $resolvedRoot 'workflows'

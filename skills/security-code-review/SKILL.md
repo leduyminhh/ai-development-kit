@@ -60,6 +60,7 @@ Use this skill for security review of source code, diffs, configs, dependencies,
 - [resources/dependency-supply-chain-review.md](resources/dependency-supply-chain-review.md): package risk, lockfile drift, unsafe defaults, SBOM, and build-chain review.
 - [resources/logging-error-handling-review.md](resources/logging-error-handling-review.md): sensitive logging, exception exposure, auditability, and observability hardening.
 - [resources/java-spring-security-review.md](resources/java-spring-security-review.md): Spring Security, method security, config, actuator, JPA, and Java-specific risk review.
+- [resources/output-template-vi.md](resources/output-template-vi.md): Vietnamese security review and scan response templates.
 
 - General source review: start with [resources/security-review-checklist.md](resources/security-review-checklist.md).
 - Access control, login, JWT, session, or permission review: load [resources/auth-session-review.md](resources/auth-session-review.md).
@@ -133,14 +134,7 @@ Run scripts from the target repository root. Scripts are read-only except for no
 
 ## Output Format
 
-Return in Vietnamese:
-
-- Pham vi review.
-- Stack va be mat tan cong da xet.
-- Findings theo muc do `Critical | High | Medium | Low`.
-- Bang chung va mapping `OWASP | ASVS | CWE`.
-- Lenh verify / kiem tra bo sung.
-- Residual risk va unknowns.
+Use [resources/output-template-vi.md](resources/output-template-vi.md) for user-facing Vietnamese security review and scan response templates.
 
 ## Notes
 

@@ -11,17 +11,9 @@ Use this resource when reporting automated testing work.
 - test level covered
 - what remains unverified
 
-## Report Template
+## Vietnamese Output Template
 
-```text
-Pham vi automation:
-Test level da chon:
-Files changed:
-Commands run:
-Ket qua:
-Coverage gaps:
-Rui ro / manual checks:
-```
+Use [output-template-vi.md](output-template-vi.md) for the user-facing automated test verification response template.
 
 ## When Tests Cannot Run
 

@@ -20,8 +20,22 @@ try {
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.codex/agent-metadata') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot 'docs/ignored-skill') -Force | Out-Null
 
-    Set-Content -LiteralPath (Join-Path $tempRoot 'AGENTS.md') -Encoding utf8 -Value '# Test Agents'
+    [System.IO.File]::WriteAllText((Join-Path $tempRoot 'AGENTS.md'), '# Test Agents', [System.Text.UTF8Encoding]::new($false))
     Set-Content -LiteralPath (Join-Path $tempRoot 'docs/ignored-skill/SKILL.md') -Encoding utf8 -Value 'not valid skill frontmatter'
+    [System.IO.File]::WriteAllText(
+        (Join-Path $tempRoot 'skills/README.md'),
+@'
+# Skills Runtime Assets
+
+## Current Skill Catalog
+
+| Skill | Purpose |
+|---|---|
+| `new-agent` | Valid writable fixture skill. |
+| `read-only-agent` | Valid read-only fixture skill. |
+'@,
+        [System.Text.UTF8Encoding]::new($false)
+    )
     Set-Content -LiteralPath (Join-Path $tempRoot '.codex/config.toml') -Encoding utf8 -Value @'
 [environment]
 network_access = true
@@ -184,14 +198,18 @@ read-only validator fixture result
         [System.Text.UTF8Encoding]::new($false)
     )
 
-    Set-Content -LiteralPath (Join-Path $tempRoot 'workflows/workflow-java-architecture-review/WORKFLOW.md') -Encoding utf8 -Value @'
+    [System.IO.File]::WriteAllText(
+        (Join-Path $tempRoot 'workflows/workflow-java-architecture-review/WORKFLOW.md'),
+@'
 ---
 name: workflow-java-architecture-review
 description: Test workflow wrapper for java architecture review.
 ---
 
 # Workflow Java Architecture Review
-'@
+'@,
+        [System.Text.UTF8Encoding]::new($false)
+    )
 
     Set-Content -LiteralPath (Join-Path $tempRoot '.codex/agents/new-agent.toml') -Encoding utf8 -Value @'
 name = "new-agent"
@@ -219,8 +237,8 @@ read_only = false
 hooks_project_enabled = true
 '@
 
-    & powershell -NoProfile -ExecutionPolicy Bypass -File $validator -Root $tempRoot -Fix | Out-Null
-    Assert-True ($LASTEXITCODE -eq 0) 'Validator with -Fix should exit 0 for valid generated repo.'
+    $fixOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File $validator -Root $tempRoot -Fix
+    Assert-True ($LASTEXITCODE -eq 0) "Validator with -Fix should exit 0 for valid generated repo.`n$($fixOutput -join "`n")"
 
     $scanOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File $validator -Root $tempRoot
     Assert-True ($LASTEXITCODE -eq 0) 'Validator should skip protected docs by default and exit 0.'
@@ -328,6 +346,7 @@ description: Bad skill name format test.
     Assert-True ($legacyMetadataText.Contains('UTF-8 BOM')) 'Validator should report UTF-8 BOM-prefixed skill files.'
     Assert-True ($legacyMetadataText.Contains('Skill name must be 1-64 lowercase alphanumeric')) 'Validator should report invalid skill name format.'
     Assert-True ($legacyMetadataText.Contains('must match directory')) 'Validator should report skill name and directory mismatch.'
+    Assert-True ($legacyMetadataText.Contains('skills/README.md catalog must match')) 'Validator should report skill catalog drift in skills/README.md.'
 
     New-Item -ItemType Directory -Path $emptyRoot -Force | Out-Null
     & powershell -NoProfile -ExecutionPolicy Bypass -File $validator -Root $emptyRoot -Fix | Out-Null

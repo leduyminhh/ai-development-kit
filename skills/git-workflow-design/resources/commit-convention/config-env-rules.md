@@ -72,7 +72,7 @@ Avoid vague wording:
 - add some new variables
 ```
 
-Prefer explicit wording:
+Vietnamese output snippet for explicit wording:
 
 ```text
 Important notes / breaking impact:

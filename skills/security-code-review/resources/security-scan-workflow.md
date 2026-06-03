@@ -43,7 +43,7 @@ Defaults:
 7. Merge findings by file, line, category, CWE, OWASP, title, and source.
 8. Export requested reports.
 9. Always write `metadata.json`, `findings.json`, `summary.md`, `summary.json`, and `cost-log.json`.
-10. Return the final Vietnamese response using the report contract.
+10. Use [output-template-vi.md](output-template-vi.md) for the user-facing Vietnamese security scan response.
 
 ## Scope Boundary
 
@@ -92,12 +92,4 @@ Use JSON output when `json` is requested and SARIF output when `sarif` is reques
 
 ## Final Response Shape
 
-Return in Vietnamese:
-
-- scan status: `PASS`, `FAIL`, or `ERROR`
-- exact scope as `<scope>/**`
-- tools used and skipped
-- severity summary
-- report paths
-- cost log summary
-- next actions
+Use [output-template-vi.md](output-template-vi.md) for the user-facing Vietnamese security scan response template.
