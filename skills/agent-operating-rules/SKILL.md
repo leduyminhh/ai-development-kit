@@ -79,10 +79,10 @@ Report concise findings, actions, verification, and remaining risk.
 
 ### Commands
 
-- `init`: run the project-start setup flow from [resources/agents-project-start-template.md](resources/agents-project-start-template.md). Check the target root for `AGENTS.md` and `CLAUDE.md`, merge missing sections when an instruction file exists, or create `AGENTS.md` from the template when none exists.
+- `init`: run the project-start setup flow from [resources/agents-project-start-template.md](resources/agents-project-start-template.md). Check the target root for `AGENTS.md` and `CLAUDE.md`; copy the full template as the canonical baseline; if an instruction file exists, compare the old file against the template and merge old project-specific content into the template only when it does not conflict; if no instruction file exists, create `AGENTS.md` from the full template.
 - `agents.md`: same as `init`; use this alias when the user's intent is specifically to create, inspect, or update project agent instructions.
 
-Command execution must still follow protected-path confirmation rules, preserve existing project-specific instructions, and avoid silent overwrites.
+Command execution must still follow protected-path confirmation rules, preserve non-conflicting project-specific instructions, prefer the template when conflicts appear, and avoid silent overwrites.
 
 ### Must-Have Rules
 
@@ -134,7 +134,7 @@ Command execution must still follow protected-path confirmation rules, preserve 
 
 Use this action when the user wants to apply these operating rules to another repository's `AGENTS.md` or `CLAUDE.md`.
 
-For project-start setup, load [resources/agents-project-start-template.md](resources/agents-project-start-template.md). Check the target root for `AGENTS.md` and `CLAUDE.md`; if an instruction file exists, read it and merge only missing template sections; if none exists, create `AGENTS.md` from the template. Never overwrite existing instruction files silently.
+For project-start setup, load [resources/agents-project-start-template.md](resources/agents-project-start-template.md). Check the target root for `AGENTS.md` and `CLAUDE.md`; copy the template as the canonical baseline first; if an instruction file exists, read it and merge old project-specific content into the template only when it does not conflict with the template; if none exists, create `AGENTS.md` from the template. Never overwrite existing instruction files silently.
 
 Choose one of three modes:
 
@@ -150,8 +150,8 @@ Choose one of three modes:
 Before writing to another project:
 
 - Read the target instruction file first.
-- Preserve existing project-specific language, safety rules, and workflow commands.
-- Avoid duplicating rules already present; merge or reference them.
+- Preserve existing project-specific language, safety rules, and workflow commands only when they do not conflict with the template.
+- Avoid duplicating rules already present; merge or reference them, and prefer template wording when equivalent rules differ.
 - If both `AGENTS.md` and `CLAUDE.md` exist, update only the file the user requested, or explain the precedence if the project defines one.
 - If the target path is protected by that project, request confirmation before writing.
 

@@ -6,15 +6,18 @@ Use this template when starting work in a new project or applying agent operatin
 
 1. Check the project root for `AGENTS.md` and `CLAUDE.md`.
 2. If either file exists, read the existing file before writing.
-3. If an instruction file exists, merge only the missing template sections and preserve project-specific rules.
-4. If no instruction file exists, create `AGENTS.md` from the template below.
-5. Do not overwrite existing instructions silently.
-6. If the target project protects instruction files, request confirmation before writing.
+3. Copy the full template as the canonical baseline.
+4. If an instruction file exists, compare the old file against the template and merge old project-specific content into the template only when it does not conflict.
+5. If no instruction file exists, create `AGENTS.md` by copying the full template below.
+6. Do not overwrite existing instructions silently.
+7. If the target project protects instruction files, request confirmation before writing.
 
 ## Merge Rules
 
-- Preserve existing project purpose, commands, language rules, safety rules, and workflow conventions.
-- Add only sections that are missing or clearly weaker than the template.
+- Template sections and wording have priority over the old instruction file.
+- Preserve existing project purpose, commands, language rules, safety rules, and workflow conventions only when they do not conflict with the template.
+- Add useful old-file sections, bullets, or instructions into the copied template when they are missing from the template and remain compatible.
+- When old and template instructions conflict, keep the template instruction and report the skipped old instruction as a conflict.
 - Do not duplicate equivalent sections under different names.
 - If both `AGENTS.md` and `CLAUDE.md` exist, update only the file requested by the user or explain the precedence before editing.
 - Keep the final instruction file concise enough for agents to read before work.
