@@ -12,7 +12,13 @@ test("writes managed files and state only after apply succeeds", async () => {
     const plan = await planTransaction({
       target,
       desiredFiles: new Map([["skills/java-analyze/SKILL.md", "skill\n"]]),
-      lock: { schemaVersion: 1, platformVersion: "1.0.0", providers: [], plugins: [] },
+      lock: {
+        schemaVersion: 1,
+        platformVersion: "1.0.0",
+        providers: ["codex"],
+        rootPlugins: ["backend"],
+        plugins: [{ id: "backend", version: "1.0.0" }],
+      },
       ownership: {
         schemaVersion: 1,
         files: {

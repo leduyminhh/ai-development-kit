@@ -74,6 +74,25 @@ export async function planTransaction({
       content,
     });
   }
+  for (const relativePath of Object.keys(previousOwnership.files ?? {})) {
+    if (!desiredFiles.has(relativePath)) {
+      const destination = resolveInside(target, relativePath);
+      if (
+        !force &&
+        previousOwnership.files[relativePath]?.checksum &&
+        (await readBytesIfExists(destination)) !== null &&
+        (await sha256File(destination)) !== previousOwnership.files[relativePath].checksum
+      ) {
+        throw new Error(`conflict: managed file drifted: ${relativePath}`);
+      }
+      actions.push({
+        action: "remove-managed",
+        relativePath,
+        destination,
+        content: null,
+      });
+    }
+  }
 
   const files = {};
   for (const [relativePath, metadata] of Object.entries(ownership.files ?? {})) {
@@ -118,18 +137,28 @@ export async function applyTransaction(plan) {
 
   try {
     for (const action of plan.actions) {
-      await mkdir(path.dirname(action.destination), { recursive: true });
-      await writeFile(action.destination, action.content, "utf8");
+      if (action.action === "remove-managed") {
+        await rm(action.destination, { force: true });
+      } else {
+        await mkdir(path.dirname(action.destination), { recursive: true });
+        await writeFile(action.destination, action.content, "utf8");
+      }
     }
     if (plan.validateApplied) {
       await plan.validateApplied();
     }
-    await writeJsonAtomic(path.join(plan.target, LOCK_PATH), plan.lock);
-    await writeJsonAtomic(path.join(plan.target, OWNERSHIP_PATH), plan.ownership);
-    await writeJsonAtomic(
-      path.join(plan.target, INSTALL_STATE_PATH),
-      createInstallState({ transactionId: plan.transactionId }),
-    );
+    if ((plan.lock.plugins ?? []).length === 0) {
+      await rm(path.join(plan.target, LOCK_PATH), { force: true });
+      await rm(path.join(plan.target, OWNERSHIP_PATH), { force: true });
+      await rm(path.join(plan.target, INSTALL_STATE_PATH), { force: true });
+    } else {
+      await writeJsonAtomic(path.join(plan.target, LOCK_PATH), plan.lock);
+      await writeJsonAtomic(path.join(plan.target, OWNERSHIP_PATH), plan.ownership);
+      await writeJsonAtomic(
+        path.join(plan.target, INSTALL_STATE_PATH),
+        createInstallState({ transactionId: plan.transactionId }),
+      );
+    }
     return {
       status: "pass",
       written: plan.actions.map((action) => action.relativePath),

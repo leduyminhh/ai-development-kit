@@ -8,6 +8,7 @@ import {
   findOutdated,
   installPlugins,
   listInstalled,
+  removePlugins,
   updatePlugins,
 } from "../src/lifecycle.mjs";
 import { repoRoot, runCli } from "./helpers.mjs";
@@ -134,6 +135,43 @@ test("cli lists installed plugins and reports outdated plugins", async () => {
     const outdated = await runCli(["plugin", "outdated", "--json"], { cwd: target });
     assert.equal(outdated.exitCode, 0);
     assert.deepEqual(JSON.parse(outdated.stdout).updates, []);
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
+test("removes plugins by ownership and preserves user-owned files", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "aiep-remove-"));
+  try {
+    await installPlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["backend", "testing"],
+      providers: ["codex"],
+    });
+    await writeFile(path.join(target, "user-owned.txt"), "keep\n");
+
+    await removePlugins({ root: repoRoot, target, pluginIds: ["backend"] });
+    assert.equal(await exists(target, "skills/test-automation-validate/SKILL.md"), true);
+    assert.equal(await exists(target, "skills/java-analyze/SKILL.md"), false);
+    assert.equal(await exists(target, "user-owned.txt"), true);
+
+    await removePlugins({ root: repoRoot, target, all: true });
+    assert.equal(await exists(target, ".aiep/install-state.json"), false);
+    assert.equal(await exists(target, "user-owned.txt"), true);
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
+test("cli removes an installed plugin", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "aiep-cli-remove-"));
+  try {
+    await runCli(["plugin", "install", "backend", "--provider", "codex"], { cwd: target });
+    const result = await runCli(["plugin", "remove", "backend", "--json"], { cwd: target });
+    assert.equal(result.exitCode, 0);
+    assert.equal(JSON.parse(result.stdout).status, "pass");
+    assert.equal(await exists(target, "skills/java-analyze/SKILL.md"), false);
   } finally {
     await rm(target, { recursive: true, force: true });
   }

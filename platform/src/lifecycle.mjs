@@ -47,13 +47,12 @@ function addOwnership(files, relativePath, owners, source, shared = false) {
   };
 }
 
-export async function installPlugins({
+async function buildDesiredState({
   root,
-  target,
   pluginIds = [],
   all = false,
   providers,
-  force = false,
+  rootPlugins,
 }) {
   const platform = await loadPlatform(root);
   const plugins = await loadPlugins(root);
@@ -143,23 +142,42 @@ export async function installPlugins({
     schemaVersion: 1,
     platformVersion: platform.product.version,
     providers: graph.providers,
+    rootPlugins: rootPlugins ?? requested,
     plugins: graph.pluginIds.map((id) => ({
       id,
       version: plugins.get(id).metadata.version,
     })),
   };
-  const plan = await planTransaction({
-    target,
+  return {
     desiredFiles,
     lock,
     ownership: { schemaVersion: 1, files: ownershipFiles },
+    plugins: graph.pluginIds,
+    providers: graph.providers,
+  };
+}
+
+export async function installPlugins({
+  root,
+  target,
+  pluginIds = [],
+  all = false,
+  providers,
+  force = false,
+}) {
+  const desired = await buildDesiredState({ root, pluginIds, all, providers });
+  const plan = await planTransaction({
+    target,
+    desiredFiles: desired.desiredFiles,
+    lock: desired.lock,
+    ownership: desired.ownership,
     force,
   });
   await applyTransaction(plan);
   return {
     status: "pass",
-    plugins: graph.pluginIds,
-    providers: graph.providers,
+    plugins: desired.plugins,
+    providers: desired.providers,
   };
 }
 
@@ -168,7 +186,9 @@ export async function listInstalled({ target }) {
   return {
     status: "pass",
     plugins: state.lock?.plugins ?? [],
+    rootPlugins: state.lock?.rootPlugins ?? [],
     providers: state.lock?.providers ?? [],
+    platformVersion: state.lock?.platformVersion,
   };
 }
 
@@ -226,5 +246,57 @@ export async function updatePlugins({
     ...result,
     changed: true,
     updates: applicable,
+  };
+}
+
+export async function removePlugins({
+  root,
+  target,
+  pluginIds = [],
+  all = false,
+  force = false,
+}) {
+  const installed = await listInstalled({ target });
+  const removeIds = new Set(pluginIds.map((item) => item.split("@")[0]));
+  const installedRoots =
+    installed.rootPlugins.length > 0
+      ? installed.rootPlugins
+      : installed.plugins.map((item) => item.id);
+  const remainingRoots = all
+    ? []
+    : installedRoots.filter((id) => !removeIds.has(id));
+  const desired =
+    remainingRoots.length === 0
+      ? {
+          desiredFiles: new Map(),
+          lock: {
+            schemaVersion: 1,
+            platformVersion: installed.platformVersion ?? "1.0.0",
+            providers: [],
+            rootPlugins: [],
+            plugins: [],
+          },
+          ownership: { schemaVersion: 1, files: {} },
+          plugins: [],
+          providers: [],
+        }
+      : await buildDesiredState({
+          root,
+          pluginIds: remainingRoots,
+          providers: installed.providers,
+          rootPlugins: remainingRoots,
+        });
+  const plan = await planTransaction({
+    target,
+    desiredFiles: desired.desiredFiles,
+    lock: desired.lock,
+    ownership: desired.ownership,
+    force,
+  });
+  await applyTransaction(plan);
+  return {
+    status: "pass",
+    plugins: desired.plugins,
+    providers: desired.providers,
   };
 }

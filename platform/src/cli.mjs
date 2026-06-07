@@ -7,6 +7,7 @@ import {
   findOutdated,
   installPlugins,
   listInstalled,
+  removePlugins,
   updatePlugins,
 } from "./lifecycle.mjs";
 import path from "node:path";
@@ -170,6 +171,32 @@ export async function run(args, streams = process) {
       args.includes("--json")
         ? `${JSON.stringify(result)}\n`
         : `Installed ${result.plugins.join(", ")}.\n`,
+    );
+    return 0;
+  }
+
+  if (
+    (args[0] === "plugin" && args[1] === "remove") ||
+    (args[0] === "remove" && args.includes("--all"))
+  ) {
+    const root = path.resolve(
+      path.dirname(fileURLToPath(import.meta.url)),
+      "..",
+      "..",
+    );
+    const all = args[0] === "remove" && args.includes("--all");
+    const parsed = all ? { plugins: [] } : parseInstallArgs(args.slice(2));
+    const result = await removePlugins({
+      root,
+      target: process.cwd(),
+      pluginIds: parsed.plugins,
+      all,
+      force: args.includes("--force"),
+    });
+    streams.stdout.write(
+      args.includes("--json")
+        ? `${JSON.stringify(result)}\n`
+        : `Remaining plugins: ${result.plugins.join(", ")}.\n`,
     );
     return 0;
   }
