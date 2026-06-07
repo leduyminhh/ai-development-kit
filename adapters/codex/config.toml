@@ -15,7 +15,6 @@ require_pre_write_summary = true
 # ------------ Validation Global structure ------------
 [validation]
 run_after_structure_change = true
-validator_command = "powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix"
 
 # ------------ Policy Global scan scope ------------
 [scan.policy]
@@ -105,12 +104,6 @@ Confirm? (yes/no)
 """
 
 # ------------ Agents ------------
-# agent_registry.codex-structure-validate Structure validator agent
-[agent_registry.codex-structure-validate]
-path = ".codex/agents/codex-structure-validate.toml"
-read_only = true
-enabled = true
-hooks_project_enabled = false
 # agent_registry.code-design-pattern Design pattern agent
 [agent_registry.code-design-pattern]
 path = ".codex/agents/code-design-pattern.toml"

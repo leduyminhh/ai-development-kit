@@ -5,7 +5,7 @@
     "id": "quality",
     "name": "Quality Engineering",
     "version": "1.0.0",
-    "description": "Testing, code review, coverage, performance, and structural validation."
+    "description": "Testing, code review, coverage, performance, and naming validation."
   },
   "compatibility": {
     "platform": ">=1.0.0 <2.0.0",
@@ -23,13 +23,11 @@
     "skills": [
       "test-qa-review",
       "test-automation-validate",
-      "codex-structure-validate",
       "naming-rule-validate"
     ],
     "agents": [
       "test-qa-review",
-      "test-automation-validate",
-      "codex-structure-validate"
+      "test-automation-validate"
     ],
     "commands": [
       "verify-quality"
@@ -46,7 +44,7 @@
   "id": "quality",
   "name": "Quality Engineering",
   "version": "1.0.0",
-  "description": "Testing, code review, coverage, performance, and structural validation.",
+  "description": "Testing, code review, coverage, performance, and naming validation.",
   "category": "capability-pack",
   "triggers": {
     "keywords": [
@@ -64,10 +62,6 @@
     }
   ],
   "skills": [
-    {
-      "id": "quality.codex_structure_validate",
-      "path": "skills/codex-structure-validate/SKILL.md"
-    },
     {
       "id": "quality.naming_rule_validate",
       "path": "skills/naming-rule-validate/SKILL.md"

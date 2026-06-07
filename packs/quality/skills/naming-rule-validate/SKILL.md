@@ -189,7 +189,6 @@ Approved capability noun exceptions:
 Current approved agents:
 
 - `code-design-pattern`
-- `codex-structure-validate`
 - `diagram-generate`
 - `doc-write`
 - `git-workflow-design`

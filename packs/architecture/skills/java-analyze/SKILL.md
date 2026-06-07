@@ -125,4 +125,4 @@ For design or review tasks, return:
 ### Validation Commands
 
 - `powershell -ExecutionPolicy Bypass -File skills/java-analyze/scripts/test-architecture-skills.ps1`
-- `powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root .`
+- `powershell -ExecutionPolicy Bypass -File skills/naming-rule-validate/scripts/validate-naming-rule.ps1 -Root . -PathList "skills/java-analyze/SKILL.md"`

@@ -196,4 +196,3 @@ Use [scripts/resolve-security-scan-scope.ps1](scripts/resolve-security-scan-scop
 
 - `powershell -ExecutionPolicy Bypass -File skills/security-code-review/scripts/test-security-code-review.ps1`
 - `powershell -ExecutionPolicy Bypass -File skills/naming-rule-validate/scripts/validate-naming-rule.ps1 -Root . -Paths @('skills/security-code-review/SKILL.md','.codex/agents/security-code-review.toml')`
-- `powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root .`

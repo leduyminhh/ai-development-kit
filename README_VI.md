@@ -51,7 +51,6 @@ packs/         capability pack có thể cài đặt
 mcp-servers/   MCP server skeleton theo namespace
 adapters/      provider template và metadata nguồn
 cli/           TypeScript CLI và shell utility còn được sử dụng
-examples/      ví dụ tích hợp
 docs/          tài liệu migration và kiến trúc
 tests/         integration test xuyên package
 ```

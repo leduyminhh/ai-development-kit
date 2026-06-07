@@ -39,6 +39,8 @@ test("installs application project-locally with required dependencies", async ()
         "utf8",
       ),
     );
+    const mcp = JSON.parse(await readFile(path.join(target, ".mcp.json"), "utf8"));
+    const applicationMcpEntrypoint = mcp.mcpServers.application.args[0];
 
     assert.deepEqual(result.plugins, ["architecture", "application"]);
     assert.deepEqual(lock.plugins.map((item) => item.id), ["architecture", "application"]);
@@ -52,6 +54,9 @@ test("installs application project-locally with required dependencies", async ()
     );
     assert.equal(await exists(target, ".codex/agents/openai.yaml"), true);
     assert.equal(await exists(target, ".mcp.json"), true);
+    assert.equal(applicationMcpEntrypoint.startsWith(target), true);
+    assert.equal(applicationMcpEntrypoint.includes(`${path.sep}mcp-servers${path.sep}`), true);
+    assert.equal(await exists(target, ".ai-engineering/mcp-servers/application-mcp/src/index.js"), true);
     assert.equal(await exists(target, "AGENTS.md"), true);
     assert.equal(await exists(target, ".codex-plugin/plugin.json"), false);
   } finally {

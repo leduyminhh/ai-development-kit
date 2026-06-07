@@ -57,6 +57,7 @@ function addOwnership(files, relativePath, owners, source, shared = false) {
 
 async function buildDesiredState({
   root,
+  target,
   pluginIds = [],
   all = false,
   providers,
@@ -144,6 +145,18 @@ async function buildDesiredState({
     }
   }
 
+  for (const pluginId of graph.pluginIds) {
+    const serverRoot = path.join(root, "mcp-servers", `${pluginId}-mcp`);
+    const serverPrefix = `.ai-engineering/mcp-servers/${pluginId}-mcp`;
+    for (const [relativePath, content] of await readDirectoryFiles(
+      serverRoot,
+      serverPrefix,
+    )) {
+      desiredFiles.set(relativePath, content);
+      addOwnership(ownershipFiles, relativePath, [pluginId], "mcp-server", false);
+    }
+  }
+
   const mcpPath = ".mcp.json";
   desiredFiles.set(
     mcpPath,
@@ -156,7 +169,8 @@ async function buildDesiredState({
               command: "node",
               args: [
                 path.join(
-                  root,
+                  target,
+                  ".ai-engineering",
                   "mcp-servers",
                   `${packId}-mcp`,
                   "src",
@@ -201,7 +215,7 @@ export async function installPlugins({
   force = false,
 }) {
   await initializeProject({ root, target });
-  const desired = await buildDesiredState({ root, pluginIds, all, providers });
+  const desired = await buildDesiredState({ root, target, pluginIds, all, providers });
   const plan = await planTransaction({
     target,
     desiredFiles: desired.desiredFiles,
@@ -331,6 +345,7 @@ export async function removePlugins({
         }
       : await buildDesiredState({
           root,
+          target,
           pluginIds: remainingRoots,
           providers: installed.providers,
           rootPlugins: remainingRoots,

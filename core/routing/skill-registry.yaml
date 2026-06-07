@@ -5,7 +5,7 @@
     "application": ["react-code-generate"],
     "data": ["data-migration"],
     "security": ["security-code-review"],
-    "quality": ["codex-structure-validate", "naming-rule-validate", "test-automation-validate", "test-qa-review"],
+    "quality": ["naming-rule-validate", "test-automation-validate", "test-qa-review"],
     "platform": ["agent-operating-rules", "git-workflow-design", "using-workflow-kit"],
     "knowledge": ["doc-write", "youtube-transcript"]
   }

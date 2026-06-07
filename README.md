@@ -51,7 +51,6 @@ packs/         installable capability packs
 mcp-servers/   namespaced MCP server skeletons
 adapters/      provider source templates and metadata
 cli/           TypeScript CLI and retained shell utilities
-examples/      integration examples
 docs/          migration and architecture documentation
 tests/         cross-package integration tests
 ```
