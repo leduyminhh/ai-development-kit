@@ -3,6 +3,7 @@ import { validateRepository } from "./contracts.mjs";
 import { buildAllPlugins, verifyPluginArtifact } from "./builder.mjs";
 import { readdir } from "node:fs/promises";
 import { generateRegistry } from "./registry.mjs";
+import { installPlugins } from "./lifecycle.mjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -20,6 +21,35 @@ Usage:
   aiep plugin remove <plugin>
   aiep remove --all
 `;
+
+function parseInstallArgs(args) {
+  const plugins = [];
+  let providers;
+  let source;
+  let skipNext = false;
+  for (let index = 0; index < args.length; index += 1) {
+    if (skipNext) {
+      skipNext = false;
+      continue;
+    }
+    const item = args[index];
+    if (item === "--provider") {
+      providers = args[index + 1]?.split(",").filter(Boolean);
+      skipNext = true;
+      continue;
+    }
+    if (item === "--source") {
+      source = args[index + 1];
+      skipNext = true;
+      continue;
+    }
+    if (item.startsWith("--")) {
+      continue;
+    }
+    plugins.push(item.split("@")[0]);
+  }
+  return { plugins, providers, source };
+}
 
 export async function run(args, streams = process) {
   if (args.length === 0 || args.includes("--help") || args.includes("-h")) {
@@ -108,6 +138,33 @@ export async function run(args, streams = process) {
       args.includes("--json")
         ? `${JSON.stringify(output)}\n`
         : `Generated registry for ${output.pluginCount} plugins.\n`,
+    );
+    return 0;
+  }
+
+  if (
+    (args[0] === "plugin" && args[1] === "install") ||
+    (args[0] === "install" && args.includes("--all"))
+  ) {
+    const root = path.resolve(
+      path.dirname(fileURLToPath(import.meta.url)),
+      "..",
+      "..",
+    );
+    const all = args[0] === "install" && args.includes("--all");
+    const parsed = all ? { plugins: [], providers: undefined } : parseInstallArgs(args.slice(2));
+    const result = await installPlugins({
+      root,
+      target: process.cwd(),
+      pluginIds: parsed.plugins,
+      all,
+      providers: parsed.providers,
+      force: args.includes("--force"),
+    });
+    streams.stdout.write(
+      args.includes("--json")
+        ? `${JSON.stringify(result)}\n`
+        : `Installed ${result.plugins.join(", ")}.\n`,
     );
     return 0;
   }

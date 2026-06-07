@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { checksumText, resolveInside, writeJsonAtomic } from "./io.mjs";
+import { checksumText, resolveInside, sha256File, writeJsonAtomic } from "./io.mjs";
 import {
   createInstallState,
   INSTALL_STATE_PATH,
@@ -52,6 +52,15 @@ export async function planTransaction({
     let action = "create";
     if (current !== null && !ownedBefore && !force) {
       throw new Error(`conflict: unmanaged file exists: ${relativePath}`);
+    }
+    if (
+      current !== null &&
+      ownedBefore &&
+      !force &&
+      previousOwnership.files[relativePath]?.checksum &&
+      (await sha256File(destination)) !== previousOwnership.files[relativePath].checksum
+    ) {
+      throw new Error(`conflict: managed file drifted: ${relativePath}`);
     }
     if (current !== null && ownedBefore) {
       action = "replace-managed";
