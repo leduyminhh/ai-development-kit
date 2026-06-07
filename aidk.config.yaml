@@ -1,9 +1,9 @@
 {
-  "apiVersion": "aidk.dev/v1alpha1",
+  "apiVersion": "aiep.dev/v1alpha1",
   "product": {
-    "name": "ai-development-kit",
-    "displayName": "AI Development Kit",
-    "version": "1.1.0",
+    "name": "ai-engineering-platform",
+    "displayName": "AI Engineering Platform",
+    "version": "1.0.0",
     "description": "Production-grade workflow skills for Codex, Claude Code, Cursor, and other AI coding agents."
   },
   "providers": {

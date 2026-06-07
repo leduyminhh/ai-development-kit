@@ -1,15 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://aidk.dev/schemas/package.schema.json",
-  "title": "AIDK Package",
+  "$id": "https://aiep.dev/schemas/package.schema.json",
+  "title": "AIEP Plugin Source",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "compatibility", "dependencies", "assets", "install"],
   "properties": {
     "apiVersion": {
-      "const": "aidk.dev/v1alpha1"
+      "const": "aiep.dev/v1alpha1"
     },
     "kind": {
-      "const": "Package"
+      "const": "Plugin"
     },
     "metadata": {
       "type": "object",
@@ -36,9 +36,9 @@
     },
     "compatibility": {
       "type": "object",
-      "required": ["aidk", "providers"],
+      "required": ["platform", "providers"],
       "properties": {
-        "aidk": {
+        "platform": {
           "type": "string"
         },
         "providers": {
@@ -73,7 +73,7 @@
     },
     "assets": {
       "type": "object",
-      "required": ["skills", "agents", "workflows", "hooks"],
+      "required": ["skills", "commands", "agents", "hooks"],
       "properties": {
         "skills": {
           "type": "array",
@@ -89,7 +89,7 @@
           },
           "uniqueItems": true
         },
-        "workflows": {
+        "commands": {
           "type": "array",
           "items": {
             "type": "string"

@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://aidk.dev/schemas/aidk-config.schema.json",
-  "title": "AIDK Project Configuration",
+  "$id": "https://aiep.dev/schemas/platform-config.schema.json",
+  "title": "AIEP Platform Configuration",
   "type": "object",
   "required": ["apiVersion", "product", "providers", "packages", "generation"],
   "properties": {
     "apiVersion": {
-      "const": "aidk.dev/v1alpha1"
+      "const": "aiep.dev/v1alpha1"
     },
     "product": {
       "type": "object",

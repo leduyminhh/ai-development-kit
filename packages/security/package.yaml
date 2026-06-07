@@ -1,14 +1,14 @@
 {
-  "apiVersion": "aidk.dev/v1alpha1",
-  "kind": "Package",
+  "apiVersion": "aiep.dev/v1alpha1",
+  "kind": "Plugin",
   "metadata": {
     "id": "security",
     "name": "Security Engineering",
-    "version": "1.1.0",
+    "version": "1.0.0",
     "description": "Source-first security review, dependency analysis, secrets review, and verified remediation."
   },
   "compatibility": {
-    "aidk": ">=1.1.0 <2.0.0",
+    "platform": ">=1.0.0 <2.0.0",
     "providers": {
       "codex": "supported",
       "claude": "supported",
@@ -22,7 +22,7 @@
   "assets": {
     "skills": ["security-code-review"],
     "agents": ["security-code-review"],
-    "workflows": [],
+    "commands": ["review-security"],
     "hooks": ["project-audit"]
   },
   "install": {

@@ -114,7 +114,10 @@ def validate_contracts(
         if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
             raise AidkError(f"schema must use JSON Schema 2020-12: {schema_name}")
 
-    if config.get("apiVersion") != "aidk.dev/v1alpha1":
+    if config.get("apiVersion") not in {
+        "aidk.dev/v1alpha1",
+        "aiep.dev/v1alpha1",
+    }:
         raise AidkError("unsupported AIDK config apiVersion")
     product = config.get("product", {})
     for key in ("name", "displayName", "version", "description"):
@@ -137,9 +140,12 @@ def validate_contracts(
     known_workflows = load_workflow_names(root)
 
     for package_id, package in packages.items():
-        if package.get("apiVersion") != "aidk.dev/v1alpha1":
+        if package.get("apiVersion") not in {
+            "aidk.dev/v1alpha1",
+            "aiep.dev/v1alpha1",
+        }:
             raise AidkError(f"unsupported package apiVersion: {package_id}")
-        if package.get("kind") != "Package":
+        if package.get("kind") not in {"Package", "Plugin"}:
             raise AidkError(f"invalid package kind: {package_id}")
         metadata = package.get("metadata", {})
         if metadata.get("version") != product["version"]:
@@ -172,6 +178,12 @@ def validate_contracts(
             if workflow not in known_workflows:
                 raise AidkError(
                     f"package {package_id} references unknown workflow {workflow}"
+                )
+        for command in assets.get("commands", []):
+            command_path = root / "packages" / package_id / "commands" / f"{command}.md"
+            if not command_path.exists():
+                raise AidkError(
+                    f"package {package_id} references unknown command {command}"
                 )
 
     detect_dependency_cycles(packages)

@@ -1,4 +1,7 @@
 import { AiepError } from "./errors.mjs";
+import { validateRepository } from "./contracts.mjs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 export const VERSION = "1.0.0";
 
@@ -23,6 +26,23 @@ export async function run(args, streams = process) {
 
   if (args.includes("--version") || args.includes("-v")) {
     streams.stdout.write(`${VERSION}\n`);
+    return 0;
+  }
+
+  if (args[0] === "validate") {
+    const root = path.resolve(
+      path.dirname(fileURLToPath(import.meta.url)),
+      "..",
+      "..",
+    );
+    const result = await validateRepository(root);
+    if (args.includes("--json")) {
+      streams.stdout.write(`${JSON.stringify(result)}\n`);
+    } else {
+      streams.stdout.write(
+        `Validated ${result.pluginCount} plugins for ${result.providerCount} providers.\n`,
+      );
+    }
     return 0;
   }
 

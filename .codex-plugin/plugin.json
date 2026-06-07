@@ -1,7 +1,7 @@
 {
-  "name": "ai-development-kit",
+  "name": "ai-engineering-platform",
   "description": "Production-grade workflow skills for Codex, Claude Code, Cursor, and other AI coding agents.",
-  "version": "1.1.0",
+  "version": "1.0.0",
   "author": {
     "name": "leduyminhh"
   },
@@ -16,7 +16,7 @@
   ],
   "skills": "./skills/",
   "aidk": {
-    "apiVersion": "aidk.dev/v1alpha1",
+    "apiVersion": "aiep.dev/v1alpha1",
     "packages": [
       "architecture",
       "backend",
@@ -39,7 +39,7 @@
     ]
   },
   "interface": {
-    "displayName": "AI Development Kit",
+    "displayName": "AI Engineering Platform",
     "shortDescription": "Bootstrap workflow and skill routing",
     "longDescription": "Use AI Development Kit to bootstrap skill selection, validate workflow registry entries, and keep provider adapters thin.",
     "developerName": "leduyminhh",

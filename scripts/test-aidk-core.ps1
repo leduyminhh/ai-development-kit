@@ -146,7 +146,7 @@ try {
     Assert-True (Test-Path -LiteralPath $statePath) 'Install should write state after generated files validate.'
     $state = Get-Content -LiteralPath $statePath -Raw | ConvertFrom-Json
     Assert-True ($state.schemaVersion -eq 1) 'Install state should use schema version 1.'
-    Assert-True ($state.packages.backend -eq '1.1.0') 'Install state should pin backend version.'
+    Assert-True ($state.packages.backend -eq '1.0.0') 'Install state should pin backend version.'
     Assert-True (@($state.generatedFiles).Count -ge 3) 'Install state should own generated adapter files.'
     Assert-True (@($state.hooks) -contains 'project-audit') 'Install state should record package hook integration.'
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.ai-hooks/invoke-hook.ps1')) 'Install should reuse the existing hook runtime installer.'
@@ -178,7 +178,7 @@ try {
     )
     Assert-True ($overwrite.status -eq 'pass') 'Explicit overwrite should resolve managed-file drift.'
     $codexManifest = Get-Content -LiteralPath (Join-Path $tempRoot '.codex-plugin/plugin.json') -Raw | ConvertFrom-Json
-    Assert-True ($codexManifest.name -eq 'ai-development-kit') 'Overwrite should restore generated Codex metadata.'
+    Assert-True ($codexManifest.name -eq 'ai-engineering-platform') 'Overwrite should restore generated Codex metadata.'
 
     $remove = Invoke-AidkJson -Action 'remove' -TargetRoot $tempRoot
     Assert-True ($remove.status -eq 'pass') 'Remove should delete only recorded generated artifacts.'

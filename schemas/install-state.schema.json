@@ -1,50 +1,20 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://aidk.dev/schemas/install-state.schema.json",
-  "title": "AIDK Install State",
+  "$id": "https://aiep.dev/schemas/install-state.schema.json",
+  "title": "AIEP Install State",
   "type": "object",
-  "required": ["schemaVersion", "aidkVersion", "providers", "packages", "hooks", "generatedFiles", "sourceChecksums", "installedAt"],
+  "required": ["schemaVersion", "transactionId", "status", "completedAt"],
   "properties": {
     "schemaVersion": {
       "const": 1
     },
-    "aidkVersion": {
+    "transactionId": {
       "type": "string"
     },
-    "providers": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "uniqueItems": true
+    "status": {
+      "const": "complete"
     },
-    "packages": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "hooks": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "uniqueItems": true
-    },
-    "generatedFiles": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "uniqueItems": true
-    },
-    "sourceChecksums": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "installedAt": {
+    "completedAt": {
       "type": "string",
       "format": "date-time"
     }
