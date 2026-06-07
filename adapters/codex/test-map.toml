@@ -1,0 +1,19 @@
+version = 1
+
+[test.core]
+paths = [
+  "adapters/codex",
+  "core/agents",
+  "core/routing",
+  "packs",
+  "mcp-servers",
+  "cli/src",
+  "cli/scripts/test-hook-core.ps1",
+  "cli/scripts/test-hook-service.ps1",
+  "cli/scripts/test-install-hooks.ps1"
+]
+commands = [
+  "npm test",
+  "npm run validate",
+  "npm run build:cli"
+]

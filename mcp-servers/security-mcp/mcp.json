@@ -1,0 +1,1 @@
+{"name":"security-mcp","version":"1.0.0","tools":["security.scan_source","security.scan_dependencies","security.generate_threat_model"]}

@@ -1,0 +1,1 @@
+{"name":"quality-mcp","version":"1.0.0","tools":["quality.generate_test_plan","quality.review_coverage","quality.performance_review"]}

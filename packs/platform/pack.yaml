@@ -1,0 +1,85 @@
+{
+  "apiVersion": "ai-engineering.dev/v1alpha1",
+  "kind": "CapabilityPack",
+  "metadata": {
+    "id": "platform",
+    "name": "Platform Engineering",
+    "version": "1.0.0",
+    "description": "Delivery, deployment, observability, incident response, and workflow operations."
+  },
+  "compatibility": {
+    "platform": ">=1.0.0 <2.0.0",
+    "providers": {
+      "codex": "supported",
+      "claude": "supported",
+      "cursor": "supported"
+    }
+  },
+  "dependencies": {
+    "required": [],
+    "optional": [
+      "quality",
+      "security"
+    ]
+  },
+  "assets": {
+    "skills": [
+      "agent-operating-rules",
+      "git-workflow-design",
+      "using-workflow-kit"
+    ],
+    "agents": [
+      "git-workflow-design"
+    ],
+    "commands": [
+      "deployment-plan"
+    ],
+    "hooks": [
+      "project-audit"
+    ]
+  },
+  "install": {
+    "defaultScope": "project",
+    "supportsCopy": true,
+    "supportsLink": true
+  },
+  "id": "platform",
+  "name": "Platform Engineering",
+  "version": "1.0.0",
+  "description": "Delivery, deployment, observability, incident response, and workflow operations.",
+  "category": "capability-pack",
+  "triggers": {
+    "keywords": [
+      "docker",
+      "kubernetes",
+      "deploy",
+      "rollback",
+      "observability",
+      "sre"
+    ]
+  },
+  "commands": [
+    {
+      "id": "platform.deployment_plan",
+      "file": "commands/deployment-plan.md",
+      "mcp_tool": "platform.deployment_plan"
+    }
+  ],
+  "skills": [
+    {
+      "id": "platform.agent_operating_rules",
+      "path": "skills/agent-operating-rules/SKILL.md"
+    },
+    {
+      "id": "platform.git_workflow_design",
+      "path": "skills/git-workflow-design/SKILL.md"
+    },
+    {
+      "id": "platform.using_workflow_kit",
+      "path": "skills/using-workflow-kit/SKILL.md"
+    }
+  ],
+  "depends_on": {
+    "packs": []
+  }
+}

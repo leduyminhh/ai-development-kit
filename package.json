@@ -1,0 +1,39 @@
+{
+  "name": "ai-engineering-platform",
+  "version": "1.0.0",
+  "description": "MCP-first capability packs and adapters for AI engineering agents.",
+  "type": "module",
+  "bin": {
+    "ai-engineering-platform": "./cli/dist/index.js",
+    "ai-engineering": "./cli/dist/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "npm run build:cli && node --test packs/platform/test",
+    "build": "npm run build:cli",
+    "build:cli": "tsc -p cli/tsconfig.json",
+    "validate": "node packs/platform/bin/ai-engineering.mjs validate",
+    "doctor": "node cli/dist/index.js doctor",
+    "migrate:dry-run": "node cli/dist/index.js migrate --dry-run"
+  },
+  "workspaces": [
+    "packs/platform",
+    "cli"
+  ],
+  "files": [
+    "packs",
+    "core",
+    "adapters",
+    "mcp-servers",
+    "cli",
+    "LICENSE",
+    "README.md"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.8.3"
+  }
+}

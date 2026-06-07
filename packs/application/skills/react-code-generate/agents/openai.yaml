@@ -1,0 +1,4 @@
+interface:
+  display_name: "React JS"
+  short_description: "Build React UI from Figma, requests, tickets, and API contracts"
+  default_prompt: "Use $react-code-generate to implement React UI from Figma or requirements, integrate APIs from curl or contracts, verify behavior, and prepare Notion/Slack completion notes in Vietnamese."

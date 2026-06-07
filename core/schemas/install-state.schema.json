@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-engineering.dev/schemas/install-state.schema.json",
+  "title": "AI Engineering Install State",
+  "type": "object",
+  "required": ["schemaVersion", "transactionId", "status", "completedAt"],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "transactionId": {
+      "type": "string"
+    },
+    "status": {
+      "const": "complete"
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

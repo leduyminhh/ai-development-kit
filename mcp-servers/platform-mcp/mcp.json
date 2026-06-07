@@ -1,0 +1,1 @@
+{"name":"platform-mcp","version":"1.0.0","tools":["platform.review_docker","platform.review_kubernetes","platform.deployment_plan"]}

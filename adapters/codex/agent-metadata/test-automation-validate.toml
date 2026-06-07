@@ -1,0 +1,4 @@
+name = "test-automation-validate"
+summary = "Test automation agent"
+read_only = false
+hooks_project_enabled = true

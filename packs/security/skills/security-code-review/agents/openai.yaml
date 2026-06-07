@@ -1,0 +1,4 @@
+interface:
+  display_name: "Security Code Review"
+  short_description: "Review and scan code for security risks"
+  default_prompt: "Use $security-code-review to review or run scoped /security-scan on source code, configs, dependencies, and reports using Rule Engine checks, optional SonarQube/Trivy enrichment, command aliases, --help guidance, OWASP, ASVS, and CWE guidance."

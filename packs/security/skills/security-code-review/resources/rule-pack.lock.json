@@ -1,0 +1,36 @@
+{
+  "owasp_top10": {
+    "version": "2025",
+    "source": "OWASP",
+    "last_checked_at": "2026-06-02"
+  },
+  "cwe_top25": {
+    "version": "2025",
+    "source": "MITRE CWE",
+    "last_checked_at": "2026-06-02"
+  },
+  "spring_security": {
+    "version": "2026.06",
+    "source": "internal + OWASP Cheat Sheet"
+  },
+  "react_security": {
+    "version": "2026.06",
+    "source": "internal + OWASP Cheat Sheet"
+  },
+  "python_security": {
+    "version": "2026.06",
+    "source": "internal + OWASP Cheat Sheet"
+  },
+  "docker_security": {
+    "version": "2026.06",
+    "source": "OWASP Docker Security Cheat Sheet"
+  },
+  "secrets": {
+    "version": "2026.06",
+    "source": "internal"
+  },
+  "architecture": {
+    "version": "2026.06",
+    "source": "internal"
+  }
+}

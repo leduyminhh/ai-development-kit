@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-engineering.dev/schemas/platform-lock.schema.json",
+  "title": "AI Engineering Platform Lock",
+  "type": "object",
+  "required": ["schemaVersion", "platformVersion", "providers", "plugins"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "platformVersion": { "type": "string" },
+    "providers": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "plugins": { "type": "array", "items": { "type": "object" } }
+  },
+  "additionalProperties": false
+}

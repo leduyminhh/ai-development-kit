@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-engineering.dev/schemas/platform-config.schema.json",
+  "title": "AI Engineering Platform Configuration",
+  "type": "object",
+  "required": ["apiVersion", "product", "providers", "packs", "generation"],
+  "properties": {
+    "apiVersion": {
+      "const": "ai-engineering.dev/v1alpha1"
+    },
+    "product": {
+      "type": "object",
+      "required": ["name", "cli", "displayName", "version", "description"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "cli": {
+          "const": "ai-engineering"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "providers": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {
+          "type": "array",
+          "items": {
+            "enum": ["codex", "claude", "cursor", "generic"]
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "packs": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "generation": {
+      "type": "object",
+      "required": ["overwritePolicy", "generatedFileMarker"],
+      "properties": {
+        "overwritePolicy": {
+          "enum": ["ask", "overwrite", "skip"]
+        },
+        "generatedFileMarker": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

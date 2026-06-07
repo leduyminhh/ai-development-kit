@@ -1,0 +1,20 @@
+{
+  "apiVersion": "ai-engineering.dev/v1alpha1",
+  "product": {
+    "name": "ai-engineering-platform",
+    "cli": "ai-engineering",
+    "displayName": "AI Engineering Platform",
+    "version": "1.0.0",
+    "description": "Production-grade workflow skills for Codex, Claude Code, Cursor, and other AI coding agents."
+  },
+  "providers": {
+    "enabled": ["codex", "claude", "cursor"]
+  },
+  "packs": {
+    "enabled": ["architecture", "application", "data", "security", "quality", "platform", "knowledge"]
+  },
+  "generation": {
+    "overwritePolicy": "ask",
+    "generatedFileMarker": true
+  }
+}

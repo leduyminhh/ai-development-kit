@@ -1,0 +1,4 @@
+name = "test-qa-review"
+summary = "QA reviewer agent"
+read_only = false
+hooks_project_enabled = true

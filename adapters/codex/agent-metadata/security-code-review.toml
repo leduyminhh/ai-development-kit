@@ -1,0 +1,4 @@
+name = "security-code-review"
+summary = "Security review agent"
+read_only = false
+hooks_project_enabled = true

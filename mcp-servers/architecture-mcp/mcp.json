@@ -1,0 +1,1 @@
+{"name":"architecture-mcp","version":"1.0.0","tools":["architecture.generate_system_design","architecture.review_architecture","architecture.generate_adr"]}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Diagram Generate"
+  short_description: "Design and generate PlantUML diagrams"
+  default_prompt: "Use $diagram-generate to design, review, or generate the smallest useful PlantUML diagram and return complete renderable source with concise Vietnamese notes."
