@@ -439,16 +439,9 @@ export async function validateRepository(root) {
     "cli/package.json",
     "cli/tsconfig.json",
     "cli/src/index.ts",
-    "cli/src/commands/init.ts",
-    "cli/src/commands/install.ts",
-    "cli/src/commands/uninstall.ts",
-    "cli/src/commands/list.ts",
-    "cli/src/commands/update.ts",
-    "cli/src/commands/upgrade.ts",
-    "cli/src/commands/validate.ts",
-    "cli/src/commands/doctor.ts",
-    "cli/src/commands/generate-adapter.ts",
-    "cli/src/commands/migrate.ts",
+    "cli/scripts/bin/install-hooks.ps1",
+    "cli/scripts/bin/hook-doctor.ps1",
+    "cli/scripts/bin/hook-service.ps1",
   ]) {
     if (!(await exists(path.join(root, required)))) {
       errors.push(`missing CLI module ${required}`);

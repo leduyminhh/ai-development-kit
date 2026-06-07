@@ -214,9 +214,9 @@ Scripts and hooks may use command-style verbs when they are operational wrappers
 - `skills/diagram-generate/scripts/run-diagram-export.py`
 - [skills/test-automation-validate/scripts/test-automation-validate-strategy.ps1](../../../skills/test-automation-validate/scripts/test-automation-validate-strategy.ps1)
 - [.codex/hooks/log-agent-event.ps1](../../../.codex/hooks/log-agent-event.ps1)
-- [scripts/hook-service.ps1](../../../scripts/hook-service.ps1)
-- [scripts/query-hook-audit.ps1](../../../scripts/query-hook-audit.ps1)
-- [scripts/view-hook-trace.ps1](../../../scripts/view-hook-trace.ps1)
+- [cli/scripts/bin/hook-service.ps1](../../../../cli/scripts/bin/hook-service.ps1)
+- [cli/scripts/bin/query-hook-audit.ps1](../../../../cli/scripts/bin/query-hook-audit.ps1)
+- [cli/scripts/bin/view-hook-trace.ps1](../../../../cli/scripts/bin/view-hook-trace.ps1)
 - `run-coverage-report.ps1`
 - `validate-workflow.ps1`
 - `test-naming-rule-validate.ps1`

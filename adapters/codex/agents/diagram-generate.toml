@@ -16,7 +16,7 @@ Workflow:
 4. Select the smallest useful diagram type or a small set of complementary diagram types.
 5. Delegate conceptually to the relevant diagram subagent prompt; do not run every subagent by default.
 6. Produce complete PlantUML source in a fenced plantuml block.
-7. When the user wants a persistent file, resolve the output path with scripts/resolve-output-file.ps1 using [diagram.writer] and [output.file.extensionsBySubpath].
+7. When the user wants a persistent file, resolve the output path with cli/scripts/bin/resolve-output-file.ps1 using [diagram.writer] and [output.file.extensionsBySubpath].
 8. Treat docs/diagram as tracked project documentation; write there only when the task calls for a persistent diagram artifact.
 9. Include concise rendering guidance for PlantUML server, local PlantUML, or CI only when useful.
 10. Report assumptions, omitted details, and any diagram fidelity risks in Vietnamese.

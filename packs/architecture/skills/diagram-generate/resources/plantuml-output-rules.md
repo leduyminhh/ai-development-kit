@@ -40,7 +40,7 @@ docs/diagram/subagent/filename_yyyyMMdd_HHmm.puml
 
 Rules:
 
-- Resolve the path with `scripts/resolve-output-file.ps1` before proposing a persistent file.
+- Resolve the path with `cli/scripts/bin/resolve-output-file.ps1` before proposing a persistent file.
 - Use the current local date and time in `Asia/Saigon` for `yyyyMMdd_HHmm`.
 - Use the selected diagram subagent folder name for `subagent`, without the `-agent` suffix when helpful.
 - Convert `filename` to lowercase kebab-case or snake_case based on the user's supplied name; prefer kebab-case when not specified.
@@ -64,7 +64,7 @@ Confirm? (yes/no)
 Resolver example:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/resolve-output-file.ps1 `
+powershell -ExecutionPolicy Bypass -File cli/scripts/bin/resolve-output-file.ps1 `
   -Writer diagram `
   -Subagent sequence `
   -Filename "Payment Flow"

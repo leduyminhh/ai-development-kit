@@ -99,7 +99,7 @@ Use [resources/output-template-vi.md](resources/output-template-vi.md) for the u
 5. Load [resources/plantuml-output-rules.md](resources/plantuml-output-rules.md).
 6. Use the relevant subagent prompt from `subagents/`.
 7. Return one complete `plantuml` fenced code block per diagram.
-8. If the user wants a persistent file, resolve the output path with repo-root [scripts/resolve-output-file.ps1](../../../scripts/resolve-output-file.ps1) using `[diagram.writer]` plus `[output.file.extensionsBySubpath]`; default to `docs/diagram/subagent/filename_yyyyMMdd_HHmm.puml`.
+8. If the user wants a persistent file, resolve the output path with repo-root [cli/scripts/bin/resolve-output-file.ps1](../../../../cli/scripts/bin/resolve-output-file.ps1) using `[diagram.writer]` plus `[output.file.extensionsBySubpath]`; default to `docs/diagram/subagent/filename_yyyyMMdd_HHmm.puml`.
 9. Treat `docs/diagram` as tracked project documentation; write there only when the task calls for a persistent diagram artifact, then report path, purpose, and summary.
 10. Add assumptions and rendering notes only when they help the user act.
 
