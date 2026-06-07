@@ -13,7 +13,7 @@ This skill is the execution discipline layer for repository work. It does not re
 
 ## When to Use
 
-Use this skill before broad planning, multi-file edits, structure validation, conflict resolution, skill authoring, protected-path decisions, or any task where the agent might otherwise skip reading, testing, or surfacing trade-offs.
+Use this skill before broad planning, multi-file edits, structure validation, conflict resolution, skill authoring, ignored-output decisions, or any task where the agent might otherwise skip reading, testing, or surfacing trade-offs.
 
 Also use this skill when the user invokes `init`, `-init`, `agents.md`, or `-agents.md` with this skill; those commands run the project-start `AGENTS.md`/`CLAUDE.md` setup flow.
 
@@ -28,7 +28,7 @@ Also use this skill when the user invokes `init`, `-init`, `agents.md`, or `-age
 ## Examples
 
 - Before editing a skill, read its `SKILL.md`, owned `resources/`, and mapped tests.
-- Before writing under `docs/` or `reports/`, present the protected-path confirmation block and wait.
+- Treat `docs/` as tracked project documentation; treat `report/` and `reports/` as ignored local-output paths and do not commit generated files from them.
 - Before finalizing a structure move, run the validator and selected tests.
 
 ## Common Rationalizations
@@ -43,7 +43,7 @@ Also use this skill when the user invokes `init`, `-init`, `agents.md`, or `-age
 
 - The agent edits before reading the target file.
 - The response claims success without command evidence.
-- A protected path is written without explicit confirmation.
+- Generated local output is committed accidentally.
 - Optional rules are used as filler instead of improving the task.
 
 ## Verification
@@ -82,7 +82,7 @@ Report concise findings, actions, verification, and remaining risk.
 - `init` or `-init`: run `powershell -ExecutionPolicy Bypass -File <loaded-skill-root>/scripts/init-agents-template.ps1 -Root <target-repo-root>`, resolving `<loaded-skill-root>` from the current `SKILL.md` location. If the script path is unavailable, perform the same read/merge/write flow manually. Check the target root for `AGENTS.md` and `CLAUDE.md`; copy the full template as the canonical baseline; if an instruction file exists, compare the old file against the template and merge old project-specific content into the template only when it does not conflict; if no instruction file exists, create `AGENTS.md` from the full template.
 - `agents.md` or `-agents.md`: same as `init`; use this alias when the user's intent is specifically to create, inspect, or update project agent instructions.
 
-Command execution must still follow protected-path confirmation rules, preserve non-conflicting project-specific instructions, prefer the template when conflicts appear, and avoid silent overwrites. Do not report success after only logging a baseline. A successful command must either create/update the target instruction file or report `no-change` with the exact target path and reason.
+Command execution must preserve non-conflicting project-specific instructions, prefer the template when conflicts appear, and avoid silent overwrites. Do not report success after only logging a baseline. A successful command must either create/update the target instruction file or report `no-change` with the exact target path and reason.
 
 ### Must-Have Rules
 
@@ -99,13 +99,13 @@ Command execution must still follow protected-path confirmation rules, preserve 
    When instructions, configs, tests, or references disagree, identify the conflict and choose by priority or ask only when the decision is risky and cannot be inferred.
 
 5. Read before writing.
-   Read targeted source files before modifying them. Do not bulk-scan protected paths or external references.
+   Read targeted source files before modifying them. Do not bulk-scan ignored output paths or external references.
 
 6. Test intent, not only behavior.
    Prefer tests and validation that prove the requested requirement, regression risk, or invariant. Reuse selected tests and mapped skill tests. For production-facing changes, report relevant operational, security, rollback, and maintainability risks.
 
 7. Match codebase conventions.
-   Follow local naming, folder placement, validation, commit, and protected-path rules before introducing a new convention.
+   Follow local naming, folder placement, validation, commit, and ignored-output rules before introducing a new convention.
 
 8. Generated code comment discipline.
    For each generated function or method, evaluate complexity before finalizing it. For simple functions, add a concise comment describing purpose when the purpose is not obvious from the name and surrounding context. For complex functions, add a concise purpose comment and inline comments at each major flow so readers can follow the logic. Do not add comments that merely restate the implementation.

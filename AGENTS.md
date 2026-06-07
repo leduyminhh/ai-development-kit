@@ -26,6 +26,7 @@ Documents and reports:
 - `docs/specs/` stores approved design specifications.
 - `docs/plans/` stores implementation plans.
 - `reports/` stores validation reports and generated review artifacts.
+- `report/` and `reports/` are ignored by Git by default.
 
 ## Architecture Rules
 - Keep the core validator independent from any domain skill.
@@ -39,45 +40,12 @@ Documents and reports:
 - Do not modify the external reference clone unless explicitly requested.
 - Do not vendor external references into core source without approval.
 
-## Protected Paths Policy
-The following paths are protected:
-- `docs/`
-- `reports/`
-
-Scan policy:
-- Do not recursively scan `docs/` or `reports/` by default.
-- Scan protected paths only after explicit user permission or when a command is intentionally run with an allow flag such as `-IncludeProtectedPaths`.
-- Prefer targeted reads over broad traversal to reduce token usage.
-
-Any action that creates, updates, overwrites, or deletes files under protected paths MUST require explicit user confirmation before execution.
-
-Before any write action under protected paths, the agent MUST present:
-- target path
-- purpose
-- short content summary
-
-Confirmation template:
-
-```text
-Proposed change:
-- Path: docs/specs/payment-flow.md
-- Purpose: document payment orchestration design
-- Summary: scope, sequence flow, API contract, failure handling
-
-Confirm? (yes/no)
-```
-
-Execution rules:
-- Proceed only after explicit confirmation from the user.
-- No implicit approval.
-- No approval by assumption.
-- If confirmation is not granted, do not write files; return the draft inline in chat instead.
-
-Strict prohibitions:
-- No silent file generation.
-- No background file writes.
-- No auto-overwrite in protected paths.
-- No delete or cleanup in protected paths without confirmation.
+## Generated Documentation Policy
+- `docs/` is tracked project documentation.
+- `report/` and `reports/` are generated or local-output paths and are ignored by Git.
+- `docs/`, `report/`, and `reports/` are not protected paths in this repository.
+- Prefer targeted reads and writes for these paths to keep scans and diffs focused.
+- Do not rely on ignored generated files as the only record of an implementation decision that must be reviewed in Git.
 
 ## Workflow Rules
 - Use the `agent-operating-rules` skill for repository-wide execution discipline before broad planning, editing, validation, or conflict resolution.
@@ -117,16 +85,14 @@ Worktree rule:
 ## Do Not
 
 - Do not mix domain workflow logic into the core validator.
-- Do not bypass confirmation for protected paths.
 - Do not use unsafe config defaults such as `danger-full-access` with `approval_policy = "never"` for normal development.
 - Do not modify external references without approval.
-- Do not generate persistent artifacts in protected paths without explicit confirmation.
+- Do not commit generated local output from ignored report paths.
 
 ## Enforcement Intent
 
 Agents MUST:
-- follow confirmation rules for protected paths
 - default to safe and non-destructive behavior
 - keep the validator modular and domain-agnostic
-- avoid assumptions when a persistent change requires approval
+- avoid assumptions when a destructive or user-visible change requires approval
 

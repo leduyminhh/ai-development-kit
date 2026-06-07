@@ -25,7 +25,7 @@ ${command.outputContract.map((item) => `- ${item}`).join("\n")}
 
 function manifest(context, provider) {
   return {
-    apiVersion: "aiep.dev/v1alpha1",
+    apiVersion: "ai-engineering.dev/v1alpha1",
     kind: "ProviderProjection",
     provider,
     plugin: {

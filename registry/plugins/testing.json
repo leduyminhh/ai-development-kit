@@ -1,5 +1,5 @@
 {
-  "apiVersion": "aiep.dev/v1alpha1",
+  "apiVersion": "ai-engineering.dev/v1alpha1",
   "id": "testing",
   "name": "Test Engineering",
   "versions": [
@@ -14,11 +14,11 @@
       "dependencies": [],
       "npm": {
         "package": "@ai-engineering-platform/plugin-testing",
-        "integrity": "sha256-231e81b6cd4a0c5efff3f126a9fae7e2bfc619c8565714e233dba1ec623dac1f"
+        "integrity": "sha256-e44bd1ec2b3e1835129bf343986040632c47c02093e79969ef5a6e7ebe6a73a6"
       },
       "github": {
         "url": "https://github.com/leduyminhh/ai-engineering-platform/releases/download/v1.0.0/ai-engineering-platform-testing-1.0.0.tgz",
-        "integrity": "sha256-231e81b6cd4a0c5efff3f126a9fae7e2bfc619c8565714e233dba1ec623dac1f"
+        "integrity": "sha256-e44bd1ec2b3e1835129bf343986040632c47c02093e79969ef5a6e7ebe6a73a6"
       }
     }
   ]

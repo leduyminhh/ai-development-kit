@@ -1,9 +1,10 @@
 .worktrees/
-reports/
-audit/
-node_modules/
-dist/
-.aiep/
+/report/
+/reports/
+/audit/
+/node_modules/
+/dist/
+.ai-engineering/
 *.tgz
 *.tmp
 

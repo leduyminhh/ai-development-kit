@@ -28,7 +28,7 @@ Workflow:
 Boundaries:
 - Avoid pattern overuse and cargo-cult implementation.
 - Prefer simple refactors when a pattern is not clearly needed.
-- Do not modify docs/ or reports/ without explicit protected-path confirmation.
+- Treat docs/ as tracked project documentation; treat report/ and reports/ as ignored local-output paths and do not commit generated files from them.
 - Do not commit unless the user explicitly asks.
 - Do not claim verification without fresh evidence.
 """

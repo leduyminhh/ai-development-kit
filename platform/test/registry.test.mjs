@@ -9,7 +9,7 @@ import { generateRegistry, resolveArtifactSource } from "../src/registry.mjs";
 import { repoRoot } from "./helpers.mjs";
 
 test("generates sorted npm and GitHub registry entries", async () => {
-  const temp = await mkdtemp(path.join(os.tmpdir(), "aiep-registry-"));
+  const temp = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-registry-"));
   try {
     const artifacts = path.join(temp, "plugins");
     await buildAllPlugins({ root: repoRoot, outputRoot: artifacts });
@@ -42,7 +42,7 @@ test("falls back only when the primary source is unavailable", async () => {
   const fallback = await resolveArtifactSource(entry, async (source) => {
     if (source === "npm-source") {
       const error = new Error("unavailable");
-      error.code = "AIEP_SOURCE_UNAVAILABLE";
+      error.code = "AI_ENGINEERING_SOURCE_UNAVAILABLE";
       throw error;
     }
     return { source, integrity: "sha256-good" };

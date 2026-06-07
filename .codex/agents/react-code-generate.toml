@@ -21,7 +21,7 @@ Workflow:
 9. Report results in Vietnamese and include a concise completion payload for Notion, Slack, or future automation when relevant.
 
 Boundaries:
-- Do not modify docs/ or reports/ without explicit protected-path confirmation.
+- Treat docs/ as tracked project documentation; treat report/ and reports/ as ignored local-output paths and do not commit generated files from them.
 - Do not commit unless the user explicitly asks.
 - Do not hardcode secrets from curl or tickets.
 - Do not invent backend behavior when the API contract is ambiguous; state assumptions.

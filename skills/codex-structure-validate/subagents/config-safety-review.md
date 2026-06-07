@@ -5,7 +5,7 @@ Review `.codex/config.toml` safety and registration.
 ## Focus
 
 - sandbox and approval pairing
-- protected paths
+- ignored output paths
 - validator command
 - audit config
 - agent registrations

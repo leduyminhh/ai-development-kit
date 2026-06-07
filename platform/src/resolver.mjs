@@ -1,4 +1,4 @@
-import { AiepError } from "./errors.mjs";
+import { PlatformError } from "./errors.mjs";
 
 const SUPPORTED_PROVIDERS = new Set(["codex", "claude", "cursor"]);
 
@@ -31,8 +31,8 @@ export function resolvePluginGraph({
 }) {
   for (const provider of providers) {
     if (!SUPPORTED_PROVIDERS.has(provider)) {
-      throw new AiepError(`unsupported provider ${provider}`, {
-        code: "AIEP_INCOMPATIBLE",
+      throw new PlatformError(`unsupported provider ${provider}`, {
+        code: "AI_ENGINEERING_INCOMPATIBLE",
       });
     }
   }
@@ -44,29 +44,29 @@ export function resolvePluginGraph({
   function visit(pluginId) {
     const plugin = plugins.get(pluginId);
     if (!plugin) {
-      throw new AiepError(`unknown plugin ${pluginId}`, {
-        code: "AIEP_UNKNOWN_PLUGIN",
+      throw new PlatformError(`unknown plugin ${pluginId}`, {
+        code: "AI_ENGINEERING_UNKNOWN_PLUGIN",
       });
     }
     if (visiting.has(pluginId)) {
-      throw new AiepError(`dependency cycle detected at ${pluginId}`, {
-        code: "AIEP_DEPENDENCY_CYCLE",
+      throw new PlatformError(`dependency cycle detected at ${pluginId}`, {
+        code: "AI_ENGINEERING_DEPENDENCY_CYCLE",
       });
     }
     if (visited.has(pluginId)) {
       return;
     }
     if (!isPlatformCompatible(plugin.compatibility?.platform, platformVersion)) {
-      throw new AiepError(
+      throw new PlatformError(
         `plugin ${pluginId} is incompatible with platform ${platformVersion}`,
-        { code: "AIEP_INCOMPATIBLE" },
+        { code: "AI_ENGINEERING_INCOMPATIBLE" },
       );
     }
     for (const provider of providers) {
       if (plugin.compatibility?.providers?.[provider] !== "supported") {
-        throw new AiepError(
+        throw new PlatformError(
           `plugin ${pluginId} does not support provider ${provider}`,
-          { code: "AIEP_INCOMPATIBLE" },
+          { code: "AI_ENGINEERING_INCOMPATIBLE" },
         );
       }
     }

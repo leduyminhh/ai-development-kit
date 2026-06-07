@@ -23,7 +23,7 @@ Prefer sources in this order:
 - Copying large source files into docs.
 - Marketing copy in technical docs.
 - Overly broad documents that mix architecture, feature, flow, and database concerns without a clear reason.
-- Writing into protected paths without explicit confirmation.
+- Committing generated report output that should stay ignored.
 
 ## Verification Checklist
 

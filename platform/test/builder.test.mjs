@@ -8,7 +8,7 @@ import { buildPlugin } from "../src/builder.mjs";
 import { repoRoot } from "./helpers.mjs";
 
 test("builds a deterministic standalone backend artifact", async () => {
-  const outputRoot = await mkdtemp(path.join(os.tmpdir(), "aiep-build-"));
+  const outputRoot = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-build-"));
   try {
     const first = await buildPlugin({ root: repoRoot, pluginId: "backend", outputRoot });
     const firstChecksums = JSON.parse(

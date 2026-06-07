@@ -314,8 +314,8 @@ network_access = true
 [behavior]
 default_language = "vi"
 prefer_inline_output_over_file_write = true
-confirm_before_protected_write = true
-protected_paths = ["docs/", "reports/"]
+confirm_before_protected_write = false
+protected_paths = []
 disallow_unsafe_destructive_actions = true
 avoid_unrelated_file_changes = true
 require_pre_write_summary = true
@@ -327,15 +327,15 @@ validator_command = "powershell -ExecutionPolicy Bypass -File skills/codex-struc
 
 # scan.policy Global scan scope
 [scan.policy]
-skipProtectedPathsByDefault = true
-protectedScanPaths = ["docs/", "reports/"]
-requireExplicitAllow = true
+skipProtectedPathsByDefault = false
+protectedScanPaths = []
+requireExplicitAllow = false
 
 # output.file Global response file naming
 [output.file]
 filenamePattern = "filename_yyyyMMdd_HHmm"
 timezone = "Asia/Saigon"
-requireConfirmationForProtectedPaths = true
+requireConfirmationForProtectedPaths = false
 
 # output.file.extensionsBySubpath Global extension resolver
 [output.file.extensionsBySubpath]
@@ -381,8 +381,8 @@ reloadOnConfigChange = true
 [guards]
 block_danger_full_access = false
 block_never_approval_for_normal_dev = true
-require_explicit_confirmation_for_protected_paths = true
-block_silent_writes_to_protected_paths = true
+require_explicit_confirmation_for_protected_paths = false
+block_silent_writes_to_protected_paths = false
 block_delete_without_confirmation = true
 '@
 }
@@ -492,9 +492,9 @@ $resolvedRoot = (Resolve-Path -LiteralPath $Root).Path
 $configPath = Join-Path $resolvedRoot '.codex/config.toml'
 $testMapPath = Join-Path $resolvedRoot '.codex/test-map.toml'
 $configText = if (Test-Path -LiteralPath $configPath) { Get-Content -LiteralPath $configPath -Raw } else { '' }
-$protectedScanPaths = Get-CodexTomlArrayValue -TomlText $configText -Section 'scan.policy' -Key 'protectedScanPaths' -Default @('docs/', 'reports/')
-$skipProtectedPathsByDefault = Get-CodexTomlBoolValue -TomlText $configText -Section 'scan.policy' -Key 'skipProtectedPathsByDefault' -Default $true
-$requireExplicitProtectedScanAllow = Get-CodexTomlBoolValue -TomlText $configText -Section 'scan.policy' -Key 'requireExplicitAllow' -Default $true
+$protectedScanPaths = Get-CodexTomlArrayValue -TomlText $configText -Section 'scan.policy' -Key 'protectedScanPaths' -Default @()
+$skipProtectedPathsByDefault = Get-CodexTomlBoolValue -TomlText $configText -Section 'scan.policy' -Key 'skipProtectedPathsByDefault' -Default $false
+$requireExplicitProtectedScanAllow = Get-CodexTomlBoolValue -TomlText $configText -Section 'scan.policy' -Key 'requireExplicitAllow' -Default $false
 
 $codexRoot = Join-Path $resolvedRoot '.codex'
 Ensure-ScaffoldDirectory -Path $codexRoot -Label 'Codex root' -TrackWhenEmpty $false
@@ -714,8 +714,17 @@ if (Test-Path -LiteralPath $skillsRoot) {
     $findings.Add((New-Finding 'warning' 'skills is missing. This is acceptable only before skills are introduced.'))
 }
 
+$ignoredProjectMarkdownDirs = @('.git', '.worktrees', 'audit', 'dist', 'node_modules', 'report', 'reports')
+$resolvedRootPrefix = $resolvedRoot.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
 $projectMarkdownFiles = @(Get-ChildItem -LiteralPath $resolvedRoot -Recurse -File -Filter '*.md' -ErrorAction SilentlyContinue |
-    Where-Object { $_.FullName -notmatch '\\.git\\' })
+    Where-Object {
+        if (-not $_.FullName.StartsWith($resolvedRootPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+            return $false
+        }
+        $relativePath = $_.FullName.Substring($resolvedRootPrefix.Length)
+        $topLevelDir = @($relativePath -split '[\\/]')[0]
+        $ignoredProjectMarkdownDirs -notcontains $topLevelDir
+    })
 $projectMarkdownChecked = 0
 foreach ($markdownFile in $projectMarkdownFiles) {
     $quality = Test-ProjectMarkdownQuality -ResolvedRoot $resolvedRoot -FullPath $markdownFile.FullName
@@ -734,7 +743,7 @@ foreach ($markdownFile in $projectMarkdownFiles) {
     }
 }
 if ($projectMarkdownChecked -gt 0) {
-    $findings.Add((New-Finding 'pass' "Project markdown quality checked for $projectMarkdownChecked files; protected paths and skill resources/subagents were excluded."))
+    $findings.Add((New-Finding 'pass' "Project markdown quality checked for $projectMarkdownChecked files; skill resources/subagents and ignored output/dependency paths were excluded."))
 }
 
 $workflowsRoot = Join-Path $resolvedRoot 'workflows'
@@ -751,7 +760,9 @@ if (Test-Path -LiteralPath $workflowsRoot) {
     }
 }
 
-if ($IncludeProtectedPaths -or -not $skipProtectedPathsByDefault -or -not $requireExplicitProtectedScanAllow) {
+if ($protectedScanPaths.Count -eq 0) {
+    $findings.Add((New-Finding 'pass' 'No additional scan paths configured.'))
+} elseif ($IncludeProtectedPaths -or -not $skipProtectedPathsByDefault -or -not $requireExplicitProtectedScanAllow) {
     foreach ($protectedPath in $protectedScanPaths) {
         $resolvedProtectedPath = Join-Path $resolvedRoot $protectedPath
         if (-not (Test-Path -LiteralPath $resolvedProtectedPath)) {
@@ -761,14 +772,14 @@ if ($IncludeProtectedPaths -or -not $skipProtectedPathsByDefault -or -not $requi
         foreach ($file in (Get-ChildItem -LiteralPath $resolvedProtectedPath -Recurse -Filter 'SKILL.md' -File -ErrorAction SilentlyContinue)) {
             $content = Get-Content -LiteralPath $file.FullName -Raw
             if ($content -match '(?s)^---\s+.*?\s+---' -and $content -match '(?m)^name:\s*\S+' -and $content -match '(?m)^description:\s*\S+') {
-                $findings.Add((New-Finding 'pass' "Protected skill frontmatter looks valid: $($file.FullName)"))
+                $findings.Add((New-Finding 'pass' "Configured scan path skill frontmatter looks valid: $($file.FullName)"))
             } else {
-                $findings.Add((New-Finding 'fail' "Protected skill frontmatter must include name and description: $($file.FullName)"))
+                $findings.Add((New-Finding 'fail' "Configured scan path skill frontmatter must include name and description: $($file.FullName)"))
             }
         }
     }
 } else {
-    $findings.Add((New-Finding 'pass' "Protected scan skipped by policy: $($protectedScanPaths -join ', ')"))
+    $findings.Add((New-Finding 'pass' "Configured scan paths skipped by policy: $($protectedScanPaths -join ', ')"))
 }
 
 $agentRegistrations = New-Object System.Collections.Generic.List[object]

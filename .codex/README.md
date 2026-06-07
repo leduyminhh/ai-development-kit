@@ -18,7 +18,7 @@ Thu muc `.codex/` chua cau hinh project-local cho Codex workflow kit: agent entr
 
 | Path | Chuc nang |
 |---|---|
-| `config.toml` | Cau hinh deterministic: ngon ngu, protected paths, validation command, output writer, project hooks, guards, agent registry entries. |
+| `config.toml` | Cau hinh deterministic: ngon ngu, validation command, output writer, ignored output paths, project hooks, guards, agent registry entries. |
 | `test-map.toml` | Map selected tests theo changed paths, activated skills va agent names. |
 | `agents/*.toml` | Entry point Desktop-facing cua agent: name, description, model, reasoning, sandbox, developer instructions. |
 | `agent-metadata/*.toml` | Governance metadata cua repo: read_only, hook gate, summary, va rule/pham vi custom neu can. |
@@ -32,7 +32,7 @@ Moi `.codex/agents/<name>.toml` nen:
 - Co `name`, `description`, `model`, `model_reasoning_effort`, `sandbox_mode`.
 - Co `developer_instructions` ngan gon, dieu phoi skill thay vi nhung quy trinh domain qua dai.
 - Tham chieu skill tuong ung trong `skills/<name>` hoac skill lien quan.
-- Ton trong protected paths va khong commit/push khi user chua yeu cau.
+- Khong commit/push generated files tu ignored output paths khi user chua yeu cau.
 
 Runtime registration boundary:
 
@@ -63,14 +63,14 @@ Agent hien co:
 | Section | Muc dich |
 |---|---|
 | `[environment]` | Network/runtime access metadata. |
-| `[behavior]` | Ngon ngu mac dinh, protected write policy, safety defaults. |
+| `[behavior]` | Ngon ngu mac dinh, output policy, safety defaults. |
 | `[validation]` | Validator command can chay sau structure change. |
-| `[scan.policy]` | Bo qua `docs/` va `reports/` theo mac dinh. |
+| `[scan.policy]` | Cau hinh scan scope; mac dinh khong co ignored output scan override. |
 | `[output.file]` | Naming policy cho generated output. |
 | `[documentation.writer]` | Policy ghi documentation. |
 | `[diagram.writer]` | Policy ghi PlantUML diagram output. |
 | `[hooks.project]` | Project event log path, filename pattern, format, retention, service name va event wrappers. |
-| `[guards]` | Safety guards cho destructive/protected actions. |
+| `[guards]` | Safety guards cho destructive actions. |
 | `[agent_registry.<name>]` | Dang ky agent config path, read_only, enabled, va hook gate da duoc sync tu agent metadata. |
 
 Hook gating:

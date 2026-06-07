@@ -4,15 +4,15 @@
   "description": "Installable AI engineering plugins for Codex, Claude Code, and Cursor.",
   "type": "module",
   "bin": {
-    "aiep": "./platform/bin/aiep.mjs"
+    "ai-engineering": "./platform/bin/ai-engineering.mjs"
   },
   "engines": {
     "node": ">=20"
   },
   "scripts": {
     "test": "node --test platform/test",
-    "build": "node platform/bin/aiep.mjs build --all",
-    "validate": "node platform/bin/aiep.mjs validate"
+    "build": "node platform/bin/ai-engineering.mjs build --all",
+    "validate": "node platform/bin/ai-engineering.mjs validate"
   },
   "workspaces": [
     "platform"

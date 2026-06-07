@@ -18,10 +18,10 @@ try {
     New-Item -ItemType Directory -Path (Join-Path $tempRoot 'workflows/workflow-java-architecture-review') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.codex/agents') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.codex/agent-metadata') -Force | Out-Null
-    New-Item -ItemType Directory -Path (Join-Path $tempRoot 'docs/ignored-skill') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $tempRoot 'reports/ignored-skill') -Force | Out-Null
 
     [System.IO.File]::WriteAllText((Join-Path $tempRoot 'AGENTS.md'), '# Test Agents', [System.Text.UTF8Encoding]::new($false))
-    Set-Content -LiteralPath (Join-Path $tempRoot 'docs/ignored-skill/SKILL.md') -Encoding utf8 -Value 'not valid skill frontmatter'
+    Set-Content -LiteralPath (Join-Path $tempRoot 'reports/ignored-skill/SKILL.md') -Encoding utf8 -Value 'not valid skill frontmatter'
     [System.IO.File]::WriteAllText(
         (Join-Path $tempRoot 'skills/README.md'),
 @'
@@ -41,9 +41,9 @@ try {
 network_access = true
 
 [scan.policy]
-skipProtectedPathsByDefault = true
-protectedScanPaths = ["docs/", "reports/"]
-requireExplicitAllow = true
+skipProtectedPathsByDefault = false
+protectedScanPaths = []
+requireExplicitAllow = false
 
 [agent_registry.existing-agent]
 path = ".codex/agents/existing-agent.toml"
@@ -241,11 +241,8 @@ hooks_project_enabled = true
     Assert-True ($LASTEXITCODE -eq 0) "Validator with -Fix should exit 0 for valid generated repo.`n$($fixOutput -join "`n")"
 
     $scanOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File $validator -Root $tempRoot
-    Assert-True ($LASTEXITCODE -eq 0) 'Validator should skip protected docs by default and exit 0.'
-    Assert-True (-not (($scanOutput -join "`n").Contains('docs/ignored-skill/SKILL.md'))) 'Validator should not scan protected docs by default.'
-
-    & powershell -NoProfile -ExecutionPolicy Bypass -File $validator -Root $tempRoot -IncludeProtectedPaths | Out-Null
-    Assert-True ($LASTEXITCODE -eq 1) 'Validator should scan protected docs only when explicitly allowed.'
+    Assert-True ($LASTEXITCODE -eq 0) 'Validator should have no additional scan paths by default and exit 0.'
+    Assert-True (($scanOutput -join "`n").Contains('No additional scan paths configured.')) 'Validator should report that no additional scan paths are configured.'
 
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.codex/agents')) 'Validator -Fix should ensure Step 1 .codex/agents exists.'
     Assert-True (Test-Path -LiteralPath (Join-Path $tempRoot '.codex/agent-metadata')) 'Validator -Fix should ensure agent metadata root exists.'

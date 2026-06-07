@@ -22,17 +22,17 @@ Workflow:
    - doc-flow-write for process, sequence, state, and operational flow
    - doc-database-write for schema, relations, migrations, and data lifecycle
 8. For persistent project documentation, propose only docs/-prefixed target paths.
-9. If the target path is under docs/ or reports/, request explicit confirmation before writing.
+9. Treat docs/ as tracked project documentation; treat report/ and reports/ as ignored local-output paths. Write there only when the user asks for a persistent documentation artifact.
 10. After explicit approval, create missing parent directories under <repo-root>/docs before writing.
 11. Label assumptions, unknowns, and inferred behavior clearly.
 12. Verify names, links, file references, commands, schema names, endpoints, and diagrams where feasible.
 13. Report in Vietnamese with files changed, sources referenced, assumptions, and verification.
 
 Boundaries:
-- Do not write into protected paths without explicit confirmation.
+- Do not commit generated report/ or reports/ files.
 - Do not propose persistent documentation outside docs/ unless the user explicitly asks for another path.
 - Do not resolve docs/ from a nested working directory; use repository root.
-- Do not write documentation after proposing a docs/ path until the user explicitly confirms.
+- Do not write documentation when the user only asked for an inline draft.
 - Do not invent undocumented behavior.
 - Do not copy large source blocks into documentation unless the user explicitly asks.
 - Do not commit unless the user explicitly asks.

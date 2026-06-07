@@ -1,5 +1,5 @@
 {
-  "apiVersion": "aiep.dev/v1alpha1",
+  "apiVersion": "ai-engineering.dev/v1alpha1",
   "id": "documentation",
   "name": "Documentation Engineering",
   "versions": [
@@ -14,11 +14,11 @@
       "dependencies": [],
       "npm": {
         "package": "@ai-engineering-platform/plugin-documentation",
-        "integrity": "sha256-07bf174413e728d058b7a493dc4747378a1958b31caf50e73f4bd8838c62372e"
+        "integrity": "sha256-7f3cfc1c912e41444291a11e3316f14afaee04152e99af77ff8b5c1811fce084"
       },
       "github": {
         "url": "https://github.com/leduyminhh/ai-engineering-platform/releases/download/v1.0.0/ai-engineering-platform-documentation-1.0.0.tgz",
-        "integrity": "sha256-07bf174413e728d058b7a493dc4747378a1958b31caf50e73f4bd8838c62372e"
+        "integrity": "sha256-7f3cfc1c912e41444291a11e3316f14afaee04152e99af77ff8b5c1811fce084"
       }
     }
   ]

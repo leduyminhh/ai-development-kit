@@ -27,7 +27,7 @@ function providerManifest(platform, graph, provider) {
       version: platform.product.version,
       provider,
       skills: "./skills/",
-      aiep: {
+      aiEngineering: {
         apiVersion: platform.apiVersion,
         plugins: graph.pluginIds,
         resolvedSkills: graph.skills,

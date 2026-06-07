@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://aiep.dev/schemas/package.schema.json",
-  "title": "AIEP Plugin Source",
+  "$id": "https://ai-engineering.dev/schemas/package.schema.json",
+  "title": "AI Engineering Plugin Source",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "compatibility", "dependencies", "assets", "install"],
   "properties": {
     "apiVersion": {
-      "const": "aiep.dev/v1alpha1"
+      "const": "ai-engineering.dev/v1alpha1"
     },
     "kind": {
       "const": "Plugin"

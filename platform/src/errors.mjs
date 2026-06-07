@@ -1,8 +1,8 @@
-export class AiepError extends Error {
+export class PlatformError extends Error {
   constructor(message, options = {}) {
     super(message);
-    this.name = "AiepError";
-    this.code = options.code ?? "AIEP_ERROR";
+    this.name = "PlatformError";
+    this.code = options.code ?? "AI_ENGINEERING_ERROR";
     this.exitCode = options.exitCode ?? 1;
     this.details = options.details ?? null;
   }

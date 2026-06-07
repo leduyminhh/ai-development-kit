@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://aiep.dev/schemas/platform-lock.schema.json",
-  "title": "AIEP Platform Lock",
+  "$id": "https://ai-engineering.dev/schemas/platform-lock.schema.json",
+  "title": "AI Engineering Platform Lock",
   "type": "object",
   "required": ["schemaVersion", "platformVersion", "providers", "plugins"],
   "properties": {

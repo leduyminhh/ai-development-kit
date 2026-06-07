@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://aiep.dev/schemas/install-state.schema.json",
-  "title": "AIEP Install State",
+  "$id": "https://ai-engineering.dev/schemas/install-state.schema.json",
+  "title": "AI Engineering Install State",
   "type": "object",
   "required": ["schemaVersion", "transactionId", "status", "completedAt"],
   "properties": {

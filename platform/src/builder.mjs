@@ -39,7 +39,7 @@ export async function buildPlugin({ root, pluginId, outputRoot }) {
   });
   const plugin = plugins.get(pluginId);
   await mkdir(outputRoot, { recursive: true });
-  const temporaryRoot = await mkdtemp(path.join(outputRoot, ".aiep-stage-"));
+  const temporaryRoot = await mkdtemp(path.join(outputRoot, ".ai-engineering-stage-"));
   const staged = path.join(temporaryRoot, "artifact");
   await mkdir(staged, { recursive: true });
 
@@ -89,7 +89,7 @@ export async function buildPlugin({ root, pluginId, outputRoot }) {
     }
 
     await writeJsonAtomic(resolveInside(staged, "plugin.json"), {
-      apiVersion: "aiep.dev/v1alpha1",
+      apiVersion: "ai-engineering.dev/v1alpha1",
       kind: "PluginArtifact",
       metadata: plugin.metadata,
       compatibility: plugin.compatibility,

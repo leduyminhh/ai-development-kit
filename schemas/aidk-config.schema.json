@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://aiep.dev/schemas/platform-config.schema.json",
-  "title": "AIEP Platform Configuration",
+  "$id": "https://ai-engineering.dev/schemas/platform-config.schema.json",
+  "title": "AI Engineering Platform Configuration",
   "type": "object",
   "required": ["apiVersion", "product", "providers", "packages", "generation"],
   "properties": {
     "apiVersion": {
-      "const": "aiep.dev/v1alpha1"
+      "const": "ai-engineering.dev/v1alpha1"
     },
     "product": {
       "type": "object",

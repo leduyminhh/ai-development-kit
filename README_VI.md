@@ -4,34 +4,24 @@
 
 Phiên bản tiếng Anh: [README.md](README.md)
 
-Repository này đóng gói agent skills, validators, test routing, template agent theo project, và các plugin có thể cài độc lập. Mục tiêu là cho phép project cài riêng từng mảng như backend/security/testing, hoặc cài toàn bộ AI Engineering Platform thông qua CLI `aiep`.
+AI Engineering Platform đóng gói skills, commands, validators và provider adapters thành các plugin cài theo project. Một project có thể cài riêng một mảng năng lực, ví dụ backend hoặc security, hoặc cài toàn bộ platform.
 
----
+## Bạn Nhận Được Gì
 
-## Commands
+- **Plugins:** `architecture`, `backend`, `documentation`, `frontend`, `security`, `testing`.
+- **Providers:** Codex, Claude Code và Cursor được sinh từ cùng một package contract chuẩn.
+- **Lifecycle:** install, list, outdated, update, remove, build, registry và artifact verification thông qua `ai-engineering`.
+- **Compatibility:** legacy AIDK PowerShell installer và `npx skills` vẫn được giữ cho direct skill install.
 
-Các lệnh phổ biến theo vòng đời repository.
+## Yêu Cầu
 
-| Nhu cầu | Command | Nguyên tắc |
-|---|---|---|
-| Liệt kê skill có thể install | `npx skills add . --list` | Inspect trước khi install |
-| Xem CLI help | `npx skills --help` | Help ở top-level command |
-| Xem help dạng ngắn | `npx skills -h` | Alias-friendly usage |
-| Install default allowlist | `npx skills add . --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review using-workflow-kit --agent codex -y` | Chỉ install danh sách được cho phép |
-| Install một skill | `npx skills add . --skill security-code-review --agent codex -y` | Mặc định hẹp phạm vi |
-| Alias add | `npx skills a . --skill security-code-review --agent codex -y` | Hỗ trợ command ngắn |
-| Alias list | `npx skills ls --agent codex` | Xác minh trạng thái target |
-| Update skill đã install | `npx skills update security-code-review` | Refresh có chủ đích |
-| Validate repository | `powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix` | Fail loud |
-| Chạy selected tests | `powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -FromGit` | Chỉ test phạm vi liên quan |
+- Node.js 20 trở lên cho package `ai-engineering`.
+- PowerShell cho repository validators và legacy installer scripts trên Windows.
+- Git khi cài từ source hoặc cập nhật linked checkout.
 
-Không thêm `--help` sau command `skills add <source>`; CLI sẽ hiểu `<source>` là target install.
+## Quick Start
 
----
-
-## AI Engineering Platform Plugins
-
-Chạy platform CLI mà không cần global install:
+Chạy platform CLI:
 
 ```powershell
 npx ai-engineering-platform --help
@@ -40,36 +30,43 @@ npx ai-engineering-platform --help
 Cài một plugin vào project hiện tại:
 
 ```powershell
-aiep plugin install backend
-aiep plugin install backend --provider codex,claude,cursor
+ai-engineering plugin install backend
+ai-engineering plugin install backend --provider codex,claude,cursor
 ```
 
 Cài toàn bộ platform:
 
 ```powershell
-aiep install --all
+ai-engineering install --all
 ```
 
-Kiểm tra và cập nhật plugin đã cài:
+Kiểm tra plugin đã cài:
 
 ```powershell
-aiep plugin list
-aiep plugin outdated
-aiep plugin update backend
-aiep update --all --dry-run
+ai-engineering plugin list
+ai-engineering plugin outdated
 ```
 
-Gỡ file do plugin quản lý một cách an toàn:
+Cập nhật plugin đã cài:
 
 ```powershell
-aiep plugin remove backend
-aiep plugin remove backend --prune
-aiep remove --all
+ai-engineering plugin update backend
+ai-engineering update --all --dry-run
 ```
 
-Mặc định installation là project-local. Chỉ dùng `--global` khi target agent cần cài global. Managed-file drift sẽ dừng install, update, và remove trừ khi truyền rõ `--force`.
+Gỡ file do plugin quản lý:
 
-Workflow source cho maintainer:
+```powershell
+ai-engineering plugin remove backend
+ai-engineering plugin remove backend --prune
+ai-engineering remove --all
+```
+
+Managed-file drift sẽ dừng install, update và remove trừ khi truyền rõ `--force`.
+
+## Cài Từ Source
+
+Dùng luồng này khi phát triển platform hoặc kiểm thử thay đổi local trước khi publish:
 
 ```powershell
 git clone https://github.com/leduyminhh/ai-engineering-platform
@@ -79,32 +76,45 @@ npm run build
 npm link
 ```
 
-npm là artifact source chính. GitHub Release archives mirror cùng nội dung plugin và là fallback. Các flow legacy `scripts/invoke-aidk.ps1` và `npx skills` vẫn được giữ cho compatibility trong khi plugin distribution hoàn thiện.
+Sau `npm link`, command `ai-engineering` sẽ khả dụng global từ local checkout.
 
----
+## Plugin Packages
 
-## AIDK v1.1 Packages
+| Plugin | Mục đích |
+|---|---|
+| `architecture` | Review kiến trúc, Onion Architecture, shared contract design và diagrams. |
+| `backend` | Backend review và workflow engineering thiên về JVM/Spring. |
+| `documentation` | Technical docs, README sections, architecture notes, flow docs và handoff notes. |
+| `frontend` | Workflow triển khai React/frontend. |
+| `security` | Source-first security review và security scan workflows. |
+| `testing` | QA review, regression planning và automated test validation. |
 
-AIDK v1.1 giữ `skills/<name>/` làm nguồn runtime chuẩn và thêm capability package trong `packages/`. Package kết hợp các skill hiện có mà không sao chép nội dung hướng dẫn.
+Mỗi package nằm dưới `packages/<plugin>/` và có thể gồm:
 
-Package ban đầu: `architecture`, `backend`, `frontend`, `security`, `testing`, và `documentation`.
+- `package.yaml` là package contract chuẩn.
+- `commands/*.md` là provider-neutral command definitions.
+- runtime skills được tham chiếu từ `skills/<name>/SKILL.md`.
 
-Validate hoặc xem trước installation:
+## Distribution Model
+
+`ai-engineering` build immutable plugin artifacts dưới `dist/plugins/<plugin>/<version>/`.
+
+```powershell
+node platform/bin/ai-engineering.mjs validate --json
+node platform/bin/ai-engineering.mjs build --all --json
+node platform/bin/ai-engineering.mjs registry generate --json
+node platform/bin/ai-engineering.mjs artifact verify --all --json
+```
+
+npm là artifact source chính. GitHub Release archives mirror cùng nội dung plugin và là fallback.
+
+## Compatibility: AIDK v1.1
+
+Legacy AIDK installer vẫn hoạt động cho team muốn dùng PowerShell-driven package projection thay vì lifecycle của `ai-engineering`:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/invoke-aidk.ps1 -Action validate -Json
 
-powershell -ExecutionPolicy Bypass -File scripts/invoke-aidk.ps1 `
-  -Action plan `
-  -Package backend,security `
-  -Provider codex,claude,cursor `
-  -TargetRoot C:\path\to\project `
-  -Json
-```
-
-Cài resolved skills, provider manifests, adapters và shared audit hooks:
-
-```powershell
 powershell -ExecutionPolicy Bypass -File scripts/invoke-aidk.ps1 `
   -Action install `
   -Package backend,security `
@@ -113,9 +123,7 @@ powershell -ExecutionPolicy Bypass -File scripts/invoke-aidk.ps1 `
   -Json
 ```
 
-Install chỉ ghi `.aidk/install-state.json` sau khi generated artifacts và hook installation thành công. Managed file đã bị thay đổi sẽ báo conflict, trừ khi truyền rõ `-OverwritePolicy overwrite` hoặc `skip`.
-
-Chỉ xóa artifact do state quản lý:
+Chỉ gỡ generated artifacts thuộc state quản lý:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/invoke-aidk.ps1 `
@@ -124,427 +132,116 @@ powershell -ExecutionPolicy Bypass -File scripts/invoke-aidk.ps1 `
   -Json
 ```
 
-Luồng `npx skills` vẫn được hỗ trợ để cài từng skill riêng lẻ.
+Luồng này ghi `.aidk/install-state.json` sau khi generated artifacts và shared audit hooks được cài thành công.
 
----
+## Compatibility: Direct Skill Install
 
-## Quick Start
+Dùng luồng này khi agent chỉ cần từng Markdown skill riêng lẻ và không cần plugin lifecycle đầy đủ.
 
-<details open>
-<summary><b>Codex local link</b></summary>
-
-Clone repository này, sau đó link skills vào native skill discovery của Codex:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/install-skill-link.ps1 -Force
-```
-
-Installer tạo Windows junction hoặc symlink:
-
-```text
-~\.codex\skills\ai-development-kit -> <repo>\skills
-```
-
-Sau đó cập nhật repository bằng:
-
-```powershell
-git pull
-```
-
-Skills sẽ cập nhật ngay qua link. Agents, hooks, và workflow config vẫn là template cục bộ theo project; chỉ import vào project khác khi thực sự cần.
-
-</details>
-
-<details>
-<summary><b>Install từ GitHub URL</b></summary>
-
-Dùng flow này trên máy khác khi bạn chỉ có link GitHub repository.
-
-Step 1. Install Node.js LTS.
-
-`npx` đi kèm với `npm`, nên install Node.js LTS là đủ cho flow `npx skills`. Kiểm tra tool:
-
-```powershell
-node --version
-npm --version
-npx --version
-```
-
-Step 2. Set repository URL:
+Đặt repository slug:
 
 ```powershell
 $repo = "leduyminhh/ai-development-kit"
 ```
 
-Step 3. Xác nhận `skills` CLI chạy được qua `npx`:
+Các help command an toàn:
 
 ```powershell
 npx skills --help
 npx skills -h
 ```
 
-Step 4. Liệt kê skill có sẵn mà chưa install:
+Không thêm `--help` sau `skills add <source>`; `skills add` sẽ hiểu `<source>` là install target.
+
+Liệt kê skill có sẵn:
 
 ```powershell
 npx skills add $repo --list
 ```
 
-Step 5. Install một skill được cho phép vào Claude Code global skills:
+Cài một skill:
 
 ```powershell
-npx skills add $repo --skill security-code-review --agent claude-code -g -y --copy
+npx skills add $repo --skill security-code-review --agent codex -y
+npx skills a $repo --skill security-code-review --agent codex -y
 ```
 
-Command này phải tạo:
-
-```text
-~\.claude\skills\security-code-review\SKILL.md
-```
-
-Step 6. Install default allowed skills vào Codex:
+Cài default allowlist vào Codex:
 
 ```powershell
 npx skills add $repo --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review using-workflow-kit --agent codex -y
 ```
 
-Step 7. Install cùng danh sách skill được cho phép vào Claude Code:
-
-```powershell
-npx skills add $repo --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review using-workflow-kit --agent claude-code -g -y --copy
-```
-
-Step 8. Verify trên máy target:
-
-```powershell
-npx skills list --agent codex
-npx skills list --agent claude-code
-Test-Path "$HOME\.claude\skills\security-code-review\SKILL.md"
-```
-
-</details>
-
-<details>
-<summary><b>Claude Code</b></summary>
-
-Install một skill global:
+Cài một skill global cho Claude Code:
 
 ```powershell
 npx skills add $repo --skill security-code-review --agent claude-code -g -y --copy
 ```
 
-Dùng `-g` để skill được đặt dưới thư mục global skills của Claude Code, và dùng `--copy` khi Claude Code cần nhận file vật lý thay vì link.
+Claude Code path kỳ vọng:
 
-</details>
+```text
+~\.claude\skills\security-code-review\SKILL.md
+```
 
-<details>
-<summary><b>Cursor</b></summary>
-
-`skills` CLI target Cursor thông qua shared agent skills path:
+Cài default allowlist cho Cursor:
 
 ```powershell
 npx skills add $repo --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review using-workflow-kit --agent cursor -y --copy
 ```
 
-Cursor cũng có thể dùng skill text đã copy qua project rules nếu project không dùng CLI.
-
-</details>
-
-<details>
-<summary><b>Agent khác</b></summary>
-
-Skills là các file Markdown thuần dưới `skills/<name>/SKILL.md`. Agent nào hỗ trợ instruction file có thể đọc trực tiếp `SKILL.md` tương ứng, hoặc bạn có thể copy nội dung skill vào rule system của agent đó.
-
-</details>
-
----
-
-## Cross-IDE Hooks
-
-Hook core cung cấp một event model chung cho Codex, Claude Code, và các AI IDE adapter khác. Core normalize các lifecycle hook như `PreToolUse`, `PostToolUse`, `PermissionRequest`, `UserPromptSubmit`, `SubagentStart`, `SubagentStop`, và `Stop` thành audit events như `agent.started`, `skill.selected`, `skill.loaded`, `subagent.started`, `subagent.completed`, và `agent.completed`.
-
-Install hook runtime vào target project:
+Kiểm tra trạng thái target:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/install-hooks.ps1 -TargetRoot <project> -Provider all -Transport cli
+npx skills ls --agent codex
+npx skills ls --agent claude-code
 ```
 
-Installer mặc định không xâm lấn. Nếu `.codex/hooks` hoặc `.claude/hooks` đã có custom hook files, provider shims sẽ được skip trừ khi dùng `-Force`. Core runtime files được copy vào `.ai-hooks`, và các section `[hooks.core]` / `[hooks.http]` bị thiếu sẽ được append mà không replace section đã tồn tại.
-
-Chạy hook doctor cục bộ:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/hook-doctor.ps1 -Root .
-```
-
-Với team HTTP transport, chạy một shared hook service và trỏ mọi member về cùng endpoint:
-
-```toml
-[hooks.core]
-enabled = true
-mode = "observe"
-transport = "http"
-timeoutMs = 1500
-failureMode = "abstain"
-
-[hooks.http]
-url = "http://127.0.0.1:42890/v1/events"
-sharedTokenEnv = ""
-teamId = ""
-projectId = ""
-clientName = ""
-maxRequestBytes = 262144
-
-[hooks.policy]
-enabled = false
-path = ".codex/hooks/policy.json"
-```
-
-HTTP endpoint nhận `POST /v1/events`, ghi canonical JSONL audit, giữ `/events` cho legacy compatibility, trả `400` với malformed JSON, `413` với request quá lớn, và chỉ check shared token khi `sharedTokenEnv` được cấu hình.
-
-Inspect runtime evidence:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/query-hook-audit.ps1 -TraceId <trace-id> -Json
-powershell -ExecutionPolicy Bypass -File scripts/view-hook-trace.ps1 -TraceId <trace-id> -Json
-```
-
----
-
-## Workflow Bootstrap
-
-`using-workflow-kit` là bootstrap skill cho workflow và skill routing. Skill này nên được install cùng default allowlist, rồi gọi trước khi chọn workflow cụ thể hoặc fallback skill:
-
-```text
-Codex: $using-workflow-kit
-Claude Code: /using-workflow-kit hoặc skill invocation đã install
-Cursor: command/rule adapter trỏ tới using-workflow-kit
-```
-
-Workflow registry hiện được tạo sẵn nhưng chưa đăng ký workflow concrete:
-
-```text
-.codex/workflows/registry.toml
-```
-
-Validate registry trước khi thêm workflow cụ thể:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/validate-workflows.ps1 -Root .
-```
-
-Provider adapters chỉ là wrapper mỏng trỏ về cùng source skill và future workflow registry:
-
-```text
-.codex-plugin/plugin.json
-.claude-plugin/plugin.json
-.cursor-plugin/plugin.json
-adapters/codex/bootstrap-snippet.toml
-adapters/claude/hooks.json
-adapters/cursor/hooks.json
-hooks/session-start
-```
-
-Các workflow backend/frontend concrete chưa được đăng ký ở bước này.
-
----
-## Skill Catalog
-
-Repository hiện có 16 skills. Default install allowlist được giữ nhỏ có chủ đích:
-
-```text
-agent-operating-rules
-diagram-generate
-doc-write
-git-workflow-design
-security-code-review
-using-workflow-kit
-```
-
-### Operating And Validation
-
-| Skill | Chức năng | Dùng khi |
-|---|---|---|
-| [agent-operating-rules](skills/agent-operating-rules/SKILL.md) | Áp dụng execution discipline cấp repository: đọc trước, chỉnh sửa gọn, test đúng intent, fail loud. | Planning, editing, validating, hoặc xử lý instruction conflict. |
-| [codex-structure-validate](skills/codex-structure-validate/SKILL.md) | Validate AGENTS.md, skills, agents, config, hooks, test mapping, và compliance theo skill spec. | Sau structure change hoặc trước khi xem repository work là hoàn tất. |
-| [naming-rule-validate](skills/naming-rule-validate/SKILL.md) | Kiểm tra naming convention cho agents, skills, subagents, workflows, hooks, scripts, và validators. | Tạo hoặc rename Codex project artifacts. |
-| [using-workflow-kit](skills/using-workflow-kit/SKILL.md) | Bootstrap workflow registry checks và fallback skill selection trước khi thực thi task. | Bắt đầu session, chọn workflow adapters, hoặc chuẩn bị future workflow entries. |
-
-### Build And Architecture
-
-| Skill | Chức năng | Dùng khi |
-|---|---|---|
-| [java-analyze](skills/java-analyze/SKILL.md) | Review Java/Spring architecture, flow, persistence, async risks, clean code boundaries, và test strategy. | Thiết kế hoặc review JVM backend services. |
-| [architecture-onion-design](skills/architecture-onion-design/SKILL.md) | Áp dụng Onion Architecture và Palermo-style inward dependency rules. | Thiết kế domain-centered Java/Spring modules hoặc review framework leakage. |
-| [code-shared-design](skills/code-shared-design/SKILL.md) | Thiết kế shared internal APIs, contracts, SDKs, và shared logic modules. | Xây module tái sử dụng hoặc publish/reuse giữa nhiều service. |
-| [code-design-pattern](skills/code-design-pattern/SKILL.md) | Tư vấn design pattern với approval gates và overuse checks. | Chọn creational, structural, behavioral, hoặc architectural patterns. |
-| [react-code-generate](skills/react-code-generate/SKILL.md) | Build hoặc chỉnh React UI từ Figma, ticket, text requirements, hoặc API examples. | Implement frontend application flows. |
-
-### Verify, Document, And Ship
-
-| Skill | Chức năng | Dùng khi |
-|---|---|---|
-| [security-code-review](skills/security-code-review/SKILL.md) | Thực hiện source-first security review, scoped scans, optional SonarQube/Trivy enrichment, report contracts, và `/fix` từ report trước. | Review source, diffs, configs, dependencies, hoặc project scan scope. |
-| [test-qa-review](skills/test-qa-review/SKILL.md) | Suy ra QA scenarios, regression risks, verification commands, và findings ngắn gọn bằng tiếng Việt. | Sau architecture hoặc implementation work. |
-| [test-automation-validate](skills/test-automation-validate/SKILL.md) | Lập kế hoạch, tạo, chạy, và ổn định automated tests trên nhiều stack. | Chuyển từ QA review sang executable verification. |
-| [diagram-generate](skills/diagram-generate/SKILL.md) | Chọn và generate PlantUML diagrams thông qua focused diagram subagents. | Thiết kế hoặc review architecture, sequence, ERD, state, deployment, và diagram liên quan. |
-| [doc-write](skills/doc-write/SKILL.md) | Tạo và cập nhật technical documentation, README sections, ADR-style notes, và handoff material. | Document architecture, features, flows, schemas, hoặc implementation context. |
-| [git-workflow-design](skills/git-workflow-design/SKILL.md) | Xử lý branch, commit, merge, revert, release, hotfix, staging, push, và PR workflows. | Publish hoặc tổ chức git changes. |
-| [youtube-transcript](skills/youtube-transcript/SKILL.md) | Download, fetch, transcribe, hoặc clean YouTube transcripts, captions, và subtitles. | Làm việc với YouTube URLs hoặc transcript artifacts. |
-
----
-
-## How Skills Work
-
-Mỗi runtime skill dùng cùng một shape:
-
-```text
-skills/<name>/
-  SKILL.md              # frontmatter + workflow entry point
-  agents/openai.yaml    # optional UI metadata
-  resources/            # optional supporting references
-  scripts/              # optional skill-owned tools and tests
-  subagents/            # optional focused prompts owned by the skill
-```
-
-Frontmatter bắt buộc trong `SKILL.md`:
-
-```yaml
----
-name: lowercase-hyphen-name
-description: Third-person trigger description that says what the skill does and when to use it.
----
-```
-
-Template top-level bắt buộc trong `SKILL.md`:
-
-```text
-YAML frontmatter
-# Skill Name
-
-## Overview
-## When to Use
-## Core Process
-## Examples
-## Common Rationalizations
-## Red Flags
-## Verification
-## Resource Map
-## Subagent Prompts
-## Scripts
-## Output Format
-## Notes
-```
-
-Dùng [skills/SKILL_TEMPLATE.md](skills/SKILL_TEMPLATE.md) khi tạo hoặc cập nhật skill. Validator sẽ fail nếu runtime skill có H2 heading không khớp đúng thứ tự template này.
-
-Design rules:
-
-- **Progressive disclosure.** `SKILL.md` là entry point; supporting references chỉ load khi cần.
-- **Flat runtime layout.** Runtime skills sống trực tiếp dưới `skills/<name>/`.
-- **Source-backed docs.** Skills phải chỉ rõ agent cần inspect gì và evidence nào là bắt buộc.
-- **Validation before completion.** Structural changes phải pass validator và selected tests.
-- **No protected writes by default.** File dưới `docs/` và `reports/` cần explicit confirmation trước khi write.
-
----
-
-## Project Structure
+## Repository Layout
 
 ```text
 ai-development-kit/
-  AGENTS.md                         # repository-level agent instructions
-  README.md                         # English README
-  README_VI.md                      # Vietnamese README companion
-  skills/                           # runtime skills
-    agent-operating-rules/
-    codex-structure-validate/
-    security-code-review/
-    ...
-  .codex/
-    agents/                         # project-local agent entry points
-    agent-metadata/                 # read-only/hooks metadata for agent registry sync
-    config.toml                     # deterministic behavior, guards, hooks, validation
-    workflows/                      # workflow registry; concrete workflows sẽ thêm sau
-    hooks/                          # project hook wrappers and hook libraries
-    mcp/                            # MCP templates or snippets
-    test-map.toml                   # selected test routing
-  scripts/                          # shared project helpers and test runners
-  references/                       # standards and external reference notes
-  docs/                             # protected documentation outputs
-  reports/                          # protected generated reports and audit logs
+  packages/        # plugin package contracts và provider-neutral commands
+  platform/        # ai-engineering CLI, lifecycle, artifact, registry và tests
+  registry/        # generated plugin registry metadata
+  schemas/         # schema contracts
+  skills/          # runtime Markdown skills
+  scripts/         # validators, installers và test runners
+  .codex/          # local Codex agents, hooks, config và test map
+  .codex-plugin/   # Codex plugin adapter
+  .claude-plugin/  # Claude Code plugin adapter
+  .cursor-plugin/  # Cursor plugin adapter
 ```
-
----
 
 ## Validation
 
-Chạy structure validator:
+Chạy bộ kiểm tra chính:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root .
-```
-
-Chạy với `-Fix` để tạo hoặc đồng bộ scaffold directories và agent registry entries:
-
-```powershell
+npm test
+powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -FromGit
 powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix
 ```
 
-Validator kiểm tra:
-
-- `AGENTS.md` guidance boundaries.
-- `README_VI.md` tồn tại như bản tiếng Việt đi kèm `README.md`.
-- `skills/<name>/SKILL.md` skill structure và agentskills-style metadata rules.
-- `.codex/agents/<name>.toml` agent structure và skill references.
-- `.codex/config.toml` safety defaults và agent registry.
-- `.codex/test-map.toml` selected test mapping.
-- `.codex/workflows/registry.toml` và workflow adapter readiness qua `scripts/validate-workflows.ps1`.
-- Optional hooks, reports, và protected path policy.
-
-Chạy selected tests cho thay đổi git hiện tại:
+Chạy kiểm tra riêng cho platform:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -FromGit
+node platform/bin/ai-engineering.mjs validate --json
+node platform/bin/ai-engineering.mjs build --all --json
+node platform/bin/ai-engineering.mjs registry generate --json
+node platform/bin/ai-engineering.mjs artifact verify --all --json
 ```
 
-Chạy tests cho một activated skill:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -ActivatedSkill architecture-onion-design
-```
-
-Mỗi file `*test*.ps1` mới phải được đăng ký trong `.codex/test-map.toml`.
-
-Nếu `README.md` thay đổi, `README_VI.md` phải được cập nhật trong cùng change để tài liệu tiếng Việt không bị lệch.
-
----
-
-## Why This Kit Exists
-
-AI coding agents có thể đi rất nhanh, nhưng nếu thiếu repository-level rules thì chúng dễ bỏ qua validation, đọc quá rộng context, viết thay đổi quá lớn, hoặc miss install detail theo từng target. Kit này làm các workflow đó rõ ràng và tái sử dụng được:
-
-- Skills encode task-specific workflows.
-- Agents cung cấp project-local entry points.
-- Validators enforce structure và skill-spec compliance.
-- Selected tests giữ verification đúng phạm vi thay đổi thật.
-- Install manifests giữ Codex, Claude Code, Cursor, và `npx skills` behavior đồng bộ.
-
----
+Nếu `README.md` thay đổi, cập nhật `README_VI.md` trong cùng change.
 
 ## Contributing
 
-Khi thêm hoặc thay đổi skill:
-
-1. Giữ `SKILL.md` dưới 500 dòng khi có thể.
-2. Dùng lowercase hyphenated skill names và để directory name khớp skill name.
-3. Tuân thủ [skills/SKILL_TEMPLATE.md](skills/SKILL_TEMPLATE.md) đúng thứ tự top-level H2.
-4. Đặt skill-owned scripts, tests, resources, và subagents dưới folder skill đó.
-5. Register PowerShell test file mới trong `.codex/test-map.toml`.
-6. Chạy validator và selected tests trước khi publish.
-7. Nếu cập nhật `README.md`, cập nhật `README_VI.md` trong cùng change.
-
----
+- Giữ plugin package contracts dưới `packages/<plugin>/`.
+- Giữ runtime skill instructions dưới `skills/<name>/SKILL.md`.
+- Đăng ký PowerShell test mới trong `.codex/test-map.toml`.
+- Chạy selected tests trước khi commit.
+- Không commit generated `node_modules/`, `dist/`, `.ai-engineering/`, `*.tgz` hoặc temporary files.
 
 ## License
 
-MIT - dùng các skill này trong projects, teams, và tools của bạn.
-
+MIT.

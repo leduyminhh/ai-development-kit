@@ -15,7 +15,7 @@ test("prints lifecycle commands in help", async () => {
   const result = await runCli(["--help"]);
 
   assert.equal(result.exitCode, 0);
-  assert.match(result.stdout, /aiep plugin install/);
-  assert.match(result.stdout, /aiep update --all/);
+  assert.match(result.stdout, /ai-engineering plugin install/);
+  assert.match(result.stdout, /ai-engineering update --all/);
   assert.equal(result.stderr, "");
 });

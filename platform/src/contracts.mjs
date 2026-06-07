@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
-import { AiepError } from "./errors.mjs";
+import { PlatformError } from "./errors.mjs";
 
 const PROVIDERS = ["codex", "claude", "cursor"];
 const PLUGIN_KEYS = new Set([
@@ -18,8 +18,8 @@ async function readJson(pathname) {
   try {
     return JSON.parse(await readFile(pathname, "utf8"));
   } catch (error) {
-    throw new AiepError(`Cannot read JSON contract ${pathname}: ${error.message}`, {
-      code: "AIEP_INVALID_CONTRACT",
+    throw new PlatformError(`Cannot read JSON contract ${pathname}: ${error.message}`, {
+      code: "AI_ENGINEERING_INVALID_CONTRACT",
     });
   }
 }
@@ -45,9 +45,9 @@ function parseSectionText(markdown, heading) {
 
 export async function loadPlatform(root) {
   const value = await readJson(path.join(root, "aidk.config.yaml"));
-  if (value.apiVersion !== "aiep.dev/v1alpha1") {
-    throw new AiepError("unsupported platform apiVersion", {
-      code: "AIEP_INVALID_CONTRACT",
+  if (value.apiVersion !== "ai-engineering.dev/v1alpha1") {
+    throw new PlatformError("unsupported platform apiVersion", {
+      code: "AI_ENGINEERING_INVALID_CONTRACT",
     });
   }
   return value;
@@ -61,9 +61,9 @@ export async function loadPlugins(root) {
     const plugin = await readJson(path.join(packagesRoot, entry.name, "package.yaml"));
     const unknownKeys = Object.keys(plugin).filter((key) => !PLUGIN_KEYS.has(key));
     if (unknownKeys.length > 0) {
-      throw new AiepError(
+      throw new PlatformError(
         `plugin ${entry.name} has unknown keys: ${unknownKeys.sort().join(", ")}`,
-        { code: "AIEP_INVALID_CONTRACT" },
+        { code: "AI_ENGINEERING_INVALID_CONTRACT" },
       );
     }
     plugins.set(entry.name, plugin);
@@ -76,14 +76,14 @@ export async function loadCanonicalCommand(pathname) {
   try {
     markdown = await readFile(pathname, "utf8");
   } catch {
-    throw new AiepError(`missing command ${path.basename(pathname, ".md")}`, {
-      code: "AIEP_INVALID_COMMAND",
+    throw new PlatformError(`missing command ${path.basename(pathname, ".md")}`, {
+      code: "AI_ENGINEERING_INVALID_COMMAND",
     });
   }
   const match = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
   if (!match) {
-    throw new AiepError(`command ${pathname} has invalid frontmatter`, {
-      code: "AIEP_INVALID_COMMAND",
+    throw new PlatformError(`command ${pathname} has invalid frontmatter`, {
+      code: "AI_ENGINEERING_INVALID_COMMAND",
     });
   }
   const metadata = Object.fromEntries(
@@ -153,7 +153,7 @@ export async function validateRepository(root) {
   }
 
   for (const [pluginId, plugin] of plugins) {
-    if (plugin.apiVersion !== "aiep.dev/v1alpha1") {
+    if (plugin.apiVersion !== "ai-engineering.dev/v1alpha1") {
       errors.push(`unsupported plugin apiVersion: ${pluginId}`);
     }
     if (plugin.kind !== "Plugin") {
@@ -232,8 +232,8 @@ export async function validateRepository(root) {
   detectCycles(plugins, errors);
 
   if (errors.length > 0) {
-    throw new AiepError(errors.sort().join("\n"), {
-      code: "AIEP_INVALID_REPOSITORY",
+    throw new PlatformError(errors.sort().join("\n"), {
+      code: "AI_ENGINEERING_INVALID_REPOSITORY",
       details: errors.sort(),
     });
   }
@@ -246,13 +246,13 @@ export async function validateRepository(root) {
 
 export async function validateArtifactManifest(value) {
   if (
-    value?.apiVersion !== "aiep.dev/v1alpha1" ||
+    value?.apiVersion !== "ai-engineering.dev/v1alpha1" ||
     value?.kind !== "PluginArtifact" ||
     !value?.metadata?.id ||
     !value?.metadata?.version
   ) {
-    throw new AiepError("invalid plugin artifact manifest", {
-      code: "AIEP_INVALID_ARTIFACT",
+    throw new PlatformError("invalid plugin artifact manifest", {
+      code: "AI_ENGINEERING_INVALID_ARTIFACT",
     });
   }
   return value;

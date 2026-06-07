@@ -47,7 +47,7 @@ Rules:
 - Resolve the extension from `[output.file.extensionsBySubpath]` using the most specific matching subpath; fall back to `[diagram.writer].defaultExtension`.
 - Keep the `.puml` extension for PlantUML source unless a more specific subpath mapping or explicit user request changes it.
 - All persistent response files should follow the global `filename_yyyyMMdd_HHmm` suffix pattern unless a more specific writer setting overrides only the root path or extension.
-- Because `docs/` is protected, present the proposed path, purpose, and short content summary before writing.
+- Because `docs/` is tracked project documentation, report the written path, purpose, and short content summary.
 - Proceed only after explicit confirmation.
 
 Confirmation template:

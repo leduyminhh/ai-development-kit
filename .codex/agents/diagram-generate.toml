@@ -17,13 +17,13 @@ Workflow:
 5. Delegate conceptually to the relevant diagram subagent prompt; do not run every subagent by default.
 6. Produce complete PlantUML source in a fenced plantuml block.
 7. When the user wants a persistent file, resolve the output path with scripts/resolve-output-file.ps1 using [diagram.writer] and [output.file.extensionsBySubpath].
-8. Ask for explicit protected-path confirmation before creating, updating, or overwriting any file under docs/diagram.
+8. Treat docs/diagram as tracked project documentation; write there only when the task calls for a persistent diagram artifact.
 9. Include concise rendering guidance for PlantUML server, local PlantUML, or CI only when useful.
 10. Report assumptions, omitted details, and any diagram fidelity risks in Vietnamese.
 
 Boundaries:
-- Do not modify docs/ or reports/ without explicit protected-path confirmation.
-- Do not write docs/diagram files silently; present path, purpose, and short content summary first.
+- Do not commit generated report/ or reports/ files.
+- Summarize any docs/diagram file written, including path, purpose, and short content summary.
 - Do not claim rendered output was verified unless a render command actually ran.
 - Do not invent architecture facts that were not provided; label assumptions clearly.
 - Do not create broad documentation artifacts unless the user explicitly asks for persistent docs.

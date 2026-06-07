@@ -1,5 +1,5 @@
 {
-  "apiVersion": "aiep.dev/v1alpha1",
+  "apiVersion": "ai-engineering.dev/v1alpha1",
   "id": "frontend",
   "name": "Frontend Engineering",
   "versions": [
@@ -14,11 +14,11 @@
       "dependencies": [],
       "npm": {
         "package": "@ai-engineering-platform/plugin-frontend",
-        "integrity": "sha256-a7ad5a0a719d25c5693b5b541c96ae9eeb64ddc2f5b67b4b93dd0eee697afcc6"
+        "integrity": "sha256-2e5bdb402a3e17d4522d41307a939f2975f511de683472a13e1356a4a2bd2141"
       },
       "github": {
         "url": "https://github.com/leduyminhh/ai-engineering-platform/releases/download/v1.0.0/ai-engineering-platform-frontend-1.0.0.tgz",
-        "integrity": "sha256-a7ad5a0a719d25c5693b5b541c96ae9eeb64ddc2f5b67b4b93dd0eee697afcc6"
+        "integrity": "sha256-2e5bdb402a3e17d4522d41307a939f2975f511de683472a13e1356a4a2bd2141"
       }
     }
   ]

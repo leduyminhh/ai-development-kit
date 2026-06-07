@@ -18,7 +18,7 @@ try {
 [output.file]
 filenamePattern = "filename_yyyyMMdd_HHmm"
 timezone = "Asia/Saigon"
-requireConfirmationForProtectedPaths = true
+requireConfirmationForProtectedPaths = false
 
 [output.file.extensionsBySubpath]
 "docs/diagram" = "puml"

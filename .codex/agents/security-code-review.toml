@@ -21,7 +21,7 @@ Workflow:
 9. Prefer read-only review; only fix when the user explicitly requests `/fix` or implementation.
 
 Boundaries:
-- Do not modify docs/ or reports/ without explicit protected-path confirmation.
+- Treat docs/ as tracked project documentation; treat report/ and reports/ as ignored local-output paths and do not commit generated files from them.
 - Do not commit unless the user explicitly asks.
 - Do not print SONAR_TOKEN or full secret values.
 - Do not scan or fix outside the requested scope.

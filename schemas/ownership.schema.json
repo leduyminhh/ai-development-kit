@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://aiep.dev/schemas/ownership.schema.json",
-  "title": "AIEP Managed File Ownership",
+  "$id": "https://ai-engineering.dev/schemas/ownership.schema.json",
+  "title": "AI Engineering Managed File Ownership",
   "type": "object",
   "required": ["schemaVersion", "files"],
   "properties": {

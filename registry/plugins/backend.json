@@ -1,5 +1,5 @@
 {
-  "apiVersion": "aiep.dev/v1alpha1",
+  "apiVersion": "ai-engineering.dev/v1alpha1",
   "id": "backend",
   "name": "Backend Engineering",
   "versions": [
@@ -16,11 +16,11 @@
       ],
       "npm": {
         "package": "@ai-engineering-platform/plugin-backend",
-        "integrity": "sha256-96bb7644f5b658b3ccb93979f146eab71c681040da8696b87fc58baec0238227"
+        "integrity": "sha256-41622c928127e1ba16ea98f474e5a9156db53471c2187c5ed227cc0a28ffc5d5"
       },
       "github": {
         "url": "https://github.com/leduyminhh/ai-engineering-platform/releases/download/v1.0.0/ai-engineering-platform-backend-1.0.0.tgz",
-        "integrity": "sha256-96bb7644f5b658b3ccb93979f146eab71c681040da8696b87fc58baec0238227"
+        "integrity": "sha256-41622c928127e1ba16ea98f474e5a9156db53471c2187c5ed227cc0a28ffc5d5"
       }
     }
   ]

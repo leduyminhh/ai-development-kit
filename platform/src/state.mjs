@@ -1,10 +1,10 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-export const STATE_DIR = ".aiep";
-export const LOCK_PATH = ".aiep/platform.lock";
-export const OWNERSHIP_PATH = ".aiep/ownership.json";
-export const INSTALL_STATE_PATH = ".aiep/install-state.json";
+export const STATE_DIR = ".ai-engineering";
+export const LOCK_PATH = ".ai-engineering/platform.lock";
+export const OWNERSHIP_PATH = ".ai-engineering/ownership.json";
+export const INSTALL_STATE_PATH = ".ai-engineering/install-state.json";
 
 async function readJsonIfExists(pathname) {
   try {

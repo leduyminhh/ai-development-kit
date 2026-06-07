@@ -34,7 +34,7 @@ Use this skill after moving skills, editing `.codex/`, changing `AGENTS.md`, add
 | Rationalization | Rebuttal |
 |---|---|
 | "The folder exists, so structure is fine." | Structure also includes metadata, test mapping, config safety, and skill spec rules. |
-| "I can skip protected-path policy during validation." | Protected paths are intentionally skipped unless explicitly allowed. |
+| "I can skip ignored-output policy during validation." | Ignored output paths should not be committed, but they are not protected by default. |
 | "A warning is harmless." | Warnings indicate drift that should be understood before publishing. |
 
 ## Red Flags
@@ -42,7 +42,7 @@ Use this skill after moving skills, editing `.codex/`, changing `AGENTS.md`, add
 - Runtime skills are nested under domain folders.
 - Agent entries do not reference known skills.
 - Test files exist but are not mapped.
-- Config combines unsafe defaults or bypasses protected-path policy.
+- Config combines unsafe defaults or commits ignored local output.
 
 ## Verification
 
@@ -61,7 +61,7 @@ Use this skill after moving skills, editing `.codex/`, changing `AGENTS.md`, add
 - [subagents/agent-config-review.md](subagents/agent-config-review.md): inspect [.codex/agents/*.toml](../../../.codex/agents/*.toml) and agent-to-skill boundaries.
 - [subagents/config-safety-review.md](subagents/config-safety-review.md): inspect [.codex/config.toml](../../../.codex/config.toml), sandbox, approval, audit, and agent registration.
 - [subagents/hook-audit-review.md](subagents/hook-audit-review.md): inspect hooks, audit behavior, retention, and generated artifacts.
-- [subagents/protected-path-review.md](subagents/protected-path-review.md): enforce `docs/` and `reports/` confirmation policy.
+- [subagents/ignored-output-review.md](subagents/ignored-output-review.md): review ignored local-output policy for docs/report artifacts.
 
 ## Scripts
 

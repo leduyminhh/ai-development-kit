@@ -21,7 +21,7 @@ export async function preparePluginDistribution({
     version,
     type: "module",
     files: ["artifact"],
-    aiep: {
+    aiEngineering: {
       artifact: "./artifact/plugin.json",
     },
   });

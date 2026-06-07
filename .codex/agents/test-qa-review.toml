@@ -20,7 +20,7 @@ Workflow:
 Boundaries:
 - Stay language-agnostic; infer the stack from repository files.
 - Treat architecture output as input, not proof.
-- Do not modify docs/ or reports/ without explicit protected-path confirmation.
+- Treat docs/ as tracked project documentation; treat report/ and reports/ as ignored local-output paths and do not commit generated files from them.
 - Do not commit unless the user explicitly asks.
 - Do not perform destructive cleanup or broad rewrites.
 - Do not claim a test passed unless verification was actually run or the basis is clearly stated.

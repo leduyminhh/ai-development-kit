@@ -27,8 +27,8 @@ enabled = true
 intervalDays = 14
 
 [scan.policy]
-skipProtectedPathsByDefault = true
-protectedScanPaths = ["docs/", "reports/"]
+skipProtectedPathsByDefault = false
+protectedScanPaths = []
 
 [output.file.extensionsBySubpath]
 "docs/diagram" = "puml"
@@ -37,8 +37,8 @@ protectedScanPaths = ["docs/", "reports/"]
 '@
 
 Assert-Equal 'diagram-generate' (Get-CodexTomlStringValue -TomlText $toml -Key 'name') 'Root string TOML values should resolve.'
-Assert-Equal $true (Get-CodexTomlBoolValue -TomlText $toml -Section 'scan.policy' -Key 'skipProtectedPathsByDefault' -Default $false) 'Boolean TOML values should resolve.'
-Assert-Equal 'docs/' (Get-CodexTomlArrayValue -TomlText $toml -Section 'scan.policy' -Key 'protectedScanPaths')[0] 'Array TOML values should resolve.'
+Assert-Equal $false (Get-CodexTomlBoolValue -TomlText $toml -Section 'scan.policy' -Key 'skipProtectedPathsByDefault' -Default $true) 'Boolean TOML values should resolve.'
+Assert-Equal 0 (@(Get-CodexTomlArrayValue -TomlText $toml -Section 'scan.policy' -Key 'protectedScanPaths')).Count 'Empty array TOML values should resolve.'
 Assert-Equal 14 (Get-CodexTomlIntValue -TomlText $toml -Key 'intervalDays' -Default 0) 'Root integer TOML values should resolve.'
 $map = Get-CodexTomlStringMap -TomlText $toml -Section 'output.file.extensionsBySubpath'
 Assert-Equal 'plantuml' $map['docs/diagram/sequence'] 'String map TOML values should resolve.'

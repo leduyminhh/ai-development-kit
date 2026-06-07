@@ -1,5 +1,5 @@
 {
-  "apiVersion": "aiep.dev/v1alpha1",
+  "apiVersion": "ai-engineering.dev/v1alpha1",
   "kind": "Plugin",
   "metadata": {
     "id": "documentation",

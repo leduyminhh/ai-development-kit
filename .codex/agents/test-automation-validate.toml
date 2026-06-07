@@ -25,6 +25,6 @@ Boundaries:
 - Do not call a test "transactional" unless it asserts commit, rollback, propagation, isolation, or lock behavior.
 - Do not call a test "contract" unless it verifies consumer/provider compatibility, schema drift, or mock-server behavior.
 - Do not introduce a new test framework unless the user requests it or no viable framework exists.
-- Do not modify docs/ or reports/ without explicit protected-path confirmation.
+- Treat docs/ as tracked project documentation; treat report/ and reports/ as ignored local-output paths and do not commit generated files from them.
 - Do not claim tests pass without fresh command output.
 """

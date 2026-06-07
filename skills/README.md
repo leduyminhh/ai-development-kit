@@ -128,4 +128,4 @@ The structure validator also checks:
 - `skills/README.md` catalog consistency against `skills/*/SKILL.md`
 - `README.md` install command contract for `npx skills`
 - `README.md` and `README_VI.md` same-diff sync when root README changes
-- project-level markdown quality outside protected paths and outside skill `resources/` or `subagents/`
+- project-level markdown quality outside skill `resources/` or `subagents/`

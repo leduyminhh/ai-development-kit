@@ -16,7 +16,7 @@
   ],
   "skills": "./skills/",
   "aidk": {
-    "apiVersion": "aiep.dev/v1alpha1",
+    "apiVersion": "ai-engineering.dev/v1alpha1",
     "packages": [
       "architecture",
       "backend",

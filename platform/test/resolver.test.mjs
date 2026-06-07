@@ -70,7 +70,7 @@ test("rejects incompatible platform versions and providers", async () => {
         platformVersion: "2.0.0",
         providers: ["codex"],
       }),
-    (error) => error.code === "AIEP_INCOMPATIBLE",
+    (error) => error.code === "AI_ENGINEERING_INCOMPATIBLE",
   );
   assert.throws(
     () =>
@@ -80,6 +80,6 @@ test("rejects incompatible platform versions and providers", async () => {
         platformVersion: "1.0.0",
         providers: ["copilot"],
       }),
-    (error) => error.code === "AIEP_INCOMPATIBLE",
+    (error) => error.code === "AI_ENGINEERING_INCOMPATIBLE",
   );
 });

@@ -57,7 +57,7 @@ Ownership rule:
 - Neu them file `*test*.ps1`, phai map vao `.codex/test-map.toml` trong dung mot group.
 - Dung `scripts/lib/` cho helper lap lai thay vi copy logic.
 - Neu file chi dung cho mot skill, dat duoi `skills/<skill>/{scripts,resources}` thay vi root.
-- Script khong nen ghi vao `docs/` hoac `reports/` neu chua co confirmation theo `AGENTS.md`.
+- `docs/` la tracked project documentation; `report/` va `reports/` la ignored local-output paths; script khong nen commit generated files tu report folders.
 - Uu tien tham so ro rang, exit code dung, output ngan va parse duoc.
 
 ## Lenh Thuong Dung

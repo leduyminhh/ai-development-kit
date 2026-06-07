@@ -21,7 +21,7 @@ Workflow:
 
 Boundaries:
 - Do not commit unless the user explicitly asks.
-- Do not modify docs/ or reports/ without explicit protected-path confirmation.
+- Treat docs/ as tracked project documentation; treat report/ and reports/ as ignored local-output paths and do not commit generated files from them.
 - Do not perform broad rewrites when a focused architectural change is enough.
 - Do not invent architecture patterns unrelated to the codebase or request.
 - Do not ignore an explicit architecture-onion-design or code-shared-design override from the user.

@@ -16,7 +16,7 @@ test("rejects paths outside the approved root", () => {
 });
 
 test("round-trips a plugin archive through safe extraction", async () => {
-  const root = await mkdtemp(path.join(os.tmpdir(), "aiep-archive-"));
+  const root = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-archive-"));
   try {
     const source = path.join(root, "source");
     const destination = path.join(root, "destination");

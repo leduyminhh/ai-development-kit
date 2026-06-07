@@ -100,7 +100,7 @@ Use [resources/output-template-vi.md](resources/output-template-vi.md) for the u
 6. Use the relevant subagent prompt from `subagents/`.
 7. Return one complete `plantuml` fenced code block per diagram.
 8. If the user wants a persistent file, resolve the output path with repo-root [scripts/resolve-output-file.ps1](../../../scripts/resolve-output-file.ps1) using `[diagram.writer]` plus `[output.file.extensionsBySubpath]`; default to `docs/diagram/subagent/filename_yyyyMMdd_HHmm.puml`.
-9. Before writing under `docs/diagram`, request explicit protected-path confirmation with path, purpose, and summary.
+9. Treat `docs/diagram` as tracked project documentation; write there only when the task calls for a persistent diagram artifact, then report path, purpose, and summary.
 10. Add assumptions and rendering notes only when they help the user act.
 
 ### Quality Gate
@@ -110,5 +110,5 @@ Use [resources/output-template-vi.md](resources/output-template-vi.md) for the u
 - Prefer readable layout over exhaustive detail.
 - Avoid mixing unrelated diagram concerns in one diagram.
 - Persistent diagram files must use `docs/diagram/subagent/filename_yyyyMMdd_HHmm.puml` unless the user explicitly asks for another path.
-- Because `docs/` is protected, never create or update a diagram file without explicit confirmation.
+- Because `docs/` is tracked, keep generated diagram files reviewable and commit them only when they belong in project documentation.
 - If the user asks for visual rendering, provide PlantUML server/local render instructions unless a render command was actually run.

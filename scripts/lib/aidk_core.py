@@ -116,7 +116,7 @@ def validate_contracts(
 
     if config.get("apiVersion") not in {
         "aidk.dev/v1alpha1",
-        "aiep.dev/v1alpha1",
+        "ai-engineering.dev/v1alpha1",
     }:
         raise AidkError("unsupported AIDK config apiVersion")
     product = config.get("product", {})
@@ -142,7 +142,7 @@ def validate_contracts(
     for package_id, package in packages.items():
         if package.get("apiVersion") not in {
             "aidk.dev/v1alpha1",
-            "aiep.dev/v1alpha1",
+            "ai-engineering.dev/v1alpha1",
         }:
             raise AidkError(f"unsupported package apiVersion: {package_id}")
         if package.get("kind") not in {"Package", "Plugin"}:

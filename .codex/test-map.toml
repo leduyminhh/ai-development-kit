@@ -96,10 +96,10 @@ paths = [
   "packages",
   "registry",
   "schemas",
-  "scripts/test-aiep-platform.ps1"
+  "scripts/test-ai-engineering-platform.ps1"
 ]
 commands = [
-  "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-aiep-platform.ps1"
+  "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-ai-engineering-platform.ps1"
 ]
 
 [test.core.validator]

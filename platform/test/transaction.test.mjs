@@ -7,7 +7,7 @@ import test from "node:test";
 import { applyTransaction, planTransaction } from "../src/transaction.mjs";
 
 test("writes managed files and state only after apply succeeds", async () => {
-  const target = await mkdtemp(path.join(os.tmpdir(), "aiep-transaction-"));
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-transaction-"));
   try {
     const plan = await planTransaction({
       target,
@@ -37,7 +37,7 @@ test("writes managed files and state only after apply succeeds", async () => {
       "skill\n",
     );
     assert.equal(
-      JSON.parse(await readFile(path.join(target, ".aiep/install-state.json"), "utf8"))
+      JSON.parse(await readFile(path.join(target, ".ai-engineering/install-state.json"), "utf8"))
         .status,
       "complete",
     );
@@ -47,7 +47,7 @@ test("writes managed files and state only after apply succeeds", async () => {
 });
 
 test("stops on unmanaged conflicts unless force is explicit", async () => {
-  const target = await mkdtemp(path.join(os.tmpdir(), "aiep-conflict-"));
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-conflict-"));
   try {
     await writeFile(path.join(target, "owned.txt"), "user\n");
     await assert.rejects(
@@ -74,7 +74,7 @@ test("stops on unmanaged conflicts unless force is explicit", async () => {
 });
 
 test("rolls back files when apply validation fails", async () => {
-  const target = await mkdtemp(path.join(os.tmpdir(), "aiep-rollback-"));
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-rollback-"));
   try {
     await writeFile(path.join(target, "managed.txt"), "before\n");
     const plan = await planTransaction({

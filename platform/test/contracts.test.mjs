@@ -13,7 +13,7 @@ import {
 import { repoRoot } from "./helpers.mjs";
 
 async function withRepositoryCopy(run) {
-  const root = await mkdtemp(path.join(os.tmpdir(), "aiep-contracts-"));
+  const root = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-contracts-"));
   try {
     for (const entry of ["aidk.config.yaml", "packages", "skills", ".codex"]) {
       await cp(path.join(repoRoot, entry), path.join(root, entry), {
@@ -37,7 +37,7 @@ test("loads six canonical plugin contracts", async () => {
   assert.equal(validation.providerCount, 3);
 
   for (const [pluginId, plugin] of plugins) {
-    assert.equal(plugin.apiVersion, "aiep.dev/v1alpha1");
+    assert.equal(plugin.apiVersion, "ai-engineering.dev/v1alpha1");
     assert.equal(plugin.kind, "Plugin");
     assert.ok(plugin.assets.skills.length > 0);
     assert.ok(plugin.assets.commands.length > 0);

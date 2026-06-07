@@ -24,7 +24,7 @@ async function exists(root, relativePath) {
 }
 
 test("installs backend project-locally with required dependencies", async () => {
-  const target = await mkdtemp(path.join(os.tmpdir(), "aiep-install-"));
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-install-"));
   try {
     const result = await installPlugins({
       root: repoRoot,
@@ -32,7 +32,7 @@ test("installs backend project-locally with required dependencies", async () => 
       pluginIds: ["backend"],
       providers: ["codex"],
     });
-    const lock = JSON.parse(await readFile(path.join(target, ".aiep/platform.lock"), "utf8"));
+    const lock = JSON.parse(await readFile(path.join(target, ".ai-engineering/platform.lock"), "utf8"));
 
     assert.deepEqual(result.plugins, ["architecture", "backend"]);
     assert.deepEqual(lock.plugins.map((item) => item.id), ["architecture", "backend"]);
@@ -44,7 +44,7 @@ test("installs backend project-locally with required dependencies", async () => 
 });
 
 test("installs all plugins and stops on unmanaged conflicts", async () => {
-  const target = await mkdtemp(path.join(os.tmpdir(), "aiep-install-all-"));
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-install-all-"));
   try {
     const all = await installPlugins({
       root: repoRoot,
@@ -70,7 +70,7 @@ test("installs all plugins and stops on unmanaged conflicts", async () => {
 });
 
 test("cli installs a plugin into the current project", async () => {
-  const target = await mkdtemp(path.join(os.tmpdir(), "aiep-cli-install-"));
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-cli-install-"));
   try {
     const result = await runCli(
       ["plugin", "install", "backend", "--provider", "codex", "--json"],
@@ -85,7 +85,7 @@ test("cli installs a plugin into the current project", async () => {
 });
 
 test("lists, detects outdated plugins, and supports dry-run updates", async () => {
-  const target = await mkdtemp(path.join(os.tmpdir(), "aiep-update-"));
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-update-"));
   try {
     await installPlugins({
       root: repoRoot,
@@ -113,7 +113,7 @@ test("lists, detects outdated plugins, and supports dry-run updates", async () =
     });
     assert.equal(dryRun.changed, false);
     const lockAfterDryRun = JSON.parse(
-      await readFile(path.join(target, ".aiep/platform.lock"), "utf8"),
+      await readFile(path.join(target, ".ai-engineering/platform.lock"), "utf8"),
     );
     assert.equal(lockAfterDryRun.plugins.find((item) => item.id === "backend").version, "1.0.0");
   } finally {
@@ -122,7 +122,7 @@ test("lists, detects outdated plugins, and supports dry-run updates", async () =
 });
 
 test("cli lists installed plugins and reports outdated plugins", async () => {
-  const target = await mkdtemp(path.join(os.tmpdir(), "aiep-cli-update-"));
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-cli-update-"));
   try {
     await runCli(["plugin", "install", "backend", "--provider", "codex"], { cwd: target });
     const list = await runCli(["plugin", "list", "--json"], { cwd: target });
@@ -141,7 +141,7 @@ test("cli lists installed plugins and reports outdated plugins", async () => {
 });
 
 test("removes plugins by ownership and preserves user-owned files", async () => {
-  const target = await mkdtemp(path.join(os.tmpdir(), "aiep-remove-"));
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-remove-"));
   try {
     await installPlugins({
       root: repoRoot,
@@ -157,7 +157,7 @@ test("removes plugins by ownership and preserves user-owned files", async () => 
     assert.equal(await exists(target, "user-owned.txt"), true);
 
     await removePlugins({ root: repoRoot, target, all: true });
-    assert.equal(await exists(target, ".aiep/install-state.json"), false);
+    assert.equal(await exists(target, ".ai-engineering/install-state.json"), false);
     assert.equal(await exists(target, "user-owned.txt"), true);
   } finally {
     await rm(target, { recursive: true, force: true });
@@ -165,7 +165,7 @@ test("removes plugins by ownership and preserves user-owned files", async () => 
 });
 
 test("cli removes an installed plugin", async () => {
-  const target = await mkdtemp(path.join(os.tmpdir(), "aiep-cli-remove-"));
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-cli-remove-"));
   try {
     await runCli(["plugin", "install", "backend", "--provider", "codex"], { cwd: target });
     const result = await runCli(["plugin", "remove", "backend", "--json"], { cwd: target });

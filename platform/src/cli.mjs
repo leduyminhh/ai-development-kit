@@ -1,4 +1,4 @@
-import { AiepError } from "./errors.mjs";
+import { PlatformError } from "./errors.mjs";
 import { validateRepository } from "./contracts.mjs";
 import { buildAllPlugins, verifyPluginArtifact } from "./builder.mjs";
 import { readdir } from "node:fs/promises";
@@ -18,14 +18,14 @@ export const VERSION = "1.0.0";
 const HELP = `AI Engineering Platform
 
 Usage:
-  aiep --help
-  aiep --version
-  aiep plugin install <plugin...>
-  aiep install --all
-  aiep plugin update <plugin>
-  aiep update --all
-  aiep plugin remove <plugin>
-  aiep remove --all
+  ai-engineering --help
+  ai-engineering --version
+  ai-engineering plugin install <plugin...>
+  ai-engineering install --all
+  ai-engineering plugin update <plugin>
+  ai-engineering update --all
+  ai-engineering plugin remove <plugin>
+  ai-engineering remove --all
 `;
 
 function parseInstallArgs(args) {
@@ -248,8 +248,8 @@ export async function run(args, streams = process) {
     return 0;
   }
 
-  throw new AiepError(`Unknown command: ${args.join(" ")}`, {
-    code: "AIEP_UNKNOWN_COMMAND",
+  throw new PlatformError(`Unknown command: ${args.join(" ")}`, {
+    code: "AI_ENGINEERING_UNKNOWN_COMMAND",
     exitCode: 2,
   });
 }

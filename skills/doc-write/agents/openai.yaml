@@ -1,4 +1,4 @@
 interface:
   display_name: "Documentation Writer"
   short_description: "Write architecture, feature, flow, and database documentation"
-  default_prompt: "Use $doc-write to create or update source-backed technical documentation, choose the right documentation subagent, respect protected paths, and report assumptions and verification in Vietnamese."
+  default_prompt: "Use $doc-write to create or update source-backed technical documentation, choose the right documentation subagent, respect ignored output paths, and report assumptions and verification in Vietnamese."

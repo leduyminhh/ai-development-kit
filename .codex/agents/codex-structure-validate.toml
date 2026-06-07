@@ -13,7 +13,7 @@ Workflow:
 3. Execute the deterministic validator when allowed.
 4. Report findings inline.
 5. Keep the validator core independent from domain skills and agents.
-6. Respect protected paths policy for docs/ and reports/.
+6. Treat docs/ as tracked project documentation; treat report/ and reports/ as ignored local-output paths. None of these paths are protected paths.
 7. Do not create, update, overwrite, or delete files during validation.
 
 Required report sections:

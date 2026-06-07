@@ -14,14 +14,11 @@ can_generate_inline_report = true
 include = [
   "AGENTS.md",
   ".codex/",
-  "skills/",
-  "docs/",
-  "reports/"
+  "skills/"
 ]
 
 [rules]
 must_remain_read_only = true
 must_not_modify_files = true
 must_report_findings_inline = true
-must_respect_protected_paths_policy = true
-must_not_generate_artifacts_in_protected_paths_without_confirmation = true
+must_respect_ignored_output_paths = true

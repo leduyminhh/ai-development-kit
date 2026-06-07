@@ -1,6 +1,6 @@
 ---
 name: doc-write
-description: Use when creating, updating, reviewing, or planning technical documentation for software systems, including architecture documentation, feature documentation, flow/process documentation, database/schema/ERD documentation, ADR-style decisions, README sections, implementation handoff notes, and documentation generated from code, tickets, APIs, or diagrams. Enforce docs/ path proposal and confirmation before writing protected documentation files.
+description: Use when creating, updating, reviewing, or planning technical documentation for software systems, including architecture documentation, feature documentation, flow/process documentation, database/schema/ERD documentation, ADR-style decisions, README sections, implementation handoff notes, and documentation generated from code, tickets, APIs, or diagrams. Treat docs as tracked project documentation and report outputs as ignored local artifacts unless the user asks otherwise.
 ---
 
 # Documentation Writer
@@ -18,35 +18,35 @@ Use this skill when creating, updating, reviewing, or planning README sections, 
 1. Identify audience, purpose, sources, and target path.
 2. Inspect source material before writing factual claims.
 3. Choose the narrowest document type and load only the needed resource or subagent.
-4. If writing under `docs/` or `reports/`, present the protected-path confirmation block first.
+4. Treat `docs/` as tracked project documentation, and `report/`/`reports/` as ignored local-output paths.
 5. Draft concise, source-backed content; label assumptions and open questions.
-6. Verify links, commands, paths, terminology, and protected-path compliance.
+6. Verify links, commands, paths, terminology, and ignored-output compliance.
 
 ## Examples
 
 - Use `doc-flow-write` for business process, sequence, state transition, or async job docs.
 - Use `doc-database-write` for schema, relation, index, migration, and ownership docs.
-- Update README inline when the target is the repository root and not protected by `docs/`.
+- Update README inline when the target is the repository root.
 
 ## Common Rationalizations
 
 | Rationalization | Rebuttal |
 |---|---|
 | "Documentation can infer missing behavior." | Unknowns must be labeled; invented behavior is worse than no documentation. |
-| "It is just a docs file, so confirmation is unnecessary." | `docs/` and `reports/` are protected paths and require explicit confirmation. |
+| "It is just a docs file, so I can skip review." | `docs/` is tracked project documentation and should stay reviewable. |
 | "Longer docs are more complete." | Maintainability comes from accurate scope, stable headings, and useful references. |
 
 ## Red Flags
 
 - Claims are not traceable to code, config, tickets, APIs, or user-provided material.
-- Protected documentation files are written without confirmation.
+- Persistent documentation files are written without clear user intent.
 - The document duplicates large code blocks instead of summarizing and linking.
 - Assumptions are presented as facts.
 
 ## Verification
 
 - Sources inspected are listed.
-- Protected-path rules were followed.
+- Documentation output rules were followed.
 - Links, paths, commands, and names are checked where feasible.
 - Assumptions, gaps, and residual risks are explicit.
 
@@ -88,7 +88,7 @@ Use [resources/output-template-vi.md](resources/output-template-vi.md) for the u
 6. Resolve the documentation root from config `[documentation.writer].rootPath`; default to `docs`.
 7. Every persistent documentation output must propose a `docs/`-prefixed target path before writing.
 8. Treat `docs/` as repository-root relative, meaning `<repo-root>/docs`, never current-shell relative from another folder.
-9. If writing under protected paths such as `docs/` or `reports/`, request explicit confirmation before creating or updating files.
+9. `docs/`, `report/`, and `reports/` are not protected paths in this repository; `docs/` is tracked documentation while `report/` and `reports/` are ignored local-output paths.
 10. After explicit approval, create missing parent directories under `<repo-root>/docs` before writing the document.
 11. Prefer diagrams or structured sections only when they improve comprehension.
 12. Mark assumptions, open questions, and source gaps clearly.
@@ -105,13 +105,13 @@ Use [resources/output-template-vi.md](resources/output-template-vi.md) for the u
 - Keep user-facing prose professional, precise, and free of promotional language.
 - Use `docs/` as the required prefix for proposed persistent project documentation paths.
 - Resolve `docs/` from repository root as `<repo-root>/docs`.
-- Before writing to `docs/`, return the confirmation block and wait for explicit approval.
-- After approval, create missing folders under `<repo-root>/docs` as part of the write operation.
-- If approval is not granted, provide the draft inline instead of writing the file.
+- Before writing to `docs/`, confirm that the user wants a persistent local artifact rather than an inline draft.
+- Create missing folders under `<repo-root>/docs` as part of the write operation when a persistent artifact is requested.
+- If a persistent artifact is not requested, provide the draft inline instead of writing the file.
 
 ### Required Confirmation Flow
 
-Before creating or updating any `docs/` file, respond with:
+Before creating or updating any `docs/` file, ensure the user asked for persistent output. A concise confirmation is enough when intent is ambiguous:
 
 ```text
 Proposed documentation change:
@@ -120,7 +120,7 @@ Proposed documentation change:
 - Summary: <short content summary>
 - Sources: <code/ticket/schema inputs inspected>
 
-Confirm? (yes/no)
+Create this local documentation artifact? (yes/no)
 ```
 
-Proceed only after an explicit yes.
+Proceed only after explicit intent for a persistent artifact.

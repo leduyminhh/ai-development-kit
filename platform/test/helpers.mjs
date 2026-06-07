@@ -4,7 +4,7 @@ import path from "node:path";
 
 const testRoot = path.dirname(fileURLToPath(import.meta.url));
 export const repoRoot = path.resolve(testRoot, "..", "..");
-export const cliPath = path.join(repoRoot, "platform", "bin", "aiep.mjs");
+export const cliPath = path.join(repoRoot, "platform", "bin", "ai-engineering.mjs");
 
 export function runCli(args, options = {}) {
   return new Promise((resolve, reject) => {

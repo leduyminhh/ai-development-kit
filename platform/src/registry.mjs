@@ -13,7 +13,7 @@ export async function generateRegistry({ root, artifactsRoot, registryRoot }) {
   const plugins = await loadPlugins(root);
   await mkdir(path.join(registryRoot, "plugins"), { recursive: true });
   const index = {
-    apiVersion: "aiep.dev/v1alpha1",
+    apiVersion: "ai-engineering.dev/v1alpha1",
     platformVersion: platform.product.version,
     plugins: [],
   };
@@ -44,7 +44,7 @@ export async function generateRegistry({ root, artifactsRoot, registryRoot }) {
       },
     };
     await writeJsonAtomic(path.join(registryRoot, "plugins", `${pluginId}.json`), {
-      apiVersion: "aiep.dev/v1alpha1",
+      apiVersion: "ai-engineering.dev/v1alpha1",
       id: pluginId,
       name: plugin.metadata.name,
       versions: [versionEntry],
@@ -70,7 +70,7 @@ export async function resolveArtifactSource(entry, fetchSource) {
   try {
     result = await fetchSource(entry.npm.package);
   } catch (error) {
-    if (error.code !== "AIEP_SOURCE_UNAVAILABLE") {
+    if (error.code !== "AI_ENGINEERING_SOURCE_UNAVAILABLE") {
       throw error;
     }
     result = await fetchSource(entry.github.url);

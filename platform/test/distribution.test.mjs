@@ -10,7 +10,7 @@ import { extractPluginArchive } from "../src/archive.mjs";
 import { repoRoot } from "./helpers.mjs";
 
 test("prepares equivalent npm and GitHub release plugin artifacts", async () => {
-  const temp = await mkdtemp(path.join(os.tmpdir(), "aiep-distribution-"));
+  const temp = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-distribution-"));
   try {
     const artifact = await buildPlugin({
       root: repoRoot,
@@ -28,7 +28,7 @@ test("prepares equivalent npm and GitHub release plugin artifacts", async () => 
       await readFile(path.join(distribution.npmPackageRoot, "package.json"), "utf8"),
     );
     assert.equal(npmPackage.name, "@ai-engineering-platform/plugin-backend");
-    assert.equal(npmPackage.aiep.artifact, "./artifact/plugin.json");
+    assert.equal(npmPackage.aiEngineering.artifact, "./artifact/plugin.json");
 
     const extracted = path.join(temp, "github-expanded");
     await extractPluginArchive({ archive: distribution.githubArchive, destination: extracted });
@@ -43,13 +43,13 @@ test("prepares equivalent npm and GitHub release plugin artifacts", async () => 
   }
 });
 
-test("documents AIEP lifecycle commands in both readmes", async () => {
+test("documents AI Engineering lifecycle commands in both readmes", async () => {
   const expected = [
     "npx ai-engineering-platform --help",
-    "aiep plugin install backend",
-    "aiep install --all",
-    "aiep plugin update backend",
-    "aiep plugin remove backend",
+    "ai-engineering plugin install backend",
+    "ai-engineering install --all",
+    "ai-engineering plugin update backend",
+    "ai-engineering plugin remove backend",
     "npm install",
     "npm run build",
     "npm link",
