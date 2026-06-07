@@ -3,7 +3,12 @@ import { validateRepository } from "./contracts.mjs";
 import { buildAllPlugins, verifyPluginArtifact } from "./builder.mjs";
 import { readdir } from "node:fs/promises";
 import { generateRegistry } from "./registry.mjs";
-import { installPlugins } from "./lifecycle.mjs";
+import {
+  findOutdated,
+  installPlugins,
+  listInstalled,
+  updatePlugins,
+} from "./lifecycle.mjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -165,6 +170,53 @@ export async function run(args, streams = process) {
       args.includes("--json")
         ? `${JSON.stringify(result)}\n`
         : `Installed ${result.plugins.join(", ")}.\n`,
+    );
+    return 0;
+  }
+
+  if (args[0] === "plugin" && args[1] === "list") {
+    const result = await listInstalled({ target: process.cwd() });
+    streams.stdout.write(
+      args.includes("--json")
+        ? `${JSON.stringify(result)}\n`
+        : `${result.plugins.map((item) => `${item.id}@${item.version}`).join("\n")}\n`,
+    );
+    return 0;
+  }
+
+  if (args[0] === "plugin" && args[1] === "outdated") {
+    const result = await findOutdated({ target: process.cwd() });
+    streams.stdout.write(
+      args.includes("--json")
+        ? `${JSON.stringify(result)}\n`
+        : `${result.updates.map((item) => `${item.id} ${item.current} -> ${item.latest}`).join("\n")}\n`,
+    );
+    return 0;
+  }
+
+  if (
+    (args[0] === "plugin" && args[1] === "update") ||
+    (args[0] === "update" && args.includes("--all"))
+  ) {
+    const root = path.resolve(
+      path.dirname(fileURLToPath(import.meta.url)),
+      "..",
+      "..",
+    );
+    const all = args[0] === "update" && args.includes("--all");
+    const parsed = all ? { plugins: [] } : parseInstallArgs(args.slice(2));
+    const result = await updatePlugins({
+      root,
+      target: process.cwd(),
+      pluginIds: parsed.plugins,
+      all,
+      dryRun: args.includes("--dry-run"),
+      force: args.includes("--force"),
+    });
+    streams.stdout.write(
+      args.includes("--json")
+        ? `${JSON.stringify(result)}\n`
+        : `${result.changed ? "Updated" : "No updates"}.\n`,
     );
     return 0;
   }

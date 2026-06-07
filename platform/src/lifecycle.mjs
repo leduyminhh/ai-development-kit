@@ -1,11 +1,12 @@
-import { readdir, readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 import { loadCanonicalCommand, loadPlatform, loadPlugins } from "./contracts.mjs";
-import { listFiles, resolveInside } from "./io.mjs";
+import { listFiles } from "./io.mjs";
 import { projectProviders } from "./providers.mjs";
 import { resolvePluginGraph } from "./resolver.mjs";
 import { applyTransaction, planTransaction } from "./transaction.mjs";
+import { readPlatformState } from "./state.mjs";
 
 async function readDirectoryFiles(sourceRoot, destinationPrefix) {
   const files = new Map();
@@ -159,5 +160,71 @@ export async function installPlugins({
     status: "pass",
     plugins: graph.pluginIds,
     providers: graph.providers,
+  };
+}
+
+export async function listInstalled({ target }) {
+  const state = await readPlatformState(target);
+  return {
+    status: "pass",
+    plugins: state.lock?.plugins ?? [],
+    providers: state.lock?.providers ?? [],
+  };
+}
+
+export async function findOutdated({ target, registry = {} }) {
+  const installed = await listInstalled({ target });
+  const updates = [];
+  for (const plugin of installed.plugins) {
+    const latest = registry[plugin.id]?.latest;
+    if (latest && latest !== plugin.version) {
+      updates.push({
+        id: plugin.id,
+        current: plugin.version,
+        latest,
+      });
+    }
+  }
+  return {
+    status: "pass",
+    updates,
+  };
+}
+
+export async function updatePlugins({
+  root,
+  target,
+  pluginIds = [],
+  all = false,
+  registry = {},
+  dryRun = false,
+  force = false,
+}) {
+  const installed = await listInstalled({ target });
+  const selected = all
+    ? installed.plugins.map((item) => item.id)
+    : pluginIds.map((item) => item.split("@")[0]);
+  const outdated = await findOutdated({ target, registry });
+  const applicable = outdated.updates.filter((item) => selected.includes(item.id));
+  if (dryRun || applicable.length === 0) {
+    return {
+      status: "pass",
+      changed: false,
+      updates: applicable,
+    };
+  }
+  const providers = installed.providers.length > 0 ? installed.providers : undefined;
+  const result = await installPlugins({
+    root,
+    target,
+    pluginIds: selected,
+    all: false,
+    providers,
+    force,
+  });
+  return {
+    ...result,
+    changed: true,
+    updates: applicable,
   };
 }

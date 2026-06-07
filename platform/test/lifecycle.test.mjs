@@ -4,7 +4,12 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { installPlugins } from "../src/lifecycle.mjs";
+import {
+  findOutdated,
+  installPlugins,
+  listInstalled,
+  updatePlugins,
+} from "../src/lifecycle.mjs";
 import { repoRoot, runCli } from "./helpers.mjs";
 
 async function exists(root, relativePath) {
@@ -73,6 +78,62 @@ test("cli installs a plugin into the current project", async () => {
     assert.equal(result.exitCode, 0);
     assert.equal(JSON.parse(result.stdout).status, "pass");
     assert.equal(await exists(target, ".codex-plugin/plugin.json"), true);
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
+test("lists, detects outdated plugins, and supports dry-run updates", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "aiep-update-"));
+  try {
+    await installPlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["backend"],
+      providers: ["codex"],
+    });
+    const installed = await listInstalled({ target });
+    assert.deepEqual(installed.plugins.map((item) => item.id), ["architecture", "backend"]);
+
+    const registry = {
+      backend: { latest: "1.1.0" },
+      architecture: { latest: "1.0.0" },
+    };
+    const outdated = await findOutdated({ target, registry });
+    assert.equal(outdated.updates[0].id, "backend");
+    assert.equal(outdated.updates[0].latest, "1.1.0");
+
+    const dryRun = await updatePlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["backend"],
+      registry,
+      dryRun: true,
+    });
+    assert.equal(dryRun.changed, false);
+    const lockAfterDryRun = JSON.parse(
+      await readFile(path.join(target, ".aiep/platform.lock"), "utf8"),
+    );
+    assert.equal(lockAfterDryRun.plugins.find((item) => item.id === "backend").version, "1.0.0");
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
+test("cli lists installed plugins and reports outdated plugins", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "aiep-cli-update-"));
+  try {
+    await runCli(["plugin", "install", "backend", "--provider", "codex"], { cwd: target });
+    const list = await runCli(["plugin", "list", "--json"], { cwd: target });
+    assert.equal(list.exitCode, 0);
+    assert.deepEqual(
+      JSON.parse(list.stdout).plugins.map((item) => item.id),
+      ["architecture", "backend"],
+    );
+
+    const outdated = await runCli(["plugin", "outdated", "--json"], { cwd: target });
+    assert.equal(outdated.exitCode, 0);
+    assert.deepEqual(JSON.parse(outdated.stdout).updates, []);
   } finally {
     await rm(target, { recursive: true, force: true });
   }
