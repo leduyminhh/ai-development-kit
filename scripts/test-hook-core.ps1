@@ -317,6 +317,60 @@ Assert-Equal 1 $singleArrayResult.warnings.Count 'One warning should keep count 
 Assert-True ($singleArrayResult.policyIds -is [array]) 'One policy ID should remain an array.'
 Assert-Equal 1 $singleArrayResult.policyIds.Count 'One policy ID should keep count one.'
 
+$ruleEventArgs = $eventArgs.Clone()
+$ruleEventArgs.Payload = @{ command = 'Remove-Item -Recurse -Force reports' }
+$ruleEventArgs.Mode = 'enforce'
+$ruleEvent = New-AiHookEvent @ruleEventArgs
+$ruleCandidates = @(Invoke-AiHookRulePolicy -Event $ruleEvent -Rules @(
+    [pscustomobject]@{
+        policyId = 'deny-recursive-delete'
+        eventName = 'tool.before'
+        commandPattern = 'Remove-Item.*-Recurse'
+        decision = 'deny'
+        reason = 'Recursive delete commands require explicit approval.'
+        warning = 'Recursive delete matched policy.'
+    },
+    [pscustomobject]@{
+        policyId = 'non-matching'
+        eventName = 'tool.completed'
+        decision = 'deny'
+        reason = 'Should not match.'
+    }
+))
+Assert-Equal 1 $ruleCandidates.Count 'Rule policy should only return matching candidates.'
+Assert-Equal 'deny-recursive-delete' $ruleCandidates[0].policyId 'Rule policy should retain policy ID.'
+Assert-Equal 'deny' $ruleCandidates[0].decision 'Rule policy should retain decision.'
+Assert-Equal 1 $ruleCandidates[0].warnings.Count 'Rule policy should retain warnings.'
+$ruleResult = Invoke-AiHookPolicy -EventId $ruleEvent.eventId -Mode 'enforce' -Candidates $ruleCandidates
+Assert-Equal 'deny' $ruleResult.decision 'Enforce mode should deny matching rule candidates.'
+Assert-Equal 'Recursive delete commands require explicit approval.' $ruleResult.reason 'Enforce mode should return matching rule reason.'
+
+$policyRuleRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("ai-hook-policy-rules-" + [guid]::NewGuid().ToString())
+try {
+    New-Item -ItemType Directory -Path $policyRuleRoot -Force | Out-Null
+    $policyRulePath = Join-Path $policyRuleRoot 'policy.json'
+    Set-Content -LiteralPath $policyRulePath -Encoding utf8 -Value (@{
+        rules = @(
+            @{
+                policyId = 'payload-secret'
+                eventName = 'prompt.submitted'
+                payloadContains = 'secret'
+                decision = 'ask'
+                reason = 'Prompt contains a sensitive marker.'
+            }
+        )
+    } | ConvertTo-Json -Depth 6)
+    $loadedRules = @(Read-AiHookPolicyRules -Path $policyRulePath)
+    Assert-Equal 1 $loadedRules.Count 'Policy rules should load from JSON object with rules array.'
+    $missingRules = @(Read-AiHookPolicyRules -Path (Join-Path $policyRuleRoot 'missing.json'))
+    Assert-Equal 0 $missingRules.Count 'Missing policy rule file should produce no rules.'
+}
+finally {
+    if (Test-Path -LiteralPath $policyRuleRoot) {
+        Remove-Item -LiteralPath $policyRuleRoot -Recurse -Force
+    }
+}
+
 Assert-ValidationError -Code 'invalid_decision' -Field 'decision' -Action {
     Merge-AiHookDecision -Decisions @('allow', 'block')
 }

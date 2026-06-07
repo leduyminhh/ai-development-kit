@@ -194,9 +194,20 @@ teamId = ""
 projectId = ""
 clientName = ""
 maxRequestBytes = 262144
+
+[hooks.policy]
+enabled = false
+path = ".codex/hooks/policy.json"
 ```
 
 The HTTP endpoint accepts `POST /v1/events`, writes canonical JSONL audit, keeps `/events` for legacy compatibility, rejects malformed JSON with `400`, oversized requests with `413`, and checks a shared token only when `sharedTokenEnv` is configured.
+
+Inspect runtime evidence:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/query-hook-audit.ps1 -TraceId <trace-id> -Json
+powershell -ExecutionPolicy Bypass -File scripts/view-hook-trace.ps1 -TraceId <trace-id> -Json
+```
 
 ---
 

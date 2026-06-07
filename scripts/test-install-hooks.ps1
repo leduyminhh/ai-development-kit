@@ -20,6 +20,16 @@ $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("codex-install-hooks-" 
 try {
     New-Item -ItemType Directory -Path $tempRoot -Force | Out-Null
 
+    $dryRunTarget = Join-Path $tempRoot 'dry-run-project'
+    $dryRunOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File $installer `
+        -TargetRoot $dryRunTarget `
+        -Provider all `
+        -Transport http `
+        -DryRun
+    $plainDryRunOutput = @($dryRunOutput) -join "`n"
+    Assert-True ($plainDryRunOutput.Contains('"status":  "planned"') -or $plainDryRunOutput.Contains('"status": "planned"')) 'Dry-run install should report planned actions.'
+    Assert-True (-not (Test-Path -LiteralPath $dryRunTarget)) 'Dry-run install should not create target files.'
+
     $cleanTarget = Join-Path $tempRoot 'clean-project'
     $cleanOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File $installer `
         -TargetRoot $cleanTarget `
@@ -31,6 +41,7 @@ try {
     $cleanResults = @((@($cleanOutput) -join "`n") | ConvertFrom-Json)
 
     Assert-True (Test-Path -LiteralPath (Join-Path $cleanTarget '.ai-hooks/invoke-hook.ps1')) 'Installer should copy hook runtime invoke script.'
+    Assert-True (Test-Path -LiteralPath (Join-Path $cleanTarget '.ai-hooks/install.json')) 'Installer should write install marker.'
     Assert-True (Test-Path -LiteralPath (Join-Path $cleanTarget '.ai-hooks/hooks/core/hook-contract.ps1')) 'Installer should copy hook core scripts.'
     Assert-True (Test-Path -LiteralPath (Join-Path $cleanTarget '.codex/hooks/invoke-ai-hook.ps1')) 'Installer should create Codex provider shim for clean target.'
     Assert-True (Test-Path -LiteralPath (Join-Path $cleanTarget '.claude/hooks/invoke-ai-hook.ps1')) 'Installer should create Claude provider shim for clean target.'
@@ -77,6 +88,14 @@ maxRequestBytes = 123
     $conflictConfig = Get-Content -LiteralPath (Join-Path $conflictTarget '.codex/config.toml') -Raw
     Assert-True ($conflictConfig.Contains('mode = "warn"')) 'Installer should preserve existing hooks.core config.'
     Assert-True ($conflictConfig.Contains('maxRequestBytes = 123')) 'Installer should preserve existing hooks.http config.'
+
+    $uninstallOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File $installer -TargetRoot $cleanTarget -Action uninstall -Provider all
+    $plainUninstallOutput = @($uninstallOutput) -join "`n"
+    Assert-True ($plainUninstallOutput.Contains('"status":  "removed"') -or $plainUninstallOutput.Contains('"status": "removed"')) 'Uninstall should report removed runtime and shims.'
+    Assert-True (-not (Test-Path -LiteralPath (Join-Path $cleanTarget '.ai-hooks'))) 'Uninstall should remove hook runtime.'
+    Assert-True (-not (Test-Path -LiteralPath (Join-Path $cleanTarget '.codex/hooks/invoke-ai-hook.ps1'))) 'Uninstall should remove Codex provider shim.'
+    Assert-True (-not (Test-Path -LiteralPath (Join-Path $cleanTarget '.claude/hooks/invoke-ai-hook.ps1'))) 'Uninstall should remove Claude provider shim.'
+    Assert-True (Test-Path -LiteralPath (Join-Path $cleanTarget '.codex/config.toml')) 'Uninstall should preserve config file.'
 
     Write-Output 'install-hooks tests passed.'
 } finally {

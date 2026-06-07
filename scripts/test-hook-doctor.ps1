@@ -27,6 +27,44 @@ Assert-True (@($result.checks | Where-Object { $_.name -eq 'selected-tests' -and
 $markdown = & powershell -NoProfile -ExecutionPolicy Bypass -File $doctor -Root $Root
 Assert-True ((@($markdown) -join "`n").Contains('# Hook Doctor')) 'hook-doctor should print Markdown by default.'
 
+$installedRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("hook-doctor-installed-" + [guid]::NewGuid().ToString())
+try {
+    $installer = Join-Path $Root 'scripts/install-hooks.ps1'
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $installer -TargetRoot $installedRoot -Provider none | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $installedRoot 'scripts/hooks/core') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $installedRoot 'scripts/hooks/transports') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $installedRoot 'scripts/hooks/adapters') -Force | Out-Null
+    foreach ($file in @(
+        'scripts/invoke-hook.ps1',
+        'scripts/hooks/core/hook-contract.ps1',
+        'scripts/hooks/core/hook-pipeline.ps1',
+        'scripts/hooks/transports/hook-cli-transport.ps1',
+        'scripts/hooks/transports/hook-http-client.ps1',
+        'scripts/hooks/adapters/codex-hook-adapter.ps1',
+        'scripts/hooks/adapters/claude-hook-adapter.ps1',
+        'scripts/hook-service.ps1',
+        'scripts/install-hooks.ps1'
+    )) {
+        Set-Content -LiteralPath (Join-Path $installedRoot $file) -Value '# placeholder' -Encoding utf8
+    }
+    New-Item -ItemType Directory -Path (Join-Path $installedRoot '.codex') -Force | Out-Null
+    Set-Content -LiteralPath (Join-Path $installedRoot '.codex/test-map.toml') -Value @'
+commands = [
+  "powershell -File scripts/test-hook-core.ps1",
+  "powershell -File scripts/test-hook-service.ps1",
+  "powershell -File scripts/test-install-hooks.ps1"
+]
+'@ -Encoding utf8
+
+    $installedJson = & powershell -NoProfile -ExecutionPolicy Bypass -File $doctor -Root $installedRoot -Json
+    $installed = (@($installedJson) -join "`n") | ConvertFrom-Json
+    Assert-True (@($installed.checks | Where-Object { $_.name -eq 'installed-runtime' -and $_.status -eq 'pass' }).Count -eq 1) 'hook-doctor should pass installed runtime when marker and invoke script exist.'
+} finally {
+    if (Test-Path -LiteralPath $installedRoot) {
+        Remove-Item -LiteralPath $installedRoot -Recurse -Force
+    }
+}
+
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("hook-doctor-" + [guid]::NewGuid().ToString())
 try {
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.codex/hooks') -Force | Out-Null

@@ -67,6 +67,10 @@ projectId = ""
 clientName = ""
 maxRequestBytes = 262144
 
+[hooks.policy]
+enabled = false
+path = ".codex/hooks/policy.json"
+
 [hooks.project]
 enabled = true
 host = "127.0.0.1"

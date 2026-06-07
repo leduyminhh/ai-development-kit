@@ -194,9 +194,20 @@ teamId = ""
 projectId = ""
 clientName = ""
 maxRequestBytes = 262144
+
+[hooks.policy]
+enabled = false
+path = ".codex/hooks/policy.json"
 ```
 
 HTTP endpoint nhan `POST /v1/events`, ghi canonical JSONL audit, giu `/events` cho legacy compatibility, tra `400` voi malformed JSON, `413` voi request qua lon, va chi check shared token khi `sharedTokenEnv` duoc cau hinh.
+
+Inspect runtime evidence:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/query-hook-audit.ps1 -TraceId <trace-id> -Json
+powershell -ExecutionPolicy Bypass -File scripts/view-hook-trace.ps1 -TraceId <trace-id> -Json
+```
 
 ---
 ## Skill Catalog

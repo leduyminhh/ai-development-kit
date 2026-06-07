@@ -63,6 +63,23 @@ $checks.Add((New-HookDoctorCheck `
     -Evidence $(if ($missingFiles.Count -eq 0) { "requiredFiles=$($requiredFiles.Count)" } else { 'missing=' + ($missingFiles -join ', ') }) `
     -Suggestion 'Restore hook runtime scripts under scripts/hooks and scripts/invoke-hook.ps1.'))
 
+$installedMarkerPath = Join-Path $resolvedRoot '.ai-hooks/install.json'
+$installedInvokePath = Join-Path $resolvedRoot '.ai-hooks/invoke-hook.ps1'
+$installedMarker = $null
+if (Test-Path -LiteralPath $installedMarkerPath) {
+    try {
+        $installedMarker = Get-Content -LiteralPath $installedMarkerPath -Raw | ConvertFrom-Json
+    } catch {
+        $installedMarker = $null
+    }
+}
+$installedRuntimeOk = (Test-Path -LiteralPath $installedInvokePath) -and $null -ne $installedMarker -and [string]$installedMarker.schema -eq 'ai.hook.install.v1'
+$checks.Add((New-HookDoctorCheck `
+    -Name 'installed-runtime' `
+    -Status $(if ($installedRuntimeOk) { 'pass' } elseif (Test-Path -LiteralPath (Join-Path $resolvedRoot '.ai-hooks')) { 'warn' } else { 'warn' }) `
+    -Evidence "marker=$((Test-Path -LiteralPath $installedMarkerPath)); invoke=$((Test-Path -LiteralPath $installedInvokePath)); transport=$([string]$installedMarker.transport)" `
+    -Suggestion 'Run scripts/install-hooks.ps1 -TargetRoot <project> -Action install or repair when this is a target project.'))
+
 $hasCore = Test-HookConfigSection -ConfigText $configText -Section 'hooks.core'
 $hasHttp = Test-HookConfigSection -ConfigText $configText -Section 'hooks.http'
 $checks.Add((New-HookDoctorCheck `

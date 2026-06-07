@@ -109,3 +109,113 @@ function Invoke-AiHookPolicy {
         -Warnings $resultWarnings `
         -PolicyIds @($policyIds)
 }
+
+function Read-AiHookPolicyRules {
+    [CmdletBinding()]
+    param(
+        [AllowNull()]
+        [string]$Path
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Path) -or -not (Test-Path -LiteralPath $Path)) {
+        return @()
+    }
+
+    $content = Get-Content -LiteralPath $Path -Raw
+    if ([string]::IsNullOrWhiteSpace($content)) {
+        return @()
+    }
+
+    $parsed = $content | ConvertFrom-Json
+    if ($null -ne $parsed.rules) {
+        return @($parsed.rules)
+    }
+
+    return @($parsed)
+}
+
+function Test-AiHookPolicyRuleMatch {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [pscustomobject]$Event,
+
+        [Parameter(Mandatory = $true)]
+        [pscustomobject]$Rule
+    )
+
+    foreach ($field in @('eventName', 'provider', 'sourceName', 'nativeEvent')) {
+        if (-not [string]::IsNullOrWhiteSpace([string]$Rule.$field) -and [string]$Event.$field -cne [string]$Rule.$field) {
+            return $false
+        }
+    }
+
+    $payloadJson = if ($null -eq $Event.payload) { '' } else { $Event.payload | ConvertTo-Json -Depth 20 -Compress }
+    if (-not [string]::IsNullOrWhiteSpace([string]$Rule.payloadContains) -and -not $payloadJson.Contains([string]$Rule.payloadContains)) {
+        return $false
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace([string]$Rule.commandPattern)) {
+        $command = ''
+        foreach ($candidatePath in @('command', 'tool_input.command', 'input.command')) {
+            $cursor = $Event.payload
+            foreach ($part in $candidatePath.Split('.')) {
+                if ($null -eq $cursor) { break }
+                $cursor = $cursor.$part
+            }
+            if (-not [string]::IsNullOrWhiteSpace([string]$cursor)) {
+                $command = [string]$cursor
+                break
+            }
+        }
+
+        if ([string]::IsNullOrWhiteSpace($command) -or $command -notmatch [string]$Rule.commandPattern) {
+            return $false
+        }
+    }
+
+    return $true
+}
+
+function Invoke-AiHookRulePolicy {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [pscustomobject]$Event,
+
+        [AllowEmptyCollection()]
+        [object[]]$Rules = @()
+    )
+
+    $candidates = New-Object 'System.Collections.Generic.List[object]'
+    foreach ($rule in @($Rules)) {
+        if ($null -eq $rule) {
+            continue
+        }
+
+        $decision = if ([string]::IsNullOrWhiteSpace([string]$rule.decision)) { 'abstain' } else { [string]$rule.decision }
+        Assert-AiHookDecision -Decision $decision
+        if (-not (Test-AiHookPolicyRuleMatch -Event $Event -Rule $rule)) {
+            continue
+        }
+
+        $warningList = New-Object 'System.Collections.Generic.List[string]'
+        foreach ($warning in @($rule.warnings)) {
+            if (-not [string]::IsNullOrWhiteSpace([string]$warning)) {
+                $warningList.Add([string]$warning)
+            }
+        }
+        if (-not [string]::IsNullOrWhiteSpace([string]$rule.warning)) {
+            $warningList.Add([string]$rule.warning)
+        }
+
+        $candidates.Add([pscustomobject][ordered]@{
+            decision = $decision
+            reason = if ([string]::IsNullOrWhiteSpace([string]$rule.reason)) { "Matched policy $($rule.policyId)." } else { [string]$rule.reason }
+            warnings = $warningList.ToArray()
+            policyId = if ([string]::IsNullOrWhiteSpace([string]$rule.policyId)) { 'inline-policy' } else { [string]$rule.policyId }
+        })
+    }
+
+    return $candidates.ToArray()
+}

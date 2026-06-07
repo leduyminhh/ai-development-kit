@@ -81,6 +81,36 @@ function Get-HookServiceHttpSettings {
     }
 }
 
+function Get-HookServicePolicySettings {
+    param([string]$Root)
+
+    $configText = Get-HookServiceConfigText -Root $Root
+    $configuredPath = Get-CodexTomlStringValue -TomlText $configText -Section 'hooks.policy' -Key 'path'
+    if ([string]::IsNullOrWhiteSpace($configuredPath)) {
+        $configuredPath = '.codex/hooks/policy.json'
+    }
+
+    [pscustomobject]@{
+        Enabled = Get-CodexTomlBoolValue -TomlText $configText -Section 'hooks.policy' -Key 'enabled' -Default $false
+        Path = if ([System.IO.Path]::IsPathRooted($configuredPath)) { $configuredPath } else { Join-Path $Root $configuredPath }
+    }
+}
+
+function Get-HookServicePolicyCandidates {
+    param(
+        [string]$Root,
+        [pscustomobject]$Event
+    )
+
+    $policySettings = Get-HookServicePolicySettings -Root $Root
+    if (-not $policySettings.Enabled) {
+        return @()
+    }
+
+    $rules = Read-AiHookPolicyRules -Path $policySettings.Path
+    return Invoke-AiHookRulePolicy -Event $Event -Rules $rules
+}
+
 function Get-HookServiceHeaderValue {
     param(
         [hashtable]$Headers,
@@ -181,7 +211,8 @@ function Invoke-HookServiceCoreEvent {
         TimeZone = $Settings.TimeZone
     }
 
-    return Invoke-AiHookPipeline -Event $event -AuditSettings $auditSettings -RuntimeRoot $Settings.RuntimeRoot
+    $policyCandidates = @(Get-HookServicePolicyCandidates -Root $Root -Event $event)
+    return Invoke-AiHookPipeline -Event $event -PolicyCandidates $policyCandidates -AuditSettings $auditSettings -RuntimeRoot $Settings.RuntimeRoot
 }
 
 function Get-HookServiceDayFolder {

@@ -59,9 +59,22 @@ $configPath = Join-Path $tempRoot '.codex/config.toml'
 try {
     $env:AI_HOOK_TEST_TOKEN = 'team-secret'
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.codex') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $tempRoot '.codex/hooks') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot 'reports/audit/runtime/20200101') -Force | Out-Null
     Set-Content -LiteralPath (Join-Path $tempRoot 'reports/audit/runtime/20200101/stale.log') -Encoding utf8 -Value 'stale'
     (Get-Item -LiteralPath (Join-Path $tempRoot 'reports/audit/runtime/20200101/stale.log')).LastWriteTimeUtc = [datetime]::UtcNow.AddDays(-10)
+    Set-Content -LiteralPath (Join-Path $tempRoot '.codex/hooks/policy.json') -Encoding utf8 -Value (@{
+        rules = @(
+            @{
+                policyId = 'deny-recursive-delete'
+                eventName = 'tool.before'
+                commandPattern = 'Remove-Item.*-Recurse'
+                decision = 'deny'
+                reason = 'Recursive delete commands require explicit approval.'
+                warning = 'Recursive delete matched policy.'
+            }
+        )
+    } | ConvertTo-Json -Depth 6)
 
     Set-Content -LiteralPath $configPath -Encoding utf8 -Value @'
 [hooks.project]
@@ -93,6 +106,10 @@ teamId = "team-alpha"
 projectId = "project-one"
 clientName = "local-test"
 maxRequestBytes = 4096
+
+[hooks.policy]
+enabled = true
+path = ".codex/hooks/policy.json"
 
 [agent_registry.java-analyze]
 path = ".codex/agents/java-analyze.toml"
@@ -169,6 +186,22 @@ hooks_project_enabled = true
         Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:42891/v1/events' -ContentType 'application/json' -Body '{'
     }
 
+    $policyResult = Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:42891/v1/events' -ContentType 'application/json' -Body (@{
+        provider = 'codex'
+        nativeEvent = 'PreToolUse'
+        eventName = 'tool.before'
+        mode = 'enforce'
+        sessionId = 'hook-service-session'
+        sourceName = 'PowerShell'
+        timestamp = '2026-04-21T03:30:00Z'
+        payload = @{
+            command = 'Remove-Item -LiteralPath reports -Recurse -Force'
+        }
+    } | ConvertTo-Json -Depth 6)
+    Assert-Equal 'deny' $policyResult.decision 'Canonical endpoint should enforce matching deny policy.'
+    Assert-Equal 'Recursive delete commands require explicit approval.' $policyResult.reason 'Canonical endpoint should return deny policy reason.'
+    Assert-Equal 1 $policyResult.warnings.Count 'Canonical endpoint should include matching policy warning in enforce mode.'
+
     Set-Content -LiteralPath $configPath -Encoding utf8 -Value @'
 [hooks.project]
 enabled = true
@@ -199,6 +232,10 @@ teamId = "team-alpha"
 projectId = "project-one"
 clientName = "local-test"
 maxRequestBytes = 64
+
+[hooks.policy]
+enabled = true
+path = ".codex/hooks/policy.json"
 
 [agent_registry.java-analyze]
 path = ".codex/agents/java-analyze.toml"
