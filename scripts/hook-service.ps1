@@ -15,6 +15,174 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 . (Join-Path $repoRoot '.codex/hooks/lib/project-hook-format.ps1')
 . (Join-Path $repoRoot '.codex/hooks/lib/project-hook-retention.ps1')
 . (Join-Path $repoRoot '.codex/hooks/lib/project-hook-writer.ps1')
+. (Join-Path $repoRoot 'scripts/hooks/core/hook-redaction.ps1')
+. (Join-Path $repoRoot 'scripts/hooks/core/hook-identity.ps1')
+. (Join-Path $repoRoot 'scripts/hooks/core/hook-contract.ps1')
+. (Join-Path $repoRoot 'scripts/hooks/core/hook-policy.ps1')
+. (Join-Path $repoRoot 'scripts/hooks/core/hook-audit.ps1')
+. (Join-Path $repoRoot 'scripts/hooks/core/hook-flow.ps1')
+. (Join-Path $repoRoot 'scripts/hooks/core/hook-pipeline.ps1')
+
+function Get-HookServiceConfigText {
+    param([string]$Root)
+
+    $configPath = Join-Path $Root '.codex/config.toml'
+    if (-not (Test-Path -LiteralPath $configPath)) {
+        return ''
+    }
+
+    return Get-Content -LiteralPath $configPath -Raw
+}
+
+function Get-HookServiceCoreSettings {
+    param([string]$Root)
+
+    $configText = Get-HookServiceConfigText -Root $Root
+    $mode = Get-CodexTomlStringValue -TomlText $configText -Section 'hooks.core' -Key 'mode'
+    if ([string]::IsNullOrWhiteSpace($mode)) {
+        $mode = 'observe'
+    }
+
+    $transport = Get-CodexTomlStringValue -TomlText $configText -Section 'hooks.core' -Key 'transport'
+    if ([string]::IsNullOrWhiteSpace($transport)) {
+        $transport = 'cli'
+    }
+
+    $failureMode = Get-CodexTomlStringValue -TomlText $configText -Section 'hooks.core' -Key 'failureMode'
+    if ([string]::IsNullOrWhiteSpace($failureMode)) {
+        $failureMode = 'abstain'
+    }
+
+    [pscustomobject]@{
+        Enabled = Get-CodexTomlBoolValue -TomlText $configText -Section 'hooks.core' -Key 'enabled' -Default $true
+        Mode = $mode
+        Transport = $transport
+        TimeoutMs = Get-CodexTomlIntValue -TomlText $configText -Section 'hooks.core' -Key 'timeoutMs' -Default 1500
+        FailureMode = $failureMode
+    }
+}
+
+function Get-HookServiceHttpSettings {
+    param([string]$Root)
+
+    $configText = Get-HookServiceConfigText -Root $Root
+    $url = Get-CodexTomlStringValue -TomlText $configText -Section 'hooks.http' -Key 'url'
+    if ([string]::IsNullOrWhiteSpace($url)) {
+        $url = 'http://127.0.0.1:42890/v1/events'
+    }
+
+    [pscustomobject]@{
+        Url = $url
+        SharedTokenEnv = Get-CodexTomlStringValue -TomlText $configText -Section 'hooks.http' -Key 'sharedTokenEnv'
+        TeamId = Get-CodexTomlStringValue -TomlText $configText -Section 'hooks.http' -Key 'teamId'
+        ProjectId = Get-CodexTomlStringValue -TomlText $configText -Section 'hooks.http' -Key 'projectId'
+        ClientName = Get-CodexTomlStringValue -TomlText $configText -Section 'hooks.http' -Key 'clientName'
+        MaxRequestBytes = Get-CodexTomlIntValue -TomlText $configText -Section 'hooks.http' -Key 'maxRequestBytes' -Default 262144
+    }
+}
+
+function Get-HookServiceHeaderValue {
+    param(
+        [hashtable]$Headers,
+        [string]$Name
+    )
+
+    foreach ($key in $Headers.Keys) {
+        if ([string]$key -ieq $Name) {
+            return [string]$Headers[$key]
+        }
+    }
+
+    return $null
+}
+
+function Test-HookServiceSharedToken {
+    param(
+        [pscustomobject]$Request,
+        [pscustomobject]$HttpSettings
+    )
+
+    if ([string]::IsNullOrWhiteSpace([string]$HttpSettings.SharedTokenEnv)) {
+        return $true
+    }
+
+    $expected = [Environment]::GetEnvironmentVariable([string]$HttpSettings.SharedTokenEnv)
+    if ([string]::IsNullOrWhiteSpace($expected)) {
+        return $true
+    }
+
+    $provided = Get-HookServiceHeaderValue -Headers $Request.Headers -Name 'X-AI-Hook-Token'
+    if ([string]::IsNullOrWhiteSpace($provided)) {
+        $authorization = Get-HookServiceHeaderValue -Headers $Request.Headers -Name 'Authorization'
+        if ($authorization -match '^Bearer\s+(.+)$') {
+            $provided = $Matches[1]
+        }
+    }
+
+    return ($provided -ceq $expected)
+}
+
+function ConvertTo-HookServiceCanonicalEvent {
+    param(
+        [pscustomobject]$Payload,
+        [pscustomobject]$CoreSettings,
+        [pscustomobject]$HttpSettings
+    )
+
+    if ([string]$Payload.schema -ceq 'ai.hook.event.v1') {
+        $Payload.teamId = if ([string]::IsNullOrWhiteSpace([string]$Payload.teamId)) { $HttpSettings.TeamId } else { $Payload.teamId }
+        $Payload.projectId = if ([string]::IsNullOrWhiteSpace([string]$Payload.projectId)) { $HttpSettings.ProjectId } else { $Payload.projectId }
+        $Payload.clientName = if ([string]::IsNullOrWhiteSpace([string]$Payload.clientName)) { $HttpSettings.ClientName } else { $Payload.clientName }
+        $Payload.mode = if ([string]::IsNullOrWhiteSpace([string]$Payload.mode)) { $CoreSettings.Mode } else { $Payload.mode }
+        return $Payload
+    }
+
+    $eventPayload = if ($null -eq $Payload.payload) { $Payload } else { $Payload.payload }
+    $mode = if ([string]::IsNullOrWhiteSpace([string]$Payload.mode)) { $CoreSettings.Mode } else { [string]$Payload.mode }
+    $timestamp = if ([string]::IsNullOrWhiteSpace([string]$Payload.timestamp)) {
+        [DateTimeOffset]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ss'Z'", [Globalization.CultureInfo]::InvariantCulture)
+    } else {
+        [string]$Payload.timestamp
+    }
+
+    return New-AiHookEvent `
+        -Provider $Payload.provider `
+        -NativeEvent $Payload.nativeEvent `
+        -EventName $Payload.eventName `
+        -SessionId $Payload.sessionId `
+        -SourceName $Payload.sourceName `
+        -Payload $eventPayload `
+        -Mode $mode `
+        -Timestamp $timestamp `
+        -TeamId $(if ([string]::IsNullOrWhiteSpace([string]$Payload.teamId)) { $HttpSettings.TeamId } else { [string]$Payload.teamId }) `
+        -ProjectId $(if ([string]::IsNullOrWhiteSpace([string]$Payload.projectId)) { $HttpSettings.ProjectId } else { [string]$Payload.projectId }) `
+        -ClientName $(if ([string]::IsNullOrWhiteSpace([string]$Payload.clientName)) { $HttpSettings.ClientName } else { [string]$Payload.clientName })
+}
+
+function Invoke-HookServiceCoreEvent {
+    param(
+        [string]$Root,
+        [pscustomobject]$Settings,
+        [pscustomobject]$Payload
+    )
+
+    $coreSettings = Get-HookServiceCoreSettings -Root $Root
+    $httpSettings = Get-HookServiceHttpSettings -Root $Root
+    $event = ConvertTo-HookServiceCanonicalEvent -Payload $Payload -CoreSettings $coreSettings -HttpSettings $httpSettings
+
+    if (-not $coreSettings.Enabled) {
+        return New-AiHookResult -EventId $event.eventId -Mode $event.mode -Decision 'abstain' -Reason 'core_hooks_disabled'
+    }
+
+    $auditSettings = [pscustomobject]@{
+        EventRoot = $Settings.EventRoot
+        Format = 'jsonl'
+        FilenamePattern = $Settings.FilenamePattern
+        TimeZone = $Settings.TimeZone
+    }
+
+    return Invoke-AiHookPipeline -Event $event -AuditSettings $auditSettings -RuntimeRoot $Settings.RuntimeRoot
+}
 
 function Get-HookServiceDayFolder {
     param([pscustomobject]$Settings)
@@ -199,6 +367,7 @@ function Read-HookServiceRequest {
         Path   = $parts[1]
         Headers = $headers
         Body   = $body
+        ContentLength = $contentLength
         Stream = $stream
     }
 }
@@ -389,6 +558,52 @@ function Invoke-HookServiceServer {
                             pid    = $PID
                         }
                         $shouldStop = $true
+                    }
+                    'POST /v1/events' {
+                        $httpSettings = Get-HookServiceHttpSettings -Root $Root
+                        if (-not (Test-HookServiceSharedToken -Request $request -HttpSettings $httpSettings)) {
+                            Send-HookServiceResponse -Stream $request.Stream -StatusCode 401 -StatusText 'Unauthorized' -Body @{
+                                schema = 'ai.hook.error.v1'
+                                code = 'unauthorized'
+                                message = 'Shared hook token is invalid.'
+                            }
+                            break
+                        }
+
+                        if ([int]$request.ContentLength -gt [int]$httpSettings.MaxRequestBytes) {
+                            Send-HookServiceResponse -Stream $request.Stream -StatusCode 413 -StatusText 'Payload Too Large' -Body @{
+                                schema = 'ai.hook.error.v1'
+                                code = 'request_too_large'
+                                message = "Request exceeds $($httpSettings.MaxRequestBytes) bytes."
+                            }
+                            break
+                        }
+
+                        try {
+                            $payload = if ([string]::IsNullOrWhiteSpace($request.Body)) { $null } else { $request.Body | ConvertFrom-Json }
+                        } catch {
+                            Send-HookServiceResponse -Stream $request.Stream -StatusCode 400 -StatusText 'Bad Request' -Body @{
+                                schema = 'ai.hook.error.v1'
+                                code = 'malformed_json'
+                                message = 'Request body must be valid JSON.'
+                            }
+                            break
+                        }
+
+                        if ($null -eq $payload) {
+                            Send-HookServiceResponse -Stream $request.Stream -StatusCode 400 -StatusText 'Bad Request' -Body @{
+                                schema = 'ai.hook.error.v1'
+                                code = 'required_field'
+                                message = 'Request body is required.'
+                                field = 'body'
+                            }
+                            break
+                        }
+
+                        Invoke-ProjectHookRetention -EventRoot $settings.EventRoot -RemainingDays $settings.RemainingDays
+                        $result = Invoke-HookServiceCoreEvent -Root $Root -Settings $settings -Payload $payload
+                        Write-HookServiceRuntimeLog -Settings $settings -Level 'info' -Message "canonical event $($payload.eventName) resolved as $($result.decision)"
+                        Send-HookServiceResponse -Stream $request.Stream -StatusCode 200 -StatusText 'OK' -Body $result
                     }
                     'POST /events' {
                         $payload = if ([string]::IsNullOrWhiteSpace($request.Body)) { $null } else { $request.Body | ConvertFrom-Json }

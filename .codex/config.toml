@@ -52,6 +52,21 @@ createRootOnConfirm = true
 requireConfirmation = true
 
 # ------------ Hooks ------------
+[hooks.core]
+enabled = true
+mode = "observe"
+transport = "cli"
+timeoutMs = 1500
+failureMode = "abstain"
+
+[hooks.http]
+url = "http://127.0.0.1:42890/v1/events"
+sharedTokenEnv = ""
+teamId = ""
+projectId = ""
+clientName = ""
+maxRequestBytes = 262144
+
 [hooks.project]
 enabled = true
 host = "127.0.0.1"

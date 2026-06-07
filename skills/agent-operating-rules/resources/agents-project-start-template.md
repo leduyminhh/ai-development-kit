@@ -11,6 +11,7 @@ Use this template when starting work in a new project or applying agent operatin
 5. If no instruction file exists, create `AGENTS.md` by copying the full template below.
 6. Do not overwrite existing instructions silently.
 7. If the target project protects instruction files, request confirmation before writing.
+8. Do not report success after only logging the baseline; create/update the target file or report `no-change` with the exact target path and reason.
 
 ## Merge Rules
 

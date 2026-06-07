@@ -159,6 +159,47 @@ Skills are plain Markdown files under `skills/<name>/SKILL.md`. Agents that supp
 
 ---
 
+## Cross-IDE Hooks
+
+The hook core provides one canonical event model for Codex, Claude Code, and other AI IDE adapters. It normalizes lifecycle hooks such as `PreToolUse`, `PostToolUse`, `PermissionRequest`, `UserPromptSubmit`, `SubagentStart`, `SubagentStop`, and `Stop` into audit events like `agent.started`, `skill.selected`, `skill.loaded`, `subagent.started`, `subagent.completed`, and `agent.completed`.
+
+Install the hook runtime into a target project:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/install-hooks.ps1 -TargetRoot <project> -Provider all -Transport cli
+```
+
+The installer is non-invasive by default. If `.codex/hooks` or `.claude/hooks` already contains custom hook files, provider shims are skipped unless `-Force` is passed. Core runtime files are copied under `.ai-hooks`, and missing `[hooks.core]` / `[hooks.http]` config sections are appended without replacing existing sections.
+
+Run the local hook doctor:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/hook-doctor.ps1 -Root .
+```
+
+For team HTTP transport, run one shared hook service and point each member at the same endpoint:
+
+```toml
+[hooks.core]
+enabled = true
+mode = "observe"
+transport = "http"
+timeoutMs = 1500
+failureMode = "abstain"
+
+[hooks.http]
+url = "http://127.0.0.1:42890/v1/events"
+sharedTokenEnv = ""
+teamId = ""
+projectId = ""
+clientName = ""
+maxRequestBytes = 262144
+```
+
+The HTTP endpoint accepts `POST /v1/events`, writes canonical JSONL audit, keeps `/events` for legacy compatibility, rejects malformed JSON with `400`, oversized requests with `413`, and checks a shared token only when `sharedTokenEnv` is configured.
+
+---
+
 ## Skill Catalog
 
 The repository currently contains 15 skills. The default install allowlist is intentionally smaller:

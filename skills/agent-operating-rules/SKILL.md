@@ -15,7 +15,7 @@ This skill is the execution discipline layer for repository work. It does not re
 
 Use this skill before broad planning, multi-file edits, structure validation, conflict resolution, skill authoring, protected-path decisions, or any task where the agent might otherwise skip reading, testing, or surfacing trade-offs.
 
-Also use this skill when the user invokes `init` or `agents.md` with this skill; those commands run the project-start `AGENTS.md`/`CLAUDE.md` setup flow.
+Also use this skill when the user invokes `init`, `-init`, `agents.md`, or `-agents.md` with this skill; those commands run the project-start `AGENTS.md`/`CLAUDE.md` setup flow.
 
 ## Core Process
 
@@ -63,7 +63,7 @@ Also use this skill when the user invokes `init` or `agents.md` with this skill;
 
 ## Scripts
 
-- None; this skill does not require dedicated scripts.
+- [scripts/init-agents-template.ps1](scripts/init-agents-template.ps1): deterministic helper for `init` and `agents.md`; copies the canonical template first, then preserves compatible existing instruction sections without overwriting template-owned sections.
 
 ## Output Format
 
@@ -79,10 +79,10 @@ Report concise findings, actions, verification, and remaining risk.
 
 ### Commands
 
-- `init`: run the project-start setup flow from [resources/agents-project-start-template.md](resources/agents-project-start-template.md). Check the target root for `AGENTS.md` and `CLAUDE.md`; copy the full template as the canonical baseline; if an instruction file exists, compare the old file against the template and merge old project-specific content into the template only when it does not conflict; if no instruction file exists, create `AGENTS.md` from the full template.
-- `agents.md`: same as `init`; use this alias when the user's intent is specifically to create, inspect, or update project agent instructions.
+- `init` or `-init`: run `powershell -ExecutionPolicy Bypass -File <loaded-skill-root>/scripts/init-agents-template.ps1 -Root <target-repo-root>`, resolving `<loaded-skill-root>` from the current `SKILL.md` location. If the script path is unavailable, perform the same read/merge/write flow manually. Check the target root for `AGENTS.md` and `CLAUDE.md`; copy the full template as the canonical baseline; if an instruction file exists, compare the old file against the template and merge old project-specific content into the template only when it does not conflict; if no instruction file exists, create `AGENTS.md` from the full template.
+- `agents.md` or `-agents.md`: same as `init`; use this alias when the user's intent is specifically to create, inspect, or update project agent instructions.
 
-Command execution must still follow protected-path confirmation rules, preserve non-conflicting project-specific instructions, prefer the template when conflicts appear, and avoid silent overwrites.
+Command execution must still follow protected-path confirmation rules, preserve non-conflicting project-specific instructions, prefer the template when conflicts appear, and avoid silent overwrites. Do not report success after only logging a baseline. A successful command must either create/update the target instruction file or report `no-change` with the exact target path and reason.
 
 ### Must-Have Rules
 

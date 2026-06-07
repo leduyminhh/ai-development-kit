@@ -38,11 +38,25 @@ paths = [
   ".codex/hooks/log-agent-event.ps1",
   ".codex/hooks/lib",
   ".codex/config.toml",
+  "scripts/hooks",
+  "scripts/invoke-hook.ps1",
+  "scripts/hook-doctor.ps1",
+  "scripts/install-hooks.ps1",
   "scripts/hook-service.ps1",
+  "scripts/test-hook-adapters.ps1",
+  "scripts/test-hook-core.ps1",
+  "scripts/test-hook-doctor.ps1",
+  "scripts/test-hook-flow.ps1",
+  "scripts/test-install-hooks.ps1",
   "scripts/test-hook-service.ps1"
 ]
 commands = [
   "powershell -ExecutionPolicy Bypass -File .codex/hooks/test-log-agent-event.ps1",
+  "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-hook-adapters.ps1",
+  "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-hook-core.ps1",
+  "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-hook-doctor.ps1",
+  "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-hook-flow.ps1",
+  "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-install-hooks.ps1",
   "powershell -ExecutionPolicy Bypass -File scripts/test-hook-service.ps1"
 ]
 

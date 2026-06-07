@@ -34,11 +34,30 @@ function Invoke-WithRetry {
     throw $lastError
 }
 
+function Assert-HttpError {
+    param(
+        [scriptblock]$Script,
+        [int]$StatusCode,
+        [string]$Message
+    )
+
+    try {
+        & $Script | Out-Null
+    } catch {
+        $actual = if ($null -ne $_.Exception.Response) { [int]$_.Exception.Response.StatusCode } else { 0 }
+        Assert-Equal $StatusCode $actual $Message
+        return
+    }
+
+    throw "$Message Expected HTTP $StatusCode but request succeeded."
+}
+
 $script = Join-Path $Root 'scripts/hook-service.ps1'
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("codex-hook-service-" + [guid]::NewGuid().ToString())
 $configPath = Join-Path $tempRoot '.codex/config.toml'
 
 try {
+    $env:AI_HOOK_TEST_TOKEN = 'team-secret'
     New-Item -ItemType Directory -Path (Join-Path $tempRoot '.codex') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $tempRoot 'reports/audit/runtime/20200101') -Force | Out-Null
     Set-Content -LiteralPath (Join-Path $tempRoot 'reports/audit/runtime/20200101/stale.log') -Encoding utf8 -Value 'stale'
@@ -59,6 +78,21 @@ defaultLogger = "codex.project"
 defaultTimezone = "Asia/Saigon"
 agentHook = ".codex/hooks/log-agent-event.ps1"
 reloadOnConfigChange = true
+
+[hooks.core]
+enabled = true
+mode = "observe"
+transport = "cli"
+timeoutMs = 1500
+failureMode = "abstain"
+
+[hooks.http]
+url = "http://127.0.0.1:42891/v1/events"
+sharedTokenEnv = ""
+teamId = "team-alpha"
+projectId = "project-one"
+clientName = "local-test"
+maxRequestBytes = 4096
 
 [agent_registry.java-analyze]
 path = ".codex/agents/java-analyze.toml"
@@ -106,6 +140,35 @@ hooks_project_enabled = true
     $line = Get-Content -LiteralPath $eventFile | Select-Object -First 1
     Assert-True ($line.Contains('eventName=agent.execution')) 'Service-written event should keep structured fields.'
 
+    $canonicalResult = Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:42891/v1/events' -ContentType 'application/json' -Body (@{
+        provider = 'codex'
+        nativeEvent = 'UserPromptSubmit'
+        eventName = 'prompt.submitted'
+        sessionId = 'hook-service-session'
+        sourceName = 'codex'
+        timestamp = '2026-04-21T03:00:00Z'
+        payload = @{
+            prompt = 'Check project flow'
+            token = 'secret-value'
+        }
+    } | ConvertTo-Json -Depth 6)
+
+    Assert-Equal 'ai.hook.result.v1' $canonicalResult.schema 'Canonical endpoint should return canonical result schema.'
+    Assert-Equal 'abstain' $canonicalResult.decision 'Audit-only canonical event should abstain.'
+    Assert-True $canonicalResult.auditWritten 'Canonical endpoint should write JSONL audit.'
+    $canonicalFile = Join-Path $tempRoot 'reports/audit/20260421_codex.jsonl'
+    Assert-True (Test-Path -LiteralPath $canonicalFile) 'Canonical endpoint should write JSONL event log.'
+    $canonicalLine = Get-Content -LiteralPath $canonicalFile | Select-Object -First 1
+    $canonicalEvent = $canonicalLine | ConvertFrom-Json
+    Assert-Equal 'team-alpha' $canonicalEvent.teamId 'Canonical endpoint should apply configured team id.'
+    Assert-Equal 'project-one' $canonicalEvent.projectId 'Canonical endpoint should apply configured project id.'
+    Assert-Equal 'local-test' $canonicalEvent.clientName 'Canonical endpoint should apply configured client name.'
+    Assert-Equal '[REDACTED]' $canonicalEvent.payload.token 'Canonical endpoint should redact secrets before audit.'
+
+    Assert-HttpError -StatusCode 400 -Message 'Canonical endpoint should reject malformed JSON.' -Script {
+        Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:42891/v1/events' -ContentType 'application/json' -Body '{'
+    }
+
     Set-Content -LiteralPath $configPath -Encoding utf8 -Value @'
 [hooks.project]
 enabled = true
@@ -122,12 +185,44 @@ defaultTimezone = "Asia/Saigon"
 agentHook = ".codex/hooks/log-agent-event.ps1"
 reloadOnConfigChange = true
 
+[hooks.core]
+enabled = true
+mode = "observe"
+transport = "cli"
+timeoutMs = 1500
+failureMode = "abstain"
+
+[hooks.http]
+url = "http://127.0.0.1:42891/v1/events"
+sharedTokenEnv = "AI_HOOK_TEST_TOKEN"
+teamId = "team-alpha"
+projectId = "project-one"
+clientName = "local-test"
+maxRequestBytes = 64
+
 [agent_registry.java-analyze]
 path = ".codex/agents/java-analyze.toml"
 read_only = false
 enabled = true
 hooks_project_enabled = false
 '@
+    Assert-HttpError -StatusCode 401 -Message 'Canonical endpoint should reject missing shared token when configured.' -Script {
+        Invoke-WithRetry -Script {
+            Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:42891/v1/events' -ContentType 'application/json' -Body (@{
+                provider = 'codex'
+                nativeEvent = 'UserPromptSubmit'
+                eventName = 'prompt.submitted'
+                sessionId = 'hook-service-session'
+                sourceName = 'codex'
+                timestamp = '2026-04-21T04:00:00Z'
+                payload = @{ prompt = 'missing token' }
+            } | ConvertTo-Json -Depth 5)
+        }
+    }
+
+    Assert-HttpError -StatusCode 413 -Message 'Canonical endpoint should reject oversized requests.' -Script {
+        Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:42891/v1/events' -ContentType 'application/json' -Headers @{ 'X-AI-Hook-Token' = 'team-secret' } -Body ('{"large":"' + ('x' * 200) + '"}')
+    }
 
     $skippedEvent = Invoke-WithRetry -Script {
         $result = Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:42891/events' -ContentType 'application/json' -Body (@{
@@ -166,6 +261,8 @@ hooks_project_enabled = false
 
     Write-Output 'hook-service tests passed'
 } finally {
+    Remove-Item Env:\AI_HOOK_TEST_TOKEN -ErrorAction SilentlyContinue
+
     try {
         & powershell -NoProfile -ExecutionPolicy Bypass -File $script -Action stop -Root $tempRoot | Out-Null
     } catch {
