@@ -1,10 +1,10 @@
-# AI Development Kit
+# AI Engineering Platform
 
-**Bộ workflow skill production-grade cho Codex, Claude Code, Cursor và các AI coding agent khác.**
+**Plugin AI engineering co the cai tung phan cho Codex, Claude Code, Cursor va cac AI coding agent khac.**
 
 Phiên bản tiếng Anh: [README.md](README.md)
 
-Repository này đóng gói các agent skill tái sử dụng, validator, bộ định tuyến test, và template agent cục bộ theo project. Mục tiêu là giúp AI coding agent làm việc theo workflow kỹ thuật nhất quán: đọc trước khi viết, chỉnh sửa gọn đúng phạm vi, validate cấu trúc, chạy selected tests, review bảo mật, và ship qua một git workflow dự đoán được.
+Repository nay dong goi agent skills, validators, test routing, template agent theo project, va cac plugin co the cai doc lap. Muc tieu la cho phep project cai rieng tung mang nhu backend/security/testing, hoac cai toan bo AI Engineering Platform thong qua CLI `aiep`.
 
 ---
 
@@ -26,6 +26,60 @@ Các lệnh phổ biến theo vòng đời repository.
 | Chạy selected tests | `powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -FromGit` | Chỉ test phạm vi liên quan |
 
 Không thêm `--help` sau command `skills add <source>`; CLI sẽ hiểu `<source>` là target install.
+
+---
+
+## AI Engineering Platform Plugins
+
+Chay platform CLI ma khong can global install:
+
+```powershell
+npx ai-engineering-platform --help
+```
+
+Cai mot plugin vao project hien tai:
+
+```powershell
+aiep plugin install backend
+aiep plugin install backend --provider codex,claude,cursor
+```
+
+Cai toan bo platform:
+
+```powershell
+aiep install --all
+```
+
+Kiem tra va cap nhat plugin da cai:
+
+```powershell
+aiep plugin list
+aiep plugin outdated
+aiep plugin update backend
+aiep update --all --dry-run
+```
+
+Go file do plugin quan ly mot cach an toan:
+
+```powershell
+aiep plugin remove backend
+aiep plugin remove backend --prune
+aiep remove --all
+```
+
+Mac dinh installation la project-local. Chi dung `--global` khi target agent can cai global. Managed-file drift se dung install, update, va remove tru khi truyen ro `--force`.
+
+Workflow source cho maintainer:
+
+```powershell
+git clone https://github.com/leduyminhh/ai-engineering-platform
+cd ai-engineering-platform
+npm install
+npm run build
+npm link
+```
+
+npm la artifact source chinh. GitHub Release archives mirror cung noi dung plugin va la fallback. Cac flow legacy `scripts/invoke-aidk.ps1` va `npx skills` van duoc giu cho compatibility trong khi plugin distribution hoan thien.
 
 ---
 

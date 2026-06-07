@@ -42,3 +42,22 @@ test("prepares equivalent npm and GitHub release plugin artifacts", async () => 
     await rm(temp, { recursive: true, force: true });
   }
 });
+
+test("documents AIEP lifecycle commands in both readmes", async () => {
+  const expected = [
+    "npx ai-engineering-platform --help",
+    "aiep plugin install backend",
+    "aiep install --all",
+    "aiep plugin update backend",
+    "aiep plugin remove backend",
+    "npm install",
+    "npm run build",
+    "npm link",
+  ];
+  for (const file of ["README.md", "README_VI.md"]) {
+    const content = await readFile(path.join(repoRoot, file), "utf8");
+    for (const text of expected) {
+      assert.match(content, new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    }
+  }
+});

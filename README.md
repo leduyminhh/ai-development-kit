@@ -1,10 +1,10 @@
-# AI Development Kit
+# AI Engineering Platform
 
-**Production-grade workflow skills for Codex, Claude Code, Cursor, and other AI coding agents.**
+**Installable AI engineering plugins for Codex, Claude Code, Cursor, and other AI coding agents.**
 
 Vietnamese version: [README_VI.md](README_VI.md)
 
-This repository packages reusable agent skills, validators, test routing, and project-local agent templates. The goal is to make AI coding agents follow consistent engineering workflows: read before writing, make surgical changes, validate structure, run selected tests, review security, and ship through a predictable git workflow.
+This repository packages reusable agent skills, validators, test routing, project-local agent templates, and independently installable plugins. The goal is to let a project install one workflow area such as backend or security, or install the full AI Engineering Platform through the `aiep` CLI.
 
 ---
 
@@ -28,6 +28,60 @@ Common commands map to the repository lifecycle.
 | Run selected tests | `powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -FromGit` | Test only relevant scope |
 
 Do not append `--help` after a `skills add <source>` command; the CLI treats `<source>` as an install target.
+
+---
+
+## AI Engineering Platform Plugins
+
+Run the platform CLI without a global install:
+
+```powershell
+npx ai-engineering-platform --help
+```
+
+Install one plugin into the current project:
+
+```powershell
+aiep plugin install backend
+aiep plugin install backend --provider codex,claude,cursor
+```
+
+Install the complete platform:
+
+```powershell
+aiep install --all
+```
+
+Inspect and update installed plugins:
+
+```powershell
+aiep plugin list
+aiep plugin outdated
+aiep plugin update backend
+aiep update --all --dry-run
+```
+
+Remove plugin-owned files safely:
+
+```powershell
+aiep plugin remove backend
+aiep plugin remove backend --prune
+aiep remove --all
+```
+
+Installation is project-local by default. Use `--global` only when the target agent should receive a global install. Managed-file drift stops install, update, and remove unless `--force` is explicit.
+
+Maintainer source workflow:
+
+```powershell
+git clone https://github.com/leduyminhh/ai-engineering-platform
+cd ai-engineering-platform
+npm install
+npm run build
+npm link
+```
+
+npm is the primary artifact source. GitHub Release archives mirror the same plugin contents and act as fallback. The legacy `scripts/invoke-aidk.ps1` and `npx skills` flows remain available for compatibility while plugin distribution matures.
 
 ---
 

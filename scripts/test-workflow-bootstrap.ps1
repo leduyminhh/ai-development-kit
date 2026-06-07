@@ -33,7 +33,7 @@ foreach ($pluginPath in @('.codex-plugin/plugin.json', '.claude-plugin/plugin.js
     $fullPath = Join-Path $Root $pluginPath
     Assert-True (Test-Path -LiteralPath $fullPath) "Plugin adapter should exist: $pluginPath"
     $plugin = Get-Content -LiteralPath $fullPath -Raw | ConvertFrom-Json
-    Assert-True ($plugin.name -eq 'ai-development-kit') "Plugin adapter should use ai-development-kit name: $pluginPath"
+    Assert-True ($plugin.name -eq 'ai-engineering-platform') "Plugin adapter should use ai-engineering-platform name: $pluginPath"
 }
 
 Write-Output 'workflow bootstrap tests passed.'
