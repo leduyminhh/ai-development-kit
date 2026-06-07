@@ -17,7 +17,7 @@ Common commands map to the repository lifecycle.
 | List installable skills | `npx skills add . --list` | Inspect before install |
 | Show CLI help | `npx skills --help` | Help at top-level command |
 | Show short help | `npx skills -h` | Alias-friendly usage |
-| Install allowed defaults | `npx skills add . --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review --agent codex -y` | Explicit allowlist |
+| Install allowed defaults | `npx skills add . --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review using-workflow-kit --agent codex -y` | Explicit allowlist |
 | Install one skill | `npx skills add . --skill security-code-review --agent codex -y` | Narrow by default |
 | Alias add | `npx skills a . --skill security-code-review --agent codex -y` | Short command support |
 | Alias list | `npx skills ls --agent codex` | Verify target state |
@@ -105,13 +105,13 @@ This command must create:
 Step 6. Install the default allowed skills into Codex:
 
 ```powershell
-npx skills add $repo --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review --agent codex -y
+npx skills add $repo --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review using-workflow-kit --agent codex -y
 ```
 
 Step 7. Install the same allowed skills into Claude Code:
 
 ```powershell
-npx skills add $repo --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review --agent claude-code -g -y --copy
+npx skills add $repo --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review using-workflow-kit --agent claude-code -g -y --copy
 ```
 
 Step 8. Verify from the target machine:
@@ -143,7 +143,7 @@ Use `-g` so the skill lands under the Claude Code global skills directory, and u
 The `skills` CLI targets Cursor through the shared agent skills path:
 
 ```powershell
-npx skills add $repo --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review --agent cursor -y --copy
+npx skills add $repo --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review using-workflow-kit --agent cursor -y --copy
 ```
 
 Cursor can also consume copied skill text through project rules when a project does not use the CLI.
@@ -211,9 +211,46 @@ powershell -ExecutionPolicy Bypass -File scripts/view-hook-trace.ps1 -TraceId <t
 
 ---
 
+## Workflow Bootstrap
+
+`using-workflow-kit` is the bootstrap skill for workflow and skill routing. It should be installed with the default allowlist, then invoked before choosing a concrete workflow or fallback skill:
+
+```text
+Codex: $using-workflow-kit
+Claude Code: /using-workflow-kit or the installed skill invocation
+Cursor: command/rule adapter that points to using-workflow-kit
+```
+
+Workflow registry support is present but intentionally empty in this bootstrap phase:
+
+```text
+.codex/workflows/registry.toml
+```
+
+Validate the registry before adding concrete workflows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/validate-workflows.ps1 -Root .
+```
+
+Provider adapters are thin wrappers over the same source skill and future workflow registry:
+
+```text
+.codex-plugin/plugin.json
+.claude-plugin/plugin.json
+.cursor-plugin/plugin.json
+adapters/codex/bootstrap-snippet.toml
+adapters/claude/hooks.json
+adapters/cursor/hooks.json
+```
+
+Concrete backend/frontend workflows are not registered yet.
+
+---
+
 ## Skill Catalog
 
-The repository currently contains 15 skills. The default install allowlist is intentionally smaller:
+The repository currently contains 16 skills. The default install allowlist is intentionally smaller:
 
 ```text
 agent-operating-rules
@@ -221,6 +258,7 @@ diagram-generate
 doc-write
 git-workflow-design
 security-code-review
+using-workflow-kit
 ```
 
 ### Operating And Validation
@@ -230,6 +268,7 @@ security-code-review
 | [agent-operating-rules](skills/agent-operating-rules/SKILL.md) | Applies repository-wide execution discipline: read first, keep changes surgical, test intent, fail loud. | Planning, editing, validating, or resolving conflicting instructions. |
 | [codex-structure-validate](skills/codex-structure-validate/SKILL.md) | Validates AGENTS.md, skills, agents, config, hooks, test mapping, and skill spec compliance. | After structure changes or before considering repository work complete. |
 | [naming-rule-validate](skills/naming-rule-validate/SKILL.md) | Checks naming conventions for agents, skills, subagents, workflows, hooks, scripts, and validators. | Creating or renaming Codex project artifacts. |
+| [using-workflow-kit](skills/using-workflow-kit/SKILL.md) | Bootstraps workflow registry checks and fallback skill selection before task execution. | Starting sessions, selecting workflow adapters, or preparing future workflow entries. |
 
 ### Build And Architecture
 
@@ -323,6 +362,7 @@ ai-development-kit/
     agents/                         # project-local agent entry points
     agent-metadata/                 # read-only/hooks metadata for agent registry sync
     config.toml                     # deterministic behavior, guards, hooks, validation
+    workflows/                      # workflow registry; concrete workflows are added later
     hooks/                          # project hook wrappers and hook libraries
     mcp/                            # MCP templates or snippets
     test-map.toml                   # selected test routing
@@ -355,6 +395,7 @@ The validator checks:
 - `.codex/agents/<name>.toml` agent structure and skill references.
 - `.codex/config.toml` safety defaults and agent registry.
 - `.codex/test-map.toml` selected test mapping.
+- `.codex/workflows/registry.toml` and workflow adapter readiness through `scripts/validate-workflows.ps1`.
 - Optional hooks, reports, and protected path policy.
 
 Run selected tests for current git changes:

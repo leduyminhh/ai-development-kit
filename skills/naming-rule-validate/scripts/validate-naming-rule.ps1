@@ -60,7 +60,9 @@ function Test-CapabilityName {
 
     $approvedCapabilityNames = @(
         'agent-operating-rules',
-        'code-design-pattern'
+        'code-design-pattern',
+        'using-workflow-kit',
+        'youtube-transcript'
     )
     if ($approvedCapabilityNames -contains $Name) {
         return $true
@@ -120,6 +122,13 @@ function Test-ScriptName {
         return $false
     }
 
+    $approvedScriptNames = @(
+        'skill-doctor'
+    )
+    if ($approvedScriptNames -contains $Name) {
+        return $true
+    }
+
     if (Test-ForbiddenRoleSuffix -Name $Name) {
         return $false
     }
@@ -130,7 +139,8 @@ function Test-ScriptName {
 
     $scriptVerbs = @(
         'analyze', 'review', 'generate', 'write', 'validate', 'fix', 'optimize', 'design',
-        'run', 'test', 'install', 'resolve', 'invoke', 'add', 'apply', 'hook', 'log'
+        'run', 'test', 'install', 'resolve', 'invoke', 'add', 'apply', 'hook', 'log',
+        'init', 'link', 'query', 'view'
     )
     $firstToken = @($Name -split '-')[0]
     return $scriptVerbs -contains $firstToken

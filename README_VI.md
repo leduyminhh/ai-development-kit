@@ -17,7 +17,7 @@ Các lệnh phổ biến theo vòng đời repository.
 | Liệt kê skill có thể install | `npx skills add . --list` | Inspect trước khi install |
 | Xem CLI help | `npx skills --help` | Help ở top-level command |
 | Xem help dạng ngắn | `npx skills -h` | Alias-friendly usage |
-| Install default allowlist | `npx skills add . --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review --agent codex -y` | Chỉ install danh sách được cho phép |
+| Install default allowlist | `npx skills add . --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review using-workflow-kit --agent codex -y` | Chỉ install danh sách được cho phép |
 | Install một skill | `npx skills add . --skill security-code-review --agent codex -y` | Mặc định hẹp phạm vi |
 | Alias add | `npx skills a . --skill security-code-review --agent codex -y` | Hỗ trợ command ngắn |
 | Alias list | `npx skills ls --agent codex` | Xác minh trạng thái target |
@@ -105,13 +105,13 @@ Command này phải tạo:
 Step 6. Install default allowed skills vào Codex:
 
 ```powershell
-npx skills add $repo --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review --agent codex -y
+npx skills add $repo --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review using-workflow-kit --agent codex -y
 ```
 
 Step 7. Install cùng danh sách skill được cho phép vào Claude Code:
 
 ```powershell
-npx skills add $repo --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review --agent claude-code -g -y --copy
+npx skills add $repo --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review using-workflow-kit --agent claude-code -g -y --copy
 ```
 
 Step 8. Verify trên máy target:
@@ -143,7 +143,7 @@ Dùng `-g` để skill được đặt dưới thư mục global skills của Cl
 `skills` CLI target Cursor thông qua shared agent skills path:
 
 ```powershell
-npx skills add $repo --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review --agent cursor -y --copy
+npx skills add $repo --skill agent-operating-rules diagram-generate doc-write git-workflow-design security-code-review using-workflow-kit --agent cursor -y --copy
 ```
 
 Cursor cũng có thể dùng skill text đã copy qua project rules nếu project không dùng CLI.
@@ -210,9 +210,47 @@ powershell -ExecutionPolicy Bypass -File scripts/view-hook-trace.ps1 -TraceId <t
 ```
 
 ---
+
+## Workflow Bootstrap
+
+`using-workflow-kit` là bootstrap skill cho workflow và skill routing. Skill này nên được install cùng default allowlist, rồi gọi trước khi chọn workflow cụ thể hoặc fallback skill:
+
+```text
+Codex: $using-workflow-kit
+Claude Code: /using-workflow-kit hoặc skill invocation đã install
+Cursor: command/rule adapter trỏ tới using-workflow-kit
+```
+
+Workflow registry hiện được tạo sẵn nhưng chưa đăng ký workflow concrete:
+
+```text
+.codex/workflows/registry.toml
+```
+
+Validate registry trước khi thêm workflow cụ thể:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/validate-workflows.ps1 -Root .
+```
+
+Provider adapters chỉ là wrapper mỏng trỏ về cùng source skill và future workflow registry:
+
+```text
+.codex-plugin/plugin.json
+.claude-plugin/plugin.json
+.cursor-plugin/plugin.json
+adapters/codex/bootstrap-snippet.toml
+adapters/claude/hooks.json
+adapters/cursor/hooks.json
+hooks/session-start
+```
+
+Các workflow backend/frontend concrete chưa được đăng ký ở bước này.
+
+---
 ## Skill Catalog
 
-Repository hiện có 15 skills. Default install allowlist được giữ nhỏ có chủ đích:
+Repository hiện có 16 skills. Default install allowlist được giữ nhỏ có chủ đích:
 
 ```text
 agent-operating-rules
@@ -220,6 +258,7 @@ diagram-generate
 doc-write
 git-workflow-design
 security-code-review
+using-workflow-kit
 ```
 
 ### Operating And Validation
@@ -229,6 +268,7 @@ security-code-review
 | [agent-operating-rules](skills/agent-operating-rules/SKILL.md) | Áp dụng execution discipline cấp repository: đọc trước, chỉnh sửa gọn, test đúng intent, fail loud. | Planning, editing, validating, hoặc xử lý instruction conflict. |
 | [codex-structure-validate](skills/codex-structure-validate/SKILL.md) | Validate AGENTS.md, skills, agents, config, hooks, test mapping, và compliance theo skill spec. | Sau structure change hoặc trước khi xem repository work là hoàn tất. |
 | [naming-rule-validate](skills/naming-rule-validate/SKILL.md) | Kiểm tra naming convention cho agents, skills, subagents, workflows, hooks, scripts, và validators. | Tạo hoặc rename Codex project artifacts. |
+| [using-workflow-kit](skills/using-workflow-kit/SKILL.md) | Bootstrap workflow registry checks và fallback skill selection trước khi thực thi task. | Bắt đầu session, chọn workflow adapters, hoặc chuẩn bị future workflow entries. |
 
 ### Build And Architecture
 
@@ -324,6 +364,7 @@ ai-development-kit/
     agents/                         # project-local agent entry points
     agent-metadata/                 # read-only/hooks metadata for agent registry sync
     config.toml                     # deterministic behavior, guards, hooks, validation
+    workflows/                      # workflow registry; concrete workflows sẽ thêm sau
     hooks/                          # project hook wrappers and hook libraries
     mcp/                            # MCP templates or snippets
     test-map.toml                   # selected test routing
@@ -357,6 +398,7 @@ Validator kiểm tra:
 - `.codex/agents/<name>.toml` agent structure và skill references.
 - `.codex/config.toml` safety defaults và agent registry.
 - `.codex/test-map.toml` selected test mapping.
+- `.codex/workflows/registry.toml` và workflow adapter readiness qua `scripts/validate-workflows.ps1`.
 - Optional hooks, reports, và protected path policy.
 
 Chạy selected tests cho thay đổi git hiện tại:

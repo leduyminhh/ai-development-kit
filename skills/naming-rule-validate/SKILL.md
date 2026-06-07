@@ -183,6 +183,8 @@ Approved capability noun exceptions:
 
 - `agent-operating-rules`
 - `code-design-pattern`
+- `using-workflow-kit`
+- `youtube-transcript`
 
 Current approved agents:
 
@@ -204,6 +206,8 @@ Current skill-only capabilities:
 - `architecture-onion-design`
 - `code-shared-design`
 - `naming-rule-validate`
+- `using-workflow-kit`
+- `youtube-transcript`
 
 Scripts and hooks may use command-style verbs when they are operational wrappers, for example:
 
@@ -212,6 +216,8 @@ Scripts and hooks may use command-style verbs when they are operational wrappers
 - [skills/test-automation-validate/scripts/test-automation-validate-strategy.ps1](../../../skills/test-automation-validate/scripts/test-automation-validate-strategy.ps1)
 - [.codex/hooks/log-agent-event.ps1](../../../.codex/hooks/log-agent-event.ps1)
 - [scripts/hook-service.ps1](../../../scripts/hook-service.ps1)
+- [scripts/query-hook-audit.ps1](../../../scripts/query-hook-audit.ps1)
+- [scripts/view-hook-trace.ps1](../../../scripts/view-hook-trace.ps1)
 - `run-coverage-report.ps1`
 - `validate-workflow.ps1`
 - `test-naming-rule-validate.ps1`

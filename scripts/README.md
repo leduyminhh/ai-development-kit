@@ -12,6 +12,7 @@ Ownership rule:
 - Cai dat lien ket skill vao discovery path.
 - Resolve output file theo cau hinh.
 - Resolve va chay selected tests.
+- Validate workflow registry bootstrap va adapter readiness.
 - Chua service runtime de nhan va dispatch project hook events qua local TCP.
 - Cung cap test cho script, hook, validator va routing.
 - Chua library PowerShell dung chung trong `scripts/lib/`.
@@ -25,6 +26,7 @@ Ownership rule:
 | `resolve-output-file.ps1` | Resolve duong dan output theo `.codex/config.toml`, subpath, filename pattern va timezone. |
 | `resolve-test-plan.ps1` | Chon test command tu `.codex/test-map.toml` theo changed files, activated skills hoac agent names. |
 | `test-selected.ps1` | Chay selected test plan; dung `-FromGit` de dua vao changed files/untracked files. |
+| `validate-workflows.ps1` | Validate `.codex/workflows/registry.toml`; registry rong duoc xem la hop le trong bootstrap phase. |
 
 ## Library
 
@@ -44,6 +46,7 @@ Ownership rule:
 | `test-resolve-output-file.ps1` | Kiem tra output path resolver. |
 | `test-skills-cli-compat.ps1` | Kiem tra `npx skills add . --list` discover duoc skill package cua repo. |
 | `test-test-map.ps1` | Kiem tra selected test routing va yeu cau map `*test*.ps1`. |
+| `test-workflow-bootstrap.ps1` | Kiem tra bootstrap skill, manifest registration, registry parse, validator, va plugin adapter manifests. |
 
 ## Quy Tac Khi Them Script
 
@@ -66,6 +69,12 @@ Xem test plan kem commands:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/resolve-test-plan.ps1 -FromGit -IncludeCommands
+```
+
+Validate workflow registry bootstrap:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/validate-workflows.ps1 -Root .
 ```
 
 Khoi dong hook service runtime:

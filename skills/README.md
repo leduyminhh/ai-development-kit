@@ -39,6 +39,12 @@ skills/
 
 The manifest does not replace `.codex/config.toml`. It documents which skills have agent entry points, which skills are companion skills, and where UI metadata lives.
 
+## Workflow Bootstrap
+
+`using-workflow-kit` is the bootstrap skill for workflow-aware sessions. It checks whether `.codex/workflows/registry.toml` has a matching workflow entry and falls back to normal skill routing when the registry is empty.
+
+This repository intentionally ships the registry before concrete workflows. Future workflow entries should point to `workflows/<name>/WORKFLOW.md` and reference existing skills by name.
+
 ## Current Skill Catalog
 
 | Skill | Purpose |
@@ -53,6 +59,7 @@ The manifest does not replace `.codex/config.toml`. It documents which skills ha
 | `git-workflow-design` | Handles branch, commit, merge, revert, release, hotfix, staging, push, and PR workflows. |
 | `java-analyze` | Reviews Java/Spring architecture, persistence, async behavior, API contracts, and test strategy. |
 | `naming-rule-validate` | Validates naming conventions for agents, skills, subagents, workflows, hooks, scripts, and validators. |
+| `using-workflow-kit` | Bootstraps workflow registry checks and fallback skill selection before task execution. |
 | `react-code-generate` | Creates or updates React UI, API integration, accessibility checks, performance review, and handoff notes. |
 | `security-code-review` | Reviews security risks across OWASP/ASVS/CWE, auth, secrets, dependencies, logging, and verification. |
 | `test-automation-validate` | Plans, creates, runs, and stabilizes automated tests across stacks. |

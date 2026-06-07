@@ -1,0 +1,19 @@
+# Workflow registry for codex-workflow-kit.
+# Concrete workflows are intentionally not registered yet.
+
+schema_version = 1
+workflows_root = "workflows"
+
+[adapter_roots]
+codex = ".codex-plugin"
+claude_code = ".claude-plugin"
+cursor = ".cursor-plugin"
+
+# Future workflow entries should use this shape:
+# [workflow.workflow-example-maintain]
+# path = "workflows/workflow-example-maintain/WORKFLOW.md"
+# role = "example"
+# mode = "maintain"
+# skills = ["using-workflow-kit"]
+# required_events = ["workflow.started", "workflow.completed"]
+# adapter_names = ["example-maintain"]

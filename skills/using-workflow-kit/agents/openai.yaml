@@ -1,0 +1,4 @@
+interface:
+  display_name: "Using Workflow Kit"
+  short_description: "Bootstrap workflow and skill selection"
+  default_prompt: "Use $using-workflow-kit to choose the right workflow or fallback skill before executing this task."

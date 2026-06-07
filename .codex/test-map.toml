@@ -64,12 +64,33 @@ commands = [
   "powershell -ExecutionPolicy Bypass -File scripts/test-hook-service.ps1"
 ]
 
+[test.core.workflow]
+paths = [
+  ".codex/workflows",
+  ".codex-plugin",
+  ".claude-plugin",
+  ".cursor-plugin",
+  "adapters",
+  "hooks/session-start",
+  "hooks/run-hook.cmd",
+  "scripts/validate-workflows.ps1",
+  "scripts/test-workflow-bootstrap.ps1",
+  "skills/using-workflow-kit"
+]
+commands = [
+  "powershell -ExecutionPolicy Bypass -File scripts/validate-workflows.ps1 -Root .",
+  "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-workflow-bootstrap.ps1"
+]
+
 [test.core.validator]
 paths = [
   "skills/codex-structure-validate",
   ".codex/agent-metadata",
   ".codex/config.toml",
   ".codex/test-map.toml",
+  ".codex/workflows",
+  "scripts/validate-workflows.ps1",
+  "scripts/test-workflow-bootstrap.ps1",
   "scripts/install-skill-link.ps1",
   "scripts/install.ps1",
   "scripts/skill-doctor.ps1",
@@ -85,6 +106,8 @@ paths = [
   "skills/SKILL_TEMPLATE.md"
 ]
 commands = [
+  "powershell -ExecutionPolicy Bypass -File scripts/validate-workflows.ps1 -Root .",
+  "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-workflow-bootstrap.ps1",
   "powershell -ExecutionPolicy Bypass -File scripts/test-install-skill-link.ps1",
   "powershell -ExecutionPolicy Bypass -File scripts/test-skill-doctor.ps1",
   "powershell -ExecutionPolicy Bypass -File scripts/test-skills-cli-compat.ps1",

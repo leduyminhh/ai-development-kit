@@ -1,0 +1,32 @@
+{
+  "name": "codex-workflow-kit",
+  "version": "0.1.0",
+  "description": "Bootstrap skills, workflow registry validation, and adapter metadata for Codex workflow orchestration.",
+  "author": {
+    "name": "leduyminhh"
+  },
+  "homepage": "https://github.com/leduyminhh/ai-development-kit",
+  "repository": "https://github.com/leduyminhh/ai-development-kit",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "workflow",
+    "hooks",
+    "codex"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codex Workflow Kit",
+    "shortDescription": "Bootstrap workflow and skill routing",
+    "longDescription": "Use Codex Workflow Kit to bootstrap skill selection, validate workflow registry entries, and keep provider adapters thin before concrete workflows are added.",
+    "developerName": "leduyminhh",
+    "category": "Coding",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Use $using-workflow-kit before selecting a workflow or fallback skill."
+    ]
+  }
+}

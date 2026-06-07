@@ -14,7 +14,11 @@ $json = powershell -ExecutionPolicy Bypass -File $doctor -Root $Root -Json
 Assert-True ($LASTEXITCODE -eq 0) 'skill-doctor should exit successfully for this repository.'
 
 $results = $json | ConvertFrom-Json
-Assert-True (@($results).Count -eq 15) 'skill-doctor should report all runtime skills.'
+$expectedRuntimeSkillCount = @(
+    Get-ChildItem -LiteralPath (Join-Path $Root 'skills') -Directory |
+        Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName 'SKILL.md') }
+).Count
+Assert-True (@($results).Count -eq $expectedRuntimeSkillCount) 'skill-doctor should report all runtime skills.'
 
 $security = @($results | Where-Object { $_.Skill -eq 'security-code-review' })[0]
 Assert-True ($null -ne $security) 'skill-doctor should include security-code-review.'

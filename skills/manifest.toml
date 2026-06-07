@@ -35,7 +35,8 @@ allowed_default_skills = [
   "diagram-generate",
   "doc-write",
   "git-workflow-design",
-  "security-code-review"
+  "security-code-review",
+  "using-workflow-kit"
 ]
 alias_commands = [
   "npx skills a . --skill security-code-review --agent codex -y",
@@ -172,6 +173,14 @@ ui_metadata = "skills/test-qa-review/agents/openai.yaml"
 agent_entry = ".codex/agents/test-qa-review.toml"
 registered_agent = "test-qa-review"
 kind = "entry"
+
+[[skill]]
+name = "using-workflow-kit"
+skill_path = "skills/using-workflow-kit/SKILL.md"
+ui_metadata = "skills/using-workflow-kit/agents/openai.yaml"
+agent_entry = ""
+registered_agent = ""
+kind = "support"
 
 [[skill]]
 name = "youtube-transcript"

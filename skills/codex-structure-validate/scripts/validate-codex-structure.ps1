@@ -532,7 +532,8 @@ if (Test-Path -LiteralPath $readmePath) {
         'diagram-generate',
         'doc-write',
         'git-workflow-design',
-        'security-code-review'
+        'security-code-review',
+        'using-workflow-kit'
     )
     $missingInstallContract = Test-ReadmeContainsInstallCommandContract -ReadmeText $readmeText -AllowedSkillNames $defaultInstallAllowlist
     if ($missingInstallContract.Count -eq 0) {
