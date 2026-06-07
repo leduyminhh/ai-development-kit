@@ -16,6 +16,7 @@ import {
 } from "./io.mjs";
 import { projectProviders } from "./providers.mjs";
 import { resolvePluginGraph } from "./resolver.mjs";
+import { preparePluginDistribution } from "./distribution.mjs";
 
 async function copyDirectory(source, destination) {
   await mkdir(path.dirname(destination), { recursive: true });
@@ -141,6 +142,26 @@ export async function buildAllPlugins({ root, outputRoot }) {
     results.push(await buildPlugin({ root, pluginId, outputRoot }));
   }
   return results;
+}
+
+export async function buildAllDistributions({ root, outputRoot }) {
+  const pluginArtifacts = await buildAllPlugins({
+    root,
+    outputRoot: path.join(outputRoot, "plugins"),
+  });
+  const distributions = [];
+  for (const artifact of pluginArtifacts) {
+    distributions.push(
+      await preparePluginDistribution({
+        pluginId: artifact.id,
+        version: artifact.version,
+        artifactRoot: artifact.path,
+        npmRoot: path.join(outputRoot, "npm"),
+        releaseRoot: path.join(outputRoot, "releases"),
+      }),
+    );
+  }
+  return { pluginArtifacts, distributions };
 }
 
 export async function verifyPluginArtifact(artifactRoot) {
