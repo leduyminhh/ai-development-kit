@@ -1,4 +1,8 @@
 .worktrees/
 reports/
 audit/
+dist/
+.aiep/
+*.tgz
+*.tmp
 

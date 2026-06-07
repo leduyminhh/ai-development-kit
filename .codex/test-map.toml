@@ -89,6 +89,19 @@ commands = [
   "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-workflow-bootstrap.ps1"
 ]
 
+[test.core.platform]
+paths = [
+  "package.json",
+  "platform",
+  "packages",
+  "registry",
+  "schemas",
+  "scripts/test-aiep-platform.ps1"
+]
+commands = [
+  "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-aiep-platform.ps1"
+]
+
 [test.core.validator]
 paths = [
   "skills/codex-structure-validate",
