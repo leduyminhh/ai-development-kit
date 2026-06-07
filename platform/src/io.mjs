@@ -2,6 +2,10 @@ import { createHash } from "node:crypto";
 import { mkdir, readdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+export function checksumText(content) {
+  return createHash("sha256").update(content, "utf8").digest("hex");
+}
+
 export async function sha256File(pathname) {
   return createHash("sha256").update(await readFile(pathname)).digest("hex");
 }
