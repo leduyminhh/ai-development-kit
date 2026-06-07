@@ -1,0 +1,42 @@
+{
+  "apiVersion": "aiep.dev/v1alpha1",
+  "platformVersion": "1.0.0",
+  "plugins": [
+    {
+      "id": "architecture",
+      "name": "Architecture Engineering",
+      "latest": "1.0.0",
+      "entry": "plugins/architecture.json"
+    },
+    {
+      "id": "backend",
+      "name": "Backend Engineering",
+      "latest": "1.0.0",
+      "entry": "plugins/backend.json"
+    },
+    {
+      "id": "documentation",
+      "name": "Documentation Engineering",
+      "latest": "1.0.0",
+      "entry": "plugins/documentation.json"
+    },
+    {
+      "id": "frontend",
+      "name": "Frontend Engineering",
+      "latest": "1.0.0",
+      "entry": "plugins/frontend.json"
+    },
+    {
+      "id": "security",
+      "name": "Security Engineering",
+      "latest": "1.0.0",
+      "entry": "plugins/security.json"
+    },
+    {
+      "id": "testing",
+      "name": "Test Engineering",
+      "latest": "1.0.0",
+      "entry": "plugins/testing.json"
+    }
+  ]
+}

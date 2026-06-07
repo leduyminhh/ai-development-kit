@@ -1,6 +1,7 @@
 .worktrees/
 reports/
 audit/
+node_modules/
 dist/
 .aiep/
 *.tgz

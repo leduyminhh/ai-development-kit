@@ -2,6 +2,7 @@ import { AiepError } from "./errors.mjs";
 import { validateRepository } from "./contracts.mjs";
 import { buildAllPlugins, verifyPluginArtifact } from "./builder.mjs";
 import { readdir } from "node:fs/promises";
+import { generateRegistry } from "./registry.mjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -87,6 +88,26 @@ export async function run(args, streams = process) {
       args.includes("--json")
         ? `${JSON.stringify(result)}\n`
         : `Verified ${verified.length} plugin artifacts.\n`,
+    );
+    return 0;
+  }
+
+  if (args[0] === "registry" && args[1] === "generate") {
+    const root = path.resolve(
+      path.dirname(fileURLToPath(import.meta.url)),
+      "..",
+      "..",
+    );
+    const result = await generateRegistry({
+      root,
+      artifactsRoot: path.join(root, "dist", "plugins"),
+      registryRoot: path.join(root, "registry"),
+    });
+    const output = { status: "pass", pluginCount: result.plugins.length };
+    streams.stdout.write(
+      args.includes("--json")
+        ? `${JSON.stringify(output)}\n`
+        : `Generated registry for ${output.pluginCount} plugins.\n`,
     );
     return 0;
   }
