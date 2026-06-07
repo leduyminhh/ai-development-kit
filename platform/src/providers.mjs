@@ -1,0 +1,109 @@
+function json(value) {
+  return `${JSON.stringify(value, null, 2)}\n`;
+}
+
+function commandBody(command) {
+  return `# ${command.id}
+
+## Intent
+
+${command.intent}
+
+## Required Skills
+
+${command.requiredSkills.map((skill) => `- ${skill}`).join("\n")}
+
+## Steps
+
+${command.steps.map((step, index) => `${index + 1}. ${step}`).join("\n")}
+
+## Output Contract
+
+${command.outputContract.map((item) => `- ${item}`).join("\n")}
+`;
+}
+
+function manifest(context, provider) {
+  return {
+    apiVersion: "aiep.dev/v1alpha1",
+    kind: "ProviderProjection",
+    provider,
+    plugin: {
+      id: context.plugin.metadata.id,
+      name: context.plugin.metadata.name,
+      version: context.plugin.metadata.version,
+    },
+    skills: [...context.skills].sort(),
+    agents: [...context.agents].sort(),
+    hooks: [...context.hooks].sort(),
+    commands: context.commands.map((command) => command.id).sort(),
+  };
+}
+
+export function projectCodex(context) {
+  const providerManifest = manifest(context, "codex");
+  const workflow = context.commands.map(commandBody).join("\n");
+  return {
+    manifest: providerManifest,
+    workflow,
+    intent: context.commands[0]?.intent ?? "",
+    files: [
+      {
+        path: "adapters/codex/provider.json",
+        content: json(providerManifest),
+      },
+      {
+        path: "adapters/codex/workflows/commands.md",
+        content: workflow,
+      },
+    ],
+  };
+}
+
+export function projectClaude(context) {
+  const providerManifest = manifest(context, "claude");
+  const commands = context.commands.map((command) => ({
+    path: `adapters/claude/.claude/commands/${command.id}.md`,
+    content: `---\ndescription: ${command.description}\n---\n\n${commandBody(command)}`,
+  }));
+  return {
+    manifest: providerManifest,
+    command: commands[0]?.content ?? "",
+    intent: context.commands[0]?.intent ?? "",
+    files: [
+      {
+        path: "adapters/claude/provider.json",
+        content: json(providerManifest),
+      },
+      ...commands,
+    ],
+  };
+}
+
+export function projectCursor(context) {
+  const providerManifest = manifest(context, "cursor");
+  const rules = context.commands.map((command) => ({
+    path: `adapters/cursor/.cursor/rules/${command.id}.mdc`,
+    content: `---\ndescription: ${command.description}\nalwaysApply: false\n---\n\n${commandBody(command)}`,
+  }));
+  return {
+    manifest: providerManifest,
+    rule: rules[0]?.content ?? "",
+    intent: context.commands[0]?.intent ?? "",
+    files: [
+      {
+        path: "adapters/cursor/provider.json",
+        content: json(providerManifest),
+      },
+      ...rules,
+    ],
+  };
+}
+
+export function projectProviders(context) {
+  return {
+    codex: projectCodex(context),
+    claude: projectClaude(context),
+    cursor: projectCursor(context),
+  };
+}
