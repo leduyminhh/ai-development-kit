@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aidk.dev/schemas/install-state.schema.json",
+  "title": "AIDK Install State",
+  "type": "object",
+  "required": ["schemaVersion", "aidkVersion", "providers", "packages", "hooks", "generatedFiles", "sourceChecksums", "installedAt"],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "aidkVersion": {
+      "type": "string"
+    },
+    "providers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "packages": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "hooks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "generatedFiles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "sourceChecksums": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "installedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

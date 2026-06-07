@@ -1,0 +1,33 @@
+{
+  "apiVersion": "aidk.dev/v1alpha1",
+  "kind": "Package",
+  "metadata": {
+    "id": "security",
+    "name": "Security Engineering",
+    "version": "1.1.0",
+    "description": "Source-first security review, dependency analysis, secrets review, and verified remediation."
+  },
+  "compatibility": {
+    "aidk": ">=1.1.0 <2.0.0",
+    "providers": {
+      "codex": "supported",
+      "claude": "supported",
+      "cursor": "supported"
+    }
+  },
+  "dependencies": {
+    "required": [],
+    "optional": ["testing"]
+  },
+  "assets": {
+    "skills": ["security-code-review"],
+    "agents": ["security-code-review"],
+    "workflows": [],
+    "hooks": ["project-audit"]
+  },
+  "install": {
+    "defaultScope": "project",
+    "supportsCopy": true,
+    "supportsLink": true
+  }
+}

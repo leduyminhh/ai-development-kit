@@ -1,0 +1,33 @@
+{
+  "apiVersion": "aidk.dev/v1alpha1",
+  "kind": "Package",
+  "metadata": {
+    "id": "frontend",
+    "name": "Frontend Engineering",
+    "version": "1.1.0",
+    "description": "React implementation, accessibility, API integration, performance review, and testing."
+  },
+  "compatibility": {
+    "aidk": ">=1.1.0 <2.0.0",
+    "providers": {
+      "codex": "supported",
+      "claude": "supported",
+      "cursor": "supported"
+    }
+  },
+  "dependencies": {
+    "required": [],
+    "optional": ["security", "testing"]
+  },
+  "assets": {
+    "skills": ["react-code-generate", "test-automation-validate"],
+    "agents": ["react-code-generate", "test-automation-validate"],
+    "workflows": [],
+    "hooks": ["project-audit"]
+  },
+  "install": {
+    "defaultScope": "project",
+    "supportsCopy": true,
+    "supportsLink": true
+  }
+}

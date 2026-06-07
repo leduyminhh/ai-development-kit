@@ -1,0 +1,33 @@
+{
+  "apiVersion": "aidk.dev/v1alpha1",
+  "kind": "Package",
+  "metadata": {
+    "id": "testing",
+    "name": "Test Engineering",
+    "version": "1.1.0",
+    "description": "QA review, regression analysis, test strategy, implementation, and stabilization."
+  },
+  "compatibility": {
+    "aidk": ">=1.1.0 <2.0.0",
+    "providers": {
+      "codex": "supported",
+      "claude": "supported",
+      "cursor": "supported"
+    }
+  },
+  "dependencies": {
+    "required": [],
+    "optional": []
+  },
+  "assets": {
+    "skills": ["test-qa-review", "test-automation-validate"],
+    "agents": ["test-qa-review", "test-automation-validate"],
+    "workflows": [],
+    "hooks": ["project-audit"]
+  },
+  "install": {
+    "defaultScope": "project",
+    "supportsCopy": true,
+    "supportsLink": true
+  }
+}

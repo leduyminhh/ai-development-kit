@@ -21,6 +21,7 @@ Ownership rule:
 
 | File | Chuc nang |
 |---|---|
+| `invoke-aidk.ps1` | CLI local cho AIDK v1.1: validate, plan, export, install va remove package/provider artifacts. |
 | `install-skill-link.ps1` | Tao junction/symlink tu Codex skill discovery path toi `skills` cua repo. |
 | `hook-service.ps1` | Start, stop, reload, status cho project hook runtime; service lang nghe local API va ghi runtime state/log vao `reports/audit/runtime/yyyyMMdd/`. |
 | `resolve-output-file.ps1` | Resolve duong dan output theo `.codex/config.toml`, subpath, filename pattern va timezone. |
@@ -35,11 +36,13 @@ Ownership rule:
 | `lib/codex-config.ps1` | Helper doc gia tri TOML don gian cho config/test map. |
 | `lib/codex-output-file.ps1` | Helper tao ten file va duong dan output theo policy. |
 | `lib/codex_config.py` | Helper Python doc config TOML va timezone cho runtime flow skill upgrade. |
+| `lib/aidk_core.py` | Core Python stdlib cho schema/package validation, dependency resolution, adapter artifacts, install state, conflict va rollback. |
 
 ## Test Scripts
 
 | File | Chuc nang |
 |---|---|
+| `test-aidk-core.ps1` | Kiem tra package resolution, adapter parity, selective export, hook lifecycle, conflict, install-state va remove. |
 | `test-codex-pwsh-lib.ps1` | Kiem tra PowerShell helper library. |
 | `test-hook-service.ps1` | Kiem tra hook service runtime: start, health, event dispatch, auto reload, retention va stop. |
 | `test-progressive-disclosure.ps1` | Kiem tra cac skill lon phai defer mapping rong sang selector resources. |

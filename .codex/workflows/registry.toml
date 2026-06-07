@@ -1,4 +1,4 @@
-# Workflow registry for codex-workflow-kit.
+# Workflow registry for ai-development-kit.
 # Concrete workflows are intentionally not registered yet.
 
 schema_version = 1

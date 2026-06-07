@@ -71,13 +71,20 @@ paths = [
   ".claude-plugin",
   ".cursor-plugin",
   "adapters",
+  "packages",
+  "schemas",
+  "aidk.config.yaml",
   "hooks/session-start",
   "hooks/run-hook.cmd",
+  "scripts/invoke-aidk.ps1",
+  "scripts/lib/aidk_core.py",
+  "scripts/test-aidk-core.ps1",
   "scripts/validate-workflows.ps1",
   "scripts/test-workflow-bootstrap.ps1",
   "skills/using-workflow-kit"
 ]
 commands = [
+  "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-aidk-core.ps1",
   "powershell -ExecutionPolicy Bypass -File scripts/validate-workflows.ps1 -Root .",
   "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-workflow-bootstrap.ps1"
 ]

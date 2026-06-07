@@ -1,0 +1,33 @@
+{
+  "apiVersion": "aidk.dev/v1alpha1",
+  "kind": "Package",
+  "metadata": {
+    "id": "documentation",
+    "name": "Documentation Engineering",
+    "version": "1.1.0",
+    "description": "Technical documentation, diagrams, architecture notes, flows, and implementation handoff."
+  },
+  "compatibility": {
+    "aidk": ">=1.1.0 <2.0.0",
+    "providers": {
+      "codex": "supported",
+      "claude": "supported",
+      "cursor": "supported"
+    }
+  },
+  "dependencies": {
+    "required": [],
+    "optional": []
+  },
+  "assets": {
+    "skills": ["doc-write", "diagram-generate"],
+    "agents": ["doc-write", "diagram-generate"],
+    "workflows": [],
+    "hooks": []
+  },
+  "install": {
+    "defaultScope": "project",
+    "supportsCopy": true,
+    "supportsLink": true
+  }
+}

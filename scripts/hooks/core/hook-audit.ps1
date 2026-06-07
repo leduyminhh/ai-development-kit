@@ -111,7 +111,7 @@ function Get-AiHookAuditMutexName {
     )
 
     $hash = Get-AiHookSha256 -Value ([System.IO.Path]::GetFullPath($EventFile).ToLowerInvariant())
-    return "Global\codex-workflow-kit-aihook-$hash"
+    return "Global\ai-development-kit-aihook-$hash"
 }
 
 function Write-AiHookJsonlEvent {

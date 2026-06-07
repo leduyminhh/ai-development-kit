@@ -1,0 +1,33 @@
+{
+  "apiVersion": "aidk.dev/v1alpha1",
+  "kind": "Package",
+  "metadata": {
+    "id": "architecture",
+    "name": "Architecture Engineering",
+    "version": "1.1.0",
+    "description": "Architecture analysis, Onion Architecture, shared module design, and pattern selection."
+  },
+  "compatibility": {
+    "aidk": ">=1.1.0 <2.0.0",
+    "providers": {
+      "codex": "supported",
+      "claude": "supported",
+      "cursor": "supported"
+    }
+  },
+  "dependencies": {
+    "required": [],
+    "optional": []
+  },
+  "assets": {
+    "skills": ["java-analyze", "architecture-onion-design", "code-shared-design", "code-design-pattern"],
+    "agents": ["java-analyze", "code-design-pattern"],
+    "workflows": [],
+    "hooks": ["project-audit"]
+  },
+  "install": {
+    "defaultScope": "project",
+    "supportsCopy": true,
+    "supportsLink": true
+  }
+}

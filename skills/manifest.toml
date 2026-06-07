@@ -15,7 +15,7 @@ agents_root = ".codex/agents"
 [external_discovery]
 loader_root = "~/.codex/skills"
 install_script = "scripts/install-skill-link.ps1"
-link_name = "codex-workflow-kit"
+link_name = "ai-development-kit"
 linked_source = "skills"
 notes = [
   "Repository structure does not register agents by itself.",

@@ -1,7 +1,7 @@
 # AGENTS.md
 
 ## Overview
-Repository: `codex-workflow-kit`
+Repository: `ai-development-kit`
 
 Purpose:
 - Organize Codex validators, agents, skills, references, and generated artifacts.

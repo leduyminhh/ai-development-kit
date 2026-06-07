@@ -1,7 +1,7 @@
 {
-  "name": "codex-workflow-kit",
-  "description": "Bootstrap skills, workflow registry validation, and SessionStart adapter metadata for Claude Code.",
-  "version": "0.1.0",
+  "name": "ai-development-kit",
+  "description": "Production-grade workflow skills for Codex, Claude Code, Cursor, and other AI coding agents.",
+  "version": "1.1.0",
   "author": {
     "name": "leduyminhh"
   },
@@ -12,8 +12,31 @@
     "skills",
     "workflow",
     "hooks",
-    "claude-code"
+    "claude"
   ],
   "skills": "./skills/",
+  "aidk": {
+    "apiVersion": "aidk.dev/v1alpha1",
+    "packages": [
+      "architecture",
+      "backend",
+      "documentation",
+      "frontend",
+      "security",
+      "testing"
+    ],
+    "resolvedSkills": [
+      "architecture-onion-design",
+      "code-design-pattern",
+      "code-shared-design",
+      "diagram-generate",
+      "doc-write",
+      "java-analyze",
+      "react-code-generate",
+      "security-code-review",
+      "test-automation-validate",
+      "test-qa-review"
+    ]
+  },
   "hooks": "./adapters/claude/hooks.json"
 }

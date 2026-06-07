@@ -1,4 +1,4 @@
-# Codex Workflow Kit
+# AI Development Kit
 
 **Bộ workflow skill production-grade cho Codex, Claude Code, Cursor và các AI coding agent khác.**
 
@@ -29,6 +29,51 @@ Không thêm `--help` sau command `skills add <source>`; CLI sẽ hiểu `<sourc
 
 ---
 
+## AIDK v1.1 Packages
+
+AIDK v1.1 giu `skills/<name>/` lam nguon runtime chuan va them capability package trong `packages/`. Package ket hop cac skill hien co ma khong sao chep noi dung huong dan.
+
+Package ban dau: `architecture`, `backend`, `frontend`, `security`, `testing`, va `documentation`.
+
+Validate hoac xem truoc installation:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/invoke-aidk.ps1 -Action validate -Json
+
+powershell -ExecutionPolicy Bypass -File scripts/invoke-aidk.ps1 `
+  -Action plan `
+  -Package backend,security `
+  -Provider codex,claude,cursor `
+  -TargetRoot C:\path\to\project `
+  -Json
+```
+
+Cai resolved skills, provider manifests, adapters va shared audit hooks:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/invoke-aidk.ps1 `
+  -Action install `
+  -Package backend,security `
+  -Provider codex,claude,cursor `
+  -TargetRoot C:\path\to\project `
+  -Json
+```
+
+Install chi ghi `.aidk/install-state.json` sau khi generated artifacts va hook installation thanh cong. Managed file da bi thay doi se bao conflict, tru khi truyen ro `-OverwritePolicy overwrite` hoac `skip`.
+
+Chi xoa artifact do state quan ly:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/invoke-aidk.ps1 `
+  -Action remove `
+  -TargetRoot C:\path\to\project `
+  -Json
+```
+
+Luong `npx skills` van duoc ho tro de cai tung skill rieng le.
+
+---
+
 ## Quick Start
 
 <details open>
@@ -43,7 +88,7 @@ powershell -ExecutionPolicy Bypass -File scripts/install-skill-link.ps1 -Force
 Installer tạo Windows junction hoặc symlink:
 
 ```text
-~\.codex\skills\codex-workflow-kit -> <repo>\skills
+~\.codex\skills\ai-development-kit -> <repo>\skills
 ```
 
 Sau đó cập nhật repository bằng:

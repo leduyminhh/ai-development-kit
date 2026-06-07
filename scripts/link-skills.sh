@@ -4,7 +4,7 @@ set -eu
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 REPO_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
 MANIFEST="${REPO_ROOT}/skills/manifest.toml"
-LINK_NAME="codex-workflow-kit"
+LINK_NAME="ai-development-kit"
 LINKED_SOURCE="skills"
 
 manifest_value() {

@@ -1,4 +1,4 @@
-# Codex Workflow Kit
+# AI Development Kit
 
 **Production-grade workflow skills for Codex, Claude Code, Cursor, and other AI coding agents.**
 
@@ -22,10 +22,57 @@ Common commands map to the repository lifecycle.
 | Alias add | `npx skills a . --skill security-code-review --agent codex -y` | Short command support |
 | Alias list | `npx skills ls --agent codex` | Verify target state |
 | Update installed skill | `npx skills update security-code-review` | Refresh intentionally |
+| Validate AIDK contracts | `powershell -ExecutionPolicy Bypass -File scripts/invoke-aidk.ps1 -Action validate -Json` | Check schemas, packages, skills, and dependencies |
+| Preview package install | `powershell -ExecutionPolicy Bypass -File scripts/invoke-aidk.ps1 -Action plan -Package backend,security -Provider codex,claude -Json` | Side-effect-free plan |
 | Validate repository | `powershell -ExecutionPolicy Bypass -File skills/codex-structure-validate/scripts/validate-codex-structure.ps1 -Root . -Fix` | Fail loud |
 | Run selected tests | `powershell -ExecutionPolicy Bypass -File scripts/test-selected.ps1 -FromGit` | Test only relevant scope |
 
 Do not append `--help` after a `skills add <source>` command; the CLI treats `<source>` as an install target.
+
+---
+
+## AIDK v1.1 Packages
+
+AIDK v1.1 keeps `skills/<name>/` as the canonical runtime source and adds capability packages under `packages/`. Packages compose existing skills without duplicating their instructions.
+
+Initial packages: `architecture`, `backend`, `frontend`, `security`, `testing`, and `documentation`.
+
+Validate or preview an installation:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/invoke-aidk.ps1 -Action validate -Json
+
+powershell -ExecutionPolicy Bypass -File scripts/invoke-aidk.ps1 `
+  -Action plan `
+  -Package backend,security `
+  -Provider codex,claude,cursor `
+  -TargetRoot C:\path\to\project `
+  -Json
+```
+
+Install resolved skills, provider manifests, adapters, and shared audit hooks:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/invoke-aidk.ps1 `
+  -Action install `
+  -Package backend,security `
+  -Provider codex,claude,cursor `
+  -TargetRoot C:\path\to\project `
+  -Json
+```
+
+Install writes `.aidk/install-state.json` only after generated artifacts and hook installation succeed. Managed-file drift fails explicitly unless `-OverwritePolicy overwrite` or `skip` is supplied.
+
+Remove only state-owned artifacts:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/invoke-aidk.ps1 `
+  -Action remove `
+  -TargetRoot C:\path\to\project `
+  -Json
+```
+
+Direct `npx skills` installation remains supported for individual skills.
 
 ---
 
@@ -43,7 +90,7 @@ powershell -ExecutionPolicy Bypass -File scripts/install-skill-link.ps1 -Force
 The installer creates a Windows junction or symlink:
 
 ```text
-~\.codex\skills\codex-workflow-kit -> <repo>\skills
+~\.codex\skills\ai-development-kit -> <repo>\skills
 ```
 
 After that, update this repository with:

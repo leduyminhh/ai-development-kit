@@ -52,7 +52,7 @@ function Get-ProjectHookSettings {
 
     $serviceName = Get-CodexTomlStringValue -TomlText $configText -Section 'hooks.project' -Key 'serviceName'
     if ([string]::IsNullOrWhiteSpace($serviceName)) {
-        $serviceName = 'codex-workflow-kit'
+        $serviceName = 'ai-development-kit'
     }
 
     $defaultLogger = Get-CodexTomlStringValue -TomlText $configText -Section 'hooks.project' -Key 'defaultLogger'

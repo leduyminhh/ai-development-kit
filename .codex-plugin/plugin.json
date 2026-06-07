@@ -1,7 +1,7 @@
 {
-  "name": "codex-workflow-kit",
-  "version": "0.1.0",
-  "description": "Bootstrap skills, workflow registry validation, and adapter metadata for Codex workflow orchestration.",
+  "name": "ai-development-kit",
+  "description": "Production-grade workflow skills for Codex, Claude Code, Cursor, and other AI coding agents.",
+  "version": "1.1.0",
   "author": {
     "name": "leduyminhh"
   },
@@ -15,10 +15,33 @@
     "codex"
   ],
   "skills": "./skills/",
+  "aidk": {
+    "apiVersion": "aidk.dev/v1alpha1",
+    "packages": [
+      "architecture",
+      "backend",
+      "documentation",
+      "frontend",
+      "security",
+      "testing"
+    ],
+    "resolvedSkills": [
+      "architecture-onion-design",
+      "code-design-pattern",
+      "code-shared-design",
+      "diagram-generate",
+      "doc-write",
+      "java-analyze",
+      "react-code-generate",
+      "security-code-review",
+      "test-automation-validate",
+      "test-qa-review"
+    ]
+  },
   "interface": {
-    "displayName": "Codex Workflow Kit",
+    "displayName": "AI Development Kit",
     "shortDescription": "Bootstrap workflow and skill routing",
-    "longDescription": "Use Codex Workflow Kit to bootstrap skill selection, validate workflow registry entries, and keep provider adapters thin before concrete workflows are added.",
+    "longDescription": "Use AI Development Kit to bootstrap skill selection, validate workflow registry entries, and keep provider adapters thin.",
     "developerName": "leduyminhh",
     "category": "Coding",
     "capabilities": [

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aidk.dev/schemas/aidk-config.schema.json",
+  "title": "AIDK Project Configuration",
+  "type": "object",
+  "required": ["apiVersion", "product", "providers", "packages", "generation"],
+  "properties": {
+    "apiVersion": {
+      "const": "aidk.dev/v1alpha1"
+    },
+    "product": {
+      "type": "object",
+      "required": ["name", "displayName", "version", "description"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "providers": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {
+          "type": "array",
+          "items": {
+            "enum": ["codex", "claude", "cursor"]
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "packages": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "generation": {
+      "type": "object",
+      "required": ["overwritePolicy", "generatedFileMarker"],
+      "properties": {
+        "overwritePolicy": {
+          "enum": ["ask", "overwrite", "skip"]
+        },
+        "generatedFileMarker": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

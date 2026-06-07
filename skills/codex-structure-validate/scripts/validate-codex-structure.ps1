@@ -371,7 +371,7 @@ runtimePath = "reports/audit/runtime"
 filenamePattern = "yyyyMMdd_filename"
 remainingDays = 30
 format = "text"
-serviceName = "codex-workflow-kit"
+serviceName = "ai-development-kit"
 defaultLogger = "codex.project"
 defaultTimezone = "Asia/Saigon"
 agentHook = ".codex/hooks/log-agent-event.ps1"
@@ -920,6 +920,39 @@ if (Test-Path -LiteralPath $configPath) {
         $findings.Add((New-Finding 'pass' '.codex/config.toml was created and synced from the standard scaffold.'))
     } else {
         $findings.Add((New-Finding 'warning' '.codex/config.toml is missing. Add it when shared Codex configuration is needed.'))
+    }
+}
+
+$aidkConfigPath = Join-Path $resolvedRoot 'aidk.config.yaml'
+if (Test-Path -LiteralPath $aidkConfigPath) {
+    $aidkCliPath = Join-Path $resolvedRoot 'scripts/invoke-aidk.ps1'
+    if (-not (Test-Path -LiteralPath $aidkCliPath)) {
+        $findings.Add((New-Finding 'fail' 'aidk.config.yaml exists but scripts/invoke-aidk.ps1 is missing.'))
+    } else {
+        $previousErrorActionPreference = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
+        try {
+            $aidkOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File $aidkCliPath `
+                -Action validate `
+                -Root $resolvedRoot `
+                -TargetRoot $resolvedRoot `
+                -Json 2>&1
+            $aidkExitCode = $LASTEXITCODE
+        } finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
+
+        $aidkText = @($aidkOutput) -join "`n"
+        if ($aidkExitCode -eq 0) {
+            try {
+                $aidkResult = $aidkText | ConvertFrom-Json
+                $findings.Add((New-Finding 'pass' "AIDK contracts validate: $($aidkResult.packageCount) packages, $($aidkResult.skillCount) skills."))
+            } catch {
+                $findings.Add((New-Finding 'fail' 'AIDK validation returned invalid JSON output.'))
+            }
+        } else {
+            $findings.Add((New-Finding 'fail' "AIDK contract validation failed: $aidkText"))
+        }
     }
 }
 

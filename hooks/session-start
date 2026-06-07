@@ -22,7 +22,7 @@ escape_for_json() {
   printf '%s' "$s"
 }
 
-context="<WORKFLOW_KIT_BOOTSTRAP>\nYou have codex-workflow-kit. Use the using-workflow-kit skill before selecting workflow or fallback skills.\n\n${registry_summary}\n\n${skill_content}\n</WORKFLOW_KIT_BOOTSTRAP>"
+context="<WORKFLOW_KIT_BOOTSTRAP>\nYou have AI Development Kit. Use the using-workflow-kit skill before selecting workflow or fallback skills.\n\n${registry_summary}\n\n${skill_content}\n</WORKFLOW_KIT_BOOTSTRAP>"
 escaped="$(escape_for_json "$context")"
 
 if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
