@@ -119,11 +119,7 @@ ai-engineering-platform/
 ├── adapters/
 │   ├── claude/
 │   ├── codex/
-│   ├── cursor/
-│   ├── continue/
-│   ├── cline/
-│   ├── roo/
-│   └── generic/
+│   └── cursor/
 │
 ├── cli/
 │   ├── README.md
@@ -619,7 +615,7 @@ mkdir -p core/workflows
 
 mkdir -p packs/{architecture,application,data,security,quality,platform,knowledge}
 mkdir -p mcp-servers/{architecture-mcp,application-mcp,data-mcp,security-mcp,quality-mcp,platform-mcp,knowledge-mcp}
-mkdir -p adapters/{claude,codex,cursor,continue,cline,roo,generic}
+mkdir -p adapters/{claude,codex,cursor}
 mkdir -p cli/src/{commands,services,utils}
 mkdir -p examples docs tests legacy
 mkdir -p docs/migration

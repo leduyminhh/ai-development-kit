@@ -41,7 +41,7 @@
         "enabled": {
           "type": "array",
           "items": {
-            "enum": ["codex", "claude", "cursor", "generic"]
+            "enum": ["codex", "claude", "cursor"]
           },
           "uniqueItems": true
         }

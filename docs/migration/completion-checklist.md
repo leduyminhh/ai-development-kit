@@ -8,7 +8,7 @@
 - [x] Platform runtime moved under `packs/platform`.
 - [x] Schemas moved and normalized under `core/schemas`.
 - [x] Canonical routing registries replace the legacy registry.
-- [x] Provider adapters generate Claude, Codex, Cursor, and generic layouts.
+- [x] Provider adapters generate Claude, Codex, and Cursor layouts.
 - [x] Seven MCP server skeletons and tool contracts created.
 - [x] TypeScript CLI and required command/service modules created.
 - [x] Legacy review matrix completed.

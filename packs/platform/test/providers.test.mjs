@@ -7,7 +7,6 @@ import {
   projectClaude,
   projectCodex,
   projectCursor,
-  projectGeneric,
   projectProviders,
 } from "../src/providers.mjs";
 import { repoRoot } from "./helpers.mjs";
@@ -27,13 +26,11 @@ test("projects canonical command semantics for all providers", async () => {
   const codex = projectCodex(context);
   const claude = projectClaude(context);
   const cursor = projectCursor(context);
-  const generic = projectGeneric(context);
 
   assert.equal(codex.manifest.provider, "codex");
   assert.match(codex.workflow, /review-backend/);
   assert.match(claude.command, /^---[\s\S]*description:/);
   assert.match(cursor.rule, /Required Skills/);
-  assert.match(generic.workflow, /review-backend/);
   assert.deepEqual(
     [codex.intent, claude.intent, cursor.intent],
     [command.intent, command.intent, command.intent],
@@ -56,7 +53,6 @@ test("emits only contained relative provider paths", async () => {
     "claude",
     "codex",
     "cursor",
-    "generic",
   ]);
   for (const provider of Object.values(outputs)) {
     for (const output of provider.files) {

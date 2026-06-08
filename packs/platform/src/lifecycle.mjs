@@ -79,7 +79,6 @@ async function buildDesiredState({
     const prefixes = new Set();
     if (graph.providers.includes("codex")) prefixes.add(`.codex/skills/${skill}`);
     if (graph.providers.includes("claude")) prefixes.add(`skills/${skill}`);
-    if (graph.providers.includes("generic")) prefixes.add(`skills/${skill}`);
     for (const prefix of prefixes) {
       for (const [relativePath, content] of await readDirectoryFiles(
         await findSkillPath(root, skill),

@@ -1,6 +1,6 @@
 import { PlatformError } from "./errors.mjs";
 
-const SUPPORTED_PROVIDERS = new Set(["codex", "claude", "cursor", "generic"]);
+const SUPPORTED_PROVIDERS = new Set(["codex", "claude", "cursor"]);
 
 function isPlatformCompatible(range, version) {
   const major = Number(version.split(".")[0]);
@@ -63,10 +63,7 @@ export function resolvePluginGraph({
       );
     }
     for (const provider of providers) {
-      if (
-        provider !== "generic" &&
-        plugin.compatibility?.providers?.[provider] !== "supported"
-      ) {
+      if (plugin.compatibility?.providers?.[provider] !== "supported") {
         throw new PlatformError(
           `plugin ${pluginId} does not support provider ${provider}`,
           { code: "AI_ENGINEERING_INCOMPATIBLE" },

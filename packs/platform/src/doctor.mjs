@@ -56,7 +56,6 @@ export async function doctorProject({ target }) {
     codex: ".codex/agents/openai.yaml",
     claude: ".claude-plugin/plugin.json",
     cursor: ".cursor/rules/provider.json",
-    generic: ".ai-engineering/provider.json",
   };
   for (const provider of lock.providers ?? []) {
     if (!(await exists(path.join(target, adapterChecks[provider])))) {

@@ -1,8 +1,7 @@
 # AI Engineering Platform
 
 An MCP-first engineering platform built from installable capability packs, safe
-project bootstrap, and generated adapters for Codex, Claude, Cursor, and generic
-AI coding agents.
+project bootstrap, and generated adapters for Codex, Claude, and Cursor.
 
 ## Capabilities
 

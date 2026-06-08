@@ -1,8 +1,7 @@
 # AI Engineering Platform
 
 Nền tảng kỹ thuật MCP-first gồm các capability pack có thể cài đặt, quy trình
-khởi tạo dự án an toàn và adapter được sinh cho Codex, Claude, Cursor cùng các
-AI coding agent khác.
+khởi tạo dự án an toàn và adapter được sinh cho Codex, Claude và Cursor.
 
 ## Năng lực
 

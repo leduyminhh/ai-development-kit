@@ -100,30 +100,10 @@ export function projectCursor(context) {
   };
 }
 
-export function projectGeneric(context) {
-  const providerManifest = manifest(context, "generic");
-  return {
-    manifest: providerManifest,
-    workflow: context.commands.map(commandBody).join("\n"),
-    intent: context.commands[0]?.intent ?? "",
-    files: [
-      {
-        path: "rules/commands.md",
-        content: context.commands.map(commandBody).join("\n"),
-      },
-      {
-        path: ".ai-engineering/provider.json",
-        content: json(providerManifest),
-      },
-    ],
-  };
-}
-
 export function projectProviders(context) {
   return {
     codex: projectCodex(context),
     claude: projectClaude(context),
     cursor: projectCursor(context),
-    generic: projectGeneric(context),
   };
 }
