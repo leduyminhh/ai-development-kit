@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "packs": {
+    "architecture": ["architecture-onion-design", "code-design-pattern", "code-shared-design", "diagram-generate", "java-analyze"],
+    "application": ["react-code-generate"],
+    "data": ["data-migration"],
+    "security": ["security-code-review"],
+    "quality": ["naming-rule-validate", "test-automation-validate", "test-qa-review"],
+    "platform": ["agent-operating-rules", "git-workflow-design", "using-workflow-kit"],
+    "knowledge": ["doc-write", "youtube-transcript"]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@ai-engineering-platform/cli",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "ai-engineering": "./dist/index.js"
+  }
+}

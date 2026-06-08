@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aidk.dev/schemas/adapter-output.schema.json",
+  "title": "AIDK Adapter Artifact",
+  "type": "object",
+  "required": ["provider", "path", "ownership", "content"],
+  "properties": {
+    "provider": {
+      "enum": ["shared", "codex", "claude", "cursor"]
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ownership": {
+      "enum": ["managed", "merged", "user-owned"]
+    },
+    "content": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}
