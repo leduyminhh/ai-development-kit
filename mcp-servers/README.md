@@ -1,12 +1,16 @@
 # MCP Servers
 
-`mcp-servers/` contains one namespaced MCP server skeleton per capability pack.
+`mcp-servers/` contains one namespaced MCP server per capability pack.
 The CLI install flow copies selected server skeletons into the target project
 under `.ai-engineering/mcp-servers/` and writes `.mcp.json` entries that point to
 those target-local entrypoints.
 
 These servers are the runtime-facing side of pack commands. Pack metadata says
 which MCP tool a command expects; the matching server contract declares that tool.
+All servers use the shared newline-delimited JSON-RPC stdio runtime in
+`core/mcp/stdio-runtime.js`. The runtime implements MCP initialization,
+`ping`, and `tools/list`; declared tools without handlers return an actionable
+tool result instead of pretending that execution succeeded.
 
 ## Server Anatomy
 
@@ -15,7 +19,7 @@ Each `<pack>-mcp/` directory follows this shape:
 - `mcp.json`: stable server contract; includes server name, version, and tool ids.
 - `package.json`: package metadata and `start` script.
 - `src/index.js`: executable entrypoint used by `.mcp.json`.
-- `src/server.js`: server factory and currently declared tool list.
+- `src/server.js`: thin server factory that loads the sibling `mcp.json`.
 - `src/tools/`: tool handler location or placeholder.
 - `src/resources/`: MCP resource handler location or placeholder.
 - `src/prompts/`: MCP prompt handler location or placeholder.
@@ -41,15 +45,17 @@ When a user runs `ai-engineering install <pack...> --target <provider>`:
    skeletons.
 3. Server files are copied into the target project under
    `.ai-engineering/mcp-servers/<pack>-mcp/`.
-4. The target `.mcp.json` points to
+4. The shared runtime is copied once to
+   `.ai-engineering/core/mcp/stdio-runtime.js`.
+5. The target `.mcp.json` points to
    `.ai-engineering/mcp-servers/<pack>-mcp/src/index.js`.
-5. Ownership metadata records the copied server files so uninstall/update can
+6. Ownership metadata records the copied server and shared runtime files so uninstall/update can
    remove or replace managed files safely.
 
 ## Change Checklist
 
-- Add or rename MCP tools in `mcp.json`, `src/server.js`, pack command metadata,
-  and routing registries together.
+- Add or rename MCP tools in `mcp.json`, pack command metadata, and routing
+  registries together. Do not duplicate tool ids in `src/server.js`.
 - Keep server directory names scoped as `<pack>-mcp`.
 - Do not reintroduce legacy provider plugin folders as active runtime paths.
 - Update English `README.md` first, then synchronize `README_VI.md`.

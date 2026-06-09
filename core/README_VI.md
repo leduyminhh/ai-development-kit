@@ -14,6 +14,7 @@ trong `packs/<pack>/`.
 | --- | --- | --- |
 | `agents/` | AGENTS baseline được quản lý, template AGENTS cho dự án đích và merge policy dùng bởi `ai-engineering init`. | Khi instruction sinh ra cho project hoặc ranh giới merge thay đổi. Luôn giữ nội dung người dùng sở hữu ngoài managed block. |
 | `checklists/` | Checklist dùng chung có thể được command, skill hoặc migration tham chiếu. | Khi checklist thật sự tái sử dụng được giữa nhiều pack. Checklist riêng của pack đặt trong pack sở hữu. |
+| `mcp/` | Runtime MCP stdio cục bộ dùng chung cho mọi capability server. | Khi xử lý giao thức MCP, đọc contract hoặc hành vi transport dùng chung thay đổi. |
 | `prompts/` | Mảnh prompt trung lập theo provider và các khối prompt tái sử dụng. | Khi wording áp dụng xuyên provider hoặc pack. Output prompt riêng theo provider đặt dưới `adapters/`. |
 | `routing/` | Registry intent, command và skill để nối user intent với command của pack và MCP tool contract. | Khi thêm, đổi tên hoặc xóa command id, skill id hoặc intent route. Giữ khớp với `pack.yaml` và `mcp-servers/*/mcp.json`. |
 | `schemas/` | JSON schema cho các hợp đồng platform như metadata pack và install state. | Khi contract được serialize thay đổi. Cập nhật validator và fixture trong cùng thay đổi. |

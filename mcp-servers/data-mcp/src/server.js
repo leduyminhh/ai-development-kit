@@ -1,9 +1,7 @@
+import { createContractServer } from "../../../core/mcp/stdio-runtime.js";
+
 export function createServer() {
-  return {
-    name: "data-mcp",
-    tools: ["data.analyze_schema", "data.review_index", "data.migration_plan"],
-    start() {
-      process.stdout.write(`${JSON.stringify({ status: "ready", server: this.name })}\n`);
-    },
-  };
+  return createContractServer({
+    contractUrl: new URL("../mcp.json", import.meta.url),
+  });
 }
