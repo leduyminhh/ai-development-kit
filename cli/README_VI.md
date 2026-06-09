@@ -13,7 +13,7 @@ install/update/migration.
 | `dist/index.js` | Output executable sinh từ `npm run build:cli`; bin ở root và package trỏ tới đây. |
 | `scripts/bin/` | PowerShell hook tool có thể chạy trực tiếp: install, invoke, doctor, service, audit query, trace view và resolve output path. |
 | `scripts/hooks/` | Module runtime hook được nhóm theo `core/`, `adapters/`, `transports/` và test `fixtures/`. |
-| `scripts/lib/` | Helper PowerShell/Python dùng chung cho parse config Codex và output path. |
+| `scripts/lib/` | Helper PowerShell dùng chung cho parse config Codex và output path. |
 | `scripts/tests/` | PowerShell test tập trung cho hook runtime, installer, doctor, query, service và script helper. |
 | `hooks/` | Provider-facing plugin hook launcher dùng bởi adapter/plugin artifact được sinh. |
 | `package.json` | Metadata package CLI và mapping bin `ai-engineering`. |

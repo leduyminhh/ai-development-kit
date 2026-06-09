@@ -13,7 +13,7 @@ implementation of install/update/migration logic.
 | `dist/index.js` | Generated executable output from `npm run build:cli`; root and package bins point here. |
 | `scripts/bin/` | Runnable PowerShell hook tools: install, invoke, doctor, service, audit query, trace view, and output-path resolution. |
 | `scripts/hooks/` | Hook runtime modules grouped by `core/`, `adapters/`, `transports/`, and test `fixtures/`. |
-| `scripts/lib/` | Shared PowerShell/Python helpers for Codex config and output-path parsing. |
+| `scripts/lib/` | Shared PowerShell helpers for Codex config and output-path parsing. |
 | `scripts/tests/` | Focused PowerShell tests for hook runtime, installer, doctor, query, service, and script helpers. |
 | `hooks/` | Provider-facing plugin hook launchers used by generated adapter/plugin artifacts. |
 | `package.json` | CLI package metadata and `ai-engineering` bin mapping. |
