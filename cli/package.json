@@ -7,6 +7,7 @@
     "ai-engineering": "./dist/index.js"
   },
   "dependencies": {
+    "@iarna/toml": "^2.2.5",
     "tar": "^7.5.16"
   }
 }
