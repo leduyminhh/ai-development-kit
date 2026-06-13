@@ -1,4 +1,5 @@
 import { access, readFile } from "node:fs/promises";
+import { spawn } from "node:child_process";
 import path from "node:path";
 import * as TOML from "@iarna/toml";
 
@@ -16,6 +17,83 @@ async function exists(pathname) {
 
 async function readJson(pathname) {
   return JSON.parse(await readFile(pathname, "utf8"));
+}
+
+function probeMcpServer(entrypoint, name) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [entrypoint], {
+      cwd: path.dirname(entrypoint),
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    const timeout = setTimeout(() => {
+      child.kill();
+      reject(new Error(`MCP server ${name} timed out during doctor probe`));
+    }, 5000);
+
+    child.stdout.setEncoding("utf8");
+    child.stderr.setEncoding("utf8");
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk;
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk;
+    });
+    child.on("error", (error) => {
+      clearTimeout(timeout);
+      reject(error);
+    });
+    child.on("close", (exitCode) => {
+      clearTimeout(timeout);
+      if (exitCode !== 0) {
+        reject(
+          new Error(
+            `MCP server ${name} exited ${exitCode}: ${stderr.trim()}`,
+          ),
+        );
+        return;
+      }
+      try {
+        const responses = stdout
+          .trim()
+          .split(/\r?\n/)
+          .filter(Boolean)
+          .map((line) => JSON.parse(line));
+        const initialize = responses.find((item) => item.id === 1);
+        const ping = responses.find((item) => item.id === 2);
+        const tools = responses.find((item) => item.id === 3);
+        if (!initialize?.result?.serverInfo || !ping?.result || !tools?.result?.tools) {
+          throw new Error("incomplete MCP probe response");
+        }
+        resolve({
+          name,
+          status: "pass",
+          toolCount: tools.result.tools.length,
+        });
+      } catch (error) {
+        reject(new Error(`MCP server ${name} probe failed: ${error.message}`));
+      }
+    });
+
+    for (const request of [
+      {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "initialize",
+        params: {
+          protocolVersion: "2025-03-26",
+          capabilities: {},
+          clientInfo: { name: "ai-engineering-doctor", version: "1.0.0" },
+        },
+      },
+      { jsonrpc: "2.0", id: 2, method: "ping", params: {} },
+      { jsonrpc: "2.0", id: 3, method: "tools/list", params: {} },
+    ]) {
+      child.stdin.write(`${JSON.stringify(request)}\n`);
+    }
+    child.stdin.end();
+  });
 }
 
 export async function doctorProject({ target, context }) {
@@ -97,13 +175,46 @@ export async function doctorProject({ target, context }) {
     },
     cursor: { path: ".cursor/mcp.json", parse: JSON.parse },
   };
+  const parsedConfigs = {};
   for (const provider of lock.providers ?? []) {
     const check = configChecks[provider];
     if (!check || !(await exists(path.join(target, check.path)))) continue;
     try {
-      check.parse(await readFile(path.join(target, check.path), "utf8"));
+      parsedConfigs[provider] = check.parse(
+        await readFile(path.join(target, check.path), "utf8"),
+      );
     } catch {
       errors.push(`${check.path} is invalid`);
+    }
+  }
+  const providerNames = {
+    codex: "Codex",
+    claude: "Claude",
+    cursor: "Cursor",
+  };
+  for (const provider of lock.providers ?? []) {
+    const config = parsedConfigs[provider];
+    if (!config) continue;
+    const registrations =
+      provider === "codex" ? config.mcp_servers : config.mcpServers;
+    for (const plugin of lock.plugins ?? []) {
+      const expectedEntrypoint = path.join(
+        target,
+        ".ai-engineering",
+        "mcp-servers",
+        `${plugin.id}-mcp`,
+        "src",
+        "index.js",
+      );
+      const registration = registrations?.[plugin.id];
+      if (
+        registration?.command !== "node" ||
+        registration?.args?.[0] !== expectedEntrypoint
+      ) {
+        errors.push(
+          `${providerNames[provider]} registration does not match installed runtime: ${plugin.id}`,
+        );
+      }
     }
   }
   for (const deprecated of [".codex-plugin", ".cursor-plugin"]) {
@@ -113,10 +224,32 @@ export async function doctorProject({ target, context }) {
   }
   if (errors.length > 0) throw new Error(errors.sort().join("\n"));
 
+  const mcpServers = [];
+  for (const plugin of lock.plugins ?? []) {
+    const entrypoint = path.join(
+      target,
+      ".ai-engineering",
+      "mcp-servers",
+      `${plugin.id}-mcp`,
+      "src",
+      "index.js",
+    );
+    if (!(await exists(entrypoint))) {
+      throw new Error(`MCP entrypoint is missing: ${plugin.id}`);
+    }
+    mcpServers.push(await probeMcpServer(entrypoint, plugin.id));
+  }
+
   return {
     status: "pass",
     scope,
     packs: (lock.plugins ?? []).map((item) => item.id),
     providers: lock.providers ?? [],
+    mcpServers,
+    nativeChecks: (lock.providers ?? []).map((provider) => ({
+      provider,
+      status: "skipped",
+      reason: "native IDE binary check is optional",
+    })),
   };
 }

@@ -6,4 +6,10 @@ export function doctorProject({ target, context }: {
     scope: any;
     packs: any[];
     providers: never[];
+    mcpServers: any[];
+    nativeChecks: {
+        provider: never;
+        status: string;
+        reason: string;
+    }[];
 }>;
