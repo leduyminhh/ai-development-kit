@@ -20,6 +20,7 @@ export function planTransaction({ target, desiredFiles, lock, ownership, force, 
     };
     validateApplied: any;
     transactionId: `${string}-${string}-${string}-${string}-${string}`;
+    backupRelativePaths: any[];
 }>;
 export function applyTransaction(plan: any): Promise<{
     status: string;

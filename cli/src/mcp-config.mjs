@@ -45,6 +45,14 @@ function mergeServers({
   return next;
 }
 
+function isEmptyConfig(parsed, serverKey) {
+  const otherKeys = Object.keys(parsed).filter((key) => key !== serverKey);
+  return (
+    otherKeys.length === 0 &&
+    Object.keys(parsed[serverKey] ?? {}).length === 0
+  );
+}
+
 export function createMcpRegistrations({ packIds, runtimeRoot }) {
   return Object.fromEntries(
     [...packIds].sort().map((packId) => [
@@ -87,6 +95,7 @@ export function mergeCodexMcpConfig({
   return {
     content: newline(TOML.stringify(parsed)),
     managedNames: Object.keys(desired).sort(),
+    empty: isEmptyConfig(parsed, "mcp_servers"),
   };
 }
 
@@ -112,6 +121,7 @@ export function mergeJsonMcpConfig({
   return {
     content: `${JSON.stringify(parsed, null, 2)}\n`,
     managedNames: Object.keys(desired).sort(),
+    empty: isEmptyConfig(parsed, "mcpServers"),
   };
 }
 

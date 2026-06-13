@@ -19,6 +19,12 @@ export function projectCodex(context: any): {
         path: string;
         content: any;
     }[];
+    mcpConfig: {
+        provider: string;
+        format: string;
+        path: string;
+        servers: any;
+    };
 };
 export function projectClaude(context: any): {
     manifest: {
@@ -38,6 +44,12 @@ export function projectClaude(context: any): {
     command: any;
     intent: any;
     files: any[];
+    mcpConfig: {
+        provider: string;
+        format: string;
+        path: string;
+        servers: any;
+    };
 };
 export function projectCursor(context: any): {
     manifest: {
@@ -57,6 +69,12 @@ export function projectCursor(context: any): {
     rule: any;
     intent: any;
     files: any[];
+    mcpConfig: {
+        provider: string;
+        format: string;
+        path: string;
+        servers: any;
+    };
 };
 export function projectProviders(context: any): {
     codex: {
@@ -80,6 +98,12 @@ export function projectProviders(context: any): {
             path: string;
             content: any;
         }[];
+        mcpConfig: {
+            provider: string;
+            format: string;
+            path: string;
+            servers: any;
+        };
     };
     claude: {
         manifest: {
@@ -99,6 +123,12 @@ export function projectProviders(context: any): {
         command: any;
         intent: any;
         files: any[];
+        mcpConfig: {
+            provider: string;
+            format: string;
+            path: string;
+            servers: any;
+        };
     };
     cursor: {
         manifest: {
@@ -118,5 +148,11 @@ export function projectProviders(context: any): {
         rule: any;
         intent: any;
         files: any[];
+        mcpConfig: {
+            provider: string;
+            format: string;
+            path: string;
+            servers: any;
+        };
     };
 };

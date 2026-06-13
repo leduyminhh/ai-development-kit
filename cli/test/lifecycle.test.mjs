@@ -3,6 +3,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import * as TOML from "@iarna/toml";
 
 import {
   findOutdated,
@@ -11,6 +12,7 @@ import {
   removePlugins,
   updatePlugins,
 } from "../src/lifecycle.mjs";
+import { resolveInstallContext } from "../src/install-scope.mjs";
 import { repoRoot, runCli } from "./helpers.mjs";
 
 async function exists(root, relativePath) {
@@ -39,8 +41,11 @@ test("installs application project-locally with required dependencies", async ()
         "utf8",
       ),
     );
-    const mcp = JSON.parse(await readFile(path.join(target, ".mcp.json"), "utf8"));
-    const applicationMcpEntrypoint = mcp.mcpServers.application.args[0];
+    const codexConfig = TOML.parse(
+      await readFile(path.join(target, ".codex/config.toml"), "utf8"),
+    );
+    const applicationMcpEntrypoint =
+      codexConfig.mcp_servers.application.args[0];
 
     assert.deepEqual(result.plugins, ["architecture", "application"]);
     assert.deepEqual(lock.plugins.map((item) => item.id), ["architecture", "application"]);
@@ -53,7 +58,8 @@ test("installs application project-locally with required dependencies", async ()
       true,
     );
     assert.equal(await exists(target, ".codex/agents/openai.yaml"), true);
-    assert.equal(await exists(target, ".mcp.json"), true);
+    assert.equal(await exists(target, ".codex/config.toml"), true);
+    assert.equal(await exists(target, ".mcp.json"), false);
     assert.equal(applicationMcpEntrypoint.startsWith(target), true);
     assert.equal(applicationMcpEntrypoint.includes(`${path.sep}mcp-servers${path.sep}`), true);
     assert.equal(await exists(target, ".ai-engineering/mcp-servers/application-mcp/src/index.js"), true);
@@ -62,6 +68,40 @@ test("installs application project-locally with required dependencies", async ()
     assert.equal(await exists(target, ".codex-plugin/plugin.json"), false);
   } finally {
     await rm(target, { recursive: true, force: true });
+  }
+});
+
+test("installs globally without writing project assets", async () => {
+  const project = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-project-"));
+  const home = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-home-"));
+  try {
+    const context = resolveInstallContext({
+      scope: "global",
+      projectRoot: project,
+      homeRoot: home,
+    });
+    const result = await installPlugins({
+      root: repoRoot,
+      target: context.targetRoot,
+      context,
+      pluginIds: ["platform"],
+      providers: ["codex", "claude", "cursor"],
+    });
+
+    assert.deepEqual(result.plugins, ["platform"]);
+    assert.equal(await exists(home, ".codex/config.toml"), true);
+    assert.equal(await exists(home, ".claude.json"), true);
+    assert.equal(await exists(home, ".cursor/mcp.json"), true);
+    assert.equal(
+      await exists(home, ".ai-engineering/mcp-servers/platform-mcp/src/index.js"),
+      true,
+    );
+    assert.equal(await exists(home, "AGENTS.md"), false);
+    assert.equal(await exists(home, "commands"), false);
+    assert.equal(await exists(project, ".ai-engineering/platform.lock"), false);
+  } finally {
+    await rm(project, { recursive: true, force: true });
+    await rm(home, { recursive: true, force: true });
   }
 });
 

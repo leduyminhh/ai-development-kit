@@ -45,18 +45,22 @@ export async function planTransaction({
   }
 
   const actions = [];
+  const backupRelativePaths = [];
   for (const [relativePath, content] of desiredFiles) {
     const destination = resolveInside(target, relativePath);
     const current = await readTextIfExists(destination);
     const ownedBefore = Boolean(previousOwnership.files?.[relativePath]);
+    const mergeManaged =
+      ownership.files?.[relativePath]?.mergeStrategy === "mcp-config";
     let action = "create";
-    if (current !== null && !ownedBefore && !force) {
+    if (current !== null && !ownedBefore && !force && !mergeManaged) {
       throw new Error(`conflict: unmanaged file exists: ${relativePath}`);
     }
     if (
       current !== null &&
       ownedBefore &&
       !force &&
+      !mergeManaged &&
       previousOwnership.files[relativePath]?.checksum &&
       (await sha256File(destination)) !== previousOwnership.files[relativePath].checksum
     ) {
@@ -66,7 +70,10 @@ export async function planTransaction({
       action = "replace-managed";
     } else if (current !== null && force) {
       action = "replace-forced";
+    } else if (current !== null && mergeManaged) {
+      action = "merge-managed";
     }
+    if (current !== null && mergeManaged) backupRelativePaths.push(relativePath);
     actions.push({
       action,
       relativePath,
@@ -79,6 +86,7 @@ export async function planTransaction({
       const destination = resolveInside(target, relativePath);
       if (
         !force &&
+        previousOwnership.files[relativePath]?.mergeStrategy !== "mcp-config" &&
         previousOwnership.files[relativePath]?.checksum &&
         (await readBytesIfExists(destination)) !== null &&
         (await sha256File(destination)) !== previousOwnership.files[relativePath].checksum
@@ -110,6 +118,7 @@ export async function planTransaction({
     ownership: { schemaVersion: 1, files },
     validateApplied,
     transactionId: randomUUID(),
+    backupRelativePaths,
   };
 }
 
@@ -121,6 +130,23 @@ export async function applyTransaction(plan) {
   }
   for (const relativePath of stateFiles) {
     backups.set(relativePath, await readBytesIfExists(path.join(plan.target, relativePath)));
+  }
+
+  for (const relativePath of plan.backupRelativePaths ?? []) {
+    const bytes = backups.get(relativePath);
+    if (bytes === null || bytes === undefined) continue;
+    const backupPath = resolveInside(
+      plan.target,
+      path.join(
+        ".ai-engineering",
+        "backups",
+        "provider-config",
+        plan.transactionId,
+        relativePath,
+      ),
+    );
+    await mkdir(path.dirname(backupPath), { recursive: true });
+    await writeFile(backupPath, bytes);
   }
 
   async function restore() {

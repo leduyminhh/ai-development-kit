@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, rm } from "node:fs/promises";
 import path from "node:path";
 
 import {
@@ -8,12 +8,16 @@ import {
   loadPlatform,
   loadPlugins,
 } from "./contracts.mjs";
-import { listFiles } from "./io.mjs";
-import { writeJsonAtomic } from "./io.mjs";
+import { listFiles, writeJsonAtomic } from "./io.mjs";
+import {
+  createMcpRegistrations,
+  mergeCodexMcpConfig,
+  mergeJsonMcpConfig,
+} from "./mcp-config.mjs";
 import { projectProviders } from "./providers.mjs";
 import { resolvePluginGraph } from "./resolver.mjs";
-import { applyTransaction, planTransaction } from "./transaction.mjs";
 import { readPlatformState } from "./state.mjs";
+import { applyTransaction, planTransaction } from "./transaction.mjs";
 import { initializeProject } from "./init.mjs";
 
 async function readDirectoryFiles(sourceRoot, destinationPrefix) {
@@ -27,57 +31,55 @@ async function readDirectoryFiles(sourceRoot, destinationPrefix) {
   return files;
 }
 
-function providerManifest(platform, graph, provider) {
-  return `${JSON.stringify(
-    {
-      name: platform.product.name,
-      description: platform.product.description,
-      version: platform.product.version,
-      provider,
-      skills: "./skills/",
-      aiEngineering: {
-        apiVersion: platform.apiVersion,
-        plugins: graph.pluginIds,
-        resolvedSkills: graph.skills,
-      },
-    },
-    null,
-    2,
-  )}\n`;
+async function readTextIfExists(pathname) {
+  try {
+    return await readFile(pathname, "utf8");
+  } catch (error) {
+    if (error.code === "ENOENT") return "";
+    throw error;
+  }
 }
 
-function addOwnership(files, relativePath, owners, source, shared = false) {
+function normalizeContext(target, context) {
+  return (
+    context ?? {
+      scope: "project",
+      targetRoot: target,
+      stateRoot: path.join(target, ".ai-engineering"),
+      projectAssets: true,
+    }
+  );
+}
+
+function addOwnership(
+  files,
+  relativePath,
+  owners,
+  source,
+  shared = false,
+  extra = {},
+) {
   files[relativePath] = {
     owners: [...owners].sort(),
     source,
     checksum: "",
     shared,
+    ...extra,
   };
 }
 
-async function buildDesiredState({
+async function addProjectAssets({
   root,
-  target,
-  pluginIds = [],
-  all = false,
-  providers,
-  rootPlugins,
+  graph,
+  plugins,
+  desiredFiles,
+  ownershipFiles,
 }) {
-  const platform = await loadPlatform(root);
-  const plugins = await loadPlugins(root);
-  const requested = all ? [...plugins.keys()] : pluginIds;
-  const graph = resolvePluginGraph({
-    requested,
-    plugins,
-    platformVersion: platform.product.version,
-    providers: providers ?? platform.providers.enabled,
-  });
-
-  const desiredFiles = new Map();
-  const ownershipFiles = {};
   for (const skill of graph.skills) {
     const prefixes = new Set();
-    if (graph.providers.includes("codex")) prefixes.add(`.codex/skills/${skill}`);
+    if (graph.providers.includes("codex")) {
+      prefixes.add(`.codex/skills/${skill}`);
+    }
     if (graph.providers.includes("claude")) prefixes.add(`skills/${skill}`);
     for (const prefix of prefixes) {
       for (const [relativePath, content] of await readDirectoryFiles(
@@ -101,10 +103,9 @@ async function buildDesiredState({
     const plugin = plugins.get(pluginId);
     for (const commandId of plugin.assets.commands) {
       const source = await findCommandPath(root, commandId);
-      const content = await readFile(source, "utf8");
       const relativePath = `commands/${commandId}.md`;
-      desiredFiles.set(relativePath, content);
-      addOwnership(ownershipFiles, relativePath, [pluginId], commandId, false);
+      desiredFiles.set(relativePath, await readFile(source, "utf8"));
+      addOwnership(ownershipFiles, relativePath, [pluginId], commandId);
       commands.push(await loadCanonicalCommand(source));
     }
   }
@@ -126,24 +127,15 @@ async function buildDesiredState({
       (graph.ownership.agents[agent] ?? []).length > 1,
     );
   }
+  return commands;
+}
 
-  const context = {
-    plugin: { metadata: { id: "platform", name: platform.product.displayName, version: platform.product.version } },
-    commands,
-    skills: graph.skills,
-    agents: graph.agents,
-    hooks: graph.hooks,
-  };
-  const projections = projectProviders(context);
-  const enabledProviders = new Set(graph.providers);
-  for (const [provider, projection] of Object.entries(projections)) {
-    if (!enabledProviders.has(provider)) continue;
-    for (const file of projection.files) {
-      desiredFiles.set(file.path, file.content);
-      addOwnership(ownershipFiles, file.path, graph.pluginIds, provider, false);
-    }
-  }
-
+async function addRuntimeFiles({
+  root,
+  graph,
+  desiredFiles,
+  ownershipFiles,
+}) {
   for (const pluginId of graph.pluginIds) {
     const serverRoot = path.join(root, "mcp-servers", `${pluginId}-mcp`);
     const serverPrefix = `.ai-engineering/mcp-servers/${pluginId}-mcp`;
@@ -152,102 +144,232 @@ async function buildDesiredState({
       serverPrefix,
     )) {
       desiredFiles.set(relativePath, content);
-      addOwnership(ownershipFiles, relativePath, [pluginId], "mcp-server", false);
+      addOwnership(
+        ownershipFiles,
+        relativePath,
+        [pluginId],
+        "mcp-server",
+      );
     }
   }
 
-  if (graph.pluginIds.length > 0) {
-    for (const [relativePath, content] of await readDirectoryFiles(
-      path.join(root, "core", "mcp"),
-      ".ai-engineering/core/mcp",
-    )) {
-      desiredFiles.set(relativePath, content);
-      addOwnership(ownershipFiles, relativePath, graph.pluginIds, "mcp-runtime", true);
-    }
+  if (graph.pluginIds.length === 0) return;
+  for (const [relativePath, content] of await readDirectoryFiles(
+    path.join(root, "core", "mcp"),
+    ".ai-engineering/core/mcp",
+  )) {
+    desiredFiles.set(relativePath, content);
+    addOwnership(
+      ownershipFiles,
+      relativePath,
+      graph.pluginIds,
+      "mcp-runtime",
+      true,
+    );
   }
+}
 
-  const mcpPath = ".mcp.json";
-  desiredFiles.set(
-    mcpPath,
-    `${JSON.stringify(
-      {
-        mcpServers: Object.fromEntries(
-          graph.pluginIds.map((packId) => [
-            packId,
-            {
-              command: "node",
-              args: [
-                path.join(
-                  target,
-                  ".ai-engineering",
-                  "mcp-servers",
-                  `${packId}-mcp`,
-                  "src",
-                  "index.js",
-                ),
-              ],
-            },
-          ]),
-        ),
-      },
-      null,
-      2,
-    )}\n`,
+async function mergeProviderConfig({
+  provider,
+  projection,
+  target,
+  previousState,
+  force,
+}) {
+  const currentText = await readTextIfExists(
+    path.join(target, projection.mcpConfig.path),
   );
-  addOwnership(ownershipFiles, mcpPath, graph.pluginIds, "mcp", true);
+  const previouslyManaged =
+    previousState.lock?.managedMcpServers?.[provider] ?? [];
+  if (projection.mcpConfig.format === "toml") {
+    return mergeCodexMcpConfig({
+      currentText,
+      desired: projection.mcpConfig.servers,
+      previouslyManaged,
+      force,
+    });
+  }
+  return mergeJsonMcpConfig({
+    currentText,
+    desired: projection.mcpConfig.servers,
+    previouslyManaged,
+    force,
+    provider: provider === "claude" ? "Claude" : "Cursor",
+  });
+}
 
+async function buildDesiredState({
+  root,
+  target,
+  context,
+  pluginIds = [],
+  all = false,
+  providers,
+  rootPlugins,
+  force = false,
+}) {
+  const installContext = normalizeContext(target, context);
+  const platform = await loadPlatform(root);
+  const plugins = await loadPlugins(root);
+  const requested = all ? [...plugins.keys()] : pluginIds;
+  const graph = resolvePluginGraph({
+    requested,
+    plugins,
+    platformVersion: platform.product.version,
+    providers: providers ?? platform.providers.enabled,
+  });
+  const previousState = await readPlatformState(installContext.targetRoot);
+  const desiredFiles = new Map();
+  const ownershipFiles = {};
+
+  const commands = installContext.projectAssets
+    ? await addProjectAssets({
+        root,
+        graph,
+        plugins,
+        desiredFiles,
+        ownershipFiles,
+      })
+    : [];
+
+  await addRuntimeFiles({ root, graph, desiredFiles, ownershipFiles });
+
+  const mcpServers = createMcpRegistrations({
+    packIds: graph.pluginIds,
+    runtimeRoot: path.join(installContext.targetRoot, ".ai-engineering"),
+  });
+  const projections = projectProviders({
+    scope: installContext.scope,
+    plugin: {
+      metadata: {
+        id: "platform",
+        name: platform.product.displayName,
+        version: platform.product.version,
+      },
+    },
+    commands,
+    skills: graph.skills,
+    agents: graph.agents,
+    hooks: graph.hooks,
+    mcpServers,
+  });
+
+  for (const provider of graph.providers) {
+    const projection = projections[provider];
+    if (installContext.projectAssets && graph.pluginIds.length > 0) {
+      for (const file of projection.files) {
+        desiredFiles.set(file.path, file.content);
+        addOwnership(
+          ownershipFiles,
+          file.path,
+          graph.pluginIds,
+          provider,
+        );
+      }
+    }
+
+    const merged = await mergeProviderConfig({
+      provider,
+      projection,
+      target: installContext.targetRoot,
+      previousState,
+      force,
+    });
+    if (!merged.empty) {
+      desiredFiles.set(projection.mcpConfig.path, merged.content);
+      addOwnership(
+        ownershipFiles,
+        projection.mcpConfig.path,
+        graph.pluginIds,
+        `${provider}-mcp-config`,
+        true,
+        { mergeStrategy: "mcp-config" },
+      );
+    }
+  }
+
+  const activeProviders =
+    graph.pluginIds.length === 0 ? [] : graph.providers;
   const lock = {
     schemaVersion: 1,
     platformVersion: platform.product.version,
-    providers: graph.providers,
+    scope: installContext.scope,
+    providers: activeProviders,
     rootPlugins: rootPlugins ?? requested,
     plugins: graph.pluginIds.map((id) => ({
       id,
       version: plugins.get(id).metadata.version,
     })),
+    managedMcpServers: Object.fromEntries(
+      activeProviders.map((provider) => [
+        provider,
+        Object.keys(mcpServers).sort(),
+      ]),
+    ),
   };
   return {
     desiredFiles,
     lock,
     ownership: { schemaVersion: 1, files: ownershipFiles },
     plugins: graph.pluginIds,
-    providers: graph.providers,
+    providers: activeProviders,
   };
+}
+
+async function writeLifecycleState(target, lock) {
+  const stateRoot = path.join(target, ".ai-engineering");
+  if (lock.plugins.length === 0) {
+    await rm(path.join(stateRoot, "installed-packs.yaml"), { force: true });
+    await rm(path.join(stateRoot, "lockfile.yaml"), { force: true });
+    return;
+  }
+  await writeJsonAtomic(path.join(stateRoot, "installed-packs.yaml"), {
+    schemaVersion: 1,
+    packs: lock.plugins,
+  });
+  await writeJsonAtomic(path.join(stateRoot, "lockfile.yaml"), {
+    schemaVersion: 1,
+    platformVersion: lock.platformVersion,
+    scope: lock.scope,
+    providers: lock.providers,
+    packs: lock.plugins,
+  });
 }
 
 export async function installPlugins({
   root,
   target,
+  context,
   pluginIds = [],
   all = false,
   providers,
   force = false,
 }) {
-  await initializeProject({ root, target });
-  const desired = await buildDesiredState({ root, target, pluginIds, all, providers });
+  const installContext = normalizeContext(target, context);
+  if (installContext.projectAssets) {
+    await initializeProject({ root, target: installContext.targetRoot });
+  }
+  const desired = await buildDesiredState({
+    root,
+    target: installContext.targetRoot,
+    context: installContext,
+    pluginIds,
+    all,
+    providers,
+    force,
+  });
   const plan = await planTransaction({
-    target,
+    target: installContext.targetRoot,
     desiredFiles: desired.desiredFiles,
     lock: desired.lock,
     ownership: desired.ownership,
     force,
   });
   await applyTransaction(plan);
-  await writeJsonAtomic(
-    path.join(target, ".ai-engineering", "installed-packs.yaml"),
-    {
-      schemaVersion: 1,
-      packs: desired.lock.plugins,
-    },
-  );
-  await writeJsonAtomic(path.join(target, ".ai-engineering", "lockfile.yaml"), {
-    schemaVersion: 1,
-    platformVersion: desired.lock.platformVersion,
-    providers: desired.lock.providers,
-    packs: desired.lock.plugins,
-  });
+  await writeLifecycleState(installContext.targetRoot, desired.lock);
   return {
     status: "pass",
+    scope: installContext.scope,
     plugins: desired.plugins,
     providers: desired.providers,
   };
@@ -257,10 +379,12 @@ export async function listInstalled({ target }) {
   const state = await readPlatformState(target);
   return {
     status: "pass",
+    scope: state.lock?.scope ?? "project",
     plugins: state.lock?.plugins ?? [],
     rootPlugins: state.lock?.rootPlugins ?? [],
     providers: state.lock?.providers ?? [],
     platformVersion: state.lock?.platformVersion,
+    managedMcpServers: state.lock?.managedMcpServers ?? {},
   };
 }
 
@@ -277,15 +401,13 @@ export async function findOutdated({ target, registry = {} }) {
       });
     }
   }
-  return {
-    status: "pass",
-    updates,
-  };
+  return { status: "pass", updates };
 }
 
 export async function updatePlugins({
   root,
   target,
+  context,
   pluginIds = [],
   all = false,
   registry = {},
@@ -297,38 +419,34 @@ export async function updatePlugins({
     ? installed.plugins.map((item) => item.id)
     : pluginIds.map((item) => item.split("@")[0]);
   const outdated = await findOutdated({ target, registry });
-  const applicable = outdated.updates.filter((item) => selected.includes(item.id));
+  const applicable = outdated.updates.filter((item) =>
+    selected.includes(item.id),
+  );
   if (dryRun || applicable.length === 0) {
-    return {
-      status: "pass",
-      changed: false,
-      updates: applicable,
-    };
+    return { status: "pass", changed: false, updates: applicable };
   }
-  const providers = installed.providers.length > 0 ? installed.providers : undefined;
   const result = await installPlugins({
     root,
     target,
+    context,
     pluginIds: selected,
-    all: false,
-    providers,
+    providers:
+      installed.providers.length > 0 ? installed.providers : undefined,
     force,
   });
-  return {
-    ...result,
-    changed: true,
-    updates: applicable,
-  };
+  return { ...result, changed: true, updates: applicable };
 }
 
 export async function removePlugins({
   root,
   target,
+  context,
   pluginIds = [],
   all = false,
   force = false,
 }) {
-  const installed = await listInstalled({ target });
+  const installContext = normalizeContext(target, context);
+  const installed = await listInstalled({ target: installContext.targetRoot });
   const removeIds = new Set(pluginIds.map((item) => item.split("@")[0]));
   const installedRoots =
     installed.rootPlugins.length > 0
@@ -337,51 +455,27 @@ export async function removePlugins({
   const remainingRoots = all
     ? []
     : installedRoots.filter((id) => !removeIds.has(id));
-  const desired =
-    remainingRoots.length === 0
-      ? {
-          desiredFiles: new Map(),
-          lock: {
-            schemaVersion: 1,
-            platformVersion: installed.platformVersion ?? "1.0.0",
-            providers: [],
-            rootPlugins: [],
-            plugins: [],
-          },
-          ownership: { schemaVersion: 1, files: {} },
-          plugins: [],
-          providers: [],
-        }
-      : await buildDesiredState({
-          root,
-          target,
-          pluginIds: remainingRoots,
-          providers: installed.providers,
-          rootPlugins: remainingRoots,
-        });
+  const desired = await buildDesiredState({
+    root,
+    target: installContext.targetRoot,
+    context: installContext,
+    pluginIds: remainingRoots,
+    providers: installed.providers,
+    rootPlugins: remainingRoots,
+    force,
+  });
   const plan = await planTransaction({
-    target,
+    target: installContext.targetRoot,
     desiredFiles: desired.desiredFiles,
     lock: desired.lock,
     ownership: desired.ownership,
     force,
   });
   await applyTransaction(plan);
-  await writeJsonAtomic(
-    path.join(target, ".ai-engineering", "installed-packs.yaml"),
-    {
-      schemaVersion: 1,
-      packs: desired.lock.plugins,
-    },
-  );
-  await writeJsonAtomic(path.join(target, ".ai-engineering", "lockfile.yaml"), {
-    schemaVersion: 1,
-    platformVersion: desired.lock.platformVersion,
-    providers: desired.lock.providers,
-    packs: desired.lock.plugins,
-  });
+  await writeLifecycleState(installContext.targetRoot, desired.lock);
   return {
     status: "pass",
+    scope: installContext.scope,
     plugins: desired.plugins,
     providers: desired.providers,
   };

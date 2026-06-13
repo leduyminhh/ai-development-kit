@@ -40,20 +40,27 @@ function manifest(context, provider) {
 export function projectCodex(context) {
     const providerManifest = manifest(context, "codex");
     const workflow = context.commands.map(commandBody).join("\n");
+    const projectFiles = [
+        {
+            path: ".codex/agents/openai.yaml",
+            content: json(providerManifest),
+        },
+        {
+            path: ".codex/workflows/commands.md",
+            content: workflow,
+        },
+    ];
     return {
         manifest: providerManifest,
         workflow,
         intent: context.commands[0]?.intent ?? "",
-        files: [
-            {
-                path: ".codex/agents/openai.yaml",
-                content: json(providerManifest),
-            },
-            {
-                path: ".codex/workflows/commands.md",
-                content: workflow,
-            },
-        ],
+        files: context.scope === "global" ? [] : projectFiles,
+        mcpConfig: {
+            provider: "codex",
+            format: "toml",
+            path: ".codex/config.toml",
+            servers: context.mcpServers ?? {},
+        },
     };
 }
 export function projectClaude(context) {
@@ -62,17 +69,24 @@ export function projectClaude(context) {
         path: `commands/${command.id}.md`,
         content: `---\ndescription: ${command.description}\n---\n\n${commandBody(command)}`,
     }));
+    const projectFiles = [
+        {
+            path: ".claude-plugin/plugin.json",
+            content: json(providerManifest),
+        },
+        ...commands,
+    ];
     return {
         manifest: providerManifest,
         command: commands[0]?.content ?? "",
         intent: context.commands[0]?.intent ?? "",
-        files: [
-            {
-                path: ".claude-plugin/plugin.json",
-                content: json(providerManifest),
-            },
-            ...commands,
-        ],
+        files: context.scope === "global" ? [] : projectFiles,
+        mcpConfig: {
+            provider: "claude",
+            format: "json",
+            path: context.scope === "global" ? ".claude.json" : ".mcp.json",
+            servers: context.mcpServers ?? {},
+        },
     };
 }
 export function projectCursor(context) {
@@ -81,17 +95,24 @@ export function projectCursor(context) {
         path: `.cursor/rules/${command.id}.mdc`,
         content: `---\ndescription: ${command.description}\nalwaysApply: false\n---\n\n${commandBody(command)}`,
     }));
+    const projectFiles = [
+        {
+            path: ".cursor/rules/provider.json",
+            content: json(providerManifest),
+        },
+        ...rules,
+    ];
     return {
         manifest: providerManifest,
         rule: rules[0]?.content ?? "",
         intent: context.commands[0]?.intent ?? "",
-        files: [
-            {
-                path: ".cursor/rules/provider.json",
-                content: json(providerManifest),
-            },
-            ...rules,
-        ],
+        files: context.scope === "global" ? [] : projectFiles,
+        mcpConfig: {
+            provider: "cursor",
+            format: "json",
+            path: ".cursor/mcp.json",
+            servers: context.mcpServers ?? {},
+        },
     };
 }
 export function projectProviders(context) {

@@ -1,12 +1,14 @@
-export function installPlugins({ root, target, pluginIds, all, providers, force, }: {
+export function installPlugins({ root, target, context, pluginIds, all, providers, force, }: {
     root: any;
     target: any;
+    context: any;
     pluginIds?: never[] | undefined;
     all?: boolean | undefined;
     providers: any;
     force?: boolean | undefined;
 }): Promise<{
     status: string;
+    scope: any;
     plugins: any[];
     providers: any[];
 }>;
@@ -14,10 +16,12 @@ export function listInstalled({ target }: {
     target: any;
 }): Promise<{
     status: string;
+    scope: any;
     plugins: any;
     rootPlugins: any;
     providers: any;
     platformVersion: any;
+    managedMcpServers: any;
 }>;
 export function findOutdated({ target, registry }: {
     target: any;
@@ -30,9 +34,10 @@ export function findOutdated({ target, registry }: {
         latest: any;
     }[];
 }>;
-export function updatePlugins({ root, target, pluginIds, all, registry, dryRun, force, }: {
+export function updatePlugins({ root, target, context, pluginIds, all, registry, dryRun, force, }: {
     root: any;
     target: any;
+    context: any;
     pluginIds?: never[] | undefined;
     all?: boolean | undefined;
     registry?: {} | undefined;
@@ -54,17 +59,20 @@ export function updatePlugins({ root, target, pluginIds, all, registry, dryRun, 
         latest: any;
     }[];
     status: string;
+    scope: any;
     plugins: any[];
     providers: any[];
 }>;
-export function removePlugins({ root, target, pluginIds, all, force, }: {
+export function removePlugins({ root, target, context, pluginIds, all, force, }: {
     root: any;
     target: any;
+    context: any;
     pluginIds?: never[] | undefined;
     all?: boolean | undefined;
     force?: boolean | undefined;
 }): Promise<{
     status: string;
+    scope: any;
     plugins: any[];
     providers: any[];
 }>;

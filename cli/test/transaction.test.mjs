@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -99,6 +99,59 @@ test("rolls back files when apply validation fails", async () => {
     });
     await assert.rejects(applyTransaction(plan), /injected failure/);
     assert.equal(await readFile(path.join(target, "managed.txt"), "utf8"), "before\n");
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
+test("merge-managed config accepts user content and creates a backup", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-merge-config-"));
+  try {
+    const configPath = path.join(target, ".codex", "config.toml");
+    await mkdir(path.dirname(configPath), { recursive: true });
+    await writeFile(configPath, 'model = "gpt-5"\n');
+
+    const plan = await planTransaction({
+      target,
+      desiredFiles: new Map([
+        [
+          ".codex/config.toml",
+          'model = "gpt-5"\n\n[mcp_servers.platform]\ncommand = "node"\n',
+        ],
+      ]),
+      lock: {
+        plugins: [{ id: "platform", version: "1.0.0" }],
+        providers: ["codex"],
+      },
+      ownership: {
+        schemaVersion: 1,
+        files: {
+          ".codex/config.toml": {
+            owners: ["platform"],
+            source: "codex-mcp-config",
+            checksum: "",
+            shared: true,
+            mergeStrategy: "mcp-config",
+          },
+        },
+      },
+    });
+    await applyTransaction(plan);
+
+    assert.match(await readFile(configPath, "utf8"), /mcp_servers\.platform/);
+    const backupRoot = path.join(
+      target,
+      ".ai-engineering",
+      "backups",
+      "provider-config",
+      plan.transactionId,
+      ".codex",
+    );
+    assert.deepEqual(await readdir(backupRoot), ["config.toml"]);
+    assert.equal(
+      await readFile(path.join(backupRoot, "config.toml"), "utf8"),
+      'model = "gpt-5"\n',
+    );
   } finally {
     await rm(target, { recursive: true, force: true });
   }
