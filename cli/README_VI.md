@@ -32,16 +32,16 @@ Executable delegate sang runtime trong `cli/src`, hiện expose:
 ai-engineering --help
 ai-engineering --version
 ai-engineering init
-ai-engineering doctor
+ai-engineering doctor --scope <project|global>
 ai-engineering validate
 ai-engineering build --all
 ai-engineering artifact verify --all
 ai-engineering registry generate
-ai-engineering install <pack...> --target <agent>
-ai-engineering install --all
-ai-engineering uninstall <pack...>
-ai-engineering remove --all
-ai-engineering list
+ai-engineering install <pack...> --target <agent> --scope <project|global>
+ai-engineering install --all --target <agent> --scope <project|global>
+ai-engineering uninstall <pack...> --scope <project|global>
+ai-engineering remove --all --scope <project|global>
+ai-engineering list --scope <project|global>
 ai-engineering plugin list
 ai-engineering plugin outdated
 ai-engineering update <pack...>
@@ -54,6 +54,17 @@ ai-engineering migrate --delete-legacy
 ai-engineering plugin install <plugin...>
 ai-engineering plugin remove <plugin...>
 ```
+
+`project` là scope mặc định. Các đường dẫn cấu hình MCP native:
+
+| Provider | Project | Global |
+| --- | --- | --- |
+| Codex | `.codex/config.toml` | `~/.codex/config.toml` |
+| Claude | `.mcp.json` | `~/.claude.json` |
+| Cursor | `.cursor/mcp.json` | `~/.cursor/mcp.json` |
+
+Global install chỉ copy runtime, server, state và MCP registration. Luồng này
+không sinh command, skill, agent, rule hoặc `AGENTS.md` cho project.
 
 ## Verification
 

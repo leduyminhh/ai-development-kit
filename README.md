@@ -9,7 +9,8 @@ project bootstrap, and generated adapters for Codex, Claude, and Cursor.
 - One MCP server contract per capability pack.
 - Safe `AGENTS.md` creation and managed-block merge with backup.
 - Dependency-aware pack installation and removal.
-- Generated provider adapters and `.mcp.json`.
+- Native MCP configuration for Codex, Claude, and Cursor.
+- Project-scoped and user-global installation.
 - Repository validation, target-project doctor, migration planning, and cleanup.
 
 ## Install
@@ -17,6 +18,8 @@ project bootstrap, and generated adapters for Codex, Claude, and Cursor.
 Requirements: Node.js 20 or newer.
 
 ```bash
+git clone https://github.com/leduyminhh/ai-development-kit.git
+cd ai-development-kit
 npm install
 npm run build
 npm link
@@ -26,21 +29,29 @@ npm link
 
 ```bash
 ai-engineering init
-ai-engineering install application
-ai-engineering install platform security --target cursor
-ai-engineering uninstall security
-ai-engineering list
+ai-engineering install application --target cursor --scope project
+ai-engineering install --all --target codex,claude,cursor --scope global
+ai-engineering doctor --scope project
+ai-engineering doctor --scope global
+ai-engineering uninstall security --scope project
+ai-engineering list --scope global
 ai-engineering update application
 ai-engineering upgrade
 ai-engineering generate-adapter quality --target codex
 ai-engineering validate
-ai-engineering doctor
 ai-engineering migrate --dry-run
 ai-engineering migrate --delete-legacy
 ```
 
 `init` never overwrites project-owned AGENTS content. It creates or updates only
 the managed baseline block and writes state under `.ai-engineering/`.
+
+Project scope writes runtime files below `<project>/.ai-engineering/`. Global
+scope writes them below `<home>/.ai-engineering/` and does not generate project
+commands, skills, rules, or `AGENTS.md`.
+
+Each machine must run the install command because stdio MCP registrations use
+absolute entrypoint paths on that machine.
 
 ## Structure
 

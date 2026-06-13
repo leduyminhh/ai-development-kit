@@ -1,17 +1,15 @@
 # MCP Servers
 
-`mcp-servers/` chứa một MCP server được namespace cho mỗi capability
-pack. Luồng install của CLI copy các server skeleton được chọn vào dự án đích
-dưới `.ai-engineering/mcp-servers/` và ghi các entry `.mcp.json` trỏ tới
-entrypoint nằm ngay trong dự án đích.
+`mcp-servers/` chứa một MCP server có namespace cho mỗi capability pack. Luồng
+install của CLI copy server vào `.ai-engineering/mcp-servers/` thuộc scope đã
+chọn và ghi MCP registration native của provider trỏ tới entrypoint cục bộ.
 
 Các server này là phía runtime của command trong pack. Metadata của pack nói
 command cần MCP tool nào; contract của server tương ứng khai báo tool đó.
-Mọi server dùng chung runtime JSON-RPC stdio phân tách theo dòng tại
-`core/mcp/stdio-runtime.js`. Runtime xử lý khởi tạo MCP, `ping`, `tools/list` và
-dispatch handler cho `tools/call`. Contract có thể dùng tool id đơn giản hoặc
-định nghĩa tool có schema và annotation. Tool đã khai báo nhưng chưa có handler
-sẽ trả kết quả lỗi có hướng dẫn thay vì giả vờ thực thi thành công.
+Mọi server dùng chung runtime JSON-RPC stdio tại `core/mcp/stdio-runtime.js`.
+Runtime xử lý khởi tạo MCP, `ping`, `tools/list` và dispatch `tools/call`. Tất cả
+tool phát hành đều có input/output schema và annotation read-only. Server không
+khởi động nếu contract và handler registration không khớp.
 
 ## Cấu trúc một server
 
@@ -19,7 +17,7 @@ Mỗi thư mục `<pack>-mcp/` có cấu trúc:
 
 - `mcp.json`: contract ổn định của server; gồm tên server, version và tool id.
 - `package.json`: metadata package và script `start`.
-- `src/index.js`: entrypoint thực thi được `.mcp.json` dùng.
+- `src/index.js`: entrypoint được cấu hình MCP native của provider sử dụng.
 - `src/server.js`: server factory mỏng, đọc `mcp.json` và đăng ký handler.
 - `src/tools/`: tool handler thuộc sở hữu capability server.
 - `src/resources/`: vị trí MCP resource handler hoặc placeholder.
@@ -39,18 +37,19 @@ Mỗi thư mục `<pack>-mcp/` có cấu trúc:
 
 ## Quan hệ với luồng install
 
-Khi người dùng chạy `ai-engineering install <pack...> --target <provider>`:
+Khi người dùng chạy
+`ai-engineering install <pack...> --target <provider> --scope <project|global>`:
 
 1. Dependency graph resolve các pack được yêu cầu.
 2. Lifecycle builder gom command, skill, adapter và MCP server skeleton của pack.
-3. File server được copy vào dự án đích dưới
+3. File server được copy vào scope đã chọn dưới
    `.ai-engineering/mcp-servers/<pack>-mcp/`.
 4. Runtime dùng chung được copy một lần vào
    `.ai-engineering/core/mcp/stdio-runtime.js`.
-5. `.mcp.json` trong dự án đích trỏ tới
+5. Cấu hình native của Codex, Claude hoặc Cursor trỏ tới entrypoint tuyệt đối
    `.ai-engineering/mcp-servers/<pack>-mcp/src/index.js`.
-6. Ownership metadata ghi nhận file server và runtime dùng chung để uninstall/update có
-   thể xóa hoặc thay thế file được quản lý một cách an toàn.
+6. Ownership metadata ghi nhận runtime và config entry được quản lý để
+   uninstall/update vẫn bảo toàn cấu hình của người dùng.
 
 ## Checklist thay đổi
 

@@ -33,16 +33,16 @@ The executable delegates to the runtime in `cli/src`, which currently exposes:
 ai-engineering --help
 ai-engineering --version
 ai-engineering init
-ai-engineering doctor
+ai-engineering doctor --scope <project|global>
 ai-engineering validate
 ai-engineering build --all
 ai-engineering artifact verify --all
 ai-engineering registry generate
-ai-engineering install <pack...> --target <agent>
-ai-engineering install --all
-ai-engineering uninstall <pack...>
-ai-engineering remove --all
-ai-engineering list
+ai-engineering install <pack...> --target <agent> --scope <project|global>
+ai-engineering install --all --target <agent> --scope <project|global>
+ai-engineering uninstall <pack...> --scope <project|global>
+ai-engineering remove --all --scope <project|global>
+ai-engineering list --scope <project|global>
 ai-engineering plugin list
 ai-engineering plugin outdated
 ai-engineering update <pack...>
@@ -55,6 +55,17 @@ ai-engineering migrate --delete-legacy
 ai-engineering plugin install <plugin...>
 ai-engineering plugin remove <plugin...>
 ```
+
+`project` is the default scope. Native MCP config paths are:
+
+| Provider | Project | Global |
+| --- | --- | --- |
+| Codex | `.codex/config.toml` | `~/.codex/config.toml` |
+| Claude | `.mcp.json` | `~/.claude.json` |
+| Cursor | `.cursor/mcp.json` | `~/.cursor/mcp.json` |
+
+Global installation copies only runtime, server, state, and MCP registrations.
+It does not generate project commands, skills, agents, rules, or `AGENTS.md`.
 
 ## Verification
 

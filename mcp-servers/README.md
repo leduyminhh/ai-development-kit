@@ -1,18 +1,17 @@
 # MCP Servers
 
 `mcp-servers/` contains one namespaced MCP server per capability pack.
-The CLI install flow copies selected server skeletons into the target project
-under `.ai-engineering/mcp-servers/` and writes `.mcp.json` entries that point to
-those target-local entrypoints.
+The CLI install flow copies selected servers below the chosen scope's
+`.ai-engineering/mcp-servers/` directory and writes provider-native MCP
+registrations that point to those local entrypoints.
 
 These servers are the runtime-facing side of pack commands. Pack metadata says
 which MCP tool a command expects; the matching server contract declares that tool.
 All servers use the shared newline-delimited JSON-RPC stdio runtime in
 `core/mcp/stdio-runtime.js`. The runtime implements MCP initialization,
-`ping`, `tools/list`, and handler dispatch for `tools/call`. Contracts may use
-simple tool ids or structured tool definitions with schemas and annotations.
-Declared tools without handlers return an actionable tool result instead of
-pretending that execution succeeded.
+`ping`, `tools/list`, and handler dispatch for `tools/call`. All released tools
+use structured input/output schemas and read-only annotations. Server startup
+fails when a contract and its registered handlers do not match.
 
 ## Server Anatomy
 
@@ -20,7 +19,7 @@ Each `<pack>-mcp/` directory follows this shape:
 
 - `mcp.json`: stable server contract; includes server name, version, and tool ids.
 - `package.json`: package metadata and `start` script.
-- `src/index.js`: executable entrypoint used by `.mcp.json`.
+- `src/index.js`: executable entrypoint used by provider MCP configuration.
 - `src/server.js`: thin server factory that loads `mcp.json` and registers handlers.
 - `src/tools/`: tool handlers owned by the capability server.
 - `src/resources/`: MCP resource handler location or placeholder.
@@ -40,19 +39,20 @@ Each `<pack>-mcp/` directory follows this shape:
 
 ## Install Flow Relationship
 
-When a user runs `ai-engineering install <pack...> --target <provider>`:
+When a user runs
+`ai-engineering install <pack...> --target <provider> --scope <project|global>`:
 
 1. The dependency graph resolves requested packs.
 2. The lifecycle builder collects pack commands, skills, adapters, and MCP server
    skeletons.
-3. Server files are copied into the target project under
+3. Server files are copied into the selected scope under
    `.ai-engineering/mcp-servers/<pack>-mcp/`.
 4. The shared runtime is copied once to
    `.ai-engineering/core/mcp/stdio-runtime.js`.
-5. The target `.mcp.json` points to
-   `.ai-engineering/mcp-servers/<pack>-mcp/src/index.js`.
-6. Ownership metadata records the copied server and shared runtime files so uninstall/update can
-   remove or replace managed files safely.
+5. Codex, Claude, or Cursor native config points to the absolute
+   `.ai-engineering/mcp-servers/<pack>-mcp/src/index.js` entrypoint.
+6. Ownership metadata records runtime files and managed config entries so
+   uninstall/update preserves user-owned configuration.
 
 ## Change Checklist
 

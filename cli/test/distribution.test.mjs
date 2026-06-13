@@ -46,10 +46,12 @@ test("prepares equivalent npm and GitHub release plugin artifacts", async () => 
 test("documents AI Engineering lifecycle commands in both readmes", async () => {
   const expected = [
     "ai-engineering init",
-    "ai-engineering install application",
-    "ai-engineering install platform security --target cursor",
+    "ai-engineering install application --target cursor --scope project",
+    "ai-engineering install --all --target codex,claude,cursor --scope global",
+    "ai-engineering doctor --scope project",
+    "ai-engineering doctor --scope global",
     "ai-engineering update application",
-    "ai-engineering uninstall security",
+    "ai-engineering uninstall security --scope project",
     "ai-engineering migrate --dry-run",
     "npm install",
     "npm run build",
