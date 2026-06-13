@@ -156,6 +156,16 @@ async function buildDesiredState({
     }
   }
 
+  if (graph.pluginIds.length > 0) {
+    for (const [relativePath, content] of await readDirectoryFiles(
+      path.join(root, "core", "mcp"),
+      ".ai-engineering/core/mcp",
+    )) {
+      desiredFiles.set(relativePath, content);
+      addOwnership(ownershipFiles, relativePath, graph.pluginIds, "mcp-runtime", true);
+    }
+  }
+
   const mcpPath = ".mcp.json";
   desiredFiles.set(
     mcpPath,

@@ -1,9 +1,6 @@
 #!/usr/bin/env node
 
-const runtimeModule = "../../packs/platform/src/cli.mjs";
-const { run } = (await import(runtimeModule)) as {
-  run(args: string[]): Promise<number>;
-};
+import { run } from "./cli.mjs";
 
 try {
   process.exitCode = await run(process.argv.slice(2));

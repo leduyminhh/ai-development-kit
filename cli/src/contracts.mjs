@@ -439,6 +439,8 @@ export async function validateRepository(root) {
     "cli/package.json",
     "cli/tsconfig.json",
     "cli/src/index.ts",
+    "cli/src/cli.mjs",
+    "cli/test",
     "cli/scripts/bin/install-hooks.ps1",
     "cli/scripts/bin/hook-doctor.ps1",
     "cli/scripts/bin/hook-service.ps1",

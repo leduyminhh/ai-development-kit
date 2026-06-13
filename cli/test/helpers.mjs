@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 const testRoot = path.dirname(fileURLToPath(import.meta.url));
-export const repoRoot = path.resolve(testRoot, "..", "..", "..");
+export const repoRoot = path.resolve(testRoot, "..", "..");
 export const cliPath = path.join(
   repoRoot,
   "cli",

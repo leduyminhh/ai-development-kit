@@ -57,6 +57,7 @@ test("installs application project-locally with required dependencies", async ()
     assert.equal(applicationMcpEntrypoint.startsWith(target), true);
     assert.equal(applicationMcpEntrypoint.includes(`${path.sep}mcp-servers${path.sep}`), true);
     assert.equal(await exists(target, ".ai-engineering/mcp-servers/application-mcp/src/index.js"), true);
+    assert.equal(await exists(target, ".ai-engineering/core/mcp/stdio-runtime.js"), true);
     assert.equal(await exists(target, "AGENTS.md"), true);
     assert.equal(await exists(target, ".codex-plugin/plugin.json"), false);
   } finally {

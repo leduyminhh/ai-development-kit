@@ -11,15 +11,14 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "npm run build:cli && node --test packs/platform/test",
+    "test": "npm run build:cli && node --test cli/test",
     "build": "npm run build:cli",
     "build:cli": "tsc -p cli/tsconfig.json",
-    "validate": "node packs/platform/bin/ai-engineering.mjs validate",
+    "validate": "node cli/dist/index.js validate",
     "doctor": "node cli/dist/index.js doctor",
     "migrate:dry-run": "node cli/dist/index.js migrate --dry-run"
   },
   "workspaces": [
-    "packs/platform",
     "cli"
   ],
   "files": [

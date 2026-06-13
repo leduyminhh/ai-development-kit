@@ -21,7 +21,6 @@ const REPOSITORY_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
   "..",
-  "..",
 );
 
 const HELP = `AI Engineering Platform

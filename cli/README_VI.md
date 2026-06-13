@@ -1,16 +1,17 @@
 # AI Engineering CLI
 
-`cli/` sở hữu executable phát hành `ai-engineering` và các shell hook tool vẫn
-cần đi kèm platform. Runtime command thật nằm trong `packs/platform/src/`;
-package CLI chỉ là cầu nối nhỏ, không phải bản triển khai thứ hai của logic
-install/update/migration.
+`cli/` sở hữu executable phát hành `ai-engineering`, runtime command, test và
+các shell hook tool vẫn cần đi kèm platform. Capability pack chỉ chứa nội dung
+capability có thể cài đặt.
 
 ## Bản Đồ Thư Mục
 
 | Path | Mục đích |
 | --- | --- |
-| `src/index.ts` | Executable Node mỏng. File này import `packs/platform/src/cli.mjs` và chuyển tiếp `process.argv`. |
+| `src/index.ts` | Executable Node mỏng. File này import CLI runtime cùng thư mục và chuyển tiếp `process.argv`. |
+| `src/*.mjs` | Runtime command, lifecycle, validation, migration, state, transaction và distribution của CLI. |
 | `dist/index.js` | Output executable sinh từ `npm run build:cli`; bin ở root và package trỏ tới đây. |
+| `test/` | Node test cho command, contract, lifecycle, provider, transaction và distribution của CLI. |
 | `scripts/bin/` | PowerShell hook tool có thể chạy trực tiếp: install, invoke, doctor, service, audit query, trace view và resolve output path. |
 | `scripts/hooks/` | Module runtime hook được nhóm theo `core/`, `adapters/`, `transports/` và test `fixtures/`. |
 | `scripts/lib/` | Helper PowerShell dùng chung cho parse config Codex và output path. |
@@ -25,7 +26,7 @@ cảm giác có một command tree song song dù không sở hữu runtime behav
 
 ## Runtime Command
 
-Executable delegate sang platform runtime, hiện expose:
+Executable delegate sang runtime trong `cli/src`, hiện expose:
 
 ```text
 ai-engineering --help
@@ -80,10 +81,11 @@ powershell -ExecutionPolicy Bypass -File cli/scripts/tests/test-install-hooks.ps
 
 ## Quy Tắc Thay Đổi
 
-- Giữ hành vi command CLI trong `packs/platform/src/`; không tạo lại command
-  handler dưới `cli/src/`.
+- Giữ hành vi command và lifecycle runtime của CLI trong `cli/src/`.
+- Giữ `packs/<pack>/` giới hạn ở command, skill, template, workflow, schema và
+  metadata của capability.
 - Giữ `src/index.ts` đủ nhỏ để chỉ là executable bridge.
-- Rebuild `dist/` sau khi đổi TypeScript.
+- Rebuild `dist/` sau khi đổi TypeScript hoặc runtime JavaScript.
 - Đặt shell entrypoint có thể chạy trong `scripts/bin/`, module hook tái sử dụng
   trong `scripts/hooks/`, helper dùng chung trong `scripts/lib/`, và test trong
   `scripts/tests/`.
