@@ -3,7 +3,7 @@ import readline from "node:readline";
 
 const SUPPORTED_PROTOCOL_VERSION = "2025-03-26";
 
-function toolDefinition(name) {
+function defaultToolDefinition(name) {
   return {
     name,
     title: name,
@@ -17,6 +17,18 @@ function toolDefinition(name) {
       destructiveHint: true,
       idempotentHint: false,
       openWorldHint: false,
+    },
+  };
+}
+
+function normalizeTool(tool) {
+  if (typeof tool === "string") return defaultToolDefinition(tool);
+  return {
+    ...defaultToolDefinition(tool.name),
+    ...tool,
+    annotations: {
+      ...defaultToolDefinition(tool.name).annotations,
+      ...tool.annotations,
     },
   };
 }
@@ -43,14 +55,40 @@ async function loadContract(contractUrl) {
     typeof contract.name !== "string" ||
     typeof contract.version !== "string" ||
     !Array.isArray(contract.tools) ||
-    contract.tools.some((tool) => typeof tool !== "string")
+    contract.tools.some(
+      (tool) =>
+        typeof tool !== "string" &&
+        (typeof tool !== "object" ||
+          tool === null ||
+          typeof tool.name !== "string" ||
+          typeof tool.inputSchema !== "object"),
+    )
   ) {
     throw new Error(`Invalid MCP contract: ${contractUrl}`);
   }
-  return contract;
+  return {
+    ...contract,
+    tools: contract.tools.map(normalizeTool),
+  };
 }
 
-function handleRequest(contract, message) {
+function toolError(message) {
+  return {
+    isError: true,
+    content: [{ type: "text", text: message }],
+  };
+}
+
+function toolSuccess(result) {
+  if (result?.content) return { isError: false, ...result };
+  return {
+    isError: false,
+    content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    structuredContent: result,
+  };
+}
+
+async function handleRequest(contract, handlers, message) {
   const { id, method, params = {} } = message;
   if (id === undefined) return undefined;
 
@@ -67,31 +105,36 @@ function handleRequest(contract, message) {
   if (method === "ping") return success(id, {});
   if (method === "tools/list") {
     return success(id, {
-      tools: contract.tools.map(toolDefinition),
+      tools: contract.tools,
     });
   }
   if (method === "tools/call") {
     const toolName = params.name;
-    if (!contract.tools.includes(toolName)) {
+    if (!contract.tools.some((tool) => tool.name === toolName)) {
       return failure(id, -32602, `Unknown tool: ${toolName}`);
     }
-    return success(id, {
-      isError: true,
-      content: [
-        {
-          type: "text",
-          text:
-            `Tool ${toolName} is declared but has no handler in ${contract.name}. ` +
+    const handler = handlers[toolName];
+    if (!handler) {
+      return success(
+        id,
+        toolError(
+          `Tool ${toolName} is declared but has no handler in ${contract.name}. ` +
             "Install or implement the owning capability handler before calling it.",
-        },
-      ],
-    });
+        ),
+      );
+    }
+    try {
+      return success(id, toolSuccess(await handler(params.arguments ?? {})));
+    } catch (error) {
+      return success(id, toolError(error.message));
+    }
   }
   return failure(id, -32601, `Method not found: ${method}`);
 }
 
 export function createContractServer({
   contractUrl,
+  handlers = {},
   input = process.stdin,
   output = process.stdout,
 } = {}) {
@@ -110,7 +153,7 @@ export function createContractServer({
         let response;
         try {
           const message = JSON.parse(line);
-          response = handleRequest(contract, message);
+          response = await handleRequest(contract, handlers, message);
         } catch (error) {
           response = failure(null, -32700, "Parse error", error.message);
         }

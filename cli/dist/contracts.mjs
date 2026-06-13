@@ -183,8 +183,15 @@ async function validateRoutingAndMcp(root, plugins, errors) {
                 errors.push(`MCP server ${server.name} is missing ${required}`);
             }
         }
-        for (const tool of contract.tools ?? [])
-            mcpTools.add(tool);
+        for (const tool of contract.tools ?? []) {
+            const toolName = typeof tool === "string" ? tool : tool?.name;
+            if (typeof toolName !== "string") {
+                errors.push(`MCP server ${server.name} has an invalid tool contract`);
+            }
+            else {
+                mcpTools.add(toolName);
+            }
+        }
     }
     for (const route of intentRouter.routes ?? []) {
         if (!plugins.has(route.pack)) {

@@ -1,1 +1,51 @@
-{"name":"platform-mcp","version":"1.0.0","tools":["platform.review_docker","platform.review_kubernetes","platform.deployment_plan"]}
+{
+  "name": "platform-mcp",
+  "version": "1.0.0",
+  "tools": [
+    "platform.review_docker",
+    "platform.review_kubernetes",
+    {
+      "name": "platform.deployment_plan",
+      "title": "Create deployment plan",
+      "description": "Create deployment stages, readiness gates, verification commands, and rollback guidance.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["releaseScope", "targetEnvironment"],
+        "properties": {
+          "releaseScope": {
+            "type": "string",
+            "minLength": 1
+          },
+          "targetEnvironment": {
+            "type": "string",
+            "minLength": 1
+          },
+          "operationalConstraints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "releaseScope",
+          "targetEnvironment",
+          "deploymentStages",
+          "readinessGates",
+          "verificationCommands",
+          "rollbackProcedure"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    }
+  ]
+}

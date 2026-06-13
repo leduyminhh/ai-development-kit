@@ -9,8 +9,10 @@ These servers are the runtime-facing side of pack commands. Pack metadata says
 which MCP tool a command expects; the matching server contract declares that tool.
 All servers use the shared newline-delimited JSON-RPC stdio runtime in
 `core/mcp/stdio-runtime.js`. The runtime implements MCP initialization,
-`ping`, and `tools/list`; declared tools without handlers return an actionable
-tool result instead of pretending that execution succeeded.
+`ping`, `tools/list`, and handler dispatch for `tools/call`. Contracts may use
+simple tool ids or structured tool definitions with schemas and annotations.
+Declared tools without handlers return an actionable tool result instead of
+pretending that execution succeeded.
 
 ## Server Anatomy
 
@@ -19,8 +21,8 @@ Each `<pack>-mcp/` directory follows this shape:
 - `mcp.json`: stable server contract; includes server name, version, and tool ids.
 - `package.json`: package metadata and `start` script.
 - `src/index.js`: executable entrypoint used by `.mcp.json`.
-- `src/server.js`: thin server factory that loads the sibling `mcp.json`.
-- `src/tools/`: tool handler location or placeholder.
+- `src/server.js`: thin server factory that loads `mcp.json` and registers handlers.
+- `src/tools/`: tool handlers owned by the capability server.
 - `src/resources/`: MCP resource handler location or placeholder.
 - `src/prompts/`: MCP prompt handler location or placeholder.
 
@@ -56,6 +58,7 @@ When a user runs `ai-engineering install <pack...> --target <provider>`:
 
 - Add or rename MCP tools in `mcp.json`, pack command metadata, and routing
   registries together. Do not duplicate tool ids in `src/server.js`.
+- Define input/output schemas and annotations for implemented tools.
 - Keep server directory names scoped as `<pack>-mcp`.
 - Do not reintroduce legacy provider plugin folders as active runtime paths.
 - Update English `README.md` first, then synchronize `README_VI.md`.

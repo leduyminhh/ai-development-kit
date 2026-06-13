@@ -8,9 +8,10 @@ entrypoint nằm ngay trong dự án đích.
 Các server này là phía runtime của command trong pack. Metadata của pack nói
 command cần MCP tool nào; contract của server tương ứng khai báo tool đó.
 Mọi server dùng chung runtime JSON-RPC stdio phân tách theo dòng tại
-`core/mcp/stdio-runtime.js`. Runtime xử lý khởi tạo MCP, `ping` và `tools/list`;
-tool đã khai báo nhưng chưa có handler sẽ trả kết quả lỗi có hướng dẫn thay vì
-giả vờ thực thi thành công.
+`core/mcp/stdio-runtime.js`. Runtime xử lý khởi tạo MCP, `ping`, `tools/list` và
+dispatch handler cho `tools/call`. Contract có thể dùng tool id đơn giản hoặc
+định nghĩa tool có schema và annotation. Tool đã khai báo nhưng chưa có handler
+sẽ trả kết quả lỗi có hướng dẫn thay vì giả vờ thực thi thành công.
 
 ## Cấu trúc một server
 
@@ -19,8 +20,8 @@ Mỗi thư mục `<pack>-mcp/` có cấu trúc:
 - `mcp.json`: contract ổn định của server; gồm tên server, version và tool id.
 - `package.json`: metadata package và script `start`.
 - `src/index.js`: entrypoint thực thi được `.mcp.json` dùng.
-- `src/server.js`: server factory mỏng, đọc contract `mcp.json` cùng cấp.
-- `src/tools/`: vị trí tool handler hoặc placeholder.
+- `src/server.js`: server factory mỏng, đọc `mcp.json` và đăng ký handler.
+- `src/tools/`: tool handler thuộc sở hữu capability server.
 - `src/resources/`: vị trí MCP resource handler hoặc placeholder.
 - `src/prompts/`: vị trí MCP prompt handler hoặc placeholder.
 
@@ -55,6 +56,7 @@ Khi người dùng chạy `ai-engineering install <pack...> --target <provider>`
 
 - Thêm hoặc đổi tên MCP tool đồng thời trong `mcp.json`, metadata command của
   pack và routing registry. Không lặp lại tool id trong `src/server.js`.
+- Khai báo input/output schema và annotation cho tool đã triển khai.
 - Giữ tên thư mục server theo phạm vi `<pack>-mcp`.
 - Không đưa lại folder provider plugin legacy làm runtime path đang hoạt động.
 - Cập nhật `README.md` tiếng Anh trước, rồi đồng bộ `README_VI.md`.
