@@ -10,6 +10,7 @@ export function loadCanonicalCommand(pathname: any): Promise<{
     outputContract: any[];
     markdown: string;
 }>;
+export function loadSkillRegistry(root: any): Promise<any>;
 export function validateStructuredToolContract(tool: any): string[];
 export function validateRepository(root: any): Promise<{
     status: string;

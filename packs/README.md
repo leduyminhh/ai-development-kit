@@ -26,13 +26,27 @@ Most pack directories follow this shape:
 
 | Pack | Capability | Required Packs | Optional Packs | Installed Assets |
 | --- | --- | --- | --- | --- |
-| `architecture` | System design, architecture review, ADR, DDD, integration design, Java analysis, shared design, patterns, and diagrams. | None | None | Skills: `java-analyze`, `architecture-onion-design`, `code-shared-design`, `code-design-pattern`, `diagram-generate`; command: `review-architecture`; hook: `project-audit`. |
-| `application` | Backend, frontend, API, Spring, React, Kafka, and Redis application workflows. | `architecture` | `quality`, `security` | Skills: `java-analyze`, `code-shared-design`, `react-code-generate`, `test-automation-validate`; commands: `review-backend`, `implement-frontend`; hook: `project-audit`. |
+| `architecture` | System design, architecture review, ADR, DDD, integration design, shared design, patterns, and diagrams. | None | None | Skills: `java-analyze`, `architecture-onion-design`, `code-shared-design`, `code-design-pattern`, `diagram-generate`; command: `review-architecture`; hook: `project-audit`. |
+| `application` | Backend, frontend, API, Spring, React, Kafka, Redis, Java analysis, and implementation documentation workflows. | `architecture` | `quality`, `security` | Skills: `java-analyze`, `doc-write`, `code-shared-design`, `react-code-generate`, `test-automation-validate`; commands: `review-backend`, `implement-frontend`; hook: `project-audit`. |
 | `data` | Schema review, indexing, migration, backup, restore, and CDC planning. | None | `application` | Skill: `data-migration`; command: `migration-plan`. |
 | `knowledge` | Technical documentation, README work, runbooks, API docs, onboarding, changelogs, diagrams, and transcript workflows. | None | `architecture` | Skills: `doc-write`, `diagram-generate`, `youtube-transcript`; command: `write-technical-doc`. |
-| `platform` | Delivery, deployment, observability, incident response, workflow operations, agent rules, and git workflow. | None | `quality`, `security` | Skills: `agent-operating-rules`, `git-workflow-design`, `using-workflow-kit`; command: `deployment-plan`; hook: `project-audit`. |
+| `platform` | Delivery, deployment, observability, incident response, workflow operations, and git workflow. | None | `quality`, `security` | Skills: `git-workflow-design`, `using-workflow-kit`; command: `deployment-plan`; hook: `project-audit`. |
 | `quality` | QA review, test automation, naming checks, coverage, performance, and quality verification. | None | None | Skills: `test-qa-review`, `test-automation-validate`, `naming-rule-validate`; command: `verify-quality`; hook: `project-audit`. |
 | `security` | OWASP/CWE review, secrets, threat modeling, dependency review, and container security. | None | `quality` | Skill: `security-code-review`; command: `review-security`; hook: `project-audit`. |
+
+## Skill Ownership Rules
+
+- Each runtime skill has exactly one canonical owner: the pack containing
+  `skills/<skill>/SKILL.md`.
+- `core/routing/skill-registry.yaml` maps canonical skill owners and must match
+  skill folders and `pack.yaml.skills`.
+- `pack.yaml.assets.skills` may include shared skills from another pack when a
+  pack command needs to install them, but it does not make that pack the
+  canonical owner.
+- Put implementation, stack, and source-code skills in `application`; put system
+  boundary and design-method skills in `architecture`; put repository-wide
+  policy and managed agent baselines in `core/agents`, not in a runtime pack
+  skill.
 
 ## Dependency Rules
 

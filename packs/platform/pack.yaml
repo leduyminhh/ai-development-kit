@@ -24,7 +24,6 @@
   },
   "assets": {
     "skills": [
-      "agent-operating-rules",
       "git-workflow-design",
       "using-workflow-kit"
     ],
@@ -66,10 +65,6 @@
     }
   ],
   "skills": [
-    {
-      "id": "platform.agent_operating_rules",
-      "path": "skills/agent-operating-rules/SKILL.md"
-    },
     {
       "id": "platform.git_workflow_design",
       "path": "skills/git-workflow-design/SKILL.md"

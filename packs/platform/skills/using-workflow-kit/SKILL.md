@@ -32,7 +32,7 @@ Do not use it as a replacement for domain skills such as `java-analyze`, `react-
 
 ## Examples
 
-- For a backend bug investigation before concrete workflows exist, use `agent-operating-rules`, then the relevant backend/security/test skills.
+- For a backend bug investigation before concrete workflows exist, use the repository `AGENTS.md` baseline, then the relevant backend/security/test skills.
 - For a future `workflow-backend-maintain` registry entry, load its `WORKFLOW.md` before selecting supporting skills.
 
 ## Common Rationalizations

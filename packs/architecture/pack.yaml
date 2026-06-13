@@ -82,10 +82,6 @@
     {
       "id": "architecture.diagram_generate",
       "path": "skills/diagram-generate/SKILL.md"
-    },
-    {
-      "id": "architecture.java_analyze",
-      "path": "skills/java-analyze/SKILL.md"
     }
   ],
   "depends_on": {

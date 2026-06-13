@@ -1,67 +1,73 @@
-# Phân tích cấu trúc Skills
+# Phân Tích Cấu Trúc Skills
 
-## Tóm tắt
+## Tóm Tắt
 
-Repository hiện có 17 skills thuộc 7 capability packs. Metadata trong
-`pack.yaml` đã sử dụng skill ID có namespace theo định dạng
-`<pack>.<skill_id>`, trong khi tên thư mục và `assets.skills` giữ dạng
-lowercase-hyphen để phục vụ đường dẫn cài đặt.
+Repository hiện có 16 runtime skills thuộc 7 capability packs. Metadata trong
+`pack.yaml` dùng hai lớp khai báo khác nhau:
 
-Hai dạng định danh này có mục đích khác nhau và không nên đồng nhất máy móc:
+- `skills[].id`: skill do pack sở hữu canonical, có namespace theo pack.
+- `assets.skills`: skill được cài cùng pack, có thể gồm skill dùng chung từ pack
+  khác.
+- `core/routing/skill-registry.yaml`: manifest tập trung map pack tới các skill
+  mà pack sở hữu canonical.
 
-- `skills[].id`: định danh canonical, có namespace theo pack.
-- `assets.skills`: tên asset và tên thư mục skill có thể cài đặt.
-- `core/routing/skill-registry.yaml`: ánh xạ pack tới tên asset, phải khớp
-  `assets.skills`.
+Không đồng nhất máy móc `assets.skills` với canonical ownership. Một pack có thể
+cài shared skill để phục vụ command, nhưng canonical owner vẫn là pack chứa
+`skills/<skill>/SKILL.md`.
 
-## Cấu trúc chuẩn
+## Cấu Trúc Chuẩn
 
 ```text
 packs/<pack>/
-├── pack.yaml
-├── README.md
-├── commands/
-├── skills/
-│   └── <skill-name>/
-│       ├── SKILL.md
-│       ├── resources/    # tùy chọn
-│       ├── scripts/      # tùy chọn
-│       ├── subagents/    # tùy chọn
-│       └── agents/       # tùy chọn
-├── templates/
-├── workflows/
-└── schemas/
+|-- pack.yaml
+|-- README.md
+|-- commands/
+|-- skills/
+|   `-- <skill-name>/
+|       |-- SKILL.md
+|       |-- resources/    # tùy chọn
+|       |-- scripts/      # tùy chọn
+|       |-- subagents/    # tùy chọn
+|       `-- agents/       # tùy chọn
+|-- templates/
+|-- workflows/
+`-- schemas/
 ```
 
-Các thư mục tùy chọn chỉ nên được tạo khi có nội dung thực. Không cần tạo
+Các thư mục tùy chọn chỉ nên được tạo khi có nội dung thật. Không cần tạo
 placeholder để làm cấu trúc trông đầy đủ.
 
-## Hiện trạng định danh
+## Hiện Trạng Canonical Owners
 
 | Pack | Canonical skill IDs |
 | --- | --- |
-| `architecture` | `architecture.architecture_onion_design`, `architecture.code_design_pattern`, `architecture.code_shared_design`, `architecture.diagram_generate`, `architecture.java_analyze` |
-| `application` | `application.react_code_generate` |
+| `architecture` | `architecture.architecture_onion_design`, `architecture.code_design_pattern`, `architecture.code_shared_design`, `architecture.diagram_generate` |
+| `application` | `application.doc_write`, `application.java_analyze`, `application.react_code_generate` |
 | `data` | `data.data_migration` |
 | `security` | `security.security_code_review` |
 | `quality` | `quality.naming_rule_validate`, `quality.test_automation_validate`, `quality.test_qa_review` |
-| `platform` | `platform.agent_operating_rules`, `platform.git_workflow_design`, `platform.using_workflow_kit` |
-| `knowledge` | `knowledge.doc_write`, `knowledge.youtube_transcript` |
+| `platform` | `platform.git_workflow_design`, `platform.using_workflow_kit` |
+| `knowledge` | `knowledge.youtube_transcript` |
 
-Kết luận: `pack.yaml` đã nhất quán; không còn yêu cầu migration skill ID.
+Agent baseline và rule vận hành toàn repo nằm trong `core/agents`, không nằm
+trong runtime pack skill.
 
-## Quy tắc cần giữ
+## Quy Tắc Cần Giữ
 
-1. Skill ID canonical phải có namespace của pack.
-2. Tên thư mục skill giữ lowercase-hyphen.
-3. `skills[].path` phải trỏ tới `skills/<skill-name>/SKILL.md` có thật.
-4. `assets.skills` và `core/routing/skill-registry.yaml` dùng cùng tên asset.
-5. Không đưa namespace canonical vào registry asset nếu runtime vẫn resolve
-   skill theo tên thư mục.
-6. Khi thêm, đổi tên hoặc xóa skill, cập nhật `pack.yaml`, routing registry,
-   adapter metadata và test liên quan trong cùng thay đổi.
+1. Mỗi runtime skill có đúng một canonical owner: pack chứa folder skill.
+2. `core/routing/skill-registry.yaml` phải khớp với folder skill và
+   `pack.yaml.skills`.
+3. `assets.skills` có thể liệt kê shared skill từ pack khác khi command cần cài
+   skill đó.
+4. Skill triển khai, stack và source-code nằm trong `application`.
+5. Skill về boundary hệ thống, architecture method và design method nằm trong
+   `architecture`.
+6. Policy toàn repo, managed AGENTS baseline và merge policy nằm trong
+   `core/agents`, không đóng gói thành runtime skill.
+7. Khi thêm, đổi tên, move hoặc xóa skill, cập nhật `pack.yaml`, routing
+   registry, adapter metadata và test liên quan trong cùng thay đổi.
 
-## Khoảng trống còn lại
+## Khoảng Trống Còn Lại
 
 ### Data migration
 
@@ -71,25 +77,26 @@ subagents khi đã có use case và contract kiểm chứng cụ thể.
 
 ### Kiểm tra tự động
 
-Validator hiện kiểm tra đường dẫn, registry và metadata pack. Có thể tăng độ
-chặt bằng các invariant:
+Validator hiện kiểm tra đường dẫn, registry và metadata pack. Các invariant quan
+trọng đã được siết:
 
-- Mọi `skills[].id` bắt đầu bằng `<pack>.`.
-- Phần sau namespace ánh xạ xác định tới tên asset hoặc path.
-- Không có asset skill trùng tên trong cùng pack.
-- Mọi test script mới được đăng ký trong test map phù hợp.
+- Mỗi pack trong registry phải tồn tại.
+- Registry của pack phải khớp với các folder `skills/*/SKILL.md` mà pack sở hữu.
+- `pack.yaml.skills` phải khớp với registry canonical owner.
+- Command required skills phải nằm trong `assets.skills` của pack để cài đặt được.
 
-## Checklist thay đổi skill
+## Checklist Thay Đổi Skill
 
 - [ ] Đọc `SKILL.md`, resources, scripts và subagents liên quan.
 - [ ] Cập nhật `pack.yaml` khi command, skill, dependency hoặc adapter thay đổi.
 - [ ] Giữ canonical ID có namespace và folder name dạng lowercase-hyphen.
-- [ ] Đồng bộ `core/routing/skill-registry.yaml` theo `assets.skills`.
+- [ ] Đồng bộ `core/routing/skill-registry.yaml` theo canonical owner.
+- [ ] Nếu command cần shared skill, thêm skill vào `assets.skills`.
 - [ ] Chạy `npm test`.
 - [ ] Chạy `npm run validate`.
 - [ ] Chạy `npm run build:cli`.
 
-## Nguồn đối chiếu
+## Nguồn Đối Chiếu
 
 - `packs/*/pack.yaml`
 - `core/routing/skill-registry.yaml`

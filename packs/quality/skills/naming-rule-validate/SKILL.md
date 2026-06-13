@@ -181,7 +181,6 @@ Examples:
 
 Approved capability noun exceptions:
 
-- `agent-operating-rules`
 - `code-design-pattern`
 - `using-workflow-kit`
 - `youtube-transcript`
@@ -201,7 +200,6 @@ Current approved agents:
 
 Current skill-only capabilities:
 
-- `agent-operating-rules`
 - `architecture-onion-design`
 - `code-shared-design`
 - `naming-rule-validate`

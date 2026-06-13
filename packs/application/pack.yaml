@@ -27,6 +27,7 @@
   "assets": {
     "skills": [
       "java-analyze",
+      "doc-write",
       "code-shared-design",
       "react-code-generate",
       "test-automation-validate"
@@ -78,6 +79,14 @@
     }
   ],
   "skills": [
+    {
+      "id": "application.doc_write",
+      "path": "skills/doc-write/SKILL.md"
+    },
+    {
+      "id": "application.java_analyze",
+      "path": "skills/java-analyze/SKILL.md"
+    },
     {
       "id": "application.react_code_generate",
       "path": "skills/react-code-generate/SKILL.md"

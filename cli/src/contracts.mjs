@@ -178,6 +178,55 @@ async function exists(pathname) {
   }
 }
 
+function sortedUnique(values) {
+  return [...new Set(values ?? [])].sort();
+}
+
+function sameValues(left, right) {
+  return JSON.stringify(sortedUnique(left)) === JSON.stringify(sortedUnique(right));
+}
+
+function skillIdFromPackPath(skill) {
+  return path.basename(path.dirname(skill.path));
+}
+
+export async function loadSkillRegistry(root) {
+  const registry = await readJson(
+    path.join(root, "core", "routing", "skill-registry.yaml"),
+  );
+  return {
+    ...registry,
+    packs: Object.fromEntries(
+      Object.entries(registry.packs ?? {})
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([packId, skillIds]) => [packId, sortedUnique(skillIds)]),
+    ),
+  };
+}
+
+async function loadOwnedSkillFolders(root) {
+  const result = new Map();
+  for (const pack of await readdir(path.join(root, "packs"))) {
+    const skillRoot = path.join(root, "packs", pack, "skills");
+    try {
+      const entries = await readdir(skillRoot, { withFileTypes: true });
+      const skills = [];
+      for (const entry of entries) {
+        if (
+          entry.isDirectory() &&
+          (await exists(path.join(skillRoot, entry.name, "SKILL.md")))
+        ) {
+          skills.push(entry.name);
+        }
+      }
+      result.set(pack, skills.sort());
+    } catch {
+      result.set(pack, []);
+    }
+  }
+  return result;
+}
+
 export function validateStructuredToolContract(tool) {
   if (typeof tool !== "object" || tool === null || Array.isArray(tool)) {
     return ["MCP tool must use a structured definition"];
@@ -210,13 +259,13 @@ export function validateStructuredToolContract(tool) {
   return errors;
 }
 
-async function validateRoutingAndMcp(root, plugins, errors) {
+async function validateRoutingAndMcp(root, plugins, errors, ownedSkillsByPack) {
   const routingRoot = path.join(root, "core", "routing");
   const intentRouter = await readJson(path.join(routingRoot, "intent-router.yaml"));
   const commandRegistry = await readJson(
     path.join(routingRoot, "command-registry.yaml"),
   );
-  const skillRegistry = await readJson(path.join(routingRoot, "skill-registry.yaml"));
+  const skillRegistry = await loadSkillRegistry(root);
   const mcpTools = new Set();
   const mcpRoot = path.join(root, "mcp-servers");
   const servers = (await readdir(mcpRoot, { withFileTypes: true })).filter((entry) =>
@@ -255,11 +304,29 @@ async function validateRoutingAndMcp(root, plugins, errors) {
   for (const [packId, registeredSkills] of Object.entries(skillRegistry.packs ?? {})) {
     if (!plugins.has(packId)) {
       errors.push(`skill registry references unknown pack ${packId}`);
+      continue;
+    }
+    const ownedSkills = ownedSkillsByPack.get(packId) ?? [];
+    const canonicalSkills = (plugins.get(packId)?.skills ?? []).map(skillIdFromPackPath);
+    if (!sameValues(registeredSkills, ownedSkills)) {
+      errors.push(
+        `skill registry for pack ${packId} must match skill folders: expected ${ownedSkills.join(", ")}, got ${registeredSkills.join(", ")}`,
+      );
+    }
+    if (!sameValues(registeredSkills, canonicalSkills)) {
+      errors.push(
+        `pack ${packId} canonical skills must match skill registry: expected ${registeredSkills.join(", ")}, got ${canonicalSkills.sort().join(", ")}`,
+      );
     }
     for (const skill of registeredSkills) {
       if (!plugins.get(packId)?.assets?.skills?.includes(skill)) {
         errors.push(`skill registry mismatch: ${packId}/${skill}`);
       }
+    }
+  }
+  for (const packId of plugins.keys()) {
+    if (!Object.hasOwn(skillRegistry.packs ?? {}, packId)) {
+      errors.push(`skill registry is missing pack ${packId}`);
     }
   }
   for (const command of commandRegistry.commands ?? []) {
@@ -302,19 +369,8 @@ async function validateRoutingAndMcp(root, plugins, errors) {
 export async function validateRepository(root) {
   const platform = await loadPlatform(root);
   const plugins = await loadPlugins(root);
-  const skills = new Set();
-  for (const pack of await readdir(path.join(root, "packs"))) {
-    try {
-      const entries = await readdir(path.join(root, "packs", pack, "skills"), {
-        withFileTypes: true,
-      });
-      for (const entry of entries) {
-        if (entry.isDirectory()) skills.add(entry.name);
-      }
-    } catch {
-      // Packs may be introduced before they contain skills.
-    }
-  }
+  const ownedSkillsByPack = await loadOwnedSkillFolders(root);
+  const skills = new Set([...ownedSkillsByPack.values()].flat());
   const agents = new Set(
     (await readdir(path.join(root, "adapters", "codex", "agents"), {
       withFileTypes: true,
@@ -472,7 +528,12 @@ export async function validateRepository(root) {
     }
   }
   detectCycles(plugins, errors);
-  const mcpServerCount = await validateRoutingAndMcp(root, plugins, errors);
+  const mcpServerCount = await validateRoutingAndMcp(
+    root,
+    plugins,
+    errors,
+    ownedSkillsByPack,
+  );
   for (const required of [
     "cli/package.json",
     "cli/tsconfig.json",

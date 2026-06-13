@@ -59,7 +59,6 @@ function Test-CapabilityName {
     }
 
     $approvedCapabilityNames = @(
-        'agent-operating-rules',
         'code-design-pattern',
         'using-workflow-kit',
         'youtube-transcript'

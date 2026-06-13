@@ -18,7 +18,7 @@ Prepare a production deployment with verification and rollback gates.
 
 ## Required Skills
 
-- agent-operating-rules
+- using-workflow-kit
 
 ## Steps
 

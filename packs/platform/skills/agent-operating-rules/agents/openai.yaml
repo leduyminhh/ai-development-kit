@@ -1,4 +1,0 @@
-interface:
-  display_name: "Agent Operating Rules"
-  short_description: "Apply repository-wide execution rules"
-  default_prompt: "Use $agent-operating-rules to apply must-have agent execution rules and optional safeguards before planning, editing, validating, or resolving instruction conflicts."

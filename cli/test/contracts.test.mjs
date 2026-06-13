@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -88,6 +88,25 @@ test("rejects unknown skills and missing commands", async () => {
       assert.match(error.message, /missing command missing-command/);
       return true;
     });
+  });
+});
+
+test("rejects skills that are not mapped in the central skill registry", async () => {
+  await withRepositoryCopy(async (root) => {
+    const skillRoot = path.join(
+      root,
+      "packs",
+      "application",
+      "skills",
+      "unmapped-skill",
+    );
+    await mkdir(skillRoot, { recursive: true });
+    await writeFile(
+      path.join(skillRoot, "SKILL.md"),
+      "---\nname: unmapped-skill\ndescription: Test skill.\n---\n\n# Test\n",
+    );
+
+    await assert.rejects(validateRepository(root), /skill registry for pack application/);
   });
 });
 
