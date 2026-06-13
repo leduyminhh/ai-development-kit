@@ -88,6 +88,24 @@ function toolSuccess(result) {
   };
 }
 
+export function validateHandlerParity(contract, handlers) {
+  const declared = new Set(contract.tools.map((tool) => tool.name));
+  const registered = new Set(Object.keys(handlers));
+  const missing = [...declared].filter((name) => !registered.has(name)).sort();
+  const extra = [...registered].filter((name) => !declared.has(name)).sort();
+  if (missing.length === 0 && extra.length === 0) return;
+  throw new Error(
+    [
+      missing.length > 0 ? `missing handlers: ${missing.join(", ")}` : "",
+      extra.length > 0
+        ? `handlers without contracts: ${extra.join(", ")}`
+        : "",
+    ]
+      .filter(Boolean)
+      .join("; "),
+  );
+}
+
 async function handleRequest(contract, handlers, message) {
   const { id, method, params = {} } = message;
   if (id === undefined) return undefined;
@@ -143,6 +161,7 @@ export function createContractServer({
   return {
     async start() {
       const contract = await loadContract(contractUrl);
+      validateHandlerParity(contract, handlers);
       const lines = readline.createInterface({
         input,
         crlfDelay: Infinity,

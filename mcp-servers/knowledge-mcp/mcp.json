@@ -1,1 +1,54 @@
-{"name":"knowledge-mcp","version":"1.0.0","tools":["knowledge.generate_readme","knowledge.generate_runbook","knowledge.review_docs"]}
+{
+  "name": "knowledge-mcp",
+  "version": "1.0.0",
+  "tools": [
+    {
+      "name": "knowledge.generate_readme",
+      "title": "Generate README plan",
+      "description": "Generate README sections, setup, usage, and maintenance guidance.",
+      "inputSchema": {
+        "type": "object", "additionalProperties": false,
+        "required": ["projectSummary", "audience"],
+        "properties": {
+          "projectSummary": { "type": "string", "minLength": 1 },
+          "audience": { "type": "string", "minLength": 1 },
+          "constraints": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "outputSchema": { "type": "object", "required": ["sections", "setupChecklist", "usageExamples", "maintenanceNotes"] },
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false }
+    },
+    {
+      "name": "knowledge.generate_runbook",
+      "title": "Generate operations runbook",
+      "description": "Generate operational signals, diagnostics, mitigations, and escalation criteria.",
+      "inputSchema": {
+        "type": "object", "additionalProperties": false,
+        "required": ["serviceSummary", "operationalScenario"],
+        "properties": {
+          "serviceSummary": { "type": "string", "minLength": 1 },
+          "operationalScenario": { "type": "string", "minLength": 1 },
+          "constraints": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "outputSchema": { "type": "object", "required": ["signals", "diagnosticSteps", "mitigations", "escalationCriteria"] },
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false }
+    },
+    {
+      "name": "knowledge.review_docs",
+      "title": "Review technical documentation",
+      "description": "Review documentation completeness, clarity, missing sections, and verification.",
+      "inputSchema": {
+        "type": "object", "additionalProperties": false,
+        "required": ["documentSummary", "reviewGoal"],
+        "properties": {
+          "documentSummary": { "type": "string", "minLength": 1 },
+          "reviewGoal": { "type": "string", "minLength": 1 },
+          "constraints": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "outputSchema": { "type": "object", "required": ["findings", "missingSections", "clarityActions", "verification"] },
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false }
+    }
+  ]
+}

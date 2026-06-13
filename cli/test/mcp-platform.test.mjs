@@ -93,7 +93,7 @@ test("platform MCP exposes and executes deployment planning", async () => {
   assert.match(result.structuredContent.rollbackProcedure, /rollback/i);
 });
 
-test("platform MCP validates handler input and keeps unimplemented tools fail-loud", async () => {
+test("platform MCP validates handler input for every released tool", async () => {
   const responses = await runPlatformMcp([
     {
       jsonrpc: "2.0",
@@ -118,7 +118,7 @@ test("platform MCP validates handler input and keeps unimplemented tools fail-lo
   assert.equal(responses[0].result.isError, true);
   assert.match(responses[0].result.content[0].text, /releaseScope is required/);
   assert.equal(responses[1].result.isError, true);
-  assert.match(responses[1].result.content[0].text, /has no handler/);
+  assert.match(responses[1].result.content[0].text, /dockerfile is required/);
 });
 
 test("installed platform MCP executes through the target-local runtime", async () => {

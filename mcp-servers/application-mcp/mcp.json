@@ -1,1 +1,54 @@
-{"name":"application-mcp","version":"1.0.0","tools":["application.review_source_code","application.generate_service","application.review_api"]}
+{
+  "name": "application-mcp",
+  "version": "1.0.0",
+  "tools": [
+    {
+      "name": "application.review_source_code",
+      "title": "Review source code",
+      "description": "Review source boundaries, maintainability risks, refactoring actions, and test gaps.",
+      "inputSchema": {
+        "type": "object", "additionalProperties": false,
+        "required": ["sourceSummary", "reviewGoal"],
+        "properties": {
+          "sourceSummary": { "type": "string", "minLength": 1 },
+          "reviewGoal": { "type": "string", "minLength": 1 },
+          "constraints": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "outputSchema": { "type": "object", "required": ["findings", "refactoringActions", "testGaps"] },
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false }
+    },
+    {
+      "name": "application.generate_service",
+      "title": "Generate service plan",
+      "description": "Generate service components, implementation steps, contracts, and verification guidance.",
+      "inputSchema": {
+        "type": "object", "additionalProperties": false,
+        "required": ["serviceGoal", "technicalContext"],
+        "properties": {
+          "serviceGoal": { "type": "string", "minLength": 1 },
+          "technicalContext": { "type": "string", "minLength": 1 },
+          "constraints": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "outputSchema": { "type": "object", "required": ["components", "implementationSteps", "contracts", "verification"] },
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false }
+    },
+    {
+      "name": "application.review_api",
+      "title": "Review API contract",
+      "description": "Review API correctness, compatibility risks, recommendations, and tests.",
+      "inputSchema": {
+        "type": "object", "additionalProperties": false,
+        "required": ["apiContract", "reviewGoal"],
+        "properties": {
+          "apiContract": { "type": "string", "minLength": 1 },
+          "reviewGoal": { "type": "string", "minLength": 1 },
+          "constraints": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "outputSchema": { "type": "object", "required": ["findings", "compatibilityRisks", "recommendations", "tests"] },
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false }
+    }
+  ]
+}

@@ -159,6 +159,35 @@ async function exists(pathname) {
         return false;
     }
 }
+export function validateStructuredToolContract(tool) {
+    if (typeof tool !== "object" || tool === null || Array.isArray(tool)) {
+        return ["MCP tool must use a structured definition"];
+    }
+    const errors = [];
+    if (typeof tool.name !== "string" || tool.name === "") {
+        errors.push("MCP tool name is required");
+    }
+    if (typeof tool.description !== "string" || tool.description === "") {
+        errors.push(`MCP tool ${tool.name ?? "unknown"} description is required`);
+    }
+    if (typeof tool.inputSchema !== "object" || tool.inputSchema === null) {
+        errors.push(`MCP tool ${tool.name ?? "unknown"} inputSchema is required`);
+    }
+    if (typeof tool.outputSchema !== "object" || tool.outputSchema === null) {
+        errors.push(`MCP tool ${tool.name ?? "unknown"} outputSchema is required`);
+    }
+    for (const annotation of [
+        "readOnlyHint",
+        "destructiveHint",
+        "idempotentHint",
+        "openWorldHint",
+    ]) {
+        if (typeof tool.annotations?.[annotation] !== "boolean") {
+            errors.push(`MCP tool ${tool.name ?? "unknown"} annotation ${annotation} must be boolean`);
+        }
+    }
+    return errors;
+}
 async function validateRoutingAndMcp(root, plugins, errors) {
     const routingRoot = path.join(root, "core", "routing");
     const intentRouter = await readJson(path.join(routingRoot, "intent-router.yaml"));
@@ -184,13 +213,12 @@ async function validateRoutingAndMcp(root, plugins, errors) {
             }
         }
         for (const tool of contract.tools ?? []) {
-            const toolName = typeof tool === "string" ? tool : tool?.name;
-            if (typeof toolName !== "string") {
-                errors.push(`MCP server ${server.name} has an invalid tool contract`);
+            const contractErrors = validateStructuredToolContract(tool);
+            for (const error of contractErrors) {
+                errors.push(`MCP server ${server.name}: ${error}`);
             }
-            else {
-                mcpTools.add(toolName);
-            }
+            if (contractErrors.length === 0)
+                mcpTools.add(tool.name);
         }
     }
     for (const route of intentRouter.routes ?? []) {
