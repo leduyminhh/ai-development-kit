@@ -43,6 +43,21 @@ test("supports direct pack install with target adapter", async () => {
   }
 });
 
+test("rejects unsupported install scope", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-invalid-scope-"));
+  try {
+    const result = await runCli(
+      ["install", "platform", "--target", "codex", "--scope", "team"],
+      { cwd: target },
+    );
+
+    assert.equal(result.exitCode, 2);
+    assert.match(result.stderr, /scope must be project or global/);
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
 test("plans legacy cleanup without changing files in dry-run mode", async () => {
   const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-migrate-"));
   try {

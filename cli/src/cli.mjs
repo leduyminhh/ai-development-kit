@@ -2,6 +2,7 @@ import { PlatformError } from "./errors.mjs";
 import { validateRepository } from "./contracts.mjs";
 import { buildAllPlugins, verifyPluginArtifact } from "./builder.mjs";
 import { readdir } from "node:fs/promises";
+import os from "node:os";
 import { generateRegistry } from "./registry.mjs";
 import {
   findOutdated,
@@ -15,6 +16,7 @@ import { fileURLToPath } from "node:url";
 import { initializeProject } from "./init.mjs";
 import { doctorProject } from "./doctor.mjs";
 import { migrateProject } from "./migration.mjs";
+import { resolveInstallContext } from "./install-scope.mjs";
 
 export const VERSION = "1.0.0";
 const REPOSITORY_ROOT = path.resolve(
@@ -44,12 +46,16 @@ Usage:
   ai-engineering update --all
   ai-engineering plugin remove <plugin>
   ai-engineering remove --all
+
+Options:
+  --scope <project|global>  Installation scope (default: project)
 `;
 
 function parseInstallArgs(args) {
   const plugins = [];
   let providers;
   let source;
+  let scope = "project";
   let skipNext = false;
   for (let index = 0; index < args.length; index += 1) {
     if (skipNext) {
@@ -72,12 +78,26 @@ function parseInstallArgs(args) {
       skipNext = true;
       continue;
     }
+    if (item === "--scope") {
+      scope = args[index + 1];
+      skipNext = true;
+      continue;
+    }
     if (item.startsWith("--")) {
       continue;
     }
     plugins.push(item.split("@")[0]);
   }
-  return { plugins, providers, source };
+  return { plugins, providers, source, scope };
+}
+
+function resolveContext(args) {
+  const scopeIndex = args.indexOf("--scope");
+  return resolveInstallContext({
+    scope: scopeIndex === -1 ? "project" : args[scopeIndex + 1],
+    projectRoot: process.cwd(),
+    homeRoot: os.homedir(),
+  });
 }
 
 export async function run(args, streams = process) {
@@ -105,7 +125,11 @@ export async function run(args, streams = process) {
   }
 
   if (args[0] === "doctor") {
-    const result = await doctorProject({ target: process.cwd() });
+    const context = resolveContext(args);
+    const result = await doctorProject({
+      target: context.targetRoot,
+      context,
+    });
     streams.stdout.write(
       args.includes("--json")
         ? `${JSON.stringify(result)}\n`
@@ -207,11 +231,21 @@ export async function run(args, streams = process) {
     const all = args[0] === "install" && args.includes("--all");
     const offset = args[0] === "plugin" ? 2 : 1;
     const parsed = all
-      ? { plugins: [], providers: undefined }
+      ? {
+          plugins: [],
+          providers: undefined,
+          scope: resolveContext(args).scope,
+        }
       : parseInstallArgs(args.slice(offset));
+    const context = resolveInstallContext({
+      scope: parsed.scope,
+      projectRoot: process.cwd(),
+      homeRoot: os.homedir(),
+    });
     const result = await installPlugins({
       root,
-      target: process.cwd(),
+      target: context.targetRoot,
+      context,
       pluginIds: parsed.plugins,
       all,
       providers: parsed.providers,
@@ -233,10 +267,18 @@ export async function run(args, streams = process) {
     const root = REPOSITORY_ROOT;
     const all = args[0] === "remove" && args.includes("--all");
     const offset = args[0] === "plugin" ? 2 : 1;
-    const parsed = all ? { plugins: [] } : parseInstallArgs(args.slice(offset));
+    const parsed = all
+      ? { plugins: [], scope: resolveContext(args).scope }
+      : parseInstallArgs(args.slice(offset));
+    const context = resolveInstallContext({
+      scope: parsed.scope,
+      projectRoot: process.cwd(),
+      homeRoot: os.homedir(),
+    });
     const result = await removePlugins({
       root,
-      target: process.cwd(),
+      target: context.targetRoot,
+      context,
       pluginIds: parsed.plugins,
       all,
       force: args.includes("--force"),
@@ -253,7 +295,8 @@ export async function run(args, streams = process) {
     (args[0] === "plugin" && args[1] === "list") ||
     args[0] === "list"
   ) {
-    const result = await listInstalled({ target: process.cwd() });
+    const context = resolveContext(args);
+    const result = await listInstalled({ target: context.targetRoot, context });
     streams.stdout.write(
       args.includes("--json")
         ? `${JSON.stringify(result)}\n`
@@ -263,7 +306,8 @@ export async function run(args, streams = process) {
   }
 
   if (args[0] === "plugin" && args[1] === "outdated") {
-    const result = await findOutdated({ target: process.cwd() });
+    const context = resolveContext(args);
+    const result = await findOutdated({ target: context.targetRoot, context });
     streams.stdout.write(
       args.includes("--json")
         ? `${JSON.stringify(result)}\n`
@@ -280,10 +324,18 @@ export async function run(args, streams = process) {
     const root = REPOSITORY_ROOT;
     const all = args[0] === "upgrade" || args.includes("--all");
     const offset = args[0] === "plugin" ? 2 : 1;
-    const parsed = all ? { plugins: [] } : parseInstallArgs(args.slice(offset));
+    const parsed = all
+      ? { plugins: [], scope: resolveContext(args).scope }
+      : parseInstallArgs(args.slice(offset));
+    const context = resolveInstallContext({
+      scope: parsed.scope,
+      projectRoot: process.cwd(),
+      homeRoot: os.homedir(),
+    });
     const result = await updatePlugins({
       root,
-      target: process.cwd(),
+      target: context.targetRoot,
+      context,
       pluginIds: parsed.plugins,
       all,
       dryRun: args.includes("--dry-run"),
