@@ -388,6 +388,71 @@ export async function listInstalled({ target }) {
   };
 }
 
+function sortedValues(values) {
+  return [...new Set(values.filter(Boolean))].sort();
+}
+
+function collectInstalledAssets(ownership) {
+  const files = Object.keys(ownership?.files ?? {});
+  const skills = [];
+  const commands = [];
+  const agents = [];
+  for (const file of files) {
+    const skill = file.match(/^(?:\.codex\/skills|skills)\/([^/]+)\//)?.[1];
+    if (skill) skills.push(skill);
+
+    const command = file.match(/^commands\/([^/]+)\.md$/)?.[1];
+    if (command) commands.push(command);
+
+    const agent = file.match(/^agents\/([^/]+)\.toml$/)?.[1];
+    if (agent) agents.push(agent);
+  }
+  return {
+    skills: sortedValues(skills),
+    commands: sortedValues(commands),
+    agents: sortedValues(agents),
+  };
+}
+
+export async function checkInstalled({ target }) {
+  const state = await readPlatformState(target);
+  const lock = state.lock;
+  const assets = collectInstalledAssets(state.ownership);
+  const managedMcpServers = sortedValues(Object.values(lock?.managedMcpServers ?? {}).flat());
+  const installedPackOrder = (lock?.plugins ?? []).map((item) => item.id);
+  const mcpServers = [
+    ...installedPackOrder.filter((item) => managedMcpServers.includes(item)),
+    ...managedMcpServers.filter((item) => !installedPackOrder.includes(item)),
+  ];
+  return {
+    status: "pass",
+    current: {
+      state: lock ? "installed" : "not-installed",
+      scope: lock?.scope ?? "project",
+      platformVersion: lock?.platformVersion,
+      installState: state.installState?.status ?? (lock ? "unknown" : "none"),
+    },
+    packs: {
+      installed: lock?.plugins ?? [],
+      roots: lock?.rootPlugins ?? [],
+    },
+    providers: lock?.providers ?? [],
+    mcp: {
+      servers: mcpServers,
+      byProvider: lock?.managedMcpServers ?? {},
+    },
+    skills: {
+      installed: assets.skills,
+    },
+    commands: {
+      installed: assets.commands,
+    },
+    agents: {
+      installed: assets.agents,
+    },
+  };
+}
+
 export async function findOutdated({ target, registry = {} }) {
   const installed = await listInstalled({ target });
   const updates = [];

@@ -33,6 +33,7 @@ ai-engineering --help
 ai-engineering --version
 ai-engineering init
 ai-engineering doctor --scope <project|global>
+ai-engineering check --scope <project|global>
 ai-engineering validate
 ai-engineering build --all
 ai-engineering artifact verify --all

@@ -19,6 +19,7 @@ test("prints lifecycle commands in help", async () => {
 
   assert.equal(result.exitCode, 0);
   assert.match(result.stdout, /ai-engineering plugin install/);
+  assert.match(result.stdout, /ai-engineering check/);
   assert.match(result.stdout, /ai-engineering update --all/);
   assert.match(result.stdout, /ai-engineering migrate --dry-run/);
   assert.match(result.stdout, /ai-engineering generate-adapter/);

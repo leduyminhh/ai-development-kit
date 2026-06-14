@@ -3,7 +3,7 @@
 Nền tảng kỹ thuật MCP-first gồm các capability pack có thể cài đặt, quy trình
 khởi tạo dự án an toàn và adapter được sinh cho Codex, Claude và Cursor.
 
-## Năng lực
+## Năng Lực
 
 - Bảy capability pack: architecture, application, data, security, quality, platform và knowledge.
 - Mỗi capability pack có một MCP server contract riêng.
@@ -11,9 +11,10 @@ khởi tạo dự án an toàn và adapter được sinh cho Codex, Claude và C
 - Cài đặt, gỡ bỏ pack có xử lý dependency.
 - Sinh cấu hình MCP native cho Codex, Claude và Cursor.
 - Hỗ trợ cài đặt theo phạm vi project và global của người dùng.
+- Kiểm tra trạng thái đã cài theo nhóm MCP server, skill, command và pack.
 - Validate repository, doctor dự án đích, lập kế hoạch và dọn dẹp migration.
 
-## Cài đặt
+## Cài Đặt
 
 Yêu cầu Node.js 20 trở lên.
 
@@ -33,6 +34,7 @@ ai-engineering install application --target cursor --scope project
 ai-engineering install --all --target codex,claude,cursor --scope global
 ai-engineering doctor --scope project
 ai-engineering doctor --scope global
+ai-engineering check --scope project
 ai-engineering uninstall security --scope project
 ai-engineering list --scope global
 ai-engineering update application
@@ -53,7 +55,7 @@ runtime dưới `<home>/.ai-engineering/` và không sinh command, skill, rule h
 Mỗi máy phải chạy lệnh install vì MCP stdio registration sử dụng đường dẫn
 entrypoint tuyệt đối trên chính máy đó.
 
-## Cấu trúc
+## Cấu Trúc
 
 ```text
 core/          contract, routing, policy, template và schema dùng chung
@@ -77,7 +79,7 @@ workflows/
 schemas/
 ```
 
-## Phát triển
+## Phát Triển
 
 ```bash
 npm test

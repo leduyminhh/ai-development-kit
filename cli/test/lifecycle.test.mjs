@@ -6,6 +6,7 @@ import test from "node:test";
 import * as TOML from "@iarna/toml";
 
 import {
+  checkInstalled,
   findOutdated,
   installPlugins,
   listInstalled,
@@ -203,6 +204,47 @@ test("cli lists installed plugins and reports outdated plugins", async () => {
     const outdated = await runCli(["plugin", "outdated", "--json"], { cwd: target });
     assert.equal(outdated.exitCode, 0);
     assert.deepEqual(JSON.parse(outdated.stdout).updates, []);
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
+test("checks installed MCP servers, skills, commands, and current state", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-check-"));
+  try {
+    await installPlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["application"],
+      providers: ["codex"],
+    });
+
+    const check = await checkInstalled({ target });
+    assert.equal(check.status, "pass");
+    assert.equal(check.current.state, "installed");
+    assert.deepEqual(check.packs.installed.map((item) => item.id), ["architecture", "application"]);
+    assert.deepEqual(check.providers, ["codex"]);
+    assert.deepEqual(check.mcp.servers, ["architecture", "application"]);
+    assert.deepEqual(check.commands.installed, ["implement-frontend", "review-architecture", "review-backend"]);
+    assert.ok(check.skills.installed.includes("java-analyze"));
+    assert.ok(check.skills.installed.includes("react-code-generate"));
+
+    const cliCheck = await runCli(["check", "--json"], { cwd: target });
+    assert.equal(cliCheck.exitCode, 0);
+    assert.deepEqual(JSON.parse(cliCheck.stdout).mcp.servers, ["architecture", "application"]);
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
+test("check reports not-installed for an empty target", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-check-empty-"));
+  try {
+    const result = await checkInstalled({ target });
+    assert.equal(result.current.state, "not-installed");
+    assert.deepEqual(result.mcp.servers, []);
+    assert.deepEqual(result.skills.installed, []);
+    assert.deepEqual(result.commands.installed, []);
   } finally {
     await rm(target, { recursive: true, force: true });
   }

@@ -4,7 +4,7 @@ import { buildAllPlugins, verifyPluginArtifact } from "./builder.mjs";
 import { readdir } from "node:fs/promises";
 import os from "node:os";
 import { generateRegistry } from "./registry.mjs";
-import { findOutdated, installPlugins, listInstalled, removePlugins, updatePlugins, } from "./lifecycle.mjs";
+import { checkInstalled, findOutdated, installPlugins, listInstalled, removePlugins, updatePlugins, } from "./lifecycle.mjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { initializeProject } from "./init.mjs";
@@ -20,6 +20,7 @@ Usage:
   ai-engineering --version
   ai-engineering init
   ai-engineering doctor
+  ai-engineering check
   ai-engineering install <pack...> --target <agent>
   ai-engineering uninstall <pack...>
   ai-engineering list
@@ -38,6 +39,34 @@ Usage:
 Options:
   --scope <project|global>  Installation scope (default: project)
 `;
+function formatCheck(result) {
+    const lines = [
+        `Current: ${result.current.state}`,
+        `Scope: ${result.current.scope}`,
+        `Platform: ${result.current.platformVersion ?? "unknown"}`,
+        "",
+        "Packs:",
+        ...(result.packs.installed.length > 0
+            ? result.packs.installed.map((item) => `- ${item.id}@${item.version}`)
+            : ["- none"]),
+        "",
+        "MCP:",
+        ...(result.mcp.servers.length > 0
+            ? result.mcp.servers.map((item) => `- ${item}`)
+            : ["- none"]),
+        "",
+        "Skills:",
+        ...(result.skills.installed.length > 0
+            ? result.skills.installed.map((item) => `- ${item}`)
+            : ["- none"]),
+        "",
+        "Commands:",
+        ...(result.commands.installed.length > 0
+            ? result.commands.installed.map((item) => `- ${item}`)
+            : ["- none"]),
+    ];
+    return `${lines.join("\n")}\n`;
+}
 function parseInstallArgs(args) {
     const plugins = [];
     let providers;
@@ -113,6 +142,12 @@ export async function run(args, streams = process) {
         streams.stdout.write(args.includes("--json")
             ? `${JSON.stringify(result)}\n`
             : `Doctor passed for ${result.packs.length} installed packs.\n`);
+        return 0;
+    }
+    if (args[0] === "check") {
+        const context = resolveContext(args);
+        const result = await checkInstalled({ target: context.targetRoot, context });
+        streams.stdout.write(args.includes("--json") ? `${JSON.stringify(result)}\n` : formatCheck(result));
         return 0;
     }
     if (args[0] === "migrate") {

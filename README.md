@@ -11,6 +11,7 @@ project bootstrap, and generated adapters for Codex, Claude, and Cursor.
 - Dependency-aware pack installation and removal.
 - Native MCP configuration for Codex, Claude, and Cursor.
 - Project-scoped and user-global installation.
+- Grouped status checks for installed MCP servers, skills, commands, and packs.
 - Repository validation, target-project doctor, migration planning, and cleanup.
 
 ## Install
@@ -33,6 +34,7 @@ ai-engineering install application --target cursor --scope project
 ai-engineering install --all --target codex,claude,cursor --scope global
 ai-engineering doctor --scope project
 ai-engineering doctor --scope global
+ai-engineering check --scope project
 ai-engineering uninstall security --scope project
 ai-engineering list --scope global
 ai-engineering update application

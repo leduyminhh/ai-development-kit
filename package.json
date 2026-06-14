@@ -11,7 +11,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "npm run build:cli && node --test cli/test",
+    "test": "npm run build:cli && node --test \"cli/test/*.mjs\"",
     "build": "npm run build:cli",
     "build:cli": "tsc -p cli/tsconfig.json",
     "validate": "node cli/dist/index.js validate",
