@@ -158,6 +158,33 @@ test("application owns one Python backend skill with FastAPI and Django routing"
   assert.match(skill, /python-backend-verification[.]md/);
 });
 
+test("application defines ten parseable deliverable command files", async () => {
+  const commandIds = [
+    "deliver-feature",
+    "design-api-contract",
+    "design-data-change",
+    "fix-feature",
+    "implement-backend",
+    "implement-frontend",
+    "integrate-feature",
+    "plan-feature",
+    "review-feature",
+    "test-feature",
+  ];
+
+  for (const commandId of commandIds) {
+    const command = await loadCanonicalCommand(
+      path.join(repoRoot, "packs/application/commands", `${commandId}.md`),
+    );
+    assert.equal(command.id, commandId);
+    assert.ok(command.intent.length > 0);
+    assert.ok(command.inputs.length > 0);
+    assert.ok(command.requiredSkills.length > 0);
+    assert.ok(command.steps.length > 0);
+    assert.ok(command.outputContract.length > 0);
+  }
+});
+
 test("rejects provider-specific paths in canonical commands", async () => {
   await withRepositoryCopy(async (root) => {
     const commandPath = path.join(
