@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-engineering.dev/schemas/application/feature-context.schema.json",
+  "title": "Application Feature Context",
+  "type": "object",
+  "required": [
+    "featureGoal",
+    "acceptanceCriteria",
+    "sourceScopes",
+    "stackSignals",
+    "artifacts",
+    "verification",
+    "residualRisks"
+  ],
+  "properties": {
+    "featureGoal": {
+      "type": "string",
+      "minLength": 1
+    },
+    "acceptanceCriteria": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "sourceScopes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "stackSignals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["module", "stack"],
+        "properties": {
+          "module": {
+            "type": "string",
+            "minLength": 1
+          },
+          "stack": {
+            "enum": [
+              "java-spring",
+              "fastapi",
+              "django-drf",
+              "python-ambiguous",
+              "react"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "verification": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "residualRisks": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "additionalProperties": false
+}
