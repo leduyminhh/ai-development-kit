@@ -35,6 +35,7 @@
       "feature-review",
       "feature-test",
       "java-analyze",
+      "python-backend-engineer",
       "doc-write",
       "code-shared-design",
       "react-code-generate",
@@ -126,6 +127,10 @@
     {
       "id": "application.java_analyze",
       "path": "skills/java-analyze/SKILL.md"
+    },
+    {
+      "id": "application.python_backend_engineer",
+      "path": "skills/python-backend-engineer/SKILL.md"
     },
     {
       "id": "application.react_code_generate",

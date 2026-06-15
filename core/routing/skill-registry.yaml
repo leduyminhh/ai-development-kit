@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "packs": {
     "architecture": ["architecture-onion-design", "code-design-pattern", "code-shared-design", "diagram-generate"],
-    "application": ["api-contract-design", "doc-write", "feature-delivery", "feature-fix", "feature-implement", "feature-integrate", "feature-plan", "feature-review", "feature-test", "java-analyze", "react-code-generate"],
+    "application": ["api-contract-design", "doc-write", "feature-delivery", "feature-fix", "feature-implement", "feature-integrate", "feature-plan", "feature-review", "feature-test", "java-analyze", "python-backend-engineer", "react-code-generate"],
     "data": ["data-migration"],
     "security": ["security-code-review"],
     "quality": ["naming-rule-validate", "test-automation-validate", "test-qa-review"],

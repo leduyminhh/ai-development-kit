@@ -144,6 +144,20 @@ test("Java and React canonical skills expose implementation subagents", async ()
   assert.match(react, /subagents\/react-frontend-implement[.]md/);
 });
 
+test("application owns one Python backend skill with FastAPI and Django routing", async () => {
+  const skill = await readFile(
+    path.join(
+      repoRoot,
+      "packs/application/skills/python-backend-engineer/SKILL.md",
+    ),
+    "utf8",
+  );
+
+  assert.match(skill, /fastapi-backend-implement[.]md/);
+  assert.match(skill, /django-drf-backend-implement[.]md/);
+  assert.match(skill, /python-backend-verification[.]md/);
+});
+
 test("rejects provider-specific paths in canonical commands", async () => {
   await withRepositoryCopy(async (root) => {
     const commandPath = path.join(
