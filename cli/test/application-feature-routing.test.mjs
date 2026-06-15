@@ -3,6 +3,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { pathToFileURL } from "node:url";
 
 import { repoRoot } from "./helpers.mjs";
 
@@ -24,7 +25,7 @@ const schemaPath = path.join(
 );
 
 async function loadDetector() {
-  return import(new URL(`file://${detectorPath.replaceAll("\\", "/")}`));
+  return import(pathToFileURL(detectorPath));
 }
 
 async function writeFixture(root, relativePath, content) {
@@ -57,7 +58,14 @@ test("detects supported stacks in a monorepo and sorts the result", async () => 
     await writeFixture(
       root,
       "java-service/pom.xml",
-      "<dependencies><dependency>org.springframework.boot</dependency></dependencies>",
+      [
+        "<dependencies>",
+        "  <dependency>",
+        "    <groupId>org.springframework.boot</groupId>",
+        "    <artifactId>spring-boot-starter-web</artifactId>",
+        "  </dependency>",
+        "</dependencies>",
+      ].join("\n"),
     );
     await writeFixture(
       root,
@@ -72,6 +80,45 @@ test("detects supported stacks in a monorepo and sorts the result", async () => 
       { module: "fastapi-service", stack: "fastapi" },
       { module: "java-service", stack: "java-spring" },
       { module: "web", stack: "react" },
+    ]);
+  });
+});
+
+test("ignores framework names outside dependency declarations", async () => {
+  await withFixture(async (root) => {
+    await writeFixture(
+      root,
+      "web-noise/package.json",
+      JSON.stringify({
+        description: "React migration notes",
+        scripts: { react: "echo react" },
+      }),
+    );
+    await writeFixture(
+      root,
+      "python-noise/pyproject.toml",
+      [
+        "[project]",
+        'name = "django-helper"',
+        'dependencies = ["pydantic>=2"]',
+        "# fastapi is under evaluation",
+      ].join("\n"),
+    );
+    await writeFixture(
+      root,
+      "gradle-noise/build.gradle",
+      'description = "spring migration helper"\n',
+    );
+    await writeFixture(
+      root,
+      "maven-noise/pom.xml",
+      "<description>spring migration helper</description>",
+    );
+
+    const { detectFeatureStacks } = await loadDetector();
+
+    assert.deepEqual(await detectFeatureStacks(root), [
+      { module: "python-noise", stack: "python-ambiguous" },
     ]);
   });
 });

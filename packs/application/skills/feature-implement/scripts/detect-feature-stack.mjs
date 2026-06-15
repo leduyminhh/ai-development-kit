@@ -19,16 +19,148 @@ const ignoredDirectories = new Set([
 ]);
 const javaFiles = new Set(["pom.xml", "build.gradle", "build.gradle.kts"]);
 const pythonFiles = new Set(["pyproject.toml", "requirements.txt"]);
-const reactDependency = /["']react["']\s*:/i;
+
+function compareText(left, right) {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
 
 function modulePath(root, directory) {
   const relative = path.relative(root, directory);
   return (relative || ".").split(path.sep).join("/");
 }
 
+function normalizePythonPackage(requirement) {
+  const match = requirement
+    .trim()
+    .match(/^([a-z0-9][a-z0-9._-]*)(?:\[[^\]]*\])?/i);
+  return match?.[1].toLowerCase().replaceAll(/[-_.]+/g, "-");
+}
+
+function detectPythonPackages(packages) {
+  return {
+    fastapi: packages.has("fastapi"),
+    django: packages.has("django") || packages.has("djangorestframework"),
+  };
+}
+
+function parseRequirements(content) {
+  const packages = new Set();
+  for (const line of content.split(/\r?\n/)) {
+    const requirement = line.replace(/\s+#.*$/, "").trim();
+    if (!requirement || requirement.startsWith("#") || requirement.startsWith("-")) {
+      continue;
+    }
+    const packageName = normalizePythonPackage(requirement);
+    if (packageName) {
+      packages.add(packageName);
+    }
+  }
+  return detectPythonPackages(packages);
+}
+
+function stripTomlComment(line) {
+  let quote = "";
+  for (let index = 0; index < line.length; index += 1) {
+    const character = line[index];
+    if ((character === '"' || character === "'") && line[index - 1] !== "\\") {
+      quote = quote === character ? "" : quote || character;
+    } else if (character === "#" && !quote) {
+      return line.slice(0, index);
+    }
+  }
+  return line;
+}
+
+function parsePyproject(content) {
+  const packages = new Set();
+  let section = "";
+  let dependencyArray = false;
+
+  for (const rawLine of content.split(/\r?\n/)) {
+    const line = stripTomlComment(rawLine).trim();
+    const sectionMatch = line.match(/^\[([^\]]+)\]$/);
+    if (sectionMatch) {
+      section = sectionMatch[1];
+      dependencyArray = false;
+      continue;
+    }
+
+    let dependencyText = "";
+    if (dependencyArray) {
+      dependencyText = line;
+    } else if (section === "project") {
+      const dependencies = line.match(/^dependencies\s*=\s*(.*)$/);
+      if (dependencies) {
+        dependencyText = dependencies[1];
+        dependencyArray = !dependencyText.includes("]");
+      }
+    } else if (section === "project.optional-dependencies") {
+      const optionalDependencies = line.match(/^[a-z0-9._-]+\s*=\s*(.*)$/i);
+      if (optionalDependencies) {
+        dependencyText = optionalDependencies[1];
+        dependencyArray = !dependencyText.includes("]");
+      }
+    }
+
+    for (const match of dependencyText.matchAll(/(["'])(.*?)\1/g)) {
+      const packageName = normalizePythonPackage(match[2]);
+      if (packageName) {
+        packages.add(packageName);
+      }
+    }
+    if (dependencyArray && line.includes("]")) {
+      dependencyArray = false;
+    }
+  }
+
+  return detectPythonPackages(packages);
+}
+
+function parsePackageJson(content) {
+  const manifest = JSON.parse(content);
+  return Boolean(
+    Object.hasOwn(manifest.dependencies ?? {}, "react") ||
+      Object.hasOwn(manifest.devDependencies ?? {}, "react"),
+  );
+}
+
+function isSpringCoordinate(group, artifact) {
+  return group.startsWith("org.springframework") || artifact.startsWith("spring-");
+}
+
+function parsePom(content) {
+  const dependencies = content.replace(/<!--[\s\S]*?-->/g, "");
+  for (const dependency of dependencies.matchAll(
+    /<dependency\b[^>]*>([\s\S]*?)<\/dependency>/gi,
+  )) {
+    const group = dependency[1].match(/<groupId>\s*([^<]+)\s*<\/groupId>/i)?.[1].trim() ?? "";
+    const artifact =
+      dependency[1].match(/<artifactId>\s*([^<]+)\s*<\/artifactId>/i)?.[1].trim() ?? "";
+    if (isSpringCoordinate(group, artifact)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function parseGradle(content) {
+  const declarations = content
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/.*$/gm, "");
+  const dependency =
+    /\b(?:api|implementation|compile|compileOnly|runtimeOnly|testImplementation|testCompileOnly|testRuntimeOnly|annotationProcessor|developmentOnly|kapt)\s*(?:\(\s*)?["']([^:"']+):([^:"']+):[^"']+["']/gi;
+
+  for (const match of declarations.matchAll(dependency)) {
+    if (isSpringCoordinate(match[1], match[2])) {
+      return true;
+    }
+  }
+  return false;
+}
+
 async function collectSignals(root, directory, modules) {
   const entries = await readdir(directory, { withFileTypes: true });
-  entries.sort((left, right) => left.name.localeCompare(right.name));
+  entries.sort((left, right) => compareText(left.name, right.name));
 
   for (const entry of entries) {
     if (entry.isDirectory()) {
@@ -43,7 +175,7 @@ async function collectSignals(root, directory, modules) {
     }
 
     const directoryPath = path.join(directory, entry.name);
-    const content = (await readFile(directoryPath, "utf8")).toLowerCase();
+    const content = await readFile(directoryPath, "utf8");
     const module = modulePath(root, directory);
     const signals = modules.get(module) ?? {
       javaSpring: false,
@@ -53,17 +185,21 @@ async function collectSignals(root, directory, modules) {
       react: false,
     };
 
-    if (javaFiles.has(entry.name) && content.includes("spring")) {
-      signals.javaSpring = true;
+    if (javaFiles.has(entry.name)) {
+      signals.javaSpring ||=
+        entry.name === "pom.xml" ? parsePom(content) : parseGradle(content);
     }
     if (pythonFiles.has(entry.name)) {
       signals.python = true;
-      signals.fastapi ||= content.includes("fastapi");
-      signals.django ||=
-        content.includes("djangorestframework") || content.includes("django");
+      const python =
+        entry.name === "requirements.txt"
+          ? parseRequirements(content)
+          : parsePyproject(content);
+      signals.fastapi ||= python.fastapi;
+      signals.django ||= python.django;
     }
-    if (entry.name === "package.json" && reactDependency.test(content)) {
-      signals.react = true;
+    if (entry.name === "package.json") {
+      signals.react ||= parsePackageJson(content);
     }
 
     modules.set(module, signals);
@@ -94,7 +230,9 @@ export async function detectFeatureStacks(root) {
     }
   }
 
-  return detected.sort((left, right) =>
-    `${left.module}:${left.stack}`.localeCompare(`${right.module}:${right.stack}`),
-  );
+  return detected.sort((left, right) => {
+    const leftKey = `${left.module}:${left.stack}`;
+    const rightKey = `${right.module}:${right.stack}`;
+    return compareText(leftKey, rightKey);
+  });
 }
