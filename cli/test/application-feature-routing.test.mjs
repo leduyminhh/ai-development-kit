@@ -105,6 +105,8 @@ test("defines the required feature context fields and strict stack signals", asy
     "residualRisks",
   ]);
   assert.equal(schema.additionalProperties, false);
+  assert.equal(schema.properties.acceptanceCriteria.minItems, 1);
+  assert.equal(schema.properties.sourceScopes.minItems, 1);
   assert.equal(schema.properties.stackSignals.items.additionalProperties, false);
   assert.deepEqual(schema.properties.stackSignals.items.properties.stack.enum, [
     "java-spring",
@@ -113,4 +115,15 @@ test("defines the required feature context fields and strict stack signals", asy
     "python-ambiguous",
     "react",
   ]);
+
+  for (const property of [
+    "uiStates",
+    "apiOperations",
+    "dataChanges",
+    "securityRequirements",
+    "testMatrix",
+  ]) {
+    assert.equal(schema.properties[property].type, "array");
+    assert.equal(schema.properties[property].items.type, "string");
+  }
 });
