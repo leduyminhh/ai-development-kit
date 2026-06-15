@@ -185,6 +185,29 @@ test("application defines ten parseable deliverable command files", async () => 
   }
 });
 
+test("application exposes ten commands mapped one-to-one to MCP tools", async () => {
+  const plugins = await loadPlugins(repoRoot);
+  const application = plugins.get("application");
+  assert.deepEqual(application.assets.commands, [
+    "deliver-feature",
+    "design-api-contract",
+    "design-data-change",
+    "fix-feature",
+    "implement-backend",
+    "implement-frontend",
+    "integrate-feature",
+    "plan-feature",
+    "review-feature",
+    "test-feature",
+  ]);
+  const commands = application.commands;
+  assert.equal(commands.length, 10);
+  for (const command of commands) {
+    assert.equal(command.id, command.mcp_tool);
+    assert.match(command.id, /^application[.]/);
+  }
+});
+
 test("rejects provider-specific paths in canonical commands", async () => {
   await withRepositoryCopy(async (root) => {
     const commandPath = path.join(
