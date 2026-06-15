@@ -110,6 +110,26 @@ test("rejects skills that are not mapped in the central skill registry", async (
   });
 });
 
+test("application owns the full-stack orchestration skill set", async () => {
+  const plugins = await loadPlugins(repoRoot);
+  const application = plugins.get("application");
+  const owned = application.skills.map((item) => path.basename(path.dirname(item.path)));
+
+  assert.deepEqual(
+    [
+      "api-contract-design",
+      "feature-delivery",
+      "feature-fix",
+      "feature-implement",
+      "feature-integrate",
+      "feature-plan",
+      "feature-review",
+      "feature-test",
+    ].filter((skill) => !owned.includes(skill)),
+    [],
+  );
+});
+
 test("rejects provider-specific paths in canonical commands", async () => {
   await withRepositoryCopy(async (root) => {
     const commandPath = path.join(
