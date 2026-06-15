@@ -51,9 +51,12 @@ test("documents AI Engineering lifecycle commands in both readmes", async () => 
     "ai-engineering doctor --scope project",
     "ai-engineering doctor --scope global",
     "ai-engineering check --scope project",
+    "ai-engineering list --available",
     "ai-engineering update application",
     "ai-engineering uninstall security --scope project",
     "ai-engineering migrate --dry-run",
+    "aie check",
+    "aie list --available",
     "npm install",
     "npm run build",
   ];
@@ -69,6 +72,12 @@ test("exposes package-name and canonical CLI aliases", async () => {
   const packageJson = JSON.parse(
     await readFile(path.join(repoRoot, "package.json"), "utf8"),
   );
+  const cliPackageJson = JSON.parse(
+    await readFile(path.join(repoRoot, "cli", "package.json"), "utf8"),
+  );
+  const packageLock = JSON.parse(
+    await readFile(path.join(repoRoot, "package-lock.json"), "utf8"),
+  );
 
   assert.equal(
     packageJson.bin["ai-engineering-platform"],
@@ -78,4 +87,8 @@ test("exposes package-name and canonical CLI aliases", async () => {
     packageJson.bin["ai-engineering"],
     "./cli/dist/index.js",
   );
+  assert.equal(packageJson.bin.aie, "./cli/dist/index.js");
+  assert.equal(cliPackageJson.bin.aie, "./dist/index.js");
+  assert.equal(packageLock.packages[""].bin.aie, "cli/dist/index.js");
+  assert.equal(packageLock.packages.cli.bin.aie, "dist/index.js");
 });

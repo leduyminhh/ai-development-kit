@@ -392,25 +392,99 @@ function sortedValues(values) {
   return [...new Set(values.filter(Boolean))].sort();
 }
 
+function groupByOwner(items) {
+  const grouped = {};
+  for (const item of items) {
+    for (const owner of item.owners ?? []) {
+      grouped[owner] = [...(grouped[owner] ?? []), item.id].sort();
+    }
+  }
+  return Object.fromEntries(Object.entries(grouped).sort(([left], [right]) => left.localeCompare(right)));
+}
+
+function upsertAsset(target, { id, path: assetPath, metadata }) {
+  const current = target.get(id) ?? {
+    id,
+    paths: [],
+    owners: [],
+    shared: false,
+    installed: true,
+  };
+  if (!current.paths.includes(assetPath)) current.paths.push(assetPath);
+  current.owners = sortedValues([...current.owners, ...(metadata.owners ?? [])]);
+  current.shared = current.shared || Boolean(metadata.shared);
+  target.set(id, current);
+}
+
+function normalizeAssets(map) {
+  return [...map.values()]
+    .map((item) => ({
+      ...item,
+      path: item.paths.sort()[0],
+      paths: item.paths.sort(),
+    }))
+    .sort((left, right) => left.id.localeCompare(right.id));
+}
+
 function collectInstalledAssets(ownership) {
-  const files = Object.keys(ownership?.files ?? {});
-  const skills = [];
-  const commands = [];
-  const agents = [];
-  for (const file of files) {
+  const entries = Object.entries(ownership?.files ?? {});
+  const skills = new Map();
+  const commands = new Map();
+  const agents = new Map();
+  for (const [file, metadata] of entries) {
     const skill = file.match(/^(?:\.codex\/skills|skills)\/([^/]+)\//)?.[1];
-    if (skill) skills.push(skill);
+    if (skill) {
+      upsertAsset(skills, {
+        id: skill,
+        path: file.replace(/^(.*?\/[^/]+)\/.*$/, "$1"),
+        metadata,
+      });
+    }
 
     const command = file.match(/^commands\/([^/]+)\.md$/)?.[1];
-    if (command) commands.push(command);
+    if (command) {
+      upsertAsset(commands, { id: command, path: file, metadata });
+    }
 
     const agent = file.match(/^agents\/([^/]+)\.toml$/)?.[1];
-    if (agent) agents.push(agent);
+    if (agent) {
+      upsertAsset(agents, { id: agent, path: file, metadata });
+    }
   }
   return {
-    skills: sortedValues(skills),
-    commands: sortedValues(commands),
-    agents: sortedValues(agents),
+    skills: normalizeAssets(skills),
+    commands: normalizeAssets(commands),
+    agents: normalizeAssets(agents),
+  };
+}
+
+export async function listAvailable({ root }) {
+  const plugins = await loadPlugins(root);
+  const packs = [...plugins.values()].map((plugin) => ({
+    id: plugin.metadata.id,
+    name: plugin.metadata.name,
+    version: plugin.metadata.version,
+    description: plugin.metadata.description,
+    triggers: plugin.triggers ?? { keywords: [] },
+    dependencies: {
+      required: plugin.dependencies?.required ?? [],
+      optional: plugin.dependencies?.optional ?? [],
+    },
+    assets: {
+      skills: plugin.assets?.skills ?? [],
+      commands: plugin.assets?.commands ?? [],
+      agents: plugin.assets?.agents ?? [],
+      hooks: plugin.assets?.hooks ?? [],
+    },
+    install: plugin.install,
+    compatibility: plugin.compatibility,
+  }));
+  return {
+    status: "pass",
+    packs: {
+      count: packs.length,
+      available: packs,
+    },
   };
 }
 
@@ -420,10 +494,19 @@ export async function checkInstalled({ target }) {
   const assets = collectInstalledAssets(state.ownership);
   const managedMcpServers = sortedValues(Object.values(lock?.managedMcpServers ?? {}).flat());
   const installedPackOrder = (lock?.plugins ?? []).map((item) => item.id);
-  const mcpServers = [
+  const mcpServerNames = [
     ...installedPackOrder.filter((item) => managedMcpServers.includes(item)),
     ...managedMcpServers.filter((item) => !installedPackOrder.includes(item)),
   ];
+  const mcpServers = mcpServerNames.map((name) => ({
+    name,
+    providers: Object.entries(lock?.managedMcpServers ?? {})
+      .filter(([, servers]) => servers.includes(name))
+      .map(([provider]) => provider)
+      .sort(),
+    path: `.ai-engineering/mcp-servers/${name}-mcp`,
+    installed: true,
+  }));
   return {
     status: "pass",
     current: {
@@ -438,17 +521,24 @@ export async function checkInstalled({ target }) {
     },
     providers: lock?.providers ?? [],
     mcp: {
+      count: mcpServers.length,
       servers: mcpServers,
       byProvider: lock?.managedMcpServers ?? {},
     },
     skills: {
+      count: assets.skills.length,
       installed: assets.skills,
+      byOwner: groupByOwner(assets.skills),
     },
     commands: {
+      count: assets.commands.length,
       installed: assets.commands,
+      byOwner: groupByOwner(assets.commands),
     },
     agents: {
+      count: assets.agents.length,
       installed: assets.agents,
+      byOwner: groupByOwner(assets.agents),
     },
   };
 }

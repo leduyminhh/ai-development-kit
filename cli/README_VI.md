@@ -43,6 +43,7 @@ ai-engineering install --all --target <agent> --scope <project|global>
 ai-engineering uninstall <pack...> --scope <project|global>
 ai-engineering remove --all --scope <project|global>
 ai-engineering list --scope <project|global>
+ai-engineering list --available
 ai-engineering plugin list
 ai-engineering plugin outdated
 ai-engineering update <pack...>
@@ -55,6 +56,9 @@ ai-engineering migrate --delete-legacy
 ai-engineering plugin install <plugin...>
 ai-engineering plugin remove <plugin...>
 ```
+
+Package cũng expose `aie` làm alias ngắn cho mọi command, ví dụ `aie check` và
+`aie list --available`.
 
 `project` là scope mặc định. Các đường dẫn cấu hình MCP native:
 

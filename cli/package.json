@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "bin": {
-    "ai-engineering": "./dist/index.js"
+    "ai-engineering": "./dist/index.js",
+    "aie": "./dist/index.js"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",

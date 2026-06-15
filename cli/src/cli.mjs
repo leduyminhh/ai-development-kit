@@ -8,6 +8,7 @@ import {
   checkInstalled,
   findOutdated,
   installPlugins,
+  listAvailable,
   listInstalled,
   removePlugins,
   updatePlugins,
@@ -28,6 +29,9 @@ const REPOSITORY_ROOT = path.resolve(
 
 const HELP = `AI Engineering Platform
 
+Alias:
+  aie = ai-engineering
+
 Usage:
   ai-engineering --help
   ai-engineering --version
@@ -37,6 +41,7 @@ Usage:
   ai-engineering install <pack...> --target <agent>
   ai-engineering uninstall <pack...>
   ai-engineering list
+  ai-engineering list --available
   ai-engineering update <pack...>
   ai-engineering upgrade
   ai-engineering generate-adapter <pack...> --target <agent>
@@ -53,31 +58,50 @@ Options:
   --scope <project|global>  Installation scope (default: project)
 `;
 
+function formatAvailable(result) {
+  const lines = ["Installable packs:"];
+  for (const pack of result.packs.available) {
+    lines.push(`- ${pack.id}@${pack.version}: ${pack.description}`);
+    lines.push(`  required: ${pack.dependencies.required.join(", ") || "none"}`);
+    lines.push(`  optional: ${pack.dependencies.optional.join(", ") || "none"}`);
+    lines.push(`  skills: ${pack.assets.skills.join(", ") || "none"}`);
+    lines.push(`  commands: ${pack.assets.commands.join(", ") || "none"}`);
+  }
+  return `${lines.join("\n")}\n`;
+}
+
 function formatCheck(result) {
+  const formatItems = (items) =>
+    items.length > 0
+      ? items.map((item) => {
+          const owners = item.owners?.length ? ` owners=${item.owners.join(",")}` : "";
+          const providers = item.providers?.length ? ` providers=${item.providers.join(",")}` : "";
+          const pathInfo = item.path ? ` path=${item.path}` : "";
+          return `- ${item.id ?? item.name}${owners}${providers}${pathInfo}`;
+        })
+      : ["- none"];
   const lines = [
     `Current: ${result.current.state}`,
     `Scope: ${result.current.scope}`,
     `Platform: ${result.current.platformVersion ?? "unknown"}`,
+    `Install state: ${result.current.installState}`,
     "",
-    "Packs:",
+    `Packs (${result.packs.installed.length}):`,
     ...(result.packs.installed.length > 0
       ? result.packs.installed.map((item) => `- ${item.id}@${item.version}`)
       : ["- none"]),
     "",
-    "MCP:",
-    ...(result.mcp.servers.length > 0
-      ? result.mcp.servers.map((item) => `- ${item}`)
-      : ["- none"]),
+    `MCP (${result.mcp.count}):`,
+    ...formatItems(result.mcp.servers),
     "",
-    "Skills:",
-    ...(result.skills.installed.length > 0
-      ? result.skills.installed.map((item) => `- ${item}`)
-      : ["- none"]),
+    `Skills (${result.skills.count}):`,
+    ...formatItems(result.skills.installed),
     "",
-    "Commands:",
-    ...(result.commands.installed.length > 0
-      ? result.commands.installed.map((item) => `- ${item}`)
-      : ["- none"]),
+    `Commands (${result.commands.count}):`,
+    ...formatItems(result.commands.installed),
+    "",
+    `Agents (${result.agents.count}):`,
+    ...formatItems(result.agents.installed),
   ];
   return `${lines.join("\n")}\n`;
 }
@@ -335,6 +359,13 @@ export async function run(args, streams = process) {
     (args[0] === "plugin" && args[1] === "list") ||
     args[0] === "list"
   ) {
+    if (args.includes("--available")) {
+      const result = await listAvailable({ root: REPOSITORY_ROOT });
+      streams.stdout.write(
+        args.includes("--json") ? `${JSON.stringify(result)}\n` : formatAvailable(result),
+      );
+      return 0;
+    }
     const context = resolveContext(args);
     const result = await listInstalled({ target: context.targetRoot, context });
     streams.stdout.write(

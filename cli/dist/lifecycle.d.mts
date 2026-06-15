@@ -23,6 +23,33 @@ export function listInstalled({ target }: {
     platformVersion: any;
     managedMcpServers: any;
 }>;
+export function listAvailable({ root }: {
+    root: any;
+}): Promise<{
+    status: string;
+    packs: {
+        count: number;
+        available: {
+            id: any;
+            name: any;
+            version: any;
+            description: any;
+            triggers: any;
+            dependencies: {
+                required: any;
+                optional: any;
+            };
+            assets: {
+                skills: any;
+                commands: any;
+                agents: any;
+                hooks: any;
+            };
+            install: any;
+            compatibility: any;
+        }[];
+    };
+}>;
 export function checkInstalled({ target }: {
     target: any;
 }): Promise<{
@@ -39,17 +66,35 @@ export function checkInstalled({ target }: {
     };
     providers: any;
     mcp: {
-        servers: any[];
+        count: number;
+        servers: {
+            name: any;
+            providers: string[];
+            path: string;
+            installed: boolean;
+        }[];
         byProvider: any;
     };
     skills: {
+        count: number;
         installed: any[];
+        byOwner: {
+            [k: string]: any;
+        };
     };
     commands: {
+        count: number;
         installed: any[];
+        byOwner: {
+            [k: string]: any;
+        };
     };
     agents: {
+        count: number;
         installed: any[];
+        byOwner: {
+            [k: string]: any;
+        };
     };
 }>;
 export function findOutdated({ target, registry }: {

@@ -9,6 +9,7 @@ import {
   checkInstalled,
   findOutdated,
   installPlugins,
+  listAvailable,
   listInstalled,
   removePlugins,
   updatePlugins,
@@ -209,6 +210,22 @@ test("cli lists installed plugins and reports outdated plugins", async () => {
   }
 });
 
+test("lists installable packs with their commands and skills", async () => {
+  const catalog = await listAvailable({ root: repoRoot });
+  assert.equal(catalog.status, "pass");
+  assert.equal(catalog.packs.count, 7);
+  const application = catalog.packs.available.find((item) => item.id === "application");
+  assert.equal(application.name, "Application Engineering");
+  assert.equal(application.install.defaultScope, "project");
+  assert.deepEqual(application.dependencies.required, ["architecture"]);
+  assert.ok(application.assets.skills.includes("react-code-generate"));
+  assert.ok(application.assets.commands.includes("review-backend"));
+
+  const cliCatalog = await runCli(["list", "--available", "--json"]);
+  assert.equal(cliCatalog.exitCode, 0);
+  assert.equal(JSON.parse(cliCatalog.stdout).packs.available.length, 7);
+});
+
 test("checks installed MCP servers, skills, commands, and current state", async () => {
   const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-check-"));
   try {
@@ -224,14 +241,37 @@ test("checks installed MCP servers, skills, commands, and current state", async 
     assert.equal(check.current.state, "installed");
     assert.deepEqual(check.packs.installed.map((item) => item.id), ["architecture", "application"]);
     assert.deepEqual(check.providers, ["codex"]);
-    assert.deepEqual(check.mcp.servers, ["architecture", "application"]);
-    assert.deepEqual(check.commands.installed, ["implement-frontend", "review-architecture", "review-backend"]);
-    assert.ok(check.skills.installed.includes("java-analyze"));
-    assert.ok(check.skills.installed.includes("react-code-generate"));
+    assert.equal(check.mcp.count, 2);
+    assert.deepEqual(
+      check.mcp.servers.map((item) => item.name),
+      ["architecture", "application"],
+    );
+    assert.equal(check.commands.count, 3);
+    assert.deepEqual(
+      check.commands.installed.map((item) => item.id),
+      ["implement-frontend", "review-architecture", "review-backend"],
+    );
+    assert.deepEqual(
+      check.commands.installed.find((item) => item.id === "review-backend"),
+      {
+        id: "review-backend",
+        path: "commands/review-backend.md",
+        paths: ["commands/review-backend.md"],
+        owners: ["application"],
+        shared: false,
+        installed: true,
+      },
+    );
+    assert.equal(check.skills.count > 0, true);
+    assert.ok(check.skills.installed.some((item) => item.id === "java-analyze"));
+    assert.ok(check.skills.installed.some((item) => item.id === "react-code-generate"));
 
     const cliCheck = await runCli(["check", "--json"], { cwd: target });
     assert.equal(cliCheck.exitCode, 0);
-    assert.deepEqual(JSON.parse(cliCheck.stdout).mcp.servers, ["architecture", "application"]);
+    assert.deepEqual(
+      JSON.parse(cliCheck.stdout).mcp.servers.map((item) => item.name),
+      ["architecture", "application"],
+    );
   } finally {
     await rm(target, { recursive: true, force: true });
   }

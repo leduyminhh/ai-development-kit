@@ -11,7 +11,8 @@ khởi tạo dự án an toàn và adapter được sinh cho Codex, Claude và C
 - Cài đặt, gỡ bỏ pack có xử lý dependency.
 - Sinh cấu hình MCP native cho Codex, Claude và Cursor.
 - Hỗ trợ cài đặt theo phạm vi project và global của người dùng.
-- Kiểm tra trạng thái đã cài theo nhóm MCP server, skill, command và pack.
+- Kiểm tra trạng thái đã cài theo nhóm MCP server, skill, command, agent và pack.
+- Liệt kê catalog pack có thể cài, gồm dependency, skill, command và hook.
 - Validate repository, doctor dự án đích, lập kế hoạch và dọn dẹp migration.
 
 ## Cài Đặt
@@ -26,6 +27,15 @@ npm run build
 npm link
 ```
 
+Sau khi cài đặt hoặc chạy `npm link`, có thể dùng `ai-engineering` hoặc alias
+ngắn hơn là `aie`:
+
+```bash
+aie check
+aie list --available
+aie install application --target cursor
+```
+
 ## CLI
 
 ```bash
@@ -37,6 +47,7 @@ ai-engineering doctor --scope global
 ai-engineering check --scope project
 ai-engineering uninstall security --scope project
 ai-engineering list --scope global
+ai-engineering list --available
 ai-engineering update application
 ai-engineering upgrade
 ai-engineering generate-adapter quality --target codex

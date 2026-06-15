@@ -44,6 +44,7 @@ ai-engineering install --all --target <agent> --scope <project|global>
 ai-engineering uninstall <pack...> --scope <project|global>
 ai-engineering remove --all --scope <project|global>
 ai-engineering list --scope <project|global>
+ai-engineering list --available
 ai-engineering plugin list
 ai-engineering plugin outdated
 ai-engineering update <pack...>
@@ -56,6 +57,9 @@ ai-engineering migrate --delete-legacy
 ai-engineering plugin install <plugin...>
 ai-engineering plugin remove <plugin...>
 ```
+
+The package also exposes `aie` as a short alias for every command, for example
+`aie check` and `aie list --available`.
 
 `project` is the default scope. Native MCP config paths are:
 
