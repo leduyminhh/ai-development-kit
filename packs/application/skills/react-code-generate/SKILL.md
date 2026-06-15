@@ -16,7 +16,7 @@ Use this skill when building or modifying React UI from Figma designs, tickets, 
 ## Core Process
 
 1. Read the target route, component structure, styling conventions, state management, and API contracts.
-2. Route to the relevant resource for API integration, Figma implementation, frontend composition, or handoff.
+2. Route approved feature-context work to `react-frontend-implement`, or route to the relevant resource for API integration, Figma implementation, frontend composition, or handoff.
 3. Build the smallest complete user workflow instead of isolated decorative components.
 4. Verify responsive layout, accessibility, API behavior, and text fit.
 5. Prepare concise completion notes and any required handoff update.
@@ -64,6 +64,7 @@ Do not claim completion without fresh verification evidence. If a command cannot
 ## Subagent Prompts
 
 - [subagents/react-figma-generate.md](subagents/react-figma-generate.md): implement UI from Figma, screenshots, or visual requirements.
+- [subagents/react-frontend-implement.md](subagents/react-frontend-implement.md): implement an approved React feature context with API integration, UX states, accessibility, and focused verification.
 - [subagents/react-composition-design.md](subagents/react-composition-design.md): establish visual thesis, content hierarchy, imagery, copy, and motion before coding.
 - [subagents/react-api-generate.md](subagents/react-api-generate.md): integrate API contracts, curl examples, and typed/request helpers.
 - [subagents/react-state-form-generate.md](subagents/react-state-form-generate.md): handle React state, forms, validation, loading, empty, error, and success states.
@@ -107,7 +108,7 @@ Accept any of these as source material:
    - language: JavaScript or TypeScript
    - styling: CSS modules, Tailwind, shadcn/ui, CSS-in-JS, Sass, or plain CSS
    - routing, data fetching, forms, validation, and state patterns
-6. Implement within existing project conventions. Prefer focused edits over rewrites.
+6. Route approved feature-context implementation to [subagents/react-frontend-implement.md](subagents/react-frontend-implement.md), then implement within existing project conventions. Prefer focused edits over rewrites.
 7. Translate API examples into a small client layer or existing data-fetching pattern:
    - method, URL, headers, auth, body, query params
    - request and response shape

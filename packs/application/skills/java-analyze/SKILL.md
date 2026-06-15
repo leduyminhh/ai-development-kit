@@ -1,25 +1,26 @@
 ---
 name: java-analyze
-description: Use when acting as a Java backend architect for Spring Boot or JVM services, especially for flow design, clean code boundaries, architecture review, persistence choices, async/concurrency risks, test strategy, or Maven/Gradle verification.
+description: Use when acting as a Java backend architect or implementation agent for Spring Boot or JVM services, especially for flow design, clean code boundaries, architecture review, approved feature implementation, persistence choices, async/concurrency risks, test strategy, or Maven/Gradle verification.
 ---
 
 # Java Architect
 
 ## Overview
 
-Use this skill to design and review Java backend changes before coding deeply. The architect should make flow, boundaries, persistence, async behavior, and verification explicit.
+Use this skill to design, implement, and review Java backend changes with explicit flow, boundaries, persistence, async behavior, and verification.
 
 ## When to Use
 
-Use this skill when acting as a Java backend architect for Spring Boot or JVM services, especially for flow design, clean code boundaries, architecture review, persistence choices, async/concurrency risks, API contracts, or Maven/Gradle verification.
+Use this skill when acting as a Java backend architect or implementation agent for Spring Boot or JVM services, especially for flow design, clean code boundaries, architecture review, approved feature implementation, persistence choices, async/concurrency risks, API contracts, or Maven/Gradle verification.
 
 ## Core Process
 
 1. Identify the target flow, module, or diff and read the relevant Java/package context.
-2. Route to the right resource: API contract, persistence, async, Spring patterns, clean code, or test strategy.
+2. Route to the right resource or subagent: API contract, persistence, async, Spring patterns, clean code, implementation, or test strategy.
 3. Use Onion or shared-module companion skills when the request explicitly crosses those architecture boundaries.
-4. Review domain, application, infrastructure, and API boundaries before recommending code changes.
-5. Provide verification commands such as Maven, Gradle, or selected tests that match the touched module.
+4. Review domain, application, infrastructure, and API boundaries before recommending or applying code changes.
+5. Route approved Spring feature implementation to `java-spring-implement`.
+6. Provide verification commands such as Maven, Gradle, or selected tests that match the touched module.
 
 ## Examples
 
@@ -76,6 +77,7 @@ Use files in `subagents/` as role prompts when delegating or simulating speciali
 - [subagents/sql-optimize.md](subagents/sql-optimize.md): query, indexing, and persistence review.
 - [subagents/java-concurrency-review.md](subagents/java-concurrency-review.md): async, transaction, and race-condition review.
 - [subagents/java-spring-boundary-review.md](subagents/java-spring-boundary-review.md): Spring controller/service/domain/infrastructure boundary review.
+- [subagents/java-spring-implement.md](subagents/java-spring-implement.md): implement an approved Spring feature within one module and run focused Maven or Gradle verification.
 - [subagents/java-api-contract-review.md](subagents/java-api-contract-review.md): request/response, validation, and frontend integration contract review.
 - [subagents/test-strategy-review.md](subagents/test-strategy-review.md): Java test level, Maven/Gradle verification, and regression strategy review.
 
@@ -89,7 +91,7 @@ Run scripts from a Java project root. Start with [scripts/changed-files-summary.
 
 ## Output Format
 
-For design or review tasks, return:
+For design, implementation, or review tasks, return:
 
 - Flow summary.
 - Boundary decisions.
@@ -106,10 +108,11 @@ For design or review tasks, return:
 2. If the user explicitly forces an architecture, apply that architecture skill before Java-specific design. Use `architecture-onion-design` when the user asks for Onion Architecture.
 3. If the design includes reusable internal API, contract, or shared logic modules published through Nexus, apply `code-shared-design`.
 4. Load only the resource checklist needed for the task.
-5. Map the intended flow before proposing code changes.
-6. Review clean code and architecture risks before implementation.
-7. Choose targeted Maven or Gradle verification.
-8. Report trade-offs, risks, and verification evidence in Vietnamese.
+5. Map the intended flow before proposing or applying code changes.
+6. Route approved implementation work to [subagents/java-spring-implement.md](subagents/java-spring-implement.md).
+7. Review clean code and architecture risks before implementation.
+8. Choose targeted Maven or Gradle verification.
+9. Report trade-offs, risks, and verification evidence in Vietnamese.
 
 ### Architecture Defaults
 

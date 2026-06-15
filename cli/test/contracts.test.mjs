@@ -130,6 +130,20 @@ test("application owns the full-stack orchestration skill set", async () => {
   );
 });
 
+test("Java and React canonical skills expose implementation subagents", async () => {
+  const java = await readFile(
+    path.join(repoRoot, "packs/application/skills/java-analyze/SKILL.md"),
+    "utf8",
+  );
+  const react = await readFile(
+    path.join(repoRoot, "packs/application/skills/react-code-generate/SKILL.md"),
+    "utf8",
+  );
+
+  assert.match(java, /subagents\/java-spring-implement[.]md/);
+  assert.match(react, /subagents\/react-frontend-implement[.]md/);
+});
+
 test("rejects provider-specific paths in canonical commands", async () => {
   await withRepositoryCopy(async (root) => {
     const commandPath = path.join(
