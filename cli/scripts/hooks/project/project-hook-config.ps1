@@ -78,21 +78,21 @@ function Get-ProjectHookSettings {
     $port = Get-CodexTomlIntValue -TomlText $configText -Section 'hooks.project' -Key 'port' -Default 42890
 
     [pscustomobject]@{
-        Enabled            = Get-CodexTomlBoolValue -TomlText $configText -Section 'hooks.project' -Key 'enabled' -Default $true
-        EventRoot          = if ([string]::IsNullOrWhiteSpace($EventRoot)) { Join-Path $Root $configuredRoot } else { $EventRoot }
-        RuntimeRoot        = Join-Path $Root $configuredRuntimeRoot
-        RemainingDays      = $RemainingDays
-        Format             = $Format.ToLowerInvariant()
-        FilenamePattern = $filenamePattern
-        ServiceName        = $serviceName
-        DefaultLogger      = $defaultLogger
-        TimeZoneId         = $timeZoneId
-        TimeZone           = Resolve-ProjectHookTimeZone -TimeZoneId $timeZoneId
-        AgentHook          = Get-CodexTomlStringValue -TomlText $configText -Section 'hooks.project' -Key 'agentHook'
-        Host               = $bindHost
-        Port               = $port
+        Enabled              = Get-CodexTomlBoolValue -TomlText $configText -Section 'hooks.project' -Key 'enabled' -Default $true
+        EventRoot            = if ([string]::IsNullOrWhiteSpace($EventRoot)) { Join-Path $Root $configuredRoot } else { $EventRoot }
+        RuntimeRoot          = Join-Path $Root $configuredRuntimeRoot
+        RemainingDays        = $RemainingDays
+        Format               = $Format.ToLowerInvariant()
+        FilenamePattern      = $filenamePattern
+        ServiceName          = $serviceName
+        DefaultLogger        = $defaultLogger
+        TimeZoneId           = $timeZoneId
+        TimeZone             = Resolve-ProjectHookTimeZone -TimeZoneId $timeZoneId
+        AgentHook            = Get-CodexTomlStringValue -TomlText $configText -Section 'hooks.project' -Key 'agentHook'
+        Host                 = $bindHost
+        Port                 = $port
         ReloadOnConfigChange = Get-CodexTomlBoolValue -TomlText $configText -Section 'hooks.project' -Key 'reloadOnConfigChange' -Default $true
-        ConfigPath         = $configPath
+        ConfigPath           = $configPath
     }
 }
 
@@ -105,9 +105,9 @@ function Get-ProjectHookAgentRegistration {
     $configPath = Join-Path $Root '.codex/config.toml'
     if (-not (Test-Path -LiteralPath $configPath)) {
         return [pscustomobject]@{
-            Exists               = $false
-            Enabled              = $false
-            HooksProjectEnabled  = $false
+            Exists              = $false
+            Enabled             = $false
+            HooksProjectEnabled = $false
         }
     }
 

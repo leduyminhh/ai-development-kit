@@ -1,7 +1,7 @@
 # Codex Adapter
 
-This directory contains source metadata, profiles, prompts, hooks, and agent
-definitions used when generating the Codex target layout.
+This directory contains Codex agent definitions used by plugin install and
+artifact build flows.
 
 Generated projects receive:
 
@@ -9,8 +9,8 @@ Generated projects receive:
 AGENTS.md
 .codex/agents/openai.yaml
 .codex/workflows/commands.md
-.mcp.json
+.codex/config.toml
 ```
 
-Canonical skills remain owned by `packs/*/skills/`; the adapter generator
-projects only the selected pack assets into the target project.
+Canonical skills remain owned by `plugins/*/skills/`; MCP runtime and hook
+support remain owned by `mcp-servers/`, `core/mcp/`, and `cli/scripts/hooks/`.

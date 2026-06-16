@@ -22,22 +22,17 @@ $configLibrary = if (Test-Path (Join-Path $repoRoot 'cli/scripts/lib/codex-confi
     Join-Path $repoRoot 'scripts/lib/codex-config.ps1'
 }
 . $configLibrary
-$adapterHookRoot = if (Test-Path (Join-Path $repoRoot 'adapters/codex/hooks/lib')) {
-    Join-Path $repoRoot 'adapters/codex/hooks'
-} else {
-    Join-Path $repoRoot '.codex/hooks'
-}
 $runtimeScriptRoot = if (Test-Path (Join-Path $repoRoot 'cli/scripts/hooks/core')) {
     Join-Path $repoRoot 'cli/scripts'
 } else {
     Join-Path $repoRoot 'scripts'
 }
-. (Join-Path $adapterHookRoot 'lib/project-hook-config.ps1')
-. (Join-Path $adapterHookRoot 'lib/project-hook-dispatch.ps1')
-. (Join-Path $adapterHookRoot 'lib/project-hook-event.ps1')
-. (Join-Path $adapterHookRoot 'lib/project-hook-format.ps1')
-. (Join-Path $adapterHookRoot 'lib/project-hook-retention.ps1')
-. (Join-Path $adapterHookRoot 'lib/project-hook-writer.ps1')
+. (Join-Path $runtimeScriptRoot 'hooks/project/project-hook-config.ps1')
+. (Join-Path $runtimeScriptRoot 'hooks/project/project-hook-dispatch.ps1')
+. (Join-Path $runtimeScriptRoot 'hooks/project/project-hook-event.ps1')
+. (Join-Path $runtimeScriptRoot 'hooks/project/project-hook-format.ps1')
+. (Join-Path $runtimeScriptRoot 'hooks/project/project-hook-retention.ps1')
+. (Join-Path $runtimeScriptRoot 'hooks/project/project-hook-writer.ps1')
 . (Join-Path $runtimeScriptRoot 'hooks/core/hook-redaction.ps1')
 . (Join-Path $runtimeScriptRoot 'hooks/core/hook-identity.ps1')
 . (Join-Path $runtimeScriptRoot 'hooks/core/hook-contract.ps1')

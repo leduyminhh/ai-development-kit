@@ -89,7 +89,6 @@ format = "text"
 serviceName = "ai-engineering-platform"
 defaultLogger = "codex.project"
 defaultTimezone = "Asia/Saigon"
-agentHook = ".codex/hooks/log-agent-event.ps1"
 reloadOnConfigChange = true
 
 [hooks.core]
@@ -215,7 +214,6 @@ format = "text"
 serviceName = "ai-engineering-platform"
 defaultLogger = "codex.project"
 defaultTimezone = "Asia/Saigon"
-agentHook = ".codex/hooks/log-agent-event.ps1"
 reloadOnConfigChange = true
 
 [hooks.core]

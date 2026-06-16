@@ -1,4 +1,0 @@
-name = "react-code-generate"
-summary = "React implementation agent"
-read_only = false
-hooks_project_enabled = true

@@ -1,0 +1,13 @@
+version = 1
+
+[test.core]
+paths = [
+  "cli/scripts/bin",
+  "cli/scripts/hooks",
+  "cli/scripts/tests"
+]
+commands = [
+  "powershell -File cli/scripts/tests/test-hook-core.ps1",
+  "powershell -File cli/scripts/tests/test-hook-service.ps1",
+  "powershell -File cli/scripts/tests/test-install-hooks.ps1"
+]

@@ -46,7 +46,7 @@ function Test-HookProviderConflict {
 $resolvedRoot = (Resolve-Path -LiteralPath $Root).Path
 $sourceMode = Test-Path -LiteralPath (Join-Path $resolvedRoot 'cli/scripts')
 $scriptPrefix = if ($sourceMode) { 'cli/scripts' } else { 'scripts' }
-$configPath = Join-Path $resolvedRoot $(if ($sourceMode) { 'adapters/codex/config.toml' } else { '.codex/config.toml' })
+$configPath = Join-Path $resolvedRoot $(if ($sourceMode) { 'cli/scripts/hooks/config.toml' } else { '.codex/config.toml' })
 $configText = if (Test-Path -LiteralPath $configPath) { Get-Content -LiteralPath $configPath -Raw } else { '' }
 
 $requiredFiles = @(
@@ -102,7 +102,7 @@ $checks.Add((New-HookDoctorCheck `
     -Evidence "codexCustomHooks=$codexConflict; claudeCustomHooks=$claudeConflict" `
     -Suggestion 'Installer will safe-skip provider shims when custom hook files already exist; use additive integration only after reviewing existing hooks.'))
 
-$testMapPath = Join-Path $resolvedRoot $(if ($sourceMode) { 'adapters/codex/test-map.toml' } else { '.codex/test-map.toml' })
+$testMapPath = Join-Path $resolvedRoot $(if ($sourceMode) { 'cli/scripts/hooks/test-map.toml' } else { '.codex/test-map.toml' })
 $testMapText = if (Test-Path -LiteralPath $testMapPath) { Get-Content -LiteralPath $testMapPath -Raw } else { '' }
 $mapped = @("$scriptPrefix/tests/test-hook-core.ps1", "$scriptPrefix/tests/test-hook-service.ps1", "$scriptPrefix/tests/test-install-hooks.ps1") | Where-Object {
     $testMapText.Contains($_)

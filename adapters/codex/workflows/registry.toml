@@ -1,7 +1,0 @@
-# Codex adapter workflow registry
-
-[targets]
-agents = ".codex/agents/openai.yaml"
-workflows = ".codex/workflows/commands.md"
-mcp = ".mcp.json"
-instructions = "AGENTS.md"
