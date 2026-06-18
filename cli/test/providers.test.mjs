@@ -26,7 +26,7 @@ test("projects canonical command semantics for all providers", async () => {
     mcpServers: {
       application: {
         command: "node",
-        args: ["C:\\runtime\\application-mcp\\src\\index.js"],
+        args: ["C:\\runtime\\application\\src\\index.js"],
         env: {},
       },
     },
@@ -104,7 +104,7 @@ test("global projections expose native files and user-level MCP configs", async 
     mcpServers: {
       platform: {
         command: "node",
-        args: ["C:\\runtime\\platform-mcp\\src\\index.js"],
+        args: ["C:\\runtime\\platform\\src\\index.js"],
         env: {},
       },
     },

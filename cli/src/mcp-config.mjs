@@ -53,17 +53,17 @@ function isEmptyConfig(parsed, serverKey) {
   );
 }
 
-export function createMcpRegistrations({ packIds, runtimeRoot }) {
+export function createMcpRegistrations({ serverIds, runtimeRoot }) {
   return Object.fromEntries(
-    [...packIds].sort().map((packId) => [
-      packId,
+    [...serverIds].sort().map((serverId) => [
+      serverId,
       {
         command: "node",
         args: [
           path.join(
             runtimeRoot,
             "mcp-servers",
-            `${packId}-mcp`,
+            serverId,
             "src",
             "index.js",
           ),

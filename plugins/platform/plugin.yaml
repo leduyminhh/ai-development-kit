@@ -73,5 +73,15 @@
   ],
   "depends_on": {
     "plugins": []
+  },
+  "runtime": {
+    "mcp": {
+      "server": "platform",
+      "tools": [
+        "platform.review_docker",
+        "platform.review_kubernetes",
+        "platform.deployment_plan"
+      ]
+    }
   }
 }

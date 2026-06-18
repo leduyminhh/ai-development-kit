@@ -70,7 +70,7 @@ test("installs application project-locally with required dependencies", async ()
     assert.equal(await exists(target, ".mcp.json"), false);
     assert.equal(applicationMcpEntrypoint.startsWith(target), true);
     assert.equal(applicationMcpEntrypoint.includes(`${path.sep}mcp-servers${path.sep}`), true);
-    assert.equal(await exists(target, ".ai-engineering/mcp-servers/application-mcp/src/index.js"), true);
+    assert.equal(await exists(target, ".ai-engineering/mcp-servers/application/src/index.js"), true);
     assert.equal(await exists(target, ".ai-engineering/core/mcp/stdio-runtime.js"), true);
     assert.equal(await exists(target, ".ai-engineering/core/agents/AGENTS.baseline.md"), true);
     assert.equal(await exists(target, ".ai-engineering/core/routing/command-registry.yaml"), true);
@@ -119,6 +119,10 @@ test("installs globally with provider-native assets", async () => {
     assert.equal(await exists(home, ".cursor/mcp.json"), true);
     assert.equal(
       await exists(home, ".ai-engineering/mcp-servers/platform-mcp/src/index.js"),
+      false,
+    );
+    assert.equal(
+      await exists(home, ".ai-engineering/mcp-servers/platform/src/index.js"),
       true,
     );
     assert.equal(await exists(home, "AGENTS.md"), false);
@@ -511,10 +515,11 @@ test("checks installed MCP servers, skills, commands, and current state", async 
     assert.deepEqual(check.plugins.installed.map((item) => item.id), ["architecture", "application"]);
     assert.deepEqual(check.providers, ["codex"]);
     assert.equal(check.mcp.count, 2);
-    assert.deepEqual(
-      check.mcp.servers.map((item) => item.name),
-      ["architecture", "application"],
-    );
+    assert.deepEqual(check.mcp.servers.map((item) => item.name), ["architecture", "application"]);
+    assert.deepEqual(check.mcp.servers.map((item) => item.path), [
+      ".ai-engineering/mcp-servers/architecture",
+      ".ai-engineering/mcp-servers/application",
+    ]);
     assert.equal(check.commands.count, 0);
     assert.equal(check.skills.count > 0, true);
     assert.equal(check.agents.count > 0, true);

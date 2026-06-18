@@ -12,14 +12,14 @@ import {
 
 const platformRegistration = {
   command: "node",
-  args: ["C:\\runtime\\platform-mcp\\src\\index.js"],
+  args: ["C:\\runtime\\platform\\src\\index.js"],
   env: {},
 };
 
 test("creates canonical MCP registrations from the runtime root", () => {
   const runtimeRoot = path.resolve("runtime");
   const registrations = createMcpRegistrations({
-    packIds: ["platform"],
+    serverIds: ["platform"],
     runtimeRoot,
   });
 
@@ -29,7 +29,7 @@ test("creates canonical MCP registrations from the runtime root", () => {
       path.join(
         runtimeRoot,
         "mcp-servers",
-        "platform-mcp",
+        "platform",
         "src",
         "index.js",
       ),

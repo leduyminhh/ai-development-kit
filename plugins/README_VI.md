@@ -67,7 +67,7 @@ Không tạo README placeholder chỉ để giữ folder.
   setting hoặc asset có thể cài đặt thay đổi.
 - Giữ command id và MCP tool id được namespace theo capability.
 - Giữ metadata command của plugin khớp với `core/routing/command-registry.yaml`
-  và `mcp-servers/<plugin>-mcp/mcp.json` khi dùng MCP.
+  và `mcp-servers/<plugin>/mcp.json` khi dùng MCP.
 - Cập nhật `README.md` tiếng Anh trước, rồi đồng bộ `README_VI.md`.
 - Chạy `npm run validate` sau thay đổi metadata plugin, command, skill,
   dependency hoặc mapping MCP.

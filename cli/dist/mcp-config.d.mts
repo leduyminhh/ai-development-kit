@@ -1,5 +1,5 @@
-export function createMcpRegistrations({ packIds, runtimeRoot }: {
-    packIds: any;
+export function createMcpRegistrations({ serverIds, runtimeRoot }: {
+    serverIds: any;
     runtimeRoot: any;
 }): any;
 export function mergeCodexMcpConfig({ currentText, desired, previouslyManaged, force, }: {

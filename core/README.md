@@ -31,7 +31,7 @@ more than one AI IDE plugin. Keep plugin-specific behavior in
 - `core/routing/command-registry.yaml` must reference command files that exist
   under `plugins/<plugin>/commands/`.
 - MCP tool names referenced by routing and plugin metadata must exist in
-  `mcp-servers/<plugin>-mcp/mcp.json` when MCP is used.
+  `mcp-servers/<plugin>/mcp.json` when MCP is used.
 
 ## Change Checklist
 

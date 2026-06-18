@@ -1,0 +1,142 @@
+{
+  "name": "platform",
+  "version": "1.0.0",
+  "tools": [
+    {
+      "name": "platform.review_docker",
+      "title": "Review Docker configuration",
+      "description": "Review a Dockerfile for production security, reproducibility, and operability.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "dockerfile",
+          "deploymentGoal"
+        ],
+        "properties": {
+          "dockerfile": {
+            "type": "string",
+            "minLength": 1
+          },
+          "deploymentGoal": {
+            "type": "string",
+            "minLength": 1
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "findings",
+          "hardeningActions",
+          "verificationChecks"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "platform.review_kubernetes",
+      "title": "Review Kubernetes workload",
+      "description": "Review Kubernetes manifests for reliability, security, and rollout safety.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "manifest",
+          "workloadGoal"
+        ],
+        "properties": {
+          "manifest": {
+            "type": "string",
+            "minLength": 1
+          },
+          "workloadGoal": {
+            "type": "string",
+            "minLength": 1
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "findings",
+          "reliabilityActions",
+          "verificationChecks"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "platform.deployment_plan",
+      "title": "Create deployment plan",
+      "description": "Create deployment stages, readiness gates, verification commands, and rollback guidance.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "releaseScope",
+          "targetEnvironment"
+        ],
+        "properties": {
+          "releaseScope": {
+            "type": "string",
+            "minLength": 1
+          },
+          "targetEnvironment": {
+            "type": "string",
+            "minLength": 1
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "operationalConstraints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "deploymentStages",
+          "readinessGates",
+          "verificationCommands",
+          "rollbackProcedure"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    }
+  ]
+}

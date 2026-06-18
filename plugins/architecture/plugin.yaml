@@ -83,5 +83,15 @@
   ],
   "depends_on": {
     "plugins": []
+  },
+  "runtime": {
+    "mcp": {
+      "server": "architecture",
+      "tools": [
+        "architecture.generate_system_design",
+        "architecture.review_architecture",
+        "architecture.generate_adr"
+      ]
+    }
   }
 }

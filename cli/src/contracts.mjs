@@ -295,6 +295,9 @@ async function validateRoutingAndMcp(root, plugins, errors, ownedSkillsByPack) {
 
   for (const server of servers) {
     const contract = await readJson(path.join(mcpRoot, server.name, "mcp.json"));
+    if (contract.name !== server.name) {
+      errors.push(`MCP server ${server.name} contract name must match directory`);
+    }
     for (const required of [
       "README.md",
       "package.json",
@@ -360,6 +363,21 @@ async function validateRoutingAndMcp(root, plugins, errors, ownedSkillsByPack) {
     errors.push(error.message);
   }
   for (const [packId, pack] of plugins) {
+    const runtimeMcp = pack.runtime?.mcp;
+    if (!runtimeMcp?.server) {
+      errors.push(`plugin ${packId} must declare runtime.mcp.server`);
+    } else if (runtimeMcp.server !== packId) {
+      errors.push(`plugin ${packId} runtime MCP server must be ${packId}`);
+    }
+    if (!Array.isArray(runtimeMcp?.tools) || runtimeMcp.tools.length === 0) {
+      errors.push(`plugin ${packId} must declare runtime.mcp.tools`);
+    } else {
+      for (const tool of runtimeMcp.tools) {
+        if (!mcpTools.has(tool)) {
+          errors.push(`plugin ${packId} runtime MCP tool is missing: ${tool}`);
+        }
+      }
+    }
     for (const skill of pack.skills ?? []) {
       if (!skill.id || !skill.path) {
         errors.push(`plugin ${packId} has invalid skill metadata`);

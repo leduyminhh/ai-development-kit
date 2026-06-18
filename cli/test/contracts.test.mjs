@@ -86,6 +86,8 @@ test("loads seven canonical plugin contracts", async () => {
     assert.equal(plugin.metadata.id, pluginId);
     assert.ok(plugin.assets.skills.length > 0);
     assert.ok(plugin.assets.commands.length > 0);
+    assert.equal(plugin.runtime?.mcp?.server, pluginId);
+    assert.equal(plugin.runtime.mcp.tools.length, 3);
 
     const command = await loadCanonicalCommand(
       await findCommandPath(repoRoot, plugin.assets.commands[0]),

@@ -193,12 +193,12 @@ export async function doctorProject({ target, context }) {
         if (!config)
             continue;
         const registrations = provider === "codex" ? config.mcp_servers : config.mcpServers;
-        for (const plugin of lock.plugins ?? []) {
-            const expectedEntrypoint = path.join(target, ".ai-engineering", "mcp-servers", `${plugin.id}-mcp`, "src", "index.js");
-            const registration = registrations?.[plugin.id];
+        for (const serverName of lock.managedMcpServers?.[provider] ?? []) {
+            const expectedEntrypoint = path.join(target, ".ai-engineering", "mcp-servers", serverName, "src", "index.js");
+            const registration = registrations?.[serverName];
             if (registration?.command !== "node" ||
                 registration?.args?.[0] !== expectedEntrypoint) {
-                errors.push(`${providerNames[provider]} registration does not match installed runtime: ${plugin.id}`);
+                errors.push(`${providerNames[provider]} registration does not match installed runtime: ${serverName}`);
             }
         }
     }
@@ -210,12 +210,15 @@ export async function doctorProject({ target, context }) {
     if (errors.length > 0)
         throw new Error(errors.sort().join("\n"));
     const mcpServers = [];
-    for (const plugin of lock.plugins ?? []) {
-        const entrypoint = path.join(target, ".ai-engineering", "mcp-servers", `${plugin.id}-mcp`, "src", "index.js");
+    const managedServerNames = [
+        ...new Set(Object.values(lock.managedMcpServers ?? {}).flat()),
+    ].sort();
+    for (const serverName of managedServerNames) {
+        const entrypoint = path.join(target, ".ai-engineering", "mcp-servers", serverName, "src", "index.js");
         if (!(await exists(entrypoint))) {
-            throw new Error(`MCP entrypoint is missing: ${plugin.id}`);
+            throw new Error(`MCP entrypoint is missing: ${serverName}`);
         }
-        mcpServers.push(await probeMcpServer(entrypoint, plugin.id));
+        mcpServers.push(await probeMcpServer(entrypoint, serverName));
     }
     return {
         status: "pass",

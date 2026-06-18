@@ -27,7 +27,7 @@ function runMcp(entrypoint, requests, cwd = repoRoot) {
     child.on("error", reject);
     child.on("close", (exitCode) => {
       if (exitCode !== 0) {
-        reject(new Error(`platform-mcp exited ${exitCode}: ${stderr}`));
+        reject(new Error(`platform MCP exited ${exitCode}: ${stderr}`));
         return;
       }
       resolve(
@@ -47,7 +47,7 @@ function runMcp(entrypoint, requests, cwd = repoRoot) {
 
 function runPlatformMcp(requests) {
   return runMcp(
-    path.join(repoRoot, "mcp-servers", "platform-mcp", "src", "index.js"),
+    path.join(repoRoot, "mcp-servers", "platform", "src", "index.js"),
     requests,
   );
 }
@@ -134,7 +134,7 @@ test("installed platform MCP executes through the target-local runtime", async (
       target,
       ".ai-engineering",
       "mcp-servers",
-      "platform-mcp",
+      "platform",
       "src",
       "index.js",
     );

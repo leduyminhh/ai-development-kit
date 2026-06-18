@@ -1,13 +1,14 @@
 # MCP Servers
 
-`mcp-servers/` contains one namespaced MCP server per capability pack.
-The CLI install flow copies selected servers below the chosen scope's
-`.ai-engineering/mcp-servers/` directory and writes provider-native MCP
-registrations that point to those local entrypoints.
+`mcp-servers/` contains optional runtime MCP servers for capability plugins.
+The CLI install flow copies only the servers declared by installed plugin
+manifests below the chosen scope's `.ai-engineering/mcp-servers/` directory and
+writes provider-native MCP registrations that point to those local entrypoints.
 
-These servers are the runtime-facing side of pack commands. Pack metadata says
-which MCP tool a command expects; the matching server contract declares that tool.
-All servers use the shared newline-delimited JSON-RPC stdio runtime in
+These servers are the executable tool layer. Plugin metadata declares the
+runtime server and tool ids it needs; command metadata may bind a user-facing
+command to one of those tool ids with `mcpTool`. All servers use the shared
+newline-delimited JSON-RPC stdio runtime in
 `core/mcp/stdio-runtime.js`. The runtime implements MCP initialization,
 `ping`, `tools/list`, and handler dispatch for `tools/call`. All released tools
 use structured input/output schemas and read-only annotations. Server startup
@@ -15,7 +16,7 @@ fails when a contract and its registered handlers do not match.
 
 ## Server Anatomy
 
-Each `<pack>-mcp/` directory follows this shape:
+Each `<plugin>/` directory follows this shape:
 
 - `mcp.json`: stable server contract; includes server name, version, and tool ids.
 - `package.json`: package metadata and `start` script.
@@ -29,37 +30,38 @@ Each `<pack>-mcp/` directory follows this shape:
 
 | Server | Owning Pack | Declared Tools |
 | --- | --- | --- |
-| `architecture-mcp` | `architecture` | `architecture.generate_system_design`, `architecture.review_architecture`, `architecture.generate_adr` |
-| `application-mcp` | `application` | `application.review_source_code`, `application.generate_service`, `application.review_api` |
-| `data-mcp` | `data` | `data.analyze_schema`, `data.review_index`, `data.migration_plan` |
-| `knowledge-mcp` | `knowledge` | `knowledge.generate_readme`, `knowledge.generate_runbook`, `knowledge.review_docs` |
-| `platform-mcp` | `platform` | `platform.review_docker`, `platform.review_kubernetes`, `platform.deployment_plan` |
-| `quality-mcp` | `quality` | `quality.generate_test_plan`, `quality.review_coverage`, `quality.performance_review` |
-| `security-mcp` | `security` | `security.scan_source`, `security.scan_dependencies`, `security.generate_threat_model` |
+| `architecture` | `architecture` | `architecture.generate_system_design`, `architecture.review_architecture`, `architecture.generate_adr` |
+| `application` | `application` | `application.review_source_code`, `application.generate_service`, `application.review_api` |
+| `data` | `data` | `data.analyze_schema`, `data.review_index`, `data.migration_plan` |
+| `knowledge` | `knowledge` | `knowledge.generate_readme`, `knowledge.generate_runbook`, `knowledge.review_docs` |
+| `platform` | `platform` | `platform.review_docker`, `platform.review_kubernetes`, `platform.deployment_plan` |
+| `quality` | `quality` | `quality.generate_test_plan`, `quality.review_coverage`, `quality.performance_review` |
+| `security` | `security` | `security.scan_source`, `security.scan_dependencies`, `security.generate_threat_model` |
 
 ## Install Flow Relationship
 
 When a user runs
 `ai-engineering install <pack...> --target <provider> --scope <project|global>`:
 
-1. The dependency graph resolves requested packs.
-2. The lifecycle builder collects pack commands, skills, adapters, and MCP server
-   skeletons.
+1. The dependency graph resolves requested plugins.
+2. The lifecycle builder collects plugin commands, skills, adapters, and
+   manifest-declared MCP runtimes.
 3. Server files are copied into the selected scope under
-   `.ai-engineering/mcp-servers/<pack>-mcp/`.
+   `.ai-engineering/mcp-servers/<plugin>/`.
 4. The shared runtime is copied once to
    `.ai-engineering/core/mcp/stdio-runtime.js`.
 5. Codex, Claude, or Cursor native config points to the absolute
-   `.ai-engineering/mcp-servers/<pack>-mcp/src/index.js` entrypoint.
+   `.ai-engineering/mcp-servers/<plugin>/src/index.js` entrypoint.
 6. Ownership metadata records runtime files and managed config entries so
    uninstall/update preserves user-owned configuration.
 
 ## Change Checklist
 
-- Add or rename MCP tools in `mcp.json`, pack command metadata, and routing
-  registries together. Do not duplicate tool ids in `src/server.js`.
+- Add or rename MCP tools in `mcp.json`, plugin `runtime.mcp.tools`, command
+  metadata, and routing registries together. Do not duplicate tool ids in
+  `src/server.js`.
 - Define input/output schemas and annotations for implemented tools.
-- Keep server directory names scoped as `<pack>-mcp`.
+- Keep server directory names scoped as `<plugin>`.
 - Do not reintroduce legacy provider plugin folders as active runtime paths.
 - Update English `README.md` first, then synchronize `README_VI.md`.
 - Run `npm run validate` and a target-project smoke test after MCP contract

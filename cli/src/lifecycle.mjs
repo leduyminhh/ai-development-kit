@@ -157,12 +157,17 @@ async function materializeProjectionAsset({
 async function addRuntimeFiles({
   root,
   graph,
+  plugins,
+  mcpServerIds,
   desiredFiles,
   ownershipFiles,
 }) {
-  for (const pluginId of graph.pluginIds) {
-    const serverRoot = path.join(root, "mcp-servers", `${pluginId}-mcp`);
-    const serverPrefix = `.ai-engineering/mcp-servers/${pluginId}-mcp`;
+  for (const serverId of mcpServerIds) {
+    const serverRoot = path.join(root, "mcp-servers", serverId);
+    const serverPrefix = `.ai-engineering/mcp-servers/${serverId}`;
+    const owners = [...plugins]
+      .filter(([, plugin]) => plugin.runtime?.mcp?.server === serverId)
+      .map(([pluginId]) => pluginId);
     for (const [relativePath, content] of await readDirectoryFiles(
       serverRoot,
       serverPrefix,
@@ -171,7 +176,7 @@ async function addRuntimeFiles({
       addOwnership(
         ownershipFiles,
         relativePath,
-        [pluginId],
+        owners.length > 0 ? owners : [serverId],
         "mcp-server",
       );
     }
@@ -194,6 +199,16 @@ async function addRuntimeFiles({
       );
     }
   }
+}
+
+function resolveMcpServerIds({ graph, plugins }) {
+  return [
+    ...new Set(
+      graph.pluginIds
+        .map((pluginId) => plugins.get(pluginId)?.runtime?.mcp?.server)
+        .filter(Boolean),
+    ),
+  ].sort();
 }
 
 async function mergeProviderConfig({
@@ -251,10 +266,18 @@ async function buildDesiredState({
   const desiredFiles = new Map();
   const ownershipFiles = {};
 
-  await addRuntimeFiles({ root, graph, desiredFiles, ownershipFiles });
+  const mcpServerIds = resolveMcpServerIds({ graph, plugins });
+  await addRuntimeFiles({
+    root,
+    graph,
+    plugins,
+    mcpServerIds,
+    desiredFiles,
+    ownershipFiles,
+  });
 
   const mcpServers = createMcpRegistrations({
-    packIds: graph.pluginIds,
+    serverIds: mcpServerIds,
     runtimeRoot: path.join(installContext.targetRoot, ".ai-engineering"),
   });
   const projections = {};
@@ -614,7 +637,7 @@ export async function checkInstalled({ target }) {
       .filter(([, servers]) => servers.includes(name))
       .map(([provider]) => provider)
       .sort(),
-    path: `.ai-engineering/mcp-servers/${name}-mcp`,
+    path: `.ai-engineering/mcp-servers/${name}`,
     installed: true,
   }));
   return {

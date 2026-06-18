@@ -30,7 +30,7 @@ trong `plugins/<plugin>/`.
 - `core/routing/command-registry.yaml` phải tham chiếu command file có thật dưới
   `plugins/<plugin>/commands/`.
 - Tên MCP tool được routing và metadata plugin tham chiếu phải tồn tại trong
-  `mcp-servers/<plugin>-mcp/mcp.json` khi dùng MCP.
+  `mcp-servers/<plugin>/mcp.json` khi dùng MCP.
 
 ## Checklist Thay Đổi
 

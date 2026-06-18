@@ -68,7 +68,7 @@ Unused asset groups remain as folders and are declared as `none` in
   runtime settings, or installable assets change.
 - Keep command ids and MCP tool ids namespaced by capability.
 - Keep plugin command metadata aligned with `core/routing/command-registry.yaml`
-  and `mcp-servers/<plugin>-mcp/mcp.json` when MCP is used.
+  and `mcp-servers/<plugin>/mcp.json` when MCP is used.
 - Update English `README.md` first, then synchronize `README_VI.md`.
 - Run `npm run validate` after plugin metadata, command, skill, dependency, or
   MCP mapping changes.

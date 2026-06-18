@@ -34,7 +34,7 @@ function runMcp(server, requests) {
   const entrypoint = path.join(
     repoRoot,
     "mcp-servers",
-    `${server}-mcp`,
+    server,
     "src",
     "index.js",
   );
@@ -56,7 +56,7 @@ function runMcp(server, requests) {
     child.on("error", reject);
     child.on("close", (exitCode) => {
       if (exitCode !== 0) {
-        reject(new Error(`${server}-mcp exited ${exitCode}: ${stderr}`));
+        reject(new Error(`${server} MCP exited ${exitCode}: ${stderr}`));
         return;
       }
       resolve(
@@ -78,7 +78,7 @@ test("all released MCP tools use structured contracts", async () => {
   for (const server of [...new Set(CASES.map(([name]) => name))]) {
     const contract = JSON.parse(
       await readFile(
-        path.join(repoRoot, "mcp-servers", `${server}-mcp`, "mcp.json"),
+        path.join(repoRoot, "mcp-servers", server, "mcp.json"),
         "utf8",
       ),
     );
