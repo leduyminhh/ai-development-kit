@@ -14,9 +14,8 @@ trong `plugins/<plugin>/`.
 | --- | --- | --- |
 | `agents/` | AGENTS baseline được quản lý, template AGENTS cho dự án đích và merge policy dùng bởi `ai-engineering init`. | Khi instruction sinh ra cho project hoặc ranh giới merge thay đổi. Luôn giữ nội dung người dùng sở hữu ngoài managed block. |
 | `checklists/` | Checklist dùng chung có thể được command, skill hoặc migration tham chiếu. | Khi checklist thật sự tái sử dụng được giữa nhiều plugin. Checklist riêng đặt trong plugin sở hữu. |
-| `mcp/` | Runtime MCP stdio cục bộ dùng chung cho optional MCP integration. | Khi xử lý giao thức MCP, đọc contract hoặc hành vi transport dùng chung thay đổi. |
 | `prompts/` | Mảnh prompt trùng lặp theo provider và các khối prompt tái sử dụng. | Khi wording áp dụng xuyên provider hoặc plugin. Output prompt riêng theo provider đặt dưới `adapters/`. |
-| `routing/` | Registry intent, command và skill để nối user intent với command của plugin và optional MCP tool contract. | Khi thêm, đổi tên hoặc xóa command id, skill id hoặc intent route. Giữ khớp với `plugin.yaml` và `mcp-servers/*/mcp.json`. |
+| `routing/` | Registry intent, command và skill để nối user intent với command của plugin. | Khi thêm, đổi tên hoặc xóa command id, skill id hoặc intent route. Giữ khớp với `plugin.yaml`. |
 | `schemas/` | JSON schema cho các hợp đồng platform như metadata plugin và install state. | Khi contract được serialize thay đổi. Cập nhật validator và fixture trong cùng thay đổi. |
 | `standards/` | Chuẩn authoring cho agent, skill và định dạng output. | Khi chuẩn viết hoặc chuẩn hành vi cấp repository thay đổi. Không đặt ghi chú quy trình riêng của plugin ở đây. |
 | `templates/` | Template tái sử dụng cho tài sản được sinh hoặc scaffold. | Khi nhiều plugin hoặc generator cần cùng một cấu trúc khởi tạo. |
@@ -29,8 +28,7 @@ trong `plugins/<plugin>/`.
   `AGENTS.md` đã tồn tại ở dự án đích.
 - `core/routing/command-registry.yaml` phải tham chiếu command file có thật dưới
   `plugins/<plugin>/commands/`.
-- Tên MCP tool được routing và metadata plugin tham chiếu phải tồn tại trong
-  `mcp-servers/<plugin>/mcp.json` khi dùng MCP.
+- Registry, policy và ví dụ MCP thuộc `providers/mcp/`.
 
 ## Checklist Thay Đổi
 

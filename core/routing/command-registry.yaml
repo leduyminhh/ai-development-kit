@@ -35,8 +35,7 @@
       "id": "application.implement_frontend",
       "plugin": "application",
       "slug": "implement-frontend",
-      "file": "commands/implement-frontend.md",
-      "mcpTool": "application.generate_service"
+      "file": "commands/implement-frontend.md"
     },
     {
       "id": "application.integrate_feature",
@@ -54,8 +53,7 @@
       "id": "application.review_backend",
       "plugin": "application",
       "slug": "review-backend",
-      "file": "commands/review-backend.md",
-      "mcpTool": "application.review_source_code"
+      "file": "commands/review-backend.md"
     },
     {
       "id": "application.review_feature",
@@ -73,43 +71,37 @@
       "id": "architecture.review_architecture",
       "plugin": "architecture",
       "slug": "review-architecture",
-      "file": "commands/review-architecture.md",
-      "mcpTool": "architecture.review_architecture"
+      "file": "commands/review-architecture.md"
     },
     {
       "id": "data.migration_plan",
       "plugin": "data",
       "slug": "migration-plan",
-      "file": "commands/migration-plan.md",
-      "mcpTool": "data.migration_plan"
+      "file": "commands/migration-plan.md"
     },
     {
       "id": "knowledge.write_technical_doc",
       "plugin": "knowledge",
       "slug": "write-technical-doc",
-      "file": "commands/write-technical-doc.md",
-      "mcpTool": "knowledge.review_docs"
+      "file": "commands/write-technical-doc.md"
     },
     {
       "id": "platform.deployment_plan",
       "plugin": "platform",
       "slug": "deployment-plan",
-      "file": "commands/deployment-plan.md",
-      "mcpTool": "platform.deployment_plan"
+      "file": "commands/deployment-plan.md"
     },
     {
       "id": "quality.verify_quality",
       "plugin": "quality",
       "slug": "verify-quality",
-      "file": "commands/verify-quality.md",
-      "mcpTool": "quality.generate_test_plan"
+      "file": "commands/verify-quality.md"
     },
     {
       "id": "security.review_security",
       "plugin": "security",
       "slug": "review-security",
-      "file": "commands/review-security.md",
-      "mcpTool": "security.scan_source"
+      "file": "commands/review-security.md"
     }
   ]
 }

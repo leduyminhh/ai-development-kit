@@ -64,15 +64,5 @@
   ],
   "depends_on": {
     "plugins": []
-  },
-  "runtime": {
-    "mcp": {
-      "server": "data",
-      "tools": [
-        "data.analyze_schema",
-        "data.review_index",
-        "data.migration_plan"
-      ]
-    }
   }
 }

@@ -1,9 +1,13 @@
-export function validateCanonicalCommand(command: any, { knownSkills, knownMcpTools, validateReferences, }?: {
+export function validateCanonicalCommand(command: any, { knownSkills, validateReferences, }?: {
     knownSkills?: Set<any> | undefined;
-    knownMcpTools?: Set<any> | undefined;
     validateReferences?: boolean | undefined;
 }): string[];
 export function loadCanonicalCommand(input: any): Promise<{
+    id: any;
+    pluginId: any;
+    slug: any;
+    description: any;
+    version: any;
     intent: any;
     inputs: any[];
     requiredSkills: any[];
@@ -13,21 +17,19 @@ export function loadCanonicalCommand(input: any): Promise<{
     absoluteSourcePath: any;
     pluginVersion: any;
     markdown: string;
-    mcpTool?: any;
-    id: any;
-    pluginId: any;
-    slug: any;
-    description: any;
-    version: any;
 }>;
-export function loadPluginCommands({ root, pluginId, plugin, knownSkills, knownMcpTools, validateReferences, }: {
+export function loadPluginCommands({ root, pluginId, plugin, knownSkills, validateReferences, }: {
     root: any;
     pluginId: any;
     plugin: any;
     knownSkills?: Set<any> | undefined;
-    knownMcpTools?: Set<any> | undefined;
     validateReferences?: boolean | undefined;
 }): Promise<{
+    id: any;
+    pluginId: any;
+    slug: any;
+    description: any;
+    version: any;
     intent: any;
     inputs: any[];
     requiredSkills: any[];
@@ -37,10 +39,4 @@ export function loadPluginCommands({ root, pluginId, plugin, knownSkills, knownM
     absoluteSourcePath: any;
     pluginVersion: any;
     markdown: string;
-    mcpTool?: any;
-    id: any;
-    pluginId: any;
-    slug: any;
-    description: any;
-    version: any;
 }[]>;

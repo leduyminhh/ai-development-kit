@@ -3,7 +3,6 @@ id: architecture.review_architecture
 slug: review-architecture
 description: Review architecture boundaries and dependency direction.
 version: 1.0.0
-mcpTool: architecture.review_architecture
 ---
 
 # Review Architecture

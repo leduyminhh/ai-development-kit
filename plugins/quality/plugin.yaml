@@ -74,15 +74,5 @@
   ],
   "depends_on": {
     "plugins": []
-  },
-  "runtime": {
-    "mcp": {
-      "server": "quality",
-      "tools": [
-        "quality.generate_test_plan",
-        "quality.review_coverage",
-        "quality.performance_review"
-      ]
-    }
   }
 }

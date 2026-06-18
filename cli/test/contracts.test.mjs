@@ -24,7 +24,7 @@ async function withRepositoryCopy(run) {
       "adapters",
       "cli",
       "core",
-      "mcp-servers",
+      "providers",
       "docs",
     ]) {
       await cp(path.join(repoRoot, entry), path.join(root, entry), {
@@ -45,7 +45,7 @@ async function withPluginsRepositoryCopy(run) {
       "adapters",
       "cli",
       "core",
-      "mcp-servers",
+      "providers",
       "docs",
     ]) {
       await cp(path.join(repoRoot, entry), path.join(root, entry), {
@@ -78,7 +78,7 @@ test("loads seven canonical plugin contracts", async () => {
   ]);
   assert.equal(validation.pluginCount, 7);
   assert.equal(validation.providerCount, 3);
-  assert.equal(validation.mcpServerCount, 7);
+  assert.equal(validation.mcpProviderExampleCount, 1);
 
   for (const [pluginId, plugin] of plugins) {
     assert.equal(plugin.apiVersion, "ai-engineering.dev/v1alpha1");
@@ -86,8 +86,7 @@ test("loads seven canonical plugin contracts", async () => {
     assert.equal(plugin.metadata.id, pluginId);
     assert.ok(plugin.assets.skills.length > 0);
     assert.ok(plugin.assets.commands.length > 0);
-    assert.equal(plugin.runtime?.mcp?.server, pluginId);
-    assert.equal(plugin.runtime.mcp.tools.length, 3);
+    assert.equal(plugin.runtime?.mcp, undefined);
 
     const command = await loadCanonicalCommand(
       await findCommandPath(repoRoot, plugin.assets.commands[0]),
@@ -235,7 +234,7 @@ test("application defines ten parseable deliverable command files", async () => 
   }
 });
 
-test("application exposes canonical command files with optional MCP tools", async () => {
+test("application exposes canonical command files without active MCP tools", async () => {
   const plugins = await loadPlugins(repoRoot);
   const application = plugins.get("application");
   assert.deepEqual(application.assets.commands, [
@@ -258,10 +257,7 @@ test("application exposes canonical command files with optional MCP tools", asyn
   });
   assert.equal(commands.length, application.assets.commands.length);
   assert.ok(commands.every((command) => /^application[.]/.test(command.id)));
-  assert.deepEqual(
-    commands.filter((command) => command.mcpTool).map((command) => command.mcpTool),
-    ["application.generate_service", "application.review_source_code"],
-  );
+  assert.deepEqual(commands.filter((command) => command.mcpTool), []);
 });
 
 test("all command files are canonical manifest assets", async () => {

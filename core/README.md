@@ -16,7 +16,7 @@ more than one AI IDE plugin. Keep plugin-specific behavior in
 | `checklists/` | Shared checklists that can be referenced by commands, skills, or migration work. | A checklist is genuinely reusable across plugins. Plugin-local checklists belong in the owning plugin. |
 | `mcp/` | Shared local MCP stdio runtime used by optional MCP integrations. | MCP protocol handling, contract loading, or shared transport behavior changes. |
 | `prompts/` | Provider-neutral prompt fragments and reusable prompt building blocks. | Prompt wording applies across providers or plugins. Provider-specific prompt output belongs under `adapters/`. |
-| `routing/` | Intent, command, and skill registries that connect user intent to plugin commands and optional MCP tool contracts. | Adding, renaming, or removing command ids, skill ids, or intent routes. Keep routes aligned with `plugin.yaml` and `mcp-servers/*/mcp.json`. |
+| `routing/` | Intent, command, and skill registries that connect user intent to plugin commands. | Adding, renaming, or removing command ids, skill ids, or intent routes. Keep routes aligned with `plugin.yaml`. |
 | `schemas/` | JSON schemas for platform contracts such as plugin metadata and install state. | A serialized contract changes. Update validators and fixtures in the same change. |
 | `standards/` | Authoring standards for agents, skills, and output formats. | Repository-wide writing or behavior standards change. Do not put plugin-specific process notes here. |
 | `templates/` | Reusable templates for generated or scaffolded assets. | Multiple plugins or generators need the same starting structure. |
@@ -30,8 +30,7 @@ more than one AI IDE plugin. Keep plugin-specific behavior in
   inside an existing target `AGENTS.md`.
 - `core/routing/command-registry.yaml` must reference command files that exist
   under `plugins/<plugin>/commands/`.
-- MCP tool names referenced by routing and plugin metadata must exist in
-  `mcp-servers/<plugin>/mcp.json` when MCP is used.
+- MCP registry, policy, and examples belong under `providers/mcp/`.
 
 ## Change Checklist
 

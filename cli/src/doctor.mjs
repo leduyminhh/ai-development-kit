@@ -1,7 +1,5 @@
 import { access, readFile } from "node:fs/promises";
-import { spawn } from "node:child_process";
 import path from "node:path";
-import * as TOML from "@iarna/toml";
 
 const BEGIN = "<!-- AI-ENGINEERING:BEGIN AGENTS_BASELINE -->";
 const END = "<!-- AI-ENGINEERING:END AGENTS_BASELINE -->";
@@ -17,83 +15,6 @@ async function exists(pathname) {
 
 async function readJson(pathname) {
   return JSON.parse(await readFile(pathname, "utf8"));
-}
-
-function probeMcpServer(entrypoint, name) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, [entrypoint], {
-      cwd: path.dirname(entrypoint),
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-    let stdout = "";
-    let stderr = "";
-    const timeout = setTimeout(() => {
-      child.kill();
-      reject(new Error(`MCP server ${name} timed out during doctor probe`));
-    }, 5000);
-
-    child.stdout.setEncoding("utf8");
-    child.stderr.setEncoding("utf8");
-    child.stdout.on("data", (chunk) => {
-      stdout += chunk;
-    });
-    child.stderr.on("data", (chunk) => {
-      stderr += chunk;
-    });
-    child.on("error", (error) => {
-      clearTimeout(timeout);
-      reject(error);
-    });
-    child.on("close", (exitCode) => {
-      clearTimeout(timeout);
-      if (exitCode !== 0) {
-        reject(
-          new Error(
-            `MCP server ${name} exited ${exitCode}: ${stderr.trim()}`,
-          ),
-        );
-        return;
-      }
-      try {
-        const responses = stdout
-          .trim()
-          .split(/\r?\n/)
-          .filter(Boolean)
-          .map((line) => JSON.parse(line));
-        const initialize = responses.find((item) => item.id === 1);
-        const ping = responses.find((item) => item.id === 2);
-        const tools = responses.find((item) => item.id === 3);
-        if (!initialize?.result?.serverInfo || !ping?.result || !tools?.result?.tools) {
-          throw new Error("incomplete MCP probe response");
-        }
-        resolve({
-          name,
-          status: "pass",
-          toolCount: tools.result.tools.length,
-        });
-      } catch (error) {
-        reject(new Error(`MCP server ${name} probe failed: ${error.message}`));
-      }
-    });
-
-    for (const request of [
-      {
-        jsonrpc: "2.0",
-        id: 1,
-        method: "initialize",
-        params: {
-          protocolVersion: "2025-03-26",
-          capabilities: {},
-          clientInfo: { name: "ai-engineering-doctor", version: "1.0.0" },
-        },
-      },
-      { jsonrpc: "2.0", id: 2, method: "ping", params: {} },
-      { jsonrpc: "2.0", id: 3, method: "tools/list", params: {} },
-    ]) {
-      child.stdin.write(`${JSON.stringify(request)}\n`);
-    }
-    child.stdin.end();
-  });
 }
 
 export async function doctorProject({ target, context }) {
@@ -169,74 +90,21 @@ export async function doctorProject({ target, context }) {
   const adapterChecks = {
     codex:
       scope === "project"
-        ? [".codex/agents/openai.yaml", ".codex/config.toml"]
-        : [".codex/AGENTS.md", ".codex/config.toml"],
+        ? [".codex/agents/openai.yaml"]
+        : [".codex/AGENTS.md"],
     claude:
       scope === "project"
-        ? ["CLAUDE.md", ".claude-plugin/plugin.json", ".mcp.json"]
-        : [".claude/CLAUDE.md", ".claude.json"],
+        ? ["CLAUDE.md", ".claude-plugin/plugin.json"]
+        : [".claude/CLAUDE.md"],
     cursor:
       scope === "project"
-        ? [".cursor/rules/provider.json", ".cursor/mcp.json"]
-        : [".cursor/mcp.json"],
+        ? [".cursor/rules/provider.json"]
+        : [],
   };
   for (const provider of lock.providers ?? []) {
     for (const relativePath of adapterChecks[provider] ?? []) {
       if (!(await exists(path.join(target, relativePath)))) {
         errors.push(`adapter files are missing for ${provider}: ${relativePath}`);
-      }
-    }
-  }
-  const configChecks = {
-    codex: {
-      path: ".codex/config.toml",
-      parse: (text) => TOML.parse(text),
-    },
-    claude: {
-      path: scope === "global" ? ".claude.json" : ".mcp.json",
-      parse: JSON.parse,
-    },
-    cursor: { path: ".cursor/mcp.json", parse: JSON.parse },
-  };
-  const parsedConfigs = {};
-  for (const provider of lock.providers ?? []) {
-    const check = configChecks[provider];
-    if (!check || !(await exists(path.join(target, check.path)))) continue;
-    try {
-      parsedConfigs[provider] = check.parse(
-        await readFile(path.join(target, check.path), "utf8"),
-      );
-    } catch {
-      errors.push(`${check.path} is invalid`);
-    }
-  }
-  const providerNames = {
-    codex: "Codex",
-    claude: "Claude",
-    cursor: "Cursor",
-  };
-  for (const provider of lock.providers ?? []) {
-    const config = parsedConfigs[provider];
-    if (!config) continue;
-    const registrations =
-      provider === "codex" ? config.mcp_servers : config.mcpServers;
-    for (const serverName of lock.managedMcpServers?.[provider] ?? []) {
-      const expectedEntrypoint = path.join(
-        target,
-        ".ai-engineering",
-        "mcp-servers",
-        serverName,
-        "src",
-        "index.js",
-      );
-      const registration = registrations?.[serverName];
-      if (
-        registration?.command !== "node" ||
-        registration?.args?.[0] !== expectedEntrypoint
-      ) {
-        errors.push(
-          `${providerNames[provider]} registration does not match installed runtime: ${serverName}`,
-        );
       }
     }
   }
@@ -247,31 +115,12 @@ export async function doctorProject({ target, context }) {
   }
   if (errors.length > 0) throw new Error(errors.sort().join("\n"));
 
-  const mcpServers = [];
-  const managedServerNames = [
-    ...new Set(Object.values(lock.managedMcpServers ?? {}).flat()),
-  ].sort();
-  for (const serverName of managedServerNames) {
-    const entrypoint = path.join(
-      target,
-      ".ai-engineering",
-      "mcp-servers",
-      serverName,
-      "src",
-      "index.js",
-    );
-    if (!(await exists(entrypoint))) {
-      throw new Error(`MCP entrypoint is missing: ${serverName}`);
-    }
-    mcpServers.push(await probeMcpServer(entrypoint, serverName));
-  }
-
   return {
     status: "pass",
     scope,
     plugins: (lock.plugins ?? []).map((item) => item.id),
     providers: lock.providers ?? [],
-    mcpServers,
+    mcpServers: [],
     nativeChecks: (lock.providers ?? []).map((provider) => ({
       provider,
       status: "skipped",

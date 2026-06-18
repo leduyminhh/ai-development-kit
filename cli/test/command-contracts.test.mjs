@@ -23,7 +23,7 @@ test("loads one canonical namespaced command model", async () => {
   assert.equal(command.id, "application.review_backend");
   assert.equal(command.pluginId, "application");
   assert.equal(command.slug, "review-backend");
-  assert.equal(command.mcpTool, "application.review_source_code");
+  assert.equal(command.mcpTool, undefined);
   assert.equal(
     command.sourcePath,
     "plugins/application/commands/review-backend.md",
@@ -37,7 +37,7 @@ test("loads one canonical namespaced command model", async () => {
   ]);
 });
 
-test("accepts a command without an MCP tool", async () => {
+test("accepts a command without MCP metadata", async () => {
   const sourcePath = path.join(
     repoRoot,
     "plugins/application/commands/deliver-feature.md",

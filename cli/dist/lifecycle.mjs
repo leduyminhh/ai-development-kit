@@ -2,7 +2,6 @@ import { readFile, rm, stat } from "node:fs/promises";
 import path from "node:path";
 import { loadPlatform, loadPlugins, } from "./contracts.mjs";
 import { listFiles, writeJsonAtomic } from "./io.mjs";
-import { createMcpRegistrations, mergeCodexMcpConfig, mergeJsonMcpConfig, } from "./mcp-config.mjs";
 import { projectProvider } from "./providers.mjs";
 import { buildProjectionInput } from "./projection-input.mjs";
 import { resolvePluginGraph } from "./resolver.mjs";
@@ -11,7 +10,6 @@ import { applyTransaction, planTransaction } from "./transaction.mjs";
 import { initializeProject, prepareInstructionFileContent, } from "./init.mjs";
 const CORE_RUNTIME_DIRECTORIES = [
     "agents",
-    "mcp",
     "prompts",
     "routing",
     "schemas",
@@ -34,16 +32,6 @@ async function readDirectoryFiles(sourceRoot, destinationPrefix) {
         files.set(`${destinationPrefix}/${relative}`, await readFile(path.join(sourceRoot, relative), "utf8"));
     }
     return files;
-}
-async function readTextIfExists(pathname) {
-    try {
-        return await readFile(pathname, "utf8");
-    }
-    catch (error) {
-        if (error.code === "ENOENT")
-            return "";
-        throw error;
-    }
 }
 async function appendPlatformInstructionFragments({ root, graph, content }) {
     if (!graph.pluginIds.includes("platform"))
@@ -90,18 +78,7 @@ async function materializeProjectionAsset({ root, asset, desiredFiles, ownership
     desiredFiles.set(asset.destinationPath, await readFile(source, "utf8"));
     addOwnership(ownershipFiles, asset.destinationPath, asset.owners, asset.assetId, asset.shared, { assetType: asset.assetType });
 }
-async function addRuntimeFiles({ root, graph, plugins, mcpServerIds, desiredFiles, ownershipFiles, }) {
-    for (const serverId of mcpServerIds) {
-        const serverRoot = path.join(root, "mcp-servers", serverId);
-        const serverPrefix = `.ai-engineering/mcp-servers/${serverId}`;
-        const owners = [...plugins]
-            .filter(([, plugin]) => plugin.runtime?.mcp?.server === serverId)
-            .map(([pluginId]) => pluginId);
-        for (const [relativePath, content] of await readDirectoryFiles(serverRoot, serverPrefix)) {
-            desiredFiles.set(relativePath, content);
-            addOwnership(ownershipFiles, relativePath, owners.length > 0 ? owners : [serverId], "mcp-server");
-        }
-    }
+async function addRuntimeFiles({ root, graph, desiredFiles, ownershipFiles, }) {
     if (graph.pluginIds.length === 0)
         return;
     for (const directory of CORE_RUNTIME_DIRECTORIES) {
@@ -112,33 +89,7 @@ async function addRuntimeFiles({ root, graph, plugins, mcpServerIds, desiredFile
         }
     }
 }
-function resolveMcpServerIds({ graph, plugins }) {
-    return [
-        ...new Set(graph.pluginIds
-            .map((pluginId) => plugins.get(pluginId)?.runtime?.mcp?.server)
-            .filter(Boolean)),
-    ].sort();
-}
-async function mergeProviderConfig({ provider, projection, target, previousState, force, }) {
-    const currentText = await readTextIfExists(path.join(target, projection.mcpConfig.path));
-    const previouslyManaged = previousState.lock?.managedMcpServers?.[provider] ?? [];
-    if (projection.mcpConfig.format === "toml") {
-        return mergeCodexMcpConfig({
-            currentText,
-            desired: projection.mcpConfig.servers,
-            previouslyManaged,
-            force,
-        });
-    }
-    return mergeJsonMcpConfig({
-        currentText,
-        desired: projection.mcpConfig.servers,
-        previouslyManaged,
-        force,
-        provider: provider === "claude" ? "Claude" : "Cursor",
-    });
-}
-async function buildDesiredState({ root, target, context, pluginIds = [], all = false, providers, rootPlugins, optionalPlugins = [], force = false, }) {
+async function buildDesiredState({ root, target, context, pluginIds = [], all = false, providers, rootPlugins, optionalPlugins = [], }) {
     const installContext = normalizeContext(target, context);
     const platform = await loadPlatform(root);
     const plugins = await loadPlugins(root);
@@ -150,22 +101,15 @@ async function buildDesiredState({ root, target, context, pluginIds = [], all = 
         platformVersion: platform.product.version,
         providers: providers ?? platform.providers.enabled,
     });
-    const previousState = await readPlatformState(installContext.targetRoot);
     const desiredFiles = new Map();
     const ownershipFiles = {};
-    const mcpServerIds = resolveMcpServerIds({ graph, plugins });
     await addRuntimeFiles({
         root,
         graph,
-        plugins,
-        mcpServerIds,
         desiredFiles,
         ownershipFiles,
     });
-    const mcpServers = createMcpRegistrations({
-        serverIds: mcpServerIds,
-        runtimeRoot: path.join(installContext.targetRoot, ".ai-engineering"),
-    });
+    const mcpServers = {};
     const projections = {};
     for (const provider of graph.providers) {
         const projectionInput = await buildProjectionInput({
@@ -201,22 +145,6 @@ async function buildDesiredState({ root, target, context, pluginIds = [], all = 
                 addOwnership(ownershipFiles, instruction.destinationPath, graph.pluginIds, `${provider}.instructions`, true, { assetType: "instruction", mergeStrategy: "managed-block" });
             }
         }
-        const merged = await mergeProviderConfig({
-            provider,
-            projection: {
-                mcpConfig: {
-                    ...projection.mcpConfig,
-                    path: projection.mcpConfig.destinationPath,
-                },
-            },
-            target: installContext.targetRoot,
-            previousState,
-            force,
-        });
-        if (!merged.empty) {
-            desiredFiles.set(projection.mcpConfig.destinationPath, merged.content);
-            addOwnership(ownershipFiles, projection.mcpConfig.destinationPath, graph.pluginIds, `${provider}.mcp-config`, true, { assetType: "mcp-config", mergeStrategy: "mcp-config" });
-        }
     }
     const activeProviders = graph.pluginIds.length === 0 ? [] : graph.providers;
     const lock = {
@@ -230,10 +158,6 @@ async function buildDesiredState({ root, target, context, pluginIds = [], all = 
             id,
             version: plugins.get(id).metadata.version,
         })),
-        managedMcpServers: Object.fromEntries(activeProviders.map((provider) => [
-            provider,
-            Object.keys(mcpServers).sort(),
-        ])),
     };
     return {
         desiredFiles,
@@ -327,7 +251,7 @@ export async function listInstalled({ target }) {
         optionalPlugins: state.lock?.optionalPlugins ?? [],
         providers: state.lock?.providers ?? [],
         platformVersion: state.lock?.platformVersion,
-        managedMcpServers: state.lock?.managedMcpServers ?? {},
+        managedMcpServers: {},
     };
 }
 function sortedValues(values) {
@@ -451,21 +375,7 @@ export async function checkInstalled({ target }) {
     const state = await readPlatformState(target);
     const lock = state.lock;
     const assets = collectInstalledAssets(state.ownership);
-    const managedMcpServers = sortedValues(Object.values(lock?.managedMcpServers ?? {}).flat());
-    const installedPackOrder = (lock?.plugins ?? []).map((item) => item.id);
-    const mcpServerNames = [
-        ...installedPackOrder.filter((item) => managedMcpServers.includes(item)),
-        ...managedMcpServers.filter((item) => !installedPackOrder.includes(item)),
-    ];
-    const mcpServers = mcpServerNames.map((name) => ({
-        name,
-        providers: Object.entries(lock?.managedMcpServers ?? {})
-            .filter(([, servers]) => servers.includes(name))
-            .map(([provider]) => provider)
-            .sort(),
-        path: `.ai-engineering/mcp-servers/${name}`,
-        installed: true,
-    }));
+    const mcpServers = [];
     return {
         status: "pass",
         current: {
@@ -482,7 +392,7 @@ export async function checkInstalled({ target }) {
         mcp: {
             count: mcpServers.length,
             servers: mcpServers,
-            byProvider: lock?.managedMcpServers ?? {},
+            byProvider: {},
         },
         skills: {
             count: assets.skills.length,

@@ -69,9 +69,9 @@ Mọi scope đều lưu runtime, ownership, lock và backup dưới
 
 | Provider | Project scope | Global scope |
 | --- | --- | --- |
-| Codex | `AGENTS.md`, `.agents/skills`, `.codex/agents`, `.codex/workflows/commands.md`, `.codex/config.toml` | `~/.codex/AGENTS.md`, `~/.agents/skills`, `~/.codex/agents`, `~/.codex/workflows/commands.md`, `~/.codex/config.toml` |
-| Claude | `CLAUDE.md`, `.claude/skills`, `.claude/commands`, `.claude-plugin/plugin.json`, `.mcp.json` | `~/.claude/CLAUDE.md`, `~/.claude/skills`, `~/.claude/commands`, `~/.claude.json` |
-| Cursor | `AGENTS.md`, `.cursor/rules`, `.cursor/mcp.json` | `~/.cursor/mcp.json` |
+| Codex | `AGENTS.md`, `.agents/skills`, `.codex/agents`, `.codex/workflows/commands.md` | `~/.codex/AGENTS.md`, `~/.agents/skills`, `~/.codex/agents`, `~/.codex/workflows/commands.md` |
+| Claude | `CLAUDE.md`, `.claude/skills`, `.claude/commands`, `.claude-plugin/plugin.json` | `~/.claude/CLAUDE.md`, `~/.claude/skills`, `~/.claude/commands` |
+| Cursor | `AGENTS.md`, `.cursor/rules` | Không sinh provider MCP config cho đến khi có active tools. |
 
 Khi cập nhật instruction file, hệ thống giữ nguyên nội dung do người dùng sở hữu
 nằm ngoài AI Engineering baseline block và ghi backup dưới
@@ -84,7 +84,7 @@ adapters/      metadata projection theo provider và định nghĩa agent cho Co
 cli/           runtime CLI, dist sinh ra, test, hook và shell tool
 core/          policy, routing, schema, template, prompt và workflow dùng chung
 docs/          hồ sơ migration và kế hoạch triển khai
-mcp-servers/   MCP runtime server tùy chọn theo namespace
+providers/     registry, schema cấu hình, policy và ví dụ MCP
 plugins/       manifest, command và skill chuẩn có thể cài đặt
 ```
 

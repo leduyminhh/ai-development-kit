@@ -5,7 +5,6 @@ export function generateCommandRegistry({ root }: {
 }): Promise<{
     schemaVersion: number;
     commands: {
-        mcpTool?: any;
         id: any;
         plugin: any;
         slug: any;
@@ -20,7 +19,7 @@ export function validateRepository(root: any): Promise<{
     status: string;
     pluginCount: number;
     providerCount: number;
-    mcpServerCount: number;
+    mcpProviderExampleCount: number;
 }>;
 export function validateArtifactManifest(value: any): Promise<any>;
 export { loadCanonicalCommand } from "./command-contracts.mjs";

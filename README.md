@@ -70,9 +70,9 @@ All scopes store runtime, ownership, lock, and backup data under
 
 | Provider | Project scope | Global scope |
 | --- | --- | --- |
-| Codex | `AGENTS.md`, `.agents/skills`, `.codex/agents`, `.codex/workflows/commands.md`, `.codex/config.toml` | `~/.codex/AGENTS.md`, `~/.agents/skills`, `~/.codex/agents`, `~/.codex/workflows/commands.md`, `~/.codex/config.toml` |
-| Claude | `CLAUDE.md`, `.claude/skills`, `.claude/commands`, `.claude-plugin/plugin.json`, `.mcp.json` | `~/.claude/CLAUDE.md`, `~/.claude/skills`, `~/.claude/commands`, `~/.claude.json` |
-| Cursor | `AGENTS.md`, `.cursor/rules`, `.cursor/mcp.json` | `~/.cursor/mcp.json` |
+| Codex | `AGENTS.md`, `.agents/skills`, `.codex/agents`, `.codex/workflows/commands.md` | `~/.codex/AGENTS.md`, `~/.agents/skills`, `~/.codex/agents`, `~/.codex/workflows/commands.md` |
+| Claude | `CLAUDE.md`, `.claude/skills`, `.claude/commands`, `.claude-plugin/plugin.json` | `~/.claude/CLAUDE.md`, `~/.claude/skills`, `~/.claude/commands` |
+| Cursor | `AGENTS.md`, `.cursor/rules` | Provider MCP config is not generated until active tools exist. |
 
 Managed instruction updates preserve user-owned content outside the AI
 Engineering baseline block and write backups under `.ai-engineering/backups/`.
@@ -84,7 +84,7 @@ adapters/      provider projection metadata and Codex agent definitions
 cli/           CLI runtime, generated dist output, tests, hooks, and shell tools
 core/          shared policy, routing, schemas, templates, prompts, and workflows
 docs/          migration records and implementation plans
-mcp-servers/   optional namespaced MCP runtime servers
+providers/     MCP registry, config schemas, policies, and examples
 plugins/       canonical installable plugin manifests, commands, and skills
 ```
 

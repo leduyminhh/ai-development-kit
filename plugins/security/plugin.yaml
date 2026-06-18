@@ -66,15 +66,5 @@
   ],
   "depends_on": {
     "plugins": []
-  },
-  "runtime": {
-    "mcp": {
-      "server": "security",
-      "tools": [
-        "security.scan_source",
-        "security.scan_dependencies",
-        "security.generate_threat_model"
-      ]
-    }
   }
 }

@@ -3,7 +3,6 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import * as TOML from "@iarna/toml";
 
 import {
   checkInstalled,
@@ -43,11 +42,6 @@ test("installs application project-locally with required dependencies", async ()
         "utf8",
       ),
     );
-    const codexConfig = TOML.parse(
-      await readFile(path.join(target, ".codex/config.toml"), "utf8"),
-    );
-    const applicationMcpEntrypoint =
-      codexConfig.mcp_servers.application.args[0];
 
     assert.deepEqual(result.plugins, ["architecture", "application"]);
     assert.deepEqual(lock.plugins.map((item) => item.id), ["architecture", "application"]);
@@ -66,12 +60,10 @@ test("installs application project-locally with required dependencies", async ()
     assert.equal(await exists(target, ".codex/agents/java-analyze.toml"), true);
     assert.equal(await exists(target, "agents/java-analyze.toml"), false);
     assert.equal(await exists(target, ".codex/agents/openai.yaml"), true);
-    assert.equal(await exists(target, ".codex/config.toml"), true);
+    assert.equal(await exists(target, ".codex/config.toml"), false);
     assert.equal(await exists(target, ".mcp.json"), false);
-    assert.equal(applicationMcpEntrypoint.startsWith(target), true);
-    assert.equal(applicationMcpEntrypoint.includes(`${path.sep}mcp-servers${path.sep}`), true);
-    assert.equal(await exists(target, ".ai-engineering/mcp-servers/application/src/index.js"), true);
-    assert.equal(await exists(target, ".ai-engineering/core/mcp/stdio-runtime.js"), true);
+    assert.equal(await exists(target, ".ai-engineering/mcp-servers/application/src/index.js"), false);
+    assert.equal(await exists(target, ".ai-engineering/core/mcp/stdio-runtime.js"), false);
     assert.equal(await exists(target, ".ai-engineering/core/agents/AGENTS.baseline.md"), true);
     assert.equal(await exists(target, ".ai-engineering/core/routing/command-registry.yaml"), true);
     assert.equal(await exists(target, ".ai-engineering/core/schemas/ownership.schema.json"), true);
@@ -102,7 +94,7 @@ test("installs globally with provider-native assets", async () => {
     });
 
     assert.deepEqual(result.plugins, ["platform"]);
-    assert.equal(await exists(home, ".codex/config.toml"), true);
+    assert.equal(await exists(home, ".codex/config.toml"), false);
     assert.equal(await exists(home, ".codex/AGENTS.md"), true);
     assert.equal(await exists(home, ".agents/skills/git-workflow-design/SKILL.md"), true);
     assert.equal(await exists(home, ".codex/skills/git-workflow-design/SKILL.md"), false);
@@ -115,16 +107,13 @@ test("installs globally with provider-native assets", async () => {
     assert.equal(await exists(home, ".claude/skills/git-workflow-design/SKILL.md"), true);
     assert.equal(await exists(home, ".claude/commands/deployment-plan.md"), true);
     assert.equal(await exists(home, ".claude/CLAUDE.md"), true);
-    assert.equal(await exists(home, ".claude.json"), true);
-    assert.equal(await exists(home, ".cursor/mcp.json"), true);
+    assert.equal(await exists(home, ".claude.json"), false);
+    assert.equal(await exists(home, ".cursor/mcp.json"), false);
     assert.equal(
       await exists(home, ".ai-engineering/mcp-servers/platform-mcp/src/index.js"),
       false,
     );
-    assert.equal(
-      await exists(home, ".ai-engineering/mcp-servers/platform/src/index.js"),
-      true,
-    );
+    assert.equal(await exists(home, ".ai-engineering/mcp-servers/platform/src/index.js"), false);
     assert.equal(await exists(home, "AGENTS.md"), false);
     assert.equal(await exists(home, "commands"), false);
     assert.equal(await exists(home, "skills"), false);
@@ -182,7 +171,7 @@ test("installs Claude project-native skills and commands", async () => {
     assert.equal(await exists(target, ".claude/skills/java-analyze/SKILL.md"), true);
     assert.equal(await exists(target, ".claude/commands/review-backend.md"), true);
     assert.equal(await exists(target, "CLAUDE.md"), true);
-    assert.equal(await exists(target, ".mcp.json"), true);
+    assert.equal(await exists(target, ".mcp.json"), false);
     assert.equal(await exists(target, "agents/java-analyze.toml"), false);
     assert.equal(await exists(target, ".codex/agents/java-analyze.toml"), false);
     assert.equal(await exists(target, "skills/java-analyze/SKILL.md"), false);
@@ -249,7 +238,7 @@ test("installs Claude global-native skills and commands", async () => {
     assert.deepEqual(result.plugins, ["architecture", "application"]);
     assert.equal(await exists(home, ".claude/skills/java-analyze/SKILL.md"), true);
     assert.equal(await exists(home, ".claude/commands/review-backend.md"), true);
-    assert.equal(await exists(home, ".claude.json"), true);
+    assert.equal(await exists(home, ".claude.json"), false);
     assert.equal(await exists(project, ".claude/skills/java-analyze/SKILL.md"), false);
     assert.equal(await exists(home, "skills/java-analyze/SKILL.md"), false);
   } finally {
@@ -363,7 +352,7 @@ test("cli -g installs into global AI IDE settings", async () => {
 
     assert.equal(result.exitCode, 0);
     assert.equal(JSON.parse(result.stdout).status, "pass");
-    assert.equal(await exists(home, ".codex/config.toml"), true);
+    assert.equal(await exists(home, ".codex/config.toml"), false);
     assert.equal(await exists(project, ".ai-engineering/platform.lock"), false);
     assert.equal(await exists(project, "AGENTS.md"), false);
   } finally {
@@ -499,7 +488,7 @@ test("lists installable plugins with their commands and skills", async () => {
   assert.equal(JSON.parse(cliCatalog.stdout).plugins.available.length, 7);
 });
 
-test("checks installed MCP servers, skills, commands, and current state", async () => {
+test("checks installed skills, commands, agents, and no active MCP servers", async () => {
   const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-check-"));
   try {
     await installPlugins({
@@ -514,12 +503,8 @@ test("checks installed MCP servers, skills, commands, and current state", async 
     assert.equal(check.current.state, "installed");
     assert.deepEqual(check.plugins.installed.map((item) => item.id), ["architecture", "application"]);
     assert.deepEqual(check.providers, ["codex"]);
-    assert.equal(check.mcp.count, 2);
-    assert.deepEqual(check.mcp.servers.map((item) => item.name), ["architecture", "application"]);
-    assert.deepEqual(check.mcp.servers.map((item) => item.path), [
-      ".ai-engineering/mcp-servers/architecture",
-      ".ai-engineering/mcp-servers/application",
-    ]);
+    assert.equal(check.mcp.count, 0);
+    assert.deepEqual(check.mcp.servers, []);
     assert.equal(check.commands.count, 0);
     assert.equal(check.skills.count > 0, true);
     assert.equal(check.agents.count > 0, true);
@@ -535,10 +520,7 @@ test("checks installed MCP servers, skills, commands, and current state", async 
 
     const cliCheck = await runCli(["check", "--json"], { cwd: target });
     assert.equal(cliCheck.exitCode, 0);
-    assert.deepEqual(
-      JSON.parse(cliCheck.stdout).mcp.servers.map((item) => item.name),
-      ["architecture", "application"],
-    );
+    assert.deepEqual(JSON.parse(cliCheck.stdout).mcp.servers, []);
   } finally {
     await rm(target, { recursive: true, force: true });
   }

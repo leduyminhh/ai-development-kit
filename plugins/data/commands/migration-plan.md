@@ -3,7 +3,6 @@ id: data.migration_plan
 slug: migration-plan
 description: Generate a safe data migration plan.
 version: 1.0.0
-mcpTool: data.migration_plan
 ---
 
 # Data Migration Plan

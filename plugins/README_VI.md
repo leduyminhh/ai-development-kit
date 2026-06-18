@@ -6,8 +6,8 @@ Platform. Plugin là đơn vị người dùng cài bằng các lệnh như
 
 Mỗi plugin sở hữu command, skill, agent, rule, template, workflow, schema trùng
 lặp provider và metadata `plugin.yaml`. Policy dùng chung thuộc `core/`;
-artifact riêng cho từng provider được sinh bởi `adapters/`; runtime MCP chỉ được
-copy từ `mcp-servers/` khi plugin cần MCP.
+artifact riêng cho từng provider được sinh bởi `adapters/`; registry, policy và
+ví dụ MCP được cấu hình qua `providers/`.
 
 ## Cấu Trúc Một Plugin
 
@@ -66,8 +66,7 @@ Không tạo README placeholder chỉ để giữ folder.
 - Cập nhật `plugin.yaml` khi command, skill, dependency, adapter, hook, runtime
   setting hoặc asset có thể cài đặt thay đổi.
 - Giữ command id và MCP tool id được namespace theo capability.
-- Giữ metadata command của plugin khớp với `core/routing/command-registry.yaml`
-  và `mcp-servers/<plugin>/mcp.json` khi dùng MCP.
+- Giữ metadata command của plugin khớp với `core/routing/command-registry.yaml`.
 - Cập nhật `README.md` tiếng Anh trước, rồi đồng bộ `README_VI.md`.
 - Chạy `npm run validate` sau thay đổi metadata plugin, command, skill,
   dependency hoặc mapping MCP.

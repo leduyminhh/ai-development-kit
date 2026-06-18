@@ -144,15 +144,5 @@
     "plugins": [
       "architecture"
     ]
-  },
-  "runtime": {
-    "mcp": {
-      "server": "application",
-      "tools": [
-        "application.review_source_code",
-        "application.generate_service",
-        "application.review_api"
-      ]
-    }
   }
 }

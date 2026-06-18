@@ -1,7 +1,3 @@
-export function createMcpRegistrations({ serverIds, runtimeRoot }: {
-    serverIds: any;
-    runtimeRoot: any;
-}): any;
 export function mergeCodexMcpConfig({ currentText, desired, previouslyManaged, force, }: {
     currentText?: string | undefined;
     desired: any;

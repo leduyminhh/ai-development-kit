@@ -3,7 +3,6 @@ id: quality.verify_quality
 slug: verify-quality
 description: Design and execute focused verification for a software change.
 version: 1.0.0
-mcpTool: quality.generate_test_plan
 ---
 
 # Verify Quality

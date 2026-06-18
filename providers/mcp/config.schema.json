@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-engineering.dev/schemas/providers/mcp-config.schema.json",
+  "title": "AI Engineering MCP Provider Config",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "transport",
+    "registration"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)*$"
+    },
+    "description": {
+      "type": "string"
+    },
+    "example": {
+      "type": "boolean",
+      "default": true
+    },
+    "transport": {
+      "type": "string",
+      "enum": [
+        "stdio",
+        "sse",
+        "http"
+      ]
+    },
+    "registration": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

@@ -6,7 +6,6 @@ const FRONTMATTER_KEYS = new Set([
     "slug",
     "description",
     "version",
-    "mcpTool",
 ]);
 const REQUIRED_SECTIONS = [
     "Intent",
@@ -55,7 +54,7 @@ function relativeSourcePath(sourcePath, repositoryRoot) {
     }
     return path.relative(repositoryRoot, sourcePath).replaceAll("\\", "/");
 }
-export function validateCanonicalCommand(command, { knownSkills = new Set(), knownMcpTools = new Set(), validateReferences = false, } = {}) {
+export function validateCanonicalCommand(command, { knownSkills = new Set(), validateReferences = false, } = {}) {
     const errors = [];
     const label = command.id ?? command.sourcePath ?? "unknown";
     if (!/^[a-z0-9-]+\.[a-z0-9_]+$/.test(command.id ?? "")) {
@@ -98,9 +97,6 @@ export function validateCanonicalCommand(command, { knownSkills = new Set(), kno
                 errors.push(`command ${label} references unknown skill ${skill}`);
             }
         }
-        if (command.mcpTool && !knownMcpTools.has(command.mcpTool)) {
-            errors.push(`command ${label} references missing MCP tool ${command.mcpTool}`);
-        }
     }
     return errors;
 }
@@ -111,7 +107,7 @@ export async function loadCanonicalCommand(input) {
             pluginId: path.basename(path.dirname(path.dirname(input))),
         }
         : input;
-    const { sourcePath, pluginId, pluginVersion, repositoryRoot, knownSkills, knownMcpTools, validateReferences = false, } = options;
+    const { sourcePath, pluginId, pluginVersion, repositoryRoot, knownSkills, validateReferences = false, } = options;
     let markdown;
     try {
         markdown = await readFile(sourcePath, "utf8");
@@ -131,7 +127,6 @@ export async function loadCanonicalCommand(input) {
         slug: metadata.slug,
         description: metadata.description,
         version: metadata.version,
-        ...(metadata.mcpTool ? { mcpTool: metadata.mcpTool } : {}),
         intent: sectionText(body, "Intent"),
         inputs: sectionList(body, "Inputs"),
         requiredSkills: sectionList(body, "Required Skills"),
@@ -144,7 +139,6 @@ export async function loadCanonicalCommand(input) {
     };
     const errors = validateCanonicalCommand(command, {
         knownSkills,
-        knownMcpTools,
         validateReferences,
     });
     if (errors.length > 0) {
@@ -152,7 +146,7 @@ export async function loadCanonicalCommand(input) {
     }
     return command;
 }
-export async function loadPluginCommands({ root, pluginId, plugin, knownSkills = new Set(), knownMcpTools = new Set(), validateReferences = false, }) {
+export async function loadPluginCommands({ root, pluginId, plugin, knownSkills = new Set(), validateReferences = false, }) {
     const commands = [];
     for (const asset of plugin.assets?.commands ?? []) {
         const relativePath = asset.includes("/")
@@ -164,7 +158,6 @@ export async function loadPluginCommands({ root, pluginId, plugin, knownSkills =
             pluginVersion: plugin.metadata.version,
             repositoryRoot: root,
             knownSkills,
-            knownMcpTools,
             validateReferences,
         }));
     }

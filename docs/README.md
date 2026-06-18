@@ -38,8 +38,8 @@ report into `docs/` only when it becomes a maintained project reference.
 - Temporary command output, scan reports, or local debugging notes.
 - Plugin-owned usage docs. Prefer real maintained docs in the owning plugin
   directory; do not add README placeholders just to keep folders alive.
-- MCP server runtime docs; place those in `mcp-servers/README.md` or the owning
-  server directory.
+- MCP provider registry docs; place those in `providers/README.md` or
+  `providers/mcp/`.
 
 ## Change Checklist
 

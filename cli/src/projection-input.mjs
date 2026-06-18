@@ -33,7 +33,6 @@ export async function buildProjectionInput({
         slug: command.slug,
         description: command.description,
         version: command.version,
-        ...(command.mcpTool ? { mcpTool: command.mcpTool } : {}),
         intent: command.intent,
         inputs: command.inputs,
         requiredSkills: command.requiredSkills,

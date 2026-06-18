@@ -1,4 +1,3 @@
-import path from "node:path";
 import * as TOML from "@iarna/toml";
 function newline(text) {
     return `${text.trimEnd()}\n`;
@@ -34,18 +33,6 @@ function isEmptyConfig(parsed, serverKey) {
     const otherKeys = Object.keys(parsed).filter((key) => key !== serverKey);
     return (otherKeys.length === 0 &&
         Object.keys(parsed[serverKey] ?? {}).length === 0);
-}
-export function createMcpRegistrations({ serverIds, runtimeRoot }) {
-    return Object.fromEntries([...serverIds].sort().map((serverId) => [
-        serverId,
-        {
-            command: "node",
-            args: [
-                path.join(runtimeRoot, "mcp-servers", serverId, "src", "index.js"),
-            ],
-            env: {},
-        },
-    ]));
 }
 export function mergeCodexMcpConfig({ currentText = "", desired, previouslyManaged, force = false, }) {
     let parsed;

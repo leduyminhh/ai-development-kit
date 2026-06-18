@@ -125,7 +125,6 @@ export async function generateCommandRegistry({ root }) {
         plugin: pluginId,
         slug: command.slug,
         file: path.posix.join("commands", `${command.slug}.md`),
-        ...(command.mcpTool ? { mcpTool: command.mcpTool } : {}),
       });
     }
   }
@@ -279,7 +278,55 @@ export function validateStructuredToolContract(tool) {
   return errors;
 }
 
-async function validateRoutingAndMcp(root, plugins, errors, ownedSkillsByPack) {
+async function validateProviderRegistry(root, errors) {
+  const providersRoot = path.join(root, "providers");
+  const required = [
+    "README.md",
+    "README_VI.md",
+    "mcp/registry.json",
+    "mcp/policies.json",
+    "mcp/config.schema.json",
+    "mcp/examples",
+  ];
+  for (const relative of required) {
+    if (!(await exists(path.join(providersRoot, relative)))) {
+      errors.push(`provider registry is missing ${relative}`);
+    }
+  }
+  if (!(await exists(path.join(providersRoot, "mcp", "examples")))) {
+    return { mcpProviderExampleCount: 0 };
+  }
+  const registry = await readJson(path.join(providersRoot, "mcp", "registry.json"));
+  const policies = await readJson(path.join(providersRoot, "mcp", "policies.json"));
+  if (registry.schemaVersion !== 1) {
+    errors.push("providers MCP registry schemaVersion must be 1");
+  }
+  if (!Array.isArray(registry.activeTools) || registry.activeTools.length !== 0) {
+    errors.push("providers MCP registry must not activate tools by default");
+  }
+  if (!Array.isArray(registry.examples) || registry.examples.length === 0) {
+    errors.push("providers MCP registry must list at least one example");
+  }
+  if (policies.schemaVersion !== 1) {
+    errors.push("providers MCP policies schemaVersion must be 1");
+  }
+  const examplesRoot = path.join(providersRoot, "mcp", "examples");
+  const examples = (await readdir(examplesRoot, { withFileTypes: true }))
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+    .map((entry) => entry.name)
+    .sort();
+  if (examples.length === 0) {
+    errors.push("providers MCP registry must include at least one example file");
+  }
+  for (const examplePath of registry.examples ?? []) {
+    if (!(await exists(path.join(providersRoot, "mcp", examplePath)))) {
+      errors.push(`providers MCP registry references missing example ${examplePath}`);
+    }
+  }
+  return { mcpProviderExampleCount: examples.length };
+}
+
+async function validateRouting(root, plugins, errors, ownedSkillsByPack) {
   const pluginSource = await resolvePluginSource(root);
   const routingRoot = path.join(root, "core", "routing");
   const intentRouter = await readJson(path.join(routingRoot, "intent-router.yaml"));
@@ -287,39 +334,6 @@ async function validateRoutingAndMcp(root, plugins, errors, ownedSkillsByPack) {
     path.join(routingRoot, "command-registry.yaml"),
   );
   const skillRegistry = await loadSkillRegistry(root);
-  const mcpTools = new Set();
-  const mcpRoot = path.join(root, "mcp-servers");
-  const servers = (await readdir(mcpRoot, { withFileTypes: true })).filter((entry) =>
-    entry.isDirectory(),
-  );
-
-  for (const server of servers) {
-    const contract = await readJson(path.join(mcpRoot, server.name, "mcp.json"));
-    if (contract.name !== server.name) {
-      errors.push(`MCP server ${server.name} contract name must match directory`);
-    }
-    for (const required of [
-      "README.md",
-      "package.json",
-      "mcp.json",
-      "src/index.js",
-      "src/server.js",
-      "src/tools",
-      "src/resources",
-      "src/prompts",
-    ]) {
-      if (!(await exists(path.join(mcpRoot, server.name, required)))) {
-        errors.push(`MCP server ${server.name} is missing ${required}`);
-      }
-    }
-    for (const tool of contract.tools ?? []) {
-      const contractErrors = validateStructuredToolContract(tool);
-      for (const error of contractErrors) {
-        errors.push(`MCP server ${server.name}: ${error}`);
-      }
-      if (contractErrors.length === 0) mcpTools.add(tool.name);
-    }
-  }
   for (const route of intentRouter.routes ?? []) {
     const pluginId = route.plugin ?? route.pack;
     if (!plugins.has(pluginId)) {
@@ -363,21 +377,6 @@ async function validateRoutingAndMcp(root, plugins, errors, ownedSkillsByPack) {
     errors.push(error.message);
   }
   for (const [packId, pack] of plugins) {
-    const runtimeMcp = pack.runtime?.mcp;
-    if (!runtimeMcp?.server) {
-      errors.push(`plugin ${packId} must declare runtime.mcp.server`);
-    } else if (runtimeMcp.server !== packId) {
-      errors.push(`plugin ${packId} runtime MCP server must be ${packId}`);
-    }
-    if (!Array.isArray(runtimeMcp?.tools) || runtimeMcp.tools.length === 0) {
-      errors.push(`plugin ${packId} must declare runtime.mcp.tools`);
-    } else {
-      for (const tool of runtimeMcp.tools) {
-        if (!mcpTools.has(tool)) {
-          errors.push(`plugin ${packId} runtime MCP tool is missing: ${tool}`);
-        }
-      }
-    }
     for (const skill of pack.skills ?? []) {
       if (!skill.id || !skill.path) {
         errors.push(`plugin ${packId} has invalid skill metadata`);
@@ -386,7 +385,6 @@ async function validateRoutingAndMcp(root, plugins, errors, ownedSkillsByPack) {
       }
     }
   }
-  return { mcpServerCount: servers.length, mcpTools };
 }
 
 export async function validateRepository(root) {
@@ -417,7 +415,7 @@ export async function validateRepository(root) {
   for (const required of [
     "core/agents/AGENTS.template.md",
     "core/agents/AGENTS.baseline.md",
-    "docs/migration/legacy-review-matrix.md",
+    "docs/migration/completion-checklist.md",
   ]) {
     if (!(await exists(path.join(root, required)))) {
       errors.push(`missing required migration artifact ${required}`);
@@ -506,12 +504,13 @@ export async function validateRepository(root) {
     }
   }
   detectCycles(plugins, errors);
-  const { mcpServerCount, mcpTools } = await validateRoutingAndMcp(
+  await validateRouting(
     root,
     plugins,
     errors,
     ownedSkillsByPack,
   );
+  const { mcpProviderExampleCount } = await validateProviderRegistry(root, errors);
   const commandOwners = new Map();
   function resolvedSkills(pluginId, visited = new Set()) {
     if (visited.has(pluginId)) return [];
@@ -531,7 +530,6 @@ export async function validateRepository(root) {
         pluginId,
         plugin,
         knownSkills: new Set(resolvedSkills(pluginId)),
-        knownMcpTools: mcpTools,
         validateReferences: true,
       });
       for (const command of commands) {
@@ -574,7 +572,7 @@ export async function validateRepository(root) {
     status: "pass",
     pluginCount: plugins.size,
     providerCount: PROVIDERS.length,
-    mcpServerCount,
+    mcpProviderExampleCount,
   };
 }
 

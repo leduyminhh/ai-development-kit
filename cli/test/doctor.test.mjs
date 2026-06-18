@@ -46,15 +46,14 @@ test("global doctor validates native registrations without project assets", asyn
 
     const result = await doctorProject({ target: home, context });
     assert.equal(result.scope, "global");
-    assert.equal(result.mcpServers[0].name, "platform");
-    assert.equal(result.mcpServers[0].toolCount, 3);
+    assert.deepEqual(result.mcpServers, []);
   } finally {
     await rm(project, { recursive: true, force: true });
     await rm(home, { recursive: true, force: true });
   }
 });
 
-test("doctor rejects provider registrations that do not match the runtime", async () => {
+test("doctor ignores user-owned MCP registrations when no platform MCP is active", async () => {
   const project = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-doctor-project-"));
   const home = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-doctor-home-"));
   try {
@@ -71,14 +70,12 @@ test("doctor rejects provider registrations that do not match the runtime", asyn
       providers: ["claude"],
     });
     const configPath = path.join(home, ".claude.json");
-    const config = JSON.parse(await readFile(configPath, "utf8"));
-    config.mcpServers.platform.args = ["wrong.js"];
+    await mkdir(path.dirname(configPath), { recursive: true });
+    const config = { mcpServers: { platform: { command: "user", args: [] } } };
     await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
 
-    await assert.rejects(
-      doctorProject({ target: home, context }),
-      /Claude registration does not match installed runtime: platform/,
-    );
+    const result = await doctorProject({ target: home, context });
+    assert.deepEqual(result.mcpServers, []);
   } finally {
     await rm(project, { recursive: true, force: true });
     await rm(home, { recursive: true, force: true });

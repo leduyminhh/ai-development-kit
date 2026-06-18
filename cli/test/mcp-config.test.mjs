@@ -1,10 +1,8 @@
 import assert from "node:assert/strict";
-import path from "node:path";
 import test from "node:test";
 import * as TOML from "@iarna/toml";
 
 import {
-  createMcpRegistrations,
   mergeCodexMcpConfig,
   mergeJsonMcpConfig,
   removeManagedMcpConfig,
@@ -15,28 +13,6 @@ const platformRegistration = {
   args: ["C:\\runtime\\platform\\src\\index.js"],
   env: {},
 };
-
-test("creates canonical MCP registrations from the runtime root", () => {
-  const runtimeRoot = path.resolve("runtime");
-  const registrations = createMcpRegistrations({
-    serverIds: ["platform"],
-    runtimeRoot,
-  });
-
-  assert.deepEqual(registrations.platform, {
-    command: "node",
-    args: [
-      path.join(
-        runtimeRoot,
-        "mcp-servers",
-        "platform",
-        "src",
-        "index.js",
-      ),
-    ],
-    env: {},
-  });
-});
 
 test("merges Codex MCP config without replacing user settings", () => {
   const currentText = [

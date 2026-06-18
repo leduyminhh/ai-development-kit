@@ -64,11 +64,7 @@ test("all provider and scope combinations install, diagnose, and uninstall", asy
             context,
           });
           assert.equal(result.status, "pass");
-          assert.equal(result.mcpServers.length, 7);
-          assert.equal(
-            result.mcpServers.every((server) => server.toolCount === 3),
-            true,
-          );
+          assert.deepEqual(result.mcpServers, []);
 
           await removePlugins({
             root: repoRoot,

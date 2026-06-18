@@ -26,7 +26,7 @@
     "plugins",
     "core",
     "adapters",
-    "mcp-servers",
+    "providers",
     "cli",
     "LICENSE",
     "README.md"

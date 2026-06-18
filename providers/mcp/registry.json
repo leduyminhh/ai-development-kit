@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "activeTools": [],
+  "examples": [
+    "examples/external-tool.example.json"
+  ]
+}

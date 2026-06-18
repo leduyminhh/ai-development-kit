@@ -3,7 +3,6 @@ id: security.review_security
 slug: review-security
 description: Review source and configuration for actionable security risks.
 version: 1.0.0
-mcpTool: security.scan_source
 ---
 
 # Review Security

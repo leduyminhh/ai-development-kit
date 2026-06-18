@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "example.external_context",
+  "description": "Example only: external MCP runtime registration shape for a future provider integration.",
+  "example": true,
+  "transport": "stdio",
+  "registration": {
+    "command": "node",
+    "args": [
+      "/absolute/path/to/external-mcp-server/dist/index.js"
+    ],
+    "env": {
+      "EXAMPLE_API_KEY": "${EXAMPLE_API_KEY}"
+    }
+  },
+  "policies": {
+    "activateByDefault": false,
+    "managedBy": "user",
+    "notes": "Copy this shape into a real provider config only after the external MCP server exists."
+  }
+}

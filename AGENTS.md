@@ -13,7 +13,7 @@ Purpose:
 
 - `core/` owns shared agents policy, routing, standards, schemas, templates, prompts, and workflows.
 - `plugins/<plugin>/` owns canonical plugin manifests, commands, skills, agents, rules, templates, workflows, and schemas.
-- `mcp-servers/<plugin>-mcp/` exposes optional namespaced MCP runtime servers.
+- `providers/` owns MCP registry, config schemas, policies, and non-active examples.
 - `adapters/` owns provider projection metadata and provider-specific source templates.
 - `cli/` owns the published `ai-engineering` / `aie` CLI, generated `dist/`, tests, hooks, and retained shell utilities.
 - `docs/` owns migration records, implementation plans, and repository documentation.

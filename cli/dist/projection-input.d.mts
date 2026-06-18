@@ -16,6 +16,11 @@ export function buildProjectionInput({ root, graph, plugins, scope, provider, mc
         owners: any[];
     }[];
     commands: {
+        id: any;
+        pluginId: any;
+        slug: any;
+        description: any;
+        version: any;
         intent: any;
         inputs: any[];
         requiredSkills: any[];
@@ -24,12 +29,6 @@ export function buildProjectionInput({ root, graph, plugins, scope, provider, mc
         sourcePath: any;
         markdown: string;
         owners: any[];
-        mcpTool?: any;
-        id: any;
-        pluginId: any;
-        slug: any;
-        description: any;
-        version: any;
     }[];
     agents: any;
     hooks: any;

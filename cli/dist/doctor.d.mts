@@ -6,7 +6,7 @@ export function doctorProject({ target, context }: {
     scope: any;
     plugins: any[];
     providers: never[];
-    mcpServers: any[];
+    mcpServers: never[];
     nativeChecks: {
         provider: never;
         status: string;

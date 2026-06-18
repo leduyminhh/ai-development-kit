@@ -19,7 +19,6 @@ export function prepareInstallation({ root, context, rootPlugins, optionalPlugin
             id: any;
             version: any;
         }[];
-        managedMcpServers: any;
     };
     ownership: {
         schemaVersion: number;
@@ -43,7 +42,7 @@ export function prepareInstallation({ root, context, rootPlugins, optionalPlugin
             hooks: {};
         };
     };
-    mcpServers: any;
+    mcpServers: {};
     plugins: any[];
     providers: any[];
 }>;
@@ -84,7 +83,7 @@ export function listInstalled({ target }: {
     optionalPlugins: any;
     providers: any;
     platformVersion: any;
-    managedMcpServers: any;
+    managedMcpServers: {};
 }>;
 export function listAvailable({ root }: {
     root: any;
@@ -130,13 +129,8 @@ export function checkInstalled({ target }: {
     providers: any;
     mcp: {
         count: number;
-        servers: {
-            name: any;
-            providers: string[];
-            path: string;
-            installed: boolean;
-        }[];
-        byProvider: any;
+        servers: any[];
+        byProvider: {};
     };
     skills: {
         count: number;
