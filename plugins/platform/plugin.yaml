@@ -1,77 +1,95 @@
-{
-  "apiVersion": "ai-engineering.dev/v1alpha1",
-  "kind": "AiIdePlugin",
-  "metadata": {
-    "id": "platform",
-    "name": "Platform Engineering",
-    "version": "1.0.0",
-    "description": "Delivery, deployment, observability, incident response, and workflow operations."
-  },
-  "compatibility": {
-    "platform": ">=1.0.0 <2.0.0",
-    "providers": {
-      "codex": "supported",
-      "claude": "supported",
-      "cursor": "supported"
-    }
-  },
-  "dependencies": {
-    "required": [],
-    "optional": [
-      "quality",
-      "security"
-    ]
-  },
-  "assets": {
-    "skills": [
-      "git-workflow-design",
-      "using-workflow-kit"
-    ],
-    "agents": [
-      "git-workflow-design"
-    ],
-    "commands": [
-      "commands/deployment-plan.md"
-    ],
-    "hooks": [
-      "project-audit"
-    ],
-    "rules": "none",
-    "templates": "none",
-    "workflows": "none",
-    "schemas": "none"
-  },
-  "install": {
-    "defaultScope": "project",
-    "supportsCopy": true,
-    "supportsLink": true
-  },
-  "id": "platform",
-  "name": "Platform Engineering",
-  "version": "1.0.0",
-  "description": "Delivery, deployment, observability, incident response, and workflow operations.",
-  "category": "ai-ide-plugin",
-  "triggers": {
-    "keywords": [
-      "docker",
-      "kubernetes",
-      "deploy",
-      "rollback",
-      "observability",
-      "sre"
-    ]
-  },
-  "skills": [
-    {
-      "id": "platform.git_workflow_design",
-      "path": "skills/git-workflow-design/SKILL.md"
-    },
-    {
-      "id": "platform.using_workflow_kit",
-      "path": "skills/using-workflow-kit/SKILL.md"
-    }
-  ],
-  "depends_on": {
-    "plugins": []
-  }
+﻿{
+    "apiVersion":  "ai-engineering.dev/v1alpha1",
+    "kind":  "AiIdePlugin",
+    "metadata":  {
+                     "id":  "platform",
+                     "name":  "Platform Engineering",
+                     "version":  "1.0.0",
+                     "description":  "Delivery, deployment, observability, incident response, and workflow operations."
+                 },
+    "compatibility":  {
+                          "platform":  "\u003e=1.0.0 \u003c2.0.0",
+                          "providers":  {
+                                            "codex":  "supported",
+                                            "claude":  "supported",
+                                            "cursor":  "supported"
+                                        }
+                      },
+    "dependencies":  {
+                         "required":  [
+
+                                      ],
+                         "optional":  [
+                                          "quality",
+                                          "security"
+                                      ]
+                     },
+    "assets":  {
+                   "skills":  [
+                                  "git-workflow-design",
+                                  "using-workflow-kit"
+                              ],
+                   "agents":  [
+                                  "git-workflow-design",
+                                  "using-workflow-kit"
+                              ],
+                   "commands":  [
+                                    "commands/deployment-plan.md"
+                                ],
+                   "hooks":  [
+                                 "project-audit"
+                             ],
+                   "rules":  "none",
+                   "templates":  "none",
+                   "workflows":  "none",
+                   "schemas":  "none"
+               },
+    "install":  {
+                    "defaultScope":  "project",
+                    "supportsCopy":  true,
+                    "supportsLink":  true
+                },
+    "id":  "platform",
+    "name":  "Platform Engineering",
+    "version":  "1.0.0",
+    "description":  "Delivery, deployment, observability, incident response, and workflow operations.",
+    "category":  "ai-ide-plugin",
+    "triggers":  {
+                     "keywords":  [
+                                      "docker",
+                                      "kubernetes",
+                                      "deploy",
+                                      "rollback",
+                                      "observability",
+                                      "sre",
+                                      "commit",
+                                      "push",
+                                      "branch",
+                                      "merge",
+                                      "revert",
+                                      "release",
+                                      "hotfix",
+                                      "PR",
+                                      "pull request",
+                                      "changelog",
+                                      "git",
+                                      "stage",
+                                      "staging"
+                                  ]
+                 },
+    "skills":  [
+                   {
+                       "id":  "platform.git_workflow_design",
+                       "path":  "skills/git-workflow-design/SKILL.md"
+                   },
+                   {
+                       "id":  "platform.using_workflow_kit",
+                       "path":  "skills/using-workflow-kit/SKILL.md"
+                   }
+               ],
+    "depends_on":  {
+                       "plugins":  [
+
+                                   ]
+                   }
 }

@@ -1,150 +1,146 @@
-{
-  "apiVersion": "ai-engineering.dev/v1alpha1",
-  "kind": "AiIdePlugin",
-  "metadata": {
-    "id": "application",
-    "name": "Application Engineering",
-    "version": "1.0.0",
-    "description": "Backend, frontend, API, Spring, React, Kafka, and Redis application workflows."
-  },
-  "compatibility": {
-    "platform": ">=1.0.0 <2.0.0",
-    "providers": {
-      "codex": "supported",
-      "claude": "supported",
-      "cursor": "supported"
-    }
-  },
-  "dependencies": {
-    "required": [
-      "architecture"
-    ],
-    "optional": [
-      "quality",
-      "security"
-    ]
-  },
-  "assets": {
-    "skills": [
-      "api-contract-design",
-      "feature-delivery",
-      "feature-fix",
-      "feature-implement",
-      "feature-integrate",
-      "feature-plan",
-      "feature-review",
-      "feature-test",
-      "java-analyze",
-      "python-backend-engineer",
-      "data-migration",
-      "doc-write",
-      "code-shared-design",
-      "react-code-generate",
-      "test-automation-validate",
-      "test-qa-review"
-    ],
-    "agents": [
-      "java-analyze",
-      "react-code-generate",
-      "test-automation-validate"
-    ],
-    "commands": [
-      "commands/deliver-feature.md",
-      "commands/design-api-contract.md",
-      "commands/design-data-change.md",
-      "commands/fix-feature.md",
-      "commands/implement-backend.md",
-      "commands/implement-frontend.md",
-      "commands/integrate-feature.md",
-      "commands/plan-feature.md",
-      "commands/review-backend.md",
-      "commands/review-feature.md",
-      "commands/test-feature.md"
-    ],
-    "hooks": [
-      "project-audit"
-    ],
-    "rules": "none",
-    "templates": "none",
-    "workflows": [
-      "workflows/fullstack-feature.yaml"
-    ],
-    "schemas": "none"
-  },
-  "install": {
-    "defaultScope": "project",
-    "supportsCopy": true,
-    "supportsLink": true
-  },
-  "id": "application",
-  "name": "Application Engineering",
-  "version": "1.0.0",
-  "description": "Backend, frontend, API, Spring, React, Kafka, and Redis application workflows.",
-  "category": "ai-ide-plugin",
-  "triggers": {
-    "keywords": [
-      "backend",
-      "frontend",
-      "api",
-      "spring",
-      "react",
-      "kafka",
-      "redis"
-    ]
-  },
-  "skills": [
-    {
-      "id": "application.api_contract_design",
-      "path": "skills/api-contract-design/SKILL.md"
-    },
-    {
-      "id": "application.doc_write",
-      "path": "skills/doc-write/SKILL.md"
-    },
-    {
-      "id": "application.feature_delivery",
-      "path": "skills/feature-delivery/SKILL.md"
-    },
-    {
-      "id": "application.feature_fix",
-      "path": "skills/feature-fix/SKILL.md"
-    },
-    {
-      "id": "application.feature_implement",
-      "path": "skills/feature-implement/SKILL.md"
-    },
-    {
-      "id": "application.feature_integrate",
-      "path": "skills/feature-integrate/SKILL.md"
-    },
-    {
-      "id": "application.feature_plan",
-      "path": "skills/feature-plan/SKILL.md"
-    },
-    {
-      "id": "application.feature_review",
-      "path": "skills/feature-review/SKILL.md"
-    },
-    {
-      "id": "application.feature_test",
-      "path": "skills/feature-test/SKILL.md"
-    },
-    {
-      "id": "application.java_analyze",
-      "path": "skills/java-analyze/SKILL.md"
-    },
-    {
-      "id": "application.python_backend_engineer",
-      "path": "skills/python-backend-engineer/SKILL.md"
-    },
-    {
-      "id": "application.react_code_generate",
-      "path": "skills/react-code-generate/SKILL.md"
-    }
-  ],
-  "depends_on": {
-    "plugins": [
-      "architecture"
-    ]
-  }
+﻿{
+    "apiVersion":  "ai-engineering.dev/v1alpha1",
+    "kind":  "AiIdePlugin",
+    "metadata":  {
+                     "id":  "application",
+                     "name":  "Application Engineering",
+                     "version":  "1.0.0",
+                     "description":  "Backend, frontend, API, Spring, React, Kafka, and Redis application workflows."
+                 },
+    "compatibility":  {
+                          "platform":  "\u003e=1.0.0 \u003c2.0.0",
+                          "providers":  {
+                                            "codex":  "supported",
+                                            "claude":  "supported",
+                                            "cursor":  "supported"
+                                        }
+                      },
+    "dependencies":  {
+                         "required":  [
+                                          "architecture"
+                                      ],
+                         "optional":  [
+                                          "quality",
+                                          "security"
+                                      ]
+                     },
+    "assets":  {
+                   "skills":  [
+                                  "api-contract-design",
+                                  "doc-write",
+                                  "feature-delivery",
+                                  "feature-fix",
+                                  "feature-implement",
+                                  "feature-integrate",
+                                  "feature-plan",
+                                  "feature-review",
+                                  "feature-test",
+                                  "java-analyze",
+                                  "python-backend-engineer",
+                                  "react-code-generate"
+                              ],
+                   "agents":  [
+                                  "doc-write",
+                                  "java-analyze",
+                                  "react-code-generate"
+                              ],
+                   "commands":  [
+                                    "commands/deliver-feature.md",
+                                    "commands/design-api-contract.md",
+                                    "commands/design-data-change.md",
+                                    "commands/fix-feature.md",
+                                    "commands/implement-backend.md",
+                                    "commands/implement-frontend.md",
+                                    "commands/integrate-feature.md",
+                                    "commands/plan-feature.md",
+                                    "commands/review-backend.md",
+                                    "commands/review-feature.md",
+                                    "commands/test-feature.md"
+                                ],
+                   "hooks":  [
+                                 "project-audit"
+                             ],
+                   "rules":  "none",
+                   "templates":  "none",
+                   "workflows":  [
+                                     "workflows/fullstack-feature.yaml"
+                                 ],
+                   "schemas":  "none"
+               },
+    "install":  {
+                    "defaultScope":  "project",
+                    "supportsCopy":  true,
+                    "supportsLink":  true
+                },
+    "id":  "application",
+    "name":  "Application Engineering",
+    "version":  "1.0.0",
+    "description":  "Backend, frontend, API, Spring, React, Kafka, and Redis application workflows.",
+    "category":  "ai-ide-plugin",
+    "triggers":  {
+                     "keywords":  [
+                                      "backend",
+                                      "frontend",
+                                      "api",
+                                      "spring",
+                                      "react",
+                                      "kafka",
+                                      "redis"
+                                  ]
+                 },
+    "skills":  [
+                   {
+                       "id":  "application.api_contract_design",
+                       "path":  "skills/api-contract-design/SKILL.md"
+                   },
+                   {
+                       "id":  "application.doc_write",
+                       "path":  "skills/doc-write/SKILL.md"
+                   },
+                   {
+                       "id":  "application.feature_delivery",
+                       "path":  "skills/feature-delivery/SKILL.md"
+                   },
+                   {
+                       "id":  "application.feature_fix",
+                       "path":  "skills/feature-fix/SKILL.md"
+                   },
+                   {
+                       "id":  "application.feature_implement",
+                       "path":  "skills/feature-implement/SKILL.md"
+                   },
+                   {
+                       "id":  "application.feature_integrate",
+                       "path":  "skills/feature-integrate/SKILL.md"
+                   },
+                   {
+                       "id":  "application.feature_plan",
+                       "path":  "skills/feature-plan/SKILL.md"
+                   },
+                   {
+                       "id":  "application.feature_review",
+                       "path":  "skills/feature-review/SKILL.md"
+                   },
+                   {
+                       "id":  "application.feature_test",
+                       "path":  "skills/feature-test/SKILL.md"
+                   },
+                   {
+                       "id":  "application.java_analyze",
+                       "path":  "skills/java-analyze/SKILL.md"
+                   },
+                   {
+                       "id":  "application.python_backend_engineer",
+                       "path":  "skills/python-backend-engineer/SKILL.md"
+                   },
+                   {
+                       "id":  "application.react_code_generate",
+                       "path":  "skills/react-code-generate/SKILL.md"
+                   }
+               ],
+    "depends_on":  {
+                       "plugins":  [
+                                       "architecture"
+                                   ]
+                   }
 }

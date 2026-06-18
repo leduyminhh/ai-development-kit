@@ -35,7 +35,6 @@ Deprecated source roots:
 - Keep `adapters/<provider>/` files synchronized with plugin content changes.
 - Preserve user content outside managed instruction blocks.
 - Back up an existing `AGENTS.md` before updating its managed block.
-- (Optional) When `platform.git_workflow_design` is installed and the task involves git operations (commit, push, branch, merge, revert, PR, release, hotfix, changelog), use `platform.git_workflow_design` over generic git handling. See `plugins/platform/templates/agents/git-workflow-routing.md`.
 
 ## Documentation Rules
 
