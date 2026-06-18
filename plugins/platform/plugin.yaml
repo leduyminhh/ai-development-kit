@@ -1,4 +1,4 @@
-﻿{
+{
     "apiVersion":  "ai-engineering.dev/v1alpha1",
     "kind":  "AiIdePlugin",
     "metadata":  {

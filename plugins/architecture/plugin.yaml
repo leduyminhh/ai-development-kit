@@ -1,4 +1,4 @@
-﻿{
+{
     "apiVersion":  "ai-engineering.dev/v1alpha1",
     "kind":  "AiIdePlugin",
     "metadata":  {
@@ -25,9 +25,10 @@
                      },
     "assets":  {
                    "skills":  [
+                                  "java-analyze",
                                   "architecture-onion-design",
-                                  "code-design-pattern",
                                   "code-shared-design",
+                                  "code-design-pattern",
                                   "diagram-generate"
                               ],
                    "agents":  [

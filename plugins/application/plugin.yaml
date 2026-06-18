@@ -1,4 +1,4 @@
-﻿{
+{
     "apiVersion":  "ai-engineering.dev/v1alpha1",
     "kind":  "AiIdePlugin",
     "metadata":  {
@@ -27,7 +27,6 @@
     "assets":  {
                    "skills":  [
                                   "api-contract-design",
-                                  "doc-write",
                                   "feature-delivery",
                                   "feature-fix",
                                   "feature-implement",
@@ -37,7 +36,12 @@
                                   "feature-test",
                                   "java-analyze",
                                   "python-backend-engineer",
-                                  "react-code-generate"
+                                  "data-migration",
+                                  "doc-write",
+                                  "code-shared-design",
+                                  "react-code-generate",
+                                  "test-automation-validate",
+                                  "test-qa-review"
                               ],
                    "agents":  [
                                   "doc-write",
