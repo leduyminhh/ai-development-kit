@@ -133,6 +133,37 @@ test("installs globally with provider-native assets", async () => {
   }
 });
 
+test("installs git workflow routing instructions only with platform", async () => {
+  const applicationTarget = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-application-routing-"));
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-platform-routing-"));
+  try {
+    await installPlugins({
+      root: repoRoot,
+      target: applicationTarget,
+      pluginIds: ["application"],
+      providers: ["codex"],
+    });
+    await installPlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["platform"],
+      providers: ["codex"],
+    });
+
+    const applicationAgents = await readFile(
+      path.join(applicationTarget, "AGENTS.md"),
+      "utf8",
+    );
+    const agents = await readFile(path.join(target, "AGENTS.md"), "utf8");
+    assert.doesNotMatch(applicationAgents, /platform[.]git_workflow_design/);
+    assert.match(agents, /platform[.]git_workflow_design/);
+    assert.match(agents, /commit|push|branch|PR|release|hotfix|changelog/i);
+  } finally {
+    await rm(applicationTarget, { recursive: true, force: true });
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
 test("installs Claude project-native skills and commands", async () => {
   const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-claude-project-"));
   try {

@@ -59,6 +59,23 @@ async function readTextIfExists(pathname) {
   }
 }
 
+async function appendPlatformInstructionFragments({ root, graph, content }) {
+  if (!graph.pluginIds.includes("platform")) return content;
+  const fragment = await readFile(
+    path.join(
+      root,
+      "plugins",
+      "platform",
+      "templates",
+      "agents",
+      "git-workflow-routing.md",
+    ),
+    "utf8",
+  );
+  if (content.includes("platform.git_workflow_design")) return content;
+  return `${content.trimEnd()}\n\n${fragment.trim()}\n`;
+}
+
 function normalizeContext(target, context) {
   return (
     context ?? {
@@ -263,10 +280,14 @@ async function buildDesiredState({
         });
       }
       for (const instruction of projection.instructions) {
-        const content = await prepareInstructionFileContent({
+        const content = await appendPlatformInstructionFragments({
           root,
-          target: installContext.targetRoot,
-          relativePath: instruction.destinationPath,
+          graph,
+          content: await prepareInstructionFileContent({
+            root,
+            target: installContext.targetRoot,
+            relativePath: instruction.destinationPath,
+          }),
         });
         desiredFiles.set(instruction.destinationPath, content);
         addOwnership(
