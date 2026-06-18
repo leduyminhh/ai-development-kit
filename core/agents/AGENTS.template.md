@@ -14,6 +14,30 @@ does not replace domain skills; it makes agents read the right context, preserve
 user work, validate deterministically, and report evidence before claiming
 completion.
 
+### Core Rule
+
+Before doing any task, the agent MUST read this file and follow its rules.
+
+**Priority:**
+1. User request
+2. AGENTS.md
+3. Project conventions
+4. Tool / skill instructions
+5. General AI knowledge
+
+**Required Workflow:**
+For every task:
+1. Read AGENTS.md
+2. Understand the user request
+3. Check relevant project files before changing code
+4. Make only necessary changes
+5. Verify the result
+6. Report what was changed
+
+> **Do Not Skip:** The agent MUST NOT ignore this file.
+>
+> If rules are unclear, the agent must choose the safest minimal change and explain the assumption.
+
 ### Core Process
 
 1. Classify the task and identify the minimum relevant files, skills, and repo

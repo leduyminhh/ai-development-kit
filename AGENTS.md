@@ -5,17 +5,18 @@
 Repository: `ai-engineering-platform`
 
 Purpose:
-- Provide MCP-first AI engineering capabilities.
-- Package reusable workflows as installable capability packs.
-- Generate provider adapters without maintaining duplicate provider-specific flows.
+- Provide AI engineering capabilities via a plugin-based platform.
+- Maintain canonical workflows, skills, commands, and agents in `plugins/`.
+- Generate provider-native configs (Codex, Claude Code, Cursor) via `adapters/`.
+- Manage MCP provider registry, schemas, and policies in `providers/`.
 
 ## Repository Boundaries
 
-- `core/` owns shared agents policy, routing, standards, schemas, templates, prompts, and workflows.
-- `plugins/<plugin>/` owns canonical plugin manifests, commands, skills, agents, rules, templates, workflows, and schemas.
+- `core/` owns shared agents policy, routing, standards, schemas, templates, and workflows.
+- `plugins/<plugin>/` owns canonical plugin manifests, commands, skills, agents, rules, hooks, templates, workflows, and schemas.
 - `providers/` owns MCP registry, config schemas, policies, and non-active examples.
-- `adapters/` owns provider projection metadata and provider-specific source templates.
-- `cli/` owns the published `ai-engineering` / `aie` CLI, generated `dist/`, tests, hooks, and retained shell utilities.
+- `adapters/` owns provider projection metadata (`projector.mjs`), provider-specific hooks (`hooks.json`), and provider source templates.
+- `cli/` owns the published `ai-engineering` / `aie` CLI, generated `dist/`, tests, hooks, source code (`src/`), and retained shell utilities (`scripts/`).
 - `docs/` owns migration records, implementation plans, and repository documentation.
 - `tests/` is reserved for cross-package integration tests.
 
@@ -28,8 +29,10 @@ Deprecated source roots:
 
 - Read the relevant plugin, runtime code, and tests before editing.
 - Keep dependencies directed toward shared `core/` contracts.
-- Add or update `plugin.yaml` whenever plugin commands, skills, dependencies, or adapters change.
+- Add or update `plugin.yaml` whenever plugin commands, skills, dependencies, hooks, or adapters change.
 - Keep command ids and MCP tool ids namespaced by capability.
+- Update `core/schemas/` when adding new JSON schema definitions.
+- Keep `adapters/<provider>/` files synchronized with plugin content changes.
 - Preserve user content outside managed instruction blocks.
 - Back up an existing `AGENTS.md` before updating its managed block.
 
@@ -46,9 +49,10 @@ Deprecated source roots:
 Run:
 
 ```powershell
+npm run build:cli
 npm test
 npm run validate
-npm run build:cli
+npm run doctor
 ```
 
 For a target-project smoke test:
@@ -74,6 +78,30 @@ This managed block is the repository-wide execution baseline for AI agents. It
 does not replace domain skills; it makes agents read the right context, preserve
 user work, validate deterministically, and report evidence before claiming
 completion.
+
+### Core Rule
+
+Before doing any task, the agent MUST read this file and follow its rules.
+
+**Priority:**
+1. User request
+2. AGENTS.md
+3. Project conventions
+4. Tool / skill instructions
+5. General AI knowledge
+
+**Required Workflow:**
+For every task:
+1. Read AGENTS.md
+2. Understand the user request
+3. Check relevant project files before changing code
+4. Make only necessary changes
+5. Verify the result
+6. Report what was changed
+
+> **Do Not Skip:** The agent MUST NOT ignore this file.
+>
+> If rules are unclear, the agent must choose the safest minimal change and explain the assumption.
 
 ### Core Process
 

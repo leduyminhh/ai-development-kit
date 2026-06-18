@@ -8,3 +8,6 @@
 /cli/scripts/flows/
 *.tgz
 *.tmp
+
+# Backup files
+*.bak
