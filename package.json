@@ -1,7 +1,7 @@
 {
   "name": "ai-engineering-platform",
   "version": "1.0.0",
-  "description": "MCP-first capability packs and adapters for AI engineering agents.",
+  "description": "AI IDE plugin platform with generated adapters for AI engineering agents.",
   "type": "module",
   "bin": {
     "ai-engineering-platform": "./cli/dist/index.js",
@@ -23,7 +23,7 @@
     "cli"
   ],
   "files": [
-    "packs",
+    "plugins",
     "core",
     "adapters",
     "mcp-servers",
@@ -35,5 +35,8 @@
   "devDependencies": {
     "@types/node": "^22.15.0",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "doctor": "^0.3.0"
   }
 }

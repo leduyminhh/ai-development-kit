@@ -1,85 +1,66 @@
 # AI Engineering CLI
 
-`cli/` sở hữu executable phát hành `ai-engineering`, runtime command, test và
-các shell hook tool vẫn cần đi kèm platform. Capability pack chỉ chứa nội dung
-capability có thể cài đặt.
+`cli/` sở hữu executable `ai-engineering` và `aie`, lifecycle runtime, provider
+projection, chẩn đoán, công cụ distribution và test.
 
 ## Bản Đồ Thư Mục
 
 | Path | Mục đích |
 | --- | --- |
-| `src/index.ts` | Executable Node mỏng. File này import CLI runtime cùng thư mục và chuyển tiếp `process.argv`. |
-| `src/*.mjs` | Runtime command, lifecycle, validation, migration, state, transaction và distribution của CLI. |
-| `dist/index.js` | Output executable sinh từ `npm run build:cli`; bin ở root và package trỏ tới đây. |
-| `test/` | Node test cho command, contract, lifecycle, provider, transaction và distribution của CLI. |
-| `scripts/bin/` | PowerShell hook tool có thể chạy trực tiếp: install, invoke, doctor, service, audit query, trace view và resolve output path. |
-| `scripts/hooks/` | Module runtime hook được nhóm theo `core/`, `adapters/`, `transports/` và test `fixtures/`. |
-| `scripts/lib/` | Helper PowerShell dùng chung cho parse config Codex và output path. |
-| `scripts/tests/` | PowerShell test tập trung cho hook runtime, installer, doctor, query, service và script helper. |
-| `hooks/` | Provider-facing plugin hook launcher dùng bởi adapter/plugin artifact được sinh. |
-| `package.json` | Metadata package CLI và mapping bin `ai-engineering`. |
-| `tsconfig.json` | Cấu hình build TypeScript từ `src/` sang `dist/`. |
+| `src/index.ts` | Entrypoint executable mỏng, được compile thành `dist/index.js`. |
+| `src/*.mjs` | Runtime cho command, contract, lifecycle, provider projection, state, transaction, migration, doctor, registry và distribution. |
+| `dist/` | Output CLI sinh bởi `npm run build:cli`. |
+| `test/` | Bộ Node test, gồm ma trận smoke cho install/update/remove và adapter. |
+| `hooks/` | Hook launcher dành cho provider. |
+| `scripts/` | PowerShell hook tool, helper, fixture và test tập trung còn được duy trì. |
 
-Đã loại khỏi bề mặt CLI active: các wrapper TypeScript cũ `src/commands/`,
-`src/services/` và `src/utils/`. Chúng chỉ delegate vào platform module và tạo
-cảm giác có một command tree song song dù không sở hữu runtime behavior.
-
-## Runtime Command
-
-Executable delegate sang runtime trong `cli/src`, hiện expose:
+## Lệnh Người Dùng
 
 ```text
-ai-engineering --help
-ai-engineering --version
-ai-engineering init
-ai-engineering doctor --scope <project|global>
-ai-engineering check --scope <project|global>
-ai-engineering validate
-ai-engineering build --all
-ai-engineering artifact verify --all
-ai-engineering registry generate
-ai-engineering install <pack...> --target <agent> --scope <project|global>
-ai-engineering install --all --target <agent> --scope <project|global>
-ai-engineering uninstall <pack...> --scope <project|global>
-ai-engineering remove --all --scope <project|global>
-ai-engineering list --scope <project|global>
-ai-engineering list --available
-ai-engineering plugin list
-ai-engineering plugin outdated
-ai-engineering update <pack...>
-ai-engineering update --all
-ai-engineering upgrade
-ai-engineering plugin update <plugin>
-ai-engineering generate-adapter <pack...> --target <agent>
-ai-engineering migrate --dry-run
-ai-engineering migrate --delete-legacy
-ai-engineering plugin install <plugin...>
-ai-engineering plugin remove <plugin...>
+aie available
+aie installed [--scope <project|global>|-g]
+aie install <plugin...> --target <provider[,provider...]>
+aie install --all --target <provider[,provider...]>
+aie update <plugin...> [--dry-run]
+aie update --all
+aie remove <plugin...>
+aie remove --all
+aie check [--scope <project|global>|-g]
+aie doctor [--scope <project|global>|-g]
 ```
 
-Package cũng expose `aie` làm alias ngắn cho mọi command, ví dụ `aie check` và
-`aie list --available`.
+Các alias tương thích vẫn khả dụng qua `plugin install`, `plugin remove`,
+`plugin list`, `plugin outdated`, `plugin update`, `uninstall` và `upgrade`.
 
-`project` là scope mặc định. Các đường dẫn cấu hình MCP native:
+`project` là scope mặc định. Lệnh `update` so sánh version đã cài với manifest
+chuẩn trong source CLI hiện tại và giữ nguyên mọi root plugin đã cài khi dựng lại
+desired state.
+
+## Projection Theo Provider
 
 | Provider | Project | Global |
 | --- | --- | --- |
-| Codex | `.codex/config.toml` | `~/.codex/config.toml` |
-| Claude | `.mcp.json` | `~/.claude.json` |
-| Cursor | `.cursor/mcp.json` | `~/.cursor/mcp.json` |
+| Codex | `AGENTS.md`, `.agents/skills`, `.codex/agents`, `.codex/workflows/commands.md`, `.codex/config.toml` | `~/.codex/AGENTS.md`, `~/.agents/skills`, `~/.codex/agents`, `~/.codex/workflows/commands.md`, `~/.codex/config.toml` |
+| Claude | `CLAUDE.md`, `.claude/skills`, `.claude/commands`, `.claude-plugin/plugin.json`, `.mcp.json` | `~/.claude/CLAUDE.md`, `~/.claude/skills`, `~/.claude/commands`, `~/.claude.json` |
+| Cursor | `AGENTS.md`, `.cursor/rules`, `.cursor/mcp.json` | `~/.cursor/mcp.json` |
 
-Global install chỉ copy runtime, server, state và MCP registration. Luồng này
-không sinh command, skill, agent, rule hoặc `AGENTS.md` cho project.
+Runtime và lifecycle state được ghi dưới `.ai-engineering/` tại scope root đã
+chọn. Instruction file được backup trước khi managed baseline block được làm mới.
 
-## Verification
+## Lệnh Cho Maintainer
 
-Build executable wrapper:
-
-```bash
-npm run build:cli
+```text
+aie init
+aie validate
+aie build --all
+aie artifact verify --all
+aie registry generate
+aie migrate --dry-run
+aie migrate --delete-legacy
+aie generate-adapter <plugin...> --target <provider[,provider...]>
 ```
 
-Chạy kiểm tra repository từ root:
+## Xác Minh
 
 ```bash
 npm test
@@ -87,22 +68,6 @@ npm run validate
 npm run build:cli
 ```
 
-Chạy kiểm tra shell tập trung sau khi đổi `cli/scripts/`:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File cli/scripts/tests/test-resolve-output-file.ps1
-powershell -ExecutionPolicy Bypass -File cli/scripts/tests/test-hook-core.ps1
-powershell -ExecutionPolicy Bypass -File cli/scripts/tests/test-install-hooks.ps1
-```
-
-## Quy Tắc Thay Đổi
-
-- Giữ hành vi command và lifecycle runtime của CLI trong `cli/src/`.
-- Giữ `packs/<pack>/` giới hạn ở command, skill, template, workflow, schema và
-  metadata của capability.
-- Giữ `src/index.ts` đủ nhỏ để chỉ là executable bridge.
-- Rebuild `dist/` sau khi đổi TypeScript hoặc runtime JavaScript.
-- Đặt shell entrypoint có thể chạy trong `scripts/bin/`, module hook tái sử dụng
-  trong `scripts/hooks/`, helper dùng chung trong `scripts/lib/`, và test trong
-  `scripts/tests/`.
-- Update `README.md` trước, sau đó đồng bộ `README_VI.md`.
+Sau khi thay đổi `cli/src/`, cần build lại `dist/`. Nội dung plugin chuẩn phải
+nằm trong `plugins/`; logic sinh riêng theo provider thuộc
+`cli/src/providers.mjs`, `cli/src/lifecycle.mjs` và `adapters/`.

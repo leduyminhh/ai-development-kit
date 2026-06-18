@@ -1,86 +1,68 @@
 # AI Engineering CLI
 
-`cli/` owns the published `ai-engineering` executable and the shell hook tools
-that still need to ship with the platform. The command runtime and its tests
-live in this package; capability packs contain only installable capability
-content.
+`cli/` owns the published `ai-engineering` and `aie` executables, lifecycle
+runtime, provider projection, diagnostics, distribution tooling, and tests.
 
 ## Folder Map
 
 | Path | Purpose |
 | --- | --- |
-| `src/index.ts` | Thin Node executable. It imports the sibling CLI runtime and forwards `process.argv`. |
-| `src/*.mjs` | CLI command, lifecycle, validation, migration, state, transaction, and distribution runtime. |
-| `dist/index.js` | Generated executable output from `npm run build:cli`; root and package bins point here. |
-| `test/` | Node tests for CLI commands, contracts, lifecycle, providers, transactions, and distribution. |
-| `scripts/bin/` | Runnable PowerShell hook tools: install, invoke, doctor, service, audit query, trace view, and output-path resolution. |
-| `scripts/hooks/` | Hook runtime modules grouped by `core/`, `adapters/`, `transports/`, and test `fixtures/`. |
-| `scripts/lib/` | Shared PowerShell helpers for Codex config and output-path parsing. |
-| `scripts/tests/` | Focused PowerShell tests for hook runtime, installer, doctor, query, service, and script helpers. |
-| `hooks/` | Provider-facing plugin hook launchers used by generated adapter/plugin artifacts. |
-| `package.json` | CLI package metadata and `ai-engineering` bin mapping. |
-| `tsconfig.json` | TypeScript build config for `src/` to `dist/`. |
+| `src/index.ts` | Thin executable entrypoint compiled to `dist/index.js`. |
+| `src/*.mjs` | Commands, contracts, lifecycle, provider projection, state, transaction, migration, doctor, registry, and distribution runtime. |
+| `dist/` | Generated CLI output from `npm run build:cli`. |
+| `test/` | Node test suite, including install/update/remove and adapter smoke matrices. |
+| `hooks/` | Provider-facing hook launchers. |
+| `scripts/` | Retained PowerShell hook tools, helpers, fixtures, and focused tests. |
 
-Removed from the active CLI surface: the old `src/commands/`, `src/services/`,
-and `src/utils/` TypeScript wrappers. They only delegated to platform modules and
-created a duplicate-looking command tree without owning runtime behavior.
-
-## Command Runtime
-
-The executable delegates to the runtime in `cli/src`, which currently exposes:
+## User Commands
 
 ```text
-ai-engineering --help
-ai-engineering --version
-ai-engineering init
-ai-engineering doctor --scope <project|global>
-ai-engineering check --scope <project|global>
-ai-engineering validate
-ai-engineering build --all
-ai-engineering artifact verify --all
-ai-engineering registry generate
-ai-engineering install <pack...> --target <agent> --scope <project|global>
-ai-engineering install --all --target <agent> --scope <project|global>
-ai-engineering uninstall <pack...> --scope <project|global>
-ai-engineering remove --all --scope <project|global>
-ai-engineering list --scope <project|global>
-ai-engineering list --available
-ai-engineering plugin list
-ai-engineering plugin outdated
-ai-engineering update <pack...>
-ai-engineering update --all
-ai-engineering upgrade
-ai-engineering plugin update <plugin>
-ai-engineering generate-adapter <pack...> --target <agent>
-ai-engineering migrate --dry-run
-ai-engineering migrate --delete-legacy
-ai-engineering plugin install <plugin...>
-ai-engineering plugin remove <plugin...>
+aie available
+aie installed [--scope <project|global>|-g]
+aie install <plugin...> --target <provider[,provider...]>
+aie install --all --target <provider[,provider...]>
+aie update <plugin...> [--dry-run]
+aie update --all
+aie remove <plugin...>
+aie remove --all
+aie check [--scope <project|global>|-g]
+aie doctor [--scope <project|global>|-g]
 ```
 
-The package also exposes `aie` as a short alias for every command, for example
-`aie check` and `aie list --available`.
+Compatibility aliases remain available through `plugin install`, `plugin
+remove`, `plugin list`, `plugin outdated`, `plugin update`, `uninstall`, and
+`upgrade`.
 
-`project` is the default scope. Native MCP config paths are:
+`project` is the default scope. `update` compares installed versions with the
+canonical manifests available in the current CLI source and preserves every
+installed root plugin while rebuilding the desired state.
+
+## Provider Projections
 
 | Provider | Project | Global |
 | --- | --- | --- |
-| Codex | `.codex/config.toml` | `~/.codex/config.toml` |
-| Claude | `.mcp.json` | `~/.claude.json` |
-| Cursor | `.cursor/mcp.json` | `~/.cursor/mcp.json` |
+| Codex | `AGENTS.md`, `.agents/skills`, `.codex/agents`, `.codex/workflows/commands.md`, `.codex/config.toml` | `~/.codex/AGENTS.md`, `~/.agents/skills`, `~/.codex/agents`, `~/.codex/workflows/commands.md`, `~/.codex/config.toml` |
+| Claude | `CLAUDE.md`, `.claude/skills`, `.claude/commands`, `.claude-plugin/plugin.json`, `.mcp.json` | `~/.claude/CLAUDE.md`, `~/.claude/skills`, `~/.claude/commands`, `~/.claude.json` |
+| Cursor | `AGENTS.md`, `.cursor/rules`, `.cursor/mcp.json` | `~/.cursor/mcp.json` |
 
-Global installation copies only runtime, server, state, and MCP registrations.
-It does not generate project commands, skills, agents, rules, or `AGENTS.md`.
+Runtime and lifecycle state are written under `.ai-engineering/` at the selected
+scope root. Managed instruction files are backed up before their baseline block
+is refreshed.
 
-## Verification
+## Maintainer Commands
 
-Build the executable wrapper:
-
-```bash
-npm run build:cli
+```text
+aie init
+aie validate
+aie build --all
+aie artifact verify --all
+aie registry generate
+aie migrate --dry-run
+aie migrate --delete-legacy
+aie generate-adapter <plugin...> --target <provider[,provider...]>
 ```
 
-Run repository checks from the root:
+## Verification
 
 ```bash
 npm test
@@ -88,22 +70,6 @@ npm run validate
 npm run build:cli
 ```
 
-Run focused shell checks after changing `cli/scripts/`:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File cli/scripts/tests/test-resolve-output-file.ps1
-powershell -ExecutionPolicy Bypass -File cli/scripts/tests/test-hook-core.ps1
-powershell -ExecutionPolicy Bypass -File cli/scripts/tests/test-install-hooks.ps1
-```
-
-## Change Rules
-
-- Keep CLI command behavior and lifecycle runtime under `cli/src/`.
-- Keep `packs/<pack>/` limited to capability commands, skills, templates,
-  workflows, schemas, and pack metadata.
-- Keep `src/index.ts` small enough to remain an executable bridge.
-- Rebuild `dist/` after TypeScript or runtime JavaScript changes.
-- Put runnable shell entrypoints under `scripts/bin/`, reusable hook modules under
-  `scripts/hooks/`, shared helpers under `scripts/lib/`, and tests under
-  `scripts/tests/`.
-- Update `README.md` first, then synchronize `README_VI.md`.
+After changing `cli/src/`, rebuild `dist/`. Keep canonical plugin content under
+`plugins/`; provider-specific generation belongs in `cli/src/providers.mjs`,
+`cli/src/lifecycle.mjs`, and `adapters/`.

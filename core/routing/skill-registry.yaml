@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "packs": {
+  "plugins": {
     "architecture": ["architecture-onion-design", "code-design-pattern", "code-shared-design", "diagram-generate"],
     "application": ["api-contract-design", "doc-write", "feature-delivery", "feature-fix", "feature-implement", "feature-integrate", "feature-plan", "feature-review", "feature-test", "java-analyze", "python-backend-engineer", "react-code-generate"],
     "data": ["data-migration"],

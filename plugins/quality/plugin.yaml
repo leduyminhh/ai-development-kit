@@ -1,0 +1,85 @@
+{
+  "apiVersion": "ai-engineering.dev/v1alpha1",
+  "kind": "AiIdePlugin",
+  "metadata": {
+    "id": "quality",
+    "name": "Quality Engineering",
+    "version": "1.0.0",
+    "description": "Testing, code review, coverage, performance, and naming validation."
+  },
+  "compatibility": {
+    "platform": ">=1.0.0 <2.0.0",
+    "providers": {
+      "codex": "supported",
+      "claude": "supported",
+      "cursor": "supported"
+    }
+  },
+  "dependencies": {
+    "required": [],
+    "optional": []
+  },
+  "assets": {
+    "skills": [
+      "test-qa-review",
+      "test-automation-validate",
+      "naming-rule-validate"
+    ],
+    "agents": [
+      "test-qa-review",
+      "test-automation-validate"
+    ],
+    "commands": [
+      "verify-quality"
+    ],
+    "hooks": [
+      "project-audit"
+    ],
+    "rules": "none",
+    "templates": "none",
+    "workflows": "none",
+    "schemas": "none"
+  },
+  "install": {
+    "defaultScope": "project",
+    "supportsCopy": true,
+    "supportsLink": true
+  },
+  "id": "quality",
+  "name": "Quality Engineering",
+  "version": "1.0.0",
+  "description": "Testing, code review, coverage, performance, and naming validation.",
+  "category": "ai-ide-plugin",
+  "triggers": {
+    "keywords": [
+      "testing",
+      "coverage",
+      "code review",
+      "performance"
+    ]
+  },
+  "commands": [
+    {
+      "id": "quality.verify_quality",
+      "file": "commands/verify-quality.md",
+      "mcp_tool": "quality.generate_test_plan"
+    }
+  ],
+  "skills": [
+    {
+      "id": "quality.naming_rule_validate",
+      "path": "skills/naming-rule-validate/SKILL.md"
+    },
+    {
+      "id": "quality.test_automation_validate",
+      "path": "skills/test-automation-validate/SKILL.md"
+    },
+    {
+      "id": "quality.test_qa_review",
+      "path": "skills/test-qa-review/SKILL.md"
+    }
+  ],
+  "depends_on": {
+    "plugins": []
+  }
+}

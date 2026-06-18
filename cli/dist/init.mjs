@@ -14,33 +14,42 @@ async function readIfExists(pathname) {
         throw error;
     }
 }
-function mergeManagedBlock(existing, baseline) {
+function mergeManagedBlock(existing, baseline, relativePath) {
     const start = existing.indexOf(BEGIN);
     const end = existing.indexOf(END);
     if (start === -1 && end === -1) {
         return `${existing.trimEnd()}\n\n${baseline.trim()}\n`;
     }
     if (start === -1 || end === -1 || end < start) {
-        throw new Error("AGENTS.md contains an invalid AI Engineering managed block");
+        throw new Error(`${relativePath} contains an invalid AI Engineering managed block`);
     }
     return `${existing.slice(0, start)}${baseline.trim()}${existing.slice(end + END.length)}`;
 }
-export async function initializeProject({ root, target }) {
-    const platform = await loadPlatform(root);
-    const agentsPath = path.join(target, "AGENTS.md");
+export async function initializeInstructionFile({ root, target, relativePath, }) {
+    const instructionPath = path.join(target, relativePath);
     const stateRoot = path.join(target, ".ai-engineering");
-    const backupRoot = path.join(stateRoot, "backups");
+    const backupPath = path.join(stateRoot, "backups", relativePath);
     const template = await readFile(path.join(root, "core", "agents", "AGENTS.template.md"), "utf8");
     const baseline = await readFile(path.join(root, "core", "agents", "AGENTS.baseline.md"), "utf8");
-    const existing = await readIfExists(agentsPath);
-    await mkdir(backupRoot, { recursive: true });
+    const existing = await readIfExists(instructionPath);
+    await mkdir(path.dirname(instructionPath), { recursive: true });
     if (existing === null) {
-        await writeFile(agentsPath, template, "utf8");
+        await writeFile(instructionPath, template, "utf8");
     }
     else {
-        await copyFile(agentsPath, path.join(backupRoot, "AGENTS.md"));
-        await writeFile(agentsPath, mergeManagedBlock(existing, baseline), "utf8");
+        await mkdir(path.dirname(backupPath), { recursive: true });
+        await copyFile(instructionPath, backupPath);
+        await writeFile(instructionPath, mergeManagedBlock(existing, baseline, relativePath), "utf8");
     }
+}
+export async function initializeProject({ root, target }) {
+    const platform = await loadPlatform(root);
+    const stateRoot = path.join(target, ".ai-engineering");
+    await initializeInstructionFile({
+        root,
+        target,
+        relativePath: "AGENTS.md",
+    });
     await writeJsonAtomic(path.join(stateRoot, "manifest.yaml"), {
         schemaVersion: 1,
         platform: platform.product.name,
@@ -51,13 +60,13 @@ export async function initializeProject({ root, target }) {
         await writeJsonAtomic(path.join(stateRoot, "lockfile.yaml"), {
             schemaVersion: 1,
             platformVersion: platform.product.version,
-            packs: [],
+            plugins: [],
         });
     }
-    if ((await readIfExists(path.join(stateRoot, "installed-packs.yaml"))) === null) {
-        await writeJsonAtomic(path.join(stateRoot, "installed-packs.yaml"), {
+    if ((await readIfExists(path.join(stateRoot, "installed-plugins.yaml"))) === null) {
+        await writeJsonAtomic(path.join(stateRoot, "installed-plugins.yaml"), {
             schemaVersion: 1,
-            packs: [],
+            plugins: [],
         });
     }
     return { status: "pass", target };

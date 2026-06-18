@@ -1,0 +1,77 @@
+{
+  "apiVersion": "ai-engineering.dev/v1alpha1",
+  "kind": "AiIdePlugin",
+  "metadata": {
+    "id": "security",
+    "name": "Security Engineering",
+    "version": "1.0.0",
+    "description": "OWASP, CWE, secrets, threat modeling, dependency, and container security."
+  },
+  "compatibility": {
+    "platform": ">=1.0.0 <2.0.0",
+    "providers": {
+      "codex": "supported",
+      "claude": "supported",
+      "cursor": "supported"
+    }
+  },
+  "dependencies": {
+    "required": [],
+    "optional": [
+      "quality"
+    ]
+  },
+  "assets": {
+    "skills": [
+      "security-code-review"
+    ],
+    "agents": [
+      "security-code-review"
+    ],
+    "commands": [
+      "review-security"
+    ],
+    "hooks": [
+      "project-audit"
+    ],
+    "rules": "none",
+    "templates": "none",
+    "workflows": "none",
+    "schemas": "none"
+  },
+  "install": {
+    "defaultScope": "project",
+    "supportsCopy": true,
+    "supportsLink": true
+  },
+  "id": "security",
+  "name": "Security Engineering",
+  "version": "1.0.0",
+  "description": "OWASP, CWE, secrets, threat modeling, dependency, and container security.",
+  "category": "ai-ide-plugin",
+  "triggers": {
+    "keywords": [
+      "security",
+      "owasp",
+      "cwe",
+      "secrets",
+      "threat model"
+    ]
+  },
+  "commands": [
+    {
+      "id": "security.review_security",
+      "file": "commands/review-security.md",
+      "mcp_tool": "security.scan_source"
+    }
+  ],
+  "skills": [
+    {
+      "id": "security.security_code_review",
+      "path": "skills/security-code-review/SKILL.md"
+    }
+  ],
+  "depends_on": {
+    "plugins": []
+  }
+}

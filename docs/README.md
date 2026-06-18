@@ -11,17 +11,19 @@ report into `docs/` only when it becomes a maintained project reference.
 
 | Folder | What It Owns | Edit When |
 | --- | --- | --- |
-| `migration/` | The MCP-first migration specification, legacy review matrix, and completion checklist. | The repository migration plan, canonical structure, deprecated path list, or acceptance criteria changes. |
+| `migration/` | Migration specifications, legacy review matrix, and completion checklist. | The repository migration plan, canonical structure, deprecated path list, or acceptance criteria changes. |
 
 ## Migration Documents
 
-- `migration/implementation-spec-v1.1.md`: source-of-truth migration design for
-  the MCP-first capability-pack architecture, target project layout, CLI
-  lifecycle, adapter generation, validation, doctor, and cleanup phases.
+- `migration/migrate-existing-source-to-plugins-platform.md`: current
+  plugin-first migration target for AI IDE plugins and adapter-generated
+  artifacts.
+- `migration/implementation-spec-v1.1.md`: historical MCP-first migration design
+  kept as context for earlier structure decisions.
 - `migration/legacy-review-matrix.md`: decision table for legacy folders and
   whether they are replaced, deprecated, retained, or removed.
-- `migration/completion-checklist.md`: final checklist showing which migration
-  work is complete and which acceptance criteria were verified.
+- `migration/completion-checklist.md`: historical checklist showing earlier
+  migration acceptance criteria.
 
 ## What Belongs Here
 
@@ -29,12 +31,13 @@ report into `docs/` only when it becomes a maintained project reference.
   exists.
 - Durable handoff notes for future maintainers.
 - Cleanup decisions that must be traceable after legacy paths are removed.
-- Cross-package documentation that does not belong to one pack.
+- Cross-package documentation that does not belong to one plugin.
 
 ## What Does Not Belong Here
 
 - Temporary command output, scan reports, or local debugging notes.
-- Pack-owned usage docs; place those in `packs/<pack>/README.md`.
+- Plugin-owned usage docs. Prefer real maintained docs in the owning plugin
+  directory; do not add README placeholders just to keep folders alive.
 - MCP server runtime docs; place those in `mcp-servers/README.md` or the owning
   server directory.
 

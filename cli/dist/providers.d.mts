@@ -43,7 +43,7 @@ export function projectClaude(context: any): {
     };
     command: any;
     intent: any;
-    files: any[];
+    files: any;
     mcpConfig: {
         provider: string;
         format: string;
@@ -122,7 +122,7 @@ export function projectProviders(context: any): {
         };
         command: any;
         intent: any;
-        files: any[];
+        files: any;
         mcpConfig: {
             provider: string;
             format: string;

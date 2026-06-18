@@ -1,23 +1,21 @@
 # AI Engineering Platform
 
-An MCP-first engineering platform built from installable capability packs, safe
-project bootstrap, and generated adapters for Codex, Claude, and Cursor.
+AI IDE plugin platform for Codex, Claude Code, and Cursor. Canonical capability
+content lives in `plugins/`; provider-specific projections are produced by the
+CLI and `adapters/`. MCP servers are an optional runtime layer.
 
 ## Capabilities
 
-- Seven capability packs: architecture, application, data, security, quality, platform, and knowledge.
-- One MCP server contract per capability pack.
-- Safe `AGENTS.md` creation and managed-block merge with backup.
-- Dependency-aware pack installation and removal.
-- Native MCP configuration for Codex, Claude, and Cursor.
-- Project-scoped and user-global installation.
-- Grouped status checks for installed MCP servers, skills, commands, agents, and packs.
-- Installable pack catalog with pack dependencies, skills, commands, and hooks.
-- Repository validation, target-project doctor, migration planning, and cleanup.
+- Seven installable plugins: architecture, application, data, security, quality,
+  platform, and knowledge.
+- Dependency-aware install, update, remove, listing, and diagnostics.
+- Project and user-global projections for Codex, Claude, and Cursor.
+- Managed instruction files that preserve user-owned content and create backups.
+- Transactional ownership tracking for generated files and merged MCP configs.
 
 ## Install
 
-Requirements: Node.js 20 or newer.
+Requires Node.js 20 or newer.
 
 ```bash
 git clone https://github.com/leduyminhh/ai-development-kit.git
@@ -27,70 +25,105 @@ npm run build
 npm link
 ```
 
-After installation or `npm link`, use either `ai-engineering` or the shorter
-`aie` alias:
+Both `ai-engineering` and `aie` invoke the CLI.
+
+## Project Workflow
 
 ```bash
+cd /path/to/project
+
+# Initialize the managed AGENTS baseline.
+aie init
+
+# Install one provider or all supported providers.
+aie install --all --target codex
+aie install --all --target claude
+aie install --all --target cursor
+aie install --all --target codex,claude,cursor
+
+# Verify the completed installation.
+aie doctor
 aie check
-aie list --available
-aie install application --target cursor
+
+# Inspect, update, and remove plugins.
+aie available
+aie installed
+aie update application
+aie update --all
+aie remove security
+aie remove --all
+
+# Install a smaller plugin set when needed.
+aie install application --target codex
+aie install security quality --target cursor
+
+# Install into user-global provider locations.
+aie install --all --target codex -g
+aie install --all --target claude -g
+aie install --all --target cursor -g
 ```
 
-## CLI
+`update` compares installed versions with the canonical plugin manifests in the
+current CLI source, then rebuilds the complete installed root-plugin set. Remote
+registry artifact download is not part of the current lifecycle.
 
-```bash
-ai-engineering init
-ai-engineering install application --target cursor --scope project
-ai-engineering install --all --target codex,claude,cursor --scope global
-ai-engineering doctor --scope project
-ai-engineering doctor --scope global
-ai-engineering check --scope project
-ai-engineering uninstall security --scope project
-ai-engineering list --scope global
-ai-engineering list --available
-ai-engineering update application
-ai-engineering upgrade
-ai-engineering generate-adapter quality --target codex
-ai-engineering validate
-ai-engineering migrate --dry-run
-ai-engineering migrate --delete-legacy
-```
+Generated MCP registrations contain absolute local runtime paths, so installation
+must be run on each machine.
 
-`init` never overwrites project-owned AGENTS content. It creates or updates only
-the managed baseline block and writes state under `.ai-engineering/`.
+## Native Provider Paths
 
-Project scope writes runtime files below `<project>/.ai-engineering/`. Global
-scope writes them below `<home>/.ai-engineering/` and does not generate project
-commands, skills, rules, or `AGENTS.md`.
+All scopes store runtime, ownership, lock, and backup data under
+`<scope-root>/.ai-engineering/`.
 
-Each machine must run the install command because stdio MCP registrations use
-absolute entrypoint paths on that machine.
+| Provider | Project scope | Global scope |
+| --- | --- | --- |
+| Codex | `AGENTS.md`, `.agents/skills`, `.codex/agents`, `.codex/workflows/commands.md`, `.codex/config.toml` | `~/.codex/AGENTS.md`, `~/.agents/skills`, `~/.codex/agents`, `~/.codex/workflows/commands.md`, `~/.codex/config.toml` |
+| Claude | `CLAUDE.md`, `.claude/skills`, `.claude/commands`, `.claude-plugin/plugin.json`, `.mcp.json` | `~/.claude/CLAUDE.md`, `~/.claude/skills`, `~/.claude/commands`, `~/.claude.json` |
+| Cursor | `AGENTS.md`, `.cursor/rules`, `.cursor/mcp.json` | `~/.cursor/mcp.json` |
 
-## Structure
+Managed instruction updates preserve content outside the AI Engineering baseline
+block and write backups below `.ai-engineering/backups/`.
+
+## Repository Structure
 
 ```text
-core/          shared contracts, routing, policy, templates, and schemas
-packs/         installable capability packs
-mcp-servers/   namespaced MCP server skeletons
-adapters/      provider source templates and metadata
-cli/           TypeScript CLI and retained shell utilities
-docs/          migration and architecture documentation
-tests/         cross-package integration tests
+adapters/      provider-owned source metadata and Codex agent definitions
+cli/           CLI runtime, generated dist output, tests, hooks, and shell tools
+core/          shared policy, routing, schemas, templates, prompts, and workflows
+docs/          migration records and implementation plans
+mcp-servers/   optional namespaced MCP runtime servers
+plugins/       canonical installable plugin manifests, commands, and skills
 ```
 
-Each pack contains:
+Each `plugins/<plugin-id>/` uses this canonical boundary:
 
 ```text
-README.md
-pack.yaml
+plugin.yaml
 commands/
 skills/
+agents/
+rules/
 templates/
 workflows/
 schemas/
 ```
 
-## Development
+Unused asset groups are declared as `none` in `plugin.yaml`. Do not add
+placeholder README files solely to keep directories alive. The deprecated
+`packs/` source root is no longer active.
+
+## Maintainer Commands
+
+```bash
+aie validate
+aie build --all
+aie artifact verify --all
+aie registry generate
+aie migrate --dry-run
+aie migrate --delete-legacy
+```
+
+## Verification
 
 ```bash
 npm test
@@ -98,5 +131,5 @@ npm run validate
 npm run build:cli
 ```
 
-The migration decision record is
+Migration decisions are recorded in
 [`docs/migration/legacy-review-matrix.md`](docs/migration/legacy-review-matrix.md).

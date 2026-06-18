@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -37,9 +37,9 @@ test("installs application project-locally with required dependencies", async ()
       providers: ["codex"],
     });
     const lock = JSON.parse(await readFile(path.join(target, ".ai-engineering/platform.lock"), "utf8"));
-    const installedPacks = JSON.parse(
+    const installedPlugins = JSON.parse(
       await readFile(
-        path.join(target, ".ai-engineering/installed-packs.yaml"),
+        path.join(target, ".ai-engineering/installed-plugins.yaml"),
         "utf8",
       ),
     );
@@ -52,13 +52,19 @@ test("installs application project-locally with required dependencies", async ()
     assert.deepEqual(result.plugins, ["architecture", "application"]);
     assert.deepEqual(lock.plugins.map((item) => item.id), ["architecture", "application"]);
     assert.deepEqual(
-      installedPacks.packs.map((item) => item.id),
+      installedPlugins.plugins.map((item) => item.id),
       ["architecture", "application"],
     );
     assert.equal(
-      await exists(target, ".codex/skills/code-shared-design/SKILL.md"),
+      await exists(target, ".agents/skills/code-shared-design/SKILL.md"),
       true,
     );
+    assert.equal(
+      await exists(target, ".codex/skills/code-shared-design/SKILL.md"),
+      false,
+    );
+    assert.equal(await exists(target, ".codex/agents/java-analyze.toml"), true);
+    assert.equal(await exists(target, "agents/java-analyze.toml"), false);
     assert.equal(await exists(target, ".codex/agents/openai.yaml"), true);
     assert.equal(await exists(target, ".codex/config.toml"), true);
     assert.equal(await exists(target, ".mcp.json"), false);
@@ -66,6 +72,11 @@ test("installs application project-locally with required dependencies", async ()
     assert.equal(applicationMcpEntrypoint.includes(`${path.sep}mcp-servers${path.sep}`), true);
     assert.equal(await exists(target, ".ai-engineering/mcp-servers/application-mcp/src/index.js"), true);
     assert.equal(await exists(target, ".ai-engineering/core/mcp/stdio-runtime.js"), true);
+    assert.equal(await exists(target, ".ai-engineering/core/agents/AGENTS.baseline.md"), true);
+    assert.equal(await exists(target, ".ai-engineering/core/routing/command-registry.yaml"), true);
+    assert.equal(await exists(target, ".ai-engineering/core/schemas/ownership.schema.json"), true);
+    assert.equal(await exists(target, ".ai-engineering/core/standards/skill-authoring-standard.md"), true);
+    assert.equal(await exists(target, ".ai-engineering/core/templates/SKILL_TEMPLATE.md"), true);
     assert.equal(await exists(target, "AGENTS.md"), true);
     assert.equal(await exists(target, ".codex-plugin/plugin.json"), false);
   } finally {
@@ -73,7 +84,7 @@ test("installs application project-locally with required dependencies", async ()
   }
 });
 
-test("installs globally without writing project assets", async () => {
+test("installs globally with provider-native assets", async () => {
   const project = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-project-"));
   const home = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-home-"));
   try {
@@ -92,6 +103,18 @@ test("installs globally without writing project assets", async () => {
 
     assert.deepEqual(result.plugins, ["platform"]);
     assert.equal(await exists(home, ".codex/config.toml"), true);
+    assert.equal(await exists(home, ".codex/AGENTS.md"), true);
+    assert.equal(await exists(home, ".agents/skills/git-workflow-design/SKILL.md"), true);
+    assert.equal(await exists(home, ".codex/skills/git-workflow-design/SKILL.md"), false);
+    assert.equal(await exists(home, ".codex/workflows/commands.md"), true);
+    assert.equal(await exists(home, ".codex/agents/openai.yaml"), true);
+    assert.equal(
+      await exists(home, ".codex/agents/git-workflow-design.toml"),
+      true,
+    );
+    assert.equal(await exists(home, ".claude/skills/git-workflow-design/SKILL.md"), true);
+    assert.equal(await exists(home, ".claude/commands/deployment-plan.md"), true);
+    assert.equal(await exists(home, ".claude/CLAUDE.md"), true);
     assert.equal(await exists(home, ".claude.json"), true);
     assert.equal(await exists(home, ".cursor/mcp.json"), true);
     assert.equal(
@@ -100,10 +123,110 @@ test("installs globally without writing project assets", async () => {
     );
     assert.equal(await exists(home, "AGENTS.md"), false);
     assert.equal(await exists(home, "commands"), false);
+    assert.equal(await exists(home, "skills"), false);
+    assert.equal(await exists(home, ".cursor/rules/provider.json"), false);
+    assert.equal(await exists(home, ".claude-plugin/plugin.json"), false);
     assert.equal(await exists(project, ".ai-engineering/platform.lock"), false);
   } finally {
     await rm(project, { recursive: true, force: true });
     await rm(home, { recursive: true, force: true });
+  }
+});
+
+test("installs Claude project-native skills and commands", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-claude-project-"));
+  try {
+    const result = await installPlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["application"],
+      providers: ["claude"],
+    });
+
+    assert.deepEqual(result.plugins, ["architecture", "application"]);
+    assert.equal(await exists(target, ".claude/skills/java-analyze/SKILL.md"), true);
+    assert.equal(await exists(target, ".claude/commands/review-backend.md"), true);
+    assert.equal(await exists(target, "CLAUDE.md"), true);
+    assert.equal(await exists(target, ".mcp.json"), true);
+    assert.equal(await exists(target, "agents/java-analyze.toml"), false);
+    assert.equal(await exists(target, ".codex/agents/java-analyze.toml"), false);
+    assert.equal(await exists(target, "skills/java-analyze/SKILL.md"), false);
+    assert.equal(await exists(target, "commands/review-backend.md"), false);
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
+test("installs Claude global-native skills and commands", async () => {
+  const project = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-claude-global-project-"));
+  const home = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-claude-global-home-"));
+  try {
+    const context = resolveInstallContext({
+      scope: "global",
+      projectRoot: project,
+      homeRoot: home,
+    });
+    const result = await installPlugins({
+      root: repoRoot,
+      target: context.targetRoot,
+      context,
+      pluginIds: ["application"],
+      providers: ["claude"],
+    });
+
+    assert.deepEqual(result.plugins, ["architecture", "application"]);
+    assert.equal(await exists(home, ".claude/skills/java-analyze/SKILL.md"), true);
+    assert.equal(await exists(home, ".claude/commands/review-backend.md"), true);
+    assert.equal(await exists(home, ".claude.json"), true);
+    assert.equal(await exists(project, ".claude/skills/java-analyze/SKILL.md"), false);
+    assert.equal(await exists(home, "skills/java-analyze/SKILL.md"), false);
+  } finally {
+    await rm(project, { recursive: true, force: true });
+    await rm(home, { recursive: true, force: true });
+  }
+});
+
+test("reinstall removes old managed provider skill paths after native migration", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-native-migration-"));
+  try {
+    await installPlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["platform"],
+      providers: ["codex"],
+    });
+    await mkdir(path.join(target, ".codex/skills/git-workflow-design"), {
+      recursive: true,
+    });
+    await writeFile(
+      path.join(target, ".codex/skills/git-workflow-design/SKILL.md"),
+      "old managed skill\n",
+    );
+    const ownership = JSON.parse(
+      await readFile(path.join(target, ".ai-engineering/ownership.json"), "utf8"),
+    );
+    ownership.files[".codex/skills/git-workflow-design/SKILL.md"] = {
+      owners: ["platform"],
+      source: "git-workflow-design",
+      checksum: "",
+      shared: false,
+    };
+    await writeFile(
+      path.join(target, ".ai-engineering/ownership.json"),
+      JSON.stringify(ownership),
+    );
+
+    await installPlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["platform"],
+      providers: ["codex"],
+    });
+
+    assert.equal(await exists(target, ".agents/skills/git-workflow-design/SKILL.md"), true);
+    assert.equal(await exists(target, ".codex/skills/git-workflow-design/SKILL.md"), false);
+  } finally {
+    await rm(target, { recursive: true, force: true });
   }
 });
 
@@ -151,6 +274,32 @@ test("cli installs a plugin into the current project", async () => {
   }
 });
 
+test("cli -g installs into global AI IDE settings", async () => {
+  const project = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-cli-global-project-"));
+  const home = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-cli-global-home-"));
+  try {
+    const result = await runCli(
+      ["install", "platform", "--target", "codex", "-g", "--json"],
+      {
+        cwd: project,
+        env: {
+          HOME: home,
+          USERPROFILE: home,
+        },
+      },
+    );
+
+    assert.equal(result.exitCode, 0);
+    assert.equal(JSON.parse(result.stdout).status, "pass");
+    assert.equal(await exists(home, ".codex/config.toml"), true);
+    assert.equal(await exists(project, ".ai-engineering/platform.lock"), false);
+    assert.equal(await exists(project, "AGENTS.md"), false);
+  } finally {
+    await rm(project, { recursive: true, force: true });
+    await rm(home, { recursive: true, force: true });
+  }
+});
+
 test("lists, detects outdated plugins, and supports dry-run updates", async () => {
   const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-update-"));
   try {
@@ -191,6 +340,56 @@ test("lists, detects outdated plugins, and supports dry-run updates", async () =
   }
 });
 
+test("updates from canonical source and preserves unrelated root plugins", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-update-source-"));
+  try {
+    await installPlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["application", "quality"],
+      providers: ["codex"],
+    });
+    const lockPath = path.join(target, ".ai-engineering/platform.lock");
+    const installedPath = path.join(
+      target,
+      ".ai-engineering/installed-plugins.yaml",
+    );
+    const lock = JSON.parse(await readFile(lockPath, "utf8"));
+    const installed = JSON.parse(await readFile(installedPath, "utf8"));
+    lock.plugins.find((item) => item.id === "application").version = "0.9.0";
+    installed.plugins.find((item) => item.id === "application").version = "0.9.0";
+    await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`);
+    await writeFile(installedPath, `${JSON.stringify(installed, null, 2)}\n`);
+
+    const result = await updatePlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["application"],
+    });
+    const updated = await listInstalled({ target });
+
+    assert.equal(result.changed, true);
+    assert.deepEqual(result.updates, [
+      { id: "application", current: "0.9.0", latest: "1.0.0" },
+    ]);
+    assert.deepEqual(updated.rootPlugins, ["application", "quality"]);
+    assert.deepEqual(
+      updated.plugins.map((item) => item.id),
+      ["architecture", "application", "quality"],
+    );
+    assert.equal(
+      updated.plugins.find((item) => item.id === "application").version,
+      "1.0.0",
+    );
+    assert.equal(
+      await exists(target, ".agents/skills/test-automation-validate/SKILL.md"),
+      true,
+    );
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
 test("cli lists installed plugins and reports outdated plugins", async () => {
   const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-cli-update-"));
   try {
@@ -210,11 +409,11 @@ test("cli lists installed plugins and reports outdated plugins", async () => {
   }
 });
 
-test("lists installable packs with their commands and skills", async () => {
+test("lists installable plugins with their commands and skills", async () => {
   const catalog = await listAvailable({ root: repoRoot });
   assert.equal(catalog.status, "pass");
-  assert.equal(catalog.packs.count, 7);
-  const application = catalog.packs.available.find((item) => item.id === "application");
+  assert.equal(catalog.plugins.count, 7);
+  const application = catalog.plugins.available.find((item) => item.id === "application");
   assert.equal(application.name, "Application Engineering");
   assert.equal(application.install.defaultScope, "project");
   assert.deepEqual(application.dependencies.required, ["architecture"]);
@@ -223,7 +422,7 @@ test("lists installable packs with their commands and skills", async () => {
 
   const cliCatalog = await runCli(["list", "--available", "--json"]);
   assert.equal(cliCatalog.exitCode, 0);
-  assert.equal(JSON.parse(cliCatalog.stdout).packs.available.length, 7);
+  assert.equal(JSON.parse(cliCatalog.stdout).plugins.available.length, 7);
 });
 
 test("checks installed MCP servers, skills, commands, and current state", async () => {
@@ -239,32 +438,25 @@ test("checks installed MCP servers, skills, commands, and current state", async 
     const check = await checkInstalled({ target });
     assert.equal(check.status, "pass");
     assert.equal(check.current.state, "installed");
-    assert.deepEqual(check.packs.installed.map((item) => item.id), ["architecture", "application"]);
+    assert.deepEqual(check.plugins.installed.map((item) => item.id), ["architecture", "application"]);
     assert.deepEqual(check.providers, ["codex"]);
     assert.equal(check.mcp.count, 2);
     assert.deepEqual(
       check.mcp.servers.map((item) => item.name),
       ["architecture", "application"],
     );
-    assert.equal(check.commands.count, 3);
-    assert.deepEqual(
-      check.commands.installed.map((item) => item.id),
-      ["implement-frontend", "review-architecture", "review-backend"],
-    );
-    assert.deepEqual(
-      check.commands.installed.find((item) => item.id === "review-backend"),
-      {
-        id: "review-backend",
-        path: "commands/review-backend.md",
-        paths: ["commands/review-backend.md"],
-        owners: ["application"],
-        shared: false,
-        installed: true,
-      },
-    );
+    assert.equal(check.commands.count, 0);
     assert.equal(check.skills.count > 0, true);
+    assert.equal(check.agents.count > 0, true);
     assert.ok(check.skills.installed.some((item) => item.id === "java-analyze"));
     assert.ok(check.skills.installed.some((item) => item.id === "react-code-generate"));
+    assert.ok(
+      check.agents.installed.some(
+        (item) =>
+          item.id === "java-analyze" &&
+          item.path === ".codex/agents/java-analyze.toml",
+      ),
+    );
 
     const cliCheck = await runCli(["check", "--json"], { cwd: target });
     assert.equal(cliCheck.exitCode, 0);
@@ -303,11 +495,11 @@ test("removes plugins by ownership and preserves user-owned files", async () => 
 
     await removePlugins({ root: repoRoot, target, pluginIds: ["application"] });
     assert.equal(
-      await exists(target, ".codex/skills/test-automation-validate/SKILL.md"),
+      await exists(target, ".agents/skills/test-automation-validate/SKILL.md"),
       true,
     );
     assert.equal(
-      await exists(target, ".codex/skills/java-analyze/SKILL.md"),
+      await exists(target, ".agents/skills/java-analyze/SKILL.md"),
       false,
     );
     assert.equal(await exists(target, "user-owned.txt"), true);
@@ -328,7 +520,7 @@ test("cli removes an installed plugin", async () => {
     assert.equal(result.exitCode, 0);
     assert.equal(JSON.parse(result.stdout).status, "pass");
     assert.equal(
-      await exists(target, ".codex/skills/java-analyze/SKILL.md"),
+      await exists(target, ".agents/skills/java-analyze/SKILL.md"),
       false,
     );
   } finally {

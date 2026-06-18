@@ -46,6 +46,14 @@ test("projects canonical command semantics for all providers", async () => {
   assert.equal(codex.mcpConfig.path, ".codex/config.toml");
   assert.equal(claude.mcpConfig.path, ".mcp.json");
   assert.equal(cursor.mcpConfig.path, ".cursor/mcp.json");
+  assert.deepEqual(
+    codex.files.map((file) => file.path),
+    [".codex/agents/openai.yaml", ".codex/workflows/commands.md"],
+  );
+  assert.deepEqual(
+    claude.files.map((file) => file.path),
+    [".claude-plugin/plugin.json", ".claude/commands/review-backend.md"],
+  );
 });
 
 test("emits only contained relative provider paths", async () => {
@@ -75,7 +83,10 @@ test("emits only contained relative provider paths", async () => {
   }
 });
 
-test("global projections expose only user-level MCP configs", async () => {
+test("global projections expose native files and user-level MCP configs", async () => {
+  const command = await loadCanonicalCommand(
+    await findCommandPath(repoRoot, "review-backend"),
+  );
   const outputs = projectProviders({
     scope: "global",
     plugin: {
@@ -85,7 +96,7 @@ test("global projections expose only user-level MCP configs", async () => {
         version: "1.0.0",
       },
     },
-    commands: [],
+    commands: [command],
     skills: [],
     agents: [],
     hooks: [],
@@ -98,8 +109,14 @@ test("global projections expose only user-level MCP configs", async () => {
     },
   });
 
-  assert.deepEqual(outputs.codex.files, []);
-  assert.deepEqual(outputs.claude.files, []);
+  assert.deepEqual(
+    outputs.codex.files.map((file) => file.path),
+    [".codex/agents/openai.yaml", ".codex/workflows/commands.md"],
+  );
+  assert.deepEqual(
+    outputs.claude.files.map((file) => file.path),
+    [".claude/commands/review-backend.md"],
+  );
   assert.deepEqual(outputs.cursor.files, []);
   assert.equal(outputs.codex.mcpConfig.path, ".codex/config.toml");
   assert.equal(outputs.claude.mcpConfig.path, ".claude.json");

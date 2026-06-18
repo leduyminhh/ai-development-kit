@@ -39,12 +39,15 @@ completion.
 7. Match codebase conventions. Follow local naming, folder placement,
    validation, commit, and protected-path rules before introducing a new
    convention.
-8. Use generated code comments sparingly. Add comments only where purpose or flow
+8. Use UTF-8 Vietnamese when Vietnamese is required. Vietnamese content must
+   include proper diacritics and must not be written as unaccented Vietnamese or
+   mojibake.
+9. Use generated code comments sparingly. Add comments only where purpose or flow
    is not obvious, especially around complex generated functions.
-9. Keep solutions production-ready. Do not present work as production-ready
+10. Keep solutions production-ready. Do not present work as production-ready
    unless validation, residual risks, and rollback considerations are addressed
    or explicitly scoped out.
-10. Fail loud. Do not claim completion without evidence. Report blockers,
+11. Fail loud. Do not claim completion without evidence. Report blockers,
     skipped verification, uncertainty, and residual risk explicitly.
 
 ### Optional Rules

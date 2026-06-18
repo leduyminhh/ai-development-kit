@@ -10,7 +10,7 @@
   "providers": {
     "enabled": ["codex", "claude", "cursor"]
   },
-  "packs": {
+  "plugins": {
     "enabled": ["architecture", "application", "data", "security", "quality", "platform", "knowledge"]
   },
   "generation": {

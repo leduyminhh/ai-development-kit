@@ -3,7 +3,7 @@
   "$id": "https://ai-engineering.dev/schemas/platform-config.schema.json",
   "title": "AI Engineering Platform Configuration",
   "type": "object",
-  "required": ["apiVersion", "product", "providers", "packs", "generation"],
+  "required": ["apiVersion", "product", "providers", "plugins", "generation"],
   "properties": {
     "apiVersion": {
       "const": "ai-engineering.dev/v1alpha1"
@@ -48,7 +48,7 @@
       },
       "additionalProperties": false
     },
-    "packs": {
+    "plugins": {
       "type": "object",
       "required": ["enabled"],
       "properties": {

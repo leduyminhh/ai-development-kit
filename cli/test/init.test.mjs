@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { initializeProject } from "../src/init.mjs";
+import { initializeInstructionFile, initializeProject } from "../src/init.mjs";
 import { repoRoot } from "./helpers.mjs";
 
 test("initializes a project with AGENTS template and platform state", async () => {
@@ -26,7 +26,7 @@ test("initializes a project with AGENTS template and platform state", async () =
     assert.deepEqual(
       JSON.parse(
         await readFile(path.join(target, ".ai-engineering", "lockfile.yaml"), "utf8"),
-      ).packs,
+      ).plugins,
       [],
     );
   } finally {
@@ -65,6 +65,53 @@ test("updates only the managed AGENTS block and creates a backup", async () => {
         )
       ).includes("old managed content"),
       true,
+    );
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
+test("merges provider-native instruction files and preserves user content", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-init-provider-"));
+  try {
+    const claudePath = path.join(target, ".claude", "CLAUDE.md");
+    await mkdir(path.dirname(claudePath), { recursive: true });
+    await writeFile(
+      claudePath,
+      [
+        "# User Claude Rules",
+        "",
+        "Keep this line.",
+        "",
+        "<!-- AI-ENGINEERING:BEGIN AGENTS_BASELINE -->",
+        "old managed content",
+        "<!-- AI-ENGINEERING:END AGENTS_BASELINE -->",
+        "",
+      ].join("\n"),
+      { flag: "wx" },
+    );
+
+    await initializeInstructionFile({
+      root: repoRoot,
+      target,
+      relativePath: ".claude/CLAUDE.md",
+    });
+
+    const merged = await readFile(claudePath, "utf8");
+    assert.match(merged, /Keep this line[.]/);
+    assert.doesNotMatch(merged, /old managed content/);
+    assert.match(
+      await readFile(
+        path.join(
+          target,
+          ".ai-engineering",
+          "backups",
+          ".claude",
+          "CLAUDE.md",
+        ),
+        "utf8",
+      ),
+      /old managed content/,
     );
   } finally {
     await rm(target, { recursive: true, force: true });

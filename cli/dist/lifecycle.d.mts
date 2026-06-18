@@ -27,7 +27,7 @@ export function listAvailable({ root }: {
     root: any;
 }): Promise<{
     status: string;
-    packs: {
+    plugins: {
         count: number;
         available: {
             id: any;
@@ -60,7 +60,7 @@ export function checkInstalled({ target }: {
         platformVersion: any;
         installState: any;
     };
-    packs: {
+    plugins: {
         installed: any;
         roots: any;
     };
@@ -97,7 +97,8 @@ export function checkInstalled({ target }: {
         };
     };
 }>;
-export function findOutdated({ target, registry }: {
+export function findOutdated({ root, target, registry }: {
+    root: any;
     target: any;
     registry?: {} | undefined;
 }): Promise<{

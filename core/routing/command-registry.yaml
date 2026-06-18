@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "commands": [
-    { "id": "architecture.review_architecture", "pack": "architecture", "file": "commands/review-architecture.md" },
-    { "id": "application.review_source_code", "pack": "application", "file": "commands/review-backend.md" },
-    { "id": "application.generate_service", "pack": "application", "file": "commands/implement-frontend.md" },
-    { "id": "data.migration_plan", "pack": "data", "file": "commands/migration-plan.md" },
-    { "id": "security.scan_source", "pack": "security", "file": "commands/review-security.md" },
-    { "id": "quality.generate_test_plan", "pack": "quality", "file": "commands/verify-quality.md" },
-    { "id": "platform.deployment_plan", "pack": "platform", "file": "commands/deployment-plan.md" },
-    { "id": "knowledge.review_docs", "pack": "knowledge", "file": "commands/write-technical-doc.md" }
+    { "id": "architecture.review_architecture", "plugin": "architecture", "file": "commands/review-architecture.md" },
+    { "id": "application.review_source_code", "plugin": "application", "file": "commands/review-backend.md" },
+    { "id": "application.generate_service", "plugin": "application", "file": "commands/implement-frontend.md" },
+    { "id": "data.migration_plan", "plugin": "data", "file": "commands/migration-plan.md" },
+    { "id": "security.scan_source", "plugin": "security", "file": "commands/review-security.md" },
+    { "id": "quality.generate_test_plan", "plugin": "quality", "file": "commands/verify-quality.md" },
+    { "id": "platform.deployment_plan", "plugin": "platform", "file": "commands/deployment-plan.md" },
+    { "id": "knowledge.review_docs", "plugin": "knowledge", "file": "commands/write-technical-doc.md" }
   ]
 }

@@ -7,10 +7,29 @@ import { projectProviders } from "./providers.mjs";
 import { resolvePluginGraph } from "./resolver.mjs";
 import { readPlatformState } from "./state.mjs";
 import { applyTransaction, planTransaction } from "./transaction.mjs";
-import { initializeProject } from "./init.mjs";
+import { initializeInstructionFile, initializeProject, } from "./init.mjs";
+const CORE_RUNTIME_DIRECTORIES = [
+    "agents",
+    "mcp",
+    "prompts",
+    "routing",
+    "schemas",
+    "standards",
+    "templates",
+    "workflows",
+];
 async function readDirectoryFiles(sourceRoot, destinationPrefix) {
     const files = new Map();
-    for (const relative of await listFiles(sourceRoot)) {
+    let relatives = [];
+    try {
+        relatives = await listFiles(sourceRoot);
+    }
+    catch (error) {
+        if (error.code === "ENOENT")
+            return files;
+        throw error;
+    }
+    for (const relative of relatives) {
         files.set(`${destinationPrefix}/${relative}`, await readFile(path.join(sourceRoot, relative), "utf8"));
     }
     return files;
@@ -46,10 +65,11 @@ async function addProjectAssets({ root, graph, plugins, desiredFiles, ownershipF
     for (const skill of graph.skills) {
         const prefixes = new Set();
         if (graph.providers.includes("codex")) {
-            prefixes.add(`.codex/skills/${skill}`);
+            prefixes.add(`.agents/skills/${skill}`);
         }
-        if (graph.providers.includes("claude"))
-            prefixes.add(`skills/${skill}`);
+        if (graph.providers.includes("claude")) {
+            prefixes.add(`.claude/skills/${skill}`);
+        }
         for (const prefix of prefixes) {
             for (const [relativePath, content] of await readDirectoryFiles(await findSkillPath(root, skill), prefix)) {
                 desiredFiles.set(relativePath, content);
@@ -62,18 +82,46 @@ async function addProjectAssets({ root, graph, plugins, desiredFiles, ownershipF
         const plugin = plugins.get(pluginId);
         for (const commandId of plugin.assets.commands) {
             const source = await findCommandPath(root, commandId);
-            const relativePath = `commands/${commandId}.md`;
-            desiredFiles.set(relativePath, await readFile(source, "utf8"));
-            addOwnership(ownershipFiles, relativePath, [pluginId], commandId);
             commands.push(await loadCanonicalCommand(source));
         }
     }
+    if (graph.providers.includes("codex")) {
+        await addCodexAgents({ root, graph, desiredFiles, ownershipFiles });
+    }
+    return commands;
+}
+async function addCodexAgents({ root, graph, desiredFiles, ownershipFiles, }) {
     for (const agent of graph.agents) {
-        const relativePath = `agents/${agent}.toml`;
+        const relativePath = `.codex/agents/${agent}.toml`;
         desiredFiles.set(relativePath, await readFile(path.join(root, "adapters", "codex", "agents", `${agent}.toml`), "utf8"));
         addOwnership(ownershipFiles, relativePath, graph.ownership.agents[agent] ?? graph.pluginIds, agent, (graph.ownership.agents[agent] ?? []).length > 1);
     }
+}
+async function loadGraphCommands({ root, graph, plugins }) {
+    const commands = [];
+    for (const pluginId of graph.pluginIds) {
+        const plugin = plugins.get(pluginId);
+        for (const commandId of plugin.assets.commands) {
+            commands.push(await loadCanonicalCommand(await findCommandPath(root, commandId)));
+        }
+    }
     return commands;
+}
+async function addGlobalProviderSkills({ root, graph, provider, desiredFiles, ownershipFiles, }) {
+    const prefixByProvider = {
+        codex: ".agents/skills",
+        claude: ".claude/skills",
+    };
+    const rootPrefix = prefixByProvider[provider];
+    if (!rootPrefix)
+        return;
+    for (const skill of graph.skills) {
+        const prefix = `${rootPrefix}/${skill}`;
+        for (const [relativePath, content] of await readDirectoryFiles(await findSkillPath(root, skill), prefix)) {
+            desiredFiles.set(relativePath, content);
+            addOwnership(ownershipFiles, relativePath, graph.ownership.skills[skill] ?? graph.pluginIds, skill, (graph.ownership.skills[skill] ?? []).length > 1);
+        }
+    }
 }
 async function addRuntimeFiles({ root, graph, desiredFiles, ownershipFiles, }) {
     for (const pluginId of graph.pluginIds) {
@@ -86,9 +134,12 @@ async function addRuntimeFiles({ root, graph, desiredFiles, ownershipFiles, }) {
     }
     if (graph.pluginIds.length === 0)
         return;
-    for (const [relativePath, content] of await readDirectoryFiles(path.join(root, "core", "mcp"), ".ai-engineering/core/mcp")) {
-        desiredFiles.set(relativePath, content);
-        addOwnership(ownershipFiles, relativePath, graph.pluginIds, "mcp-runtime", true);
+    for (const directory of CORE_RUNTIME_DIRECTORIES) {
+        const sourceRoot = path.join(root, "core", directory);
+        for (const [relativePath, content] of await readDirectoryFiles(sourceRoot, `.ai-engineering/core/${directory}`)) {
+            desiredFiles.set(relativePath, content);
+            addOwnership(ownershipFiles, relativePath, graph.pluginIds, "core-runtime", true);
+        }
     }
 }
 async function mergeProviderConfig({ provider, projection, target, previousState, force, }) {
@@ -124,15 +175,36 @@ async function buildDesiredState({ root, target, context, pluginIds = [], all = 
     const previousState = await readPlatformState(installContext.targetRoot);
     const desiredFiles = new Map();
     const ownershipFiles = {};
-    const commands = installContext.projectAssets
-        ? await addProjectAssets({
+    let commands = [];
+    if (installContext.projectAssets) {
+        commands = await addProjectAssets({
             root,
             graph,
             plugins,
             desiredFiles,
             ownershipFiles,
-        })
-        : [];
+        });
+    }
+    else if (installContext.scope === "global") {
+        commands = await loadGraphCommands({ root, graph, plugins });
+        for (const provider of graph.providers) {
+            await addGlobalProviderSkills({
+                root,
+                graph,
+                provider,
+                desiredFiles,
+                ownershipFiles,
+            });
+            if (provider === "codex") {
+                await addCodexAgents({
+                    root,
+                    graph,
+                    desiredFiles,
+                    ownershipFiles,
+                });
+            }
+        }
+    }
     await addRuntimeFiles({ root, graph, desiredFiles, ownershipFiles });
     const mcpServers = createMcpRegistrations({
         packIds: graph.pluginIds,
@@ -155,7 +227,10 @@ async function buildDesiredState({ root, target, context, pluginIds = [], all = 
     });
     for (const provider of graph.providers) {
         const projection = projections[provider];
-        if (installContext.projectAssets && graph.pluginIds.length > 0) {
+        const globalProviderFiles = new Set(["codex", "claude"]);
+        const writeProviderFiles = installContext.projectAssets ||
+            (installContext.scope === "global" && globalProviderFiles.has(provider));
+        if (writeProviderFiles && graph.pluginIds.length > 0) {
             for (const file of projection.files) {
                 desiredFiles.set(file.path, file.content);
                 addOwnership(ownershipFiles, file.path, graph.pluginIds, provider);
@@ -200,21 +275,36 @@ async function buildDesiredState({ root, target, context, pluginIds = [], all = 
 async function writeLifecycleState(target, lock) {
     const stateRoot = path.join(target, ".ai-engineering");
     if (lock.plugins.length === 0) {
-        await rm(path.join(stateRoot, "installed-packs.yaml"), { force: true });
+        await rm(path.join(stateRoot, "installed-plugins.yaml"), { force: true });
         await rm(path.join(stateRoot, "lockfile.yaml"), { force: true });
         return;
     }
-    await writeJsonAtomic(path.join(stateRoot, "installed-packs.yaml"), {
+    await writeJsonAtomic(path.join(stateRoot, "installed-plugins.yaml"), {
         schemaVersion: 1,
-        packs: lock.plugins,
+        plugins: lock.plugins,
     });
     await writeJsonAtomic(path.join(stateRoot, "lockfile.yaml"), {
         schemaVersion: 1,
         platformVersion: lock.platformVersion,
         scope: lock.scope,
         providers: lock.providers,
-        packs: lock.plugins,
+        plugins: lock.plugins,
     });
+}
+async function initializeProviderInstructions({ root, context, providers }) {
+    const relativePaths = [];
+    if (context.scope === "project" && providers.includes("claude")) {
+        relativePaths.push("CLAUDE.md");
+    }
+    if (context.scope === "global" && providers.includes("codex")) {
+        relativePaths.push(".codex/AGENTS.md");
+    }
+    if (context.scope === "global" && providers.includes("claude")) {
+        relativePaths.push(".claude/CLAUDE.md");
+    }
+    for (const relativePath of relativePaths) {
+        await initializeInstructionFile({ root, target: context.targetRoot, relativePath });
+    }
 }
 export async function installPlugins({ root, target, context, pluginIds = [], all = false, providers, force = false, }) {
     const installContext = normalizeContext(target, context);
@@ -230,6 +320,13 @@ export async function installPlugins({ root, target, context, pluginIds = [], al
         providers,
         force,
     });
+    if (desired.plugins.length > 0) {
+        await initializeProviderInstructions({
+            root,
+            context: installContext,
+            providers: desired.providers,
+        });
+    }
     const plan = await planTransaction({
         target: installContext.targetRoot,
         desiredFiles: desired.desiredFiles,
@@ -299,7 +396,7 @@ function collectInstalledAssets(ownership) {
     const commands = new Map();
     const agents = new Map();
     for (const [file, metadata] of entries) {
-        const skill = file.match(/^(?:\.codex\/skills|skills)\/([^/]+)\//)?.[1];
+        const skill = file.match(/^(?:\.agents\/skills|\.claude\/skills|\.codex\/skills|skills)\/([^/]+)\//)?.[1];
         if (skill) {
             upsertAsset(skills, {
                 id: skill,
@@ -307,11 +404,11 @@ function collectInstalledAssets(ownership) {
                 metadata,
             });
         }
-        const command = file.match(/^commands\/([^/]+)\.md$/)?.[1];
+        const command = file.match(/^(?:commands|\.claude\/commands)\/([^/]+)\.md$/)?.[1];
         if (command) {
             upsertAsset(commands, { id: command, path: file, metadata });
         }
-        const agent = file.match(/^agents\/([^/]+)\.toml$/)?.[1];
+        const agent = file.match(/^(?:\.codex\/agents|agents)\/([^/]+)\.toml$/)?.[1];
         if (agent) {
             upsertAsset(agents, { id: agent, path: file, metadata });
         }
@@ -324,7 +421,7 @@ function collectInstalledAssets(ownership) {
 }
 export async function listAvailable({ root }) {
     const plugins = await loadPlugins(root);
-    const packs = [...plugins.values()].map((plugin) => ({
+    const available = [...plugins.values()].map((plugin) => ({
         id: plugin.metadata.id,
         name: plugin.metadata.name,
         version: plugin.metadata.version,
@@ -345,9 +442,9 @@ export async function listAvailable({ root }) {
     }));
     return {
         status: "pass",
-        packs: {
-            count: packs.length,
-            available: packs,
+        plugins: {
+            count: available.length,
+            available,
         },
     };
 }
@@ -378,7 +475,7 @@ export async function checkInstalled({ target }) {
             platformVersion: lock?.platformVersion,
             installState: state.installState?.status ?? (lock ? "unknown" : "none"),
         },
-        packs: {
+        plugins: {
             installed: lock?.plugins ?? [],
             roots: lock?.rootPlugins ?? [],
         },
@@ -405,11 +502,19 @@ export async function checkInstalled({ target }) {
         },
     };
 }
-export async function findOutdated({ target, registry = {} }) {
+export async function findOutdated({ root, target, registry = {} }) {
     const installed = await listInstalled({ target });
+    let available = registry;
+    if (root && Object.keys(available).length === 0) {
+        const plugins = await loadPlugins(root);
+        available = Object.fromEntries([...plugins.values()].map((plugin) => [
+            plugin.metadata.id,
+            { latest: plugin.metadata.version },
+        ]));
+    }
     const updates = [];
     for (const plugin of installed.plugins) {
-        const latest = registry[plugin.id]?.latest;
+        const latest = available[plugin.id]?.latest;
         if (latest && latest !== plugin.version) {
             updates.push({
                 id: plugin.id,
@@ -425,7 +530,7 @@ export async function updatePlugins({ root, target, context, pluginIds = [], all
     const selected = all
         ? installed.plugins.map((item) => item.id)
         : pluginIds.map((item) => item.split("@")[0]);
-    const outdated = await findOutdated({ target, registry });
+    const outdated = await findOutdated({ root, target, registry });
     const applicable = outdated.updates.filter((item) => selected.includes(item.id));
     if (dryRun || applicable.length === 0) {
         return { status: "pass", changed: false, updates: applicable };
@@ -434,7 +539,9 @@ export async function updatePlugins({ root, target, context, pluginIds = [], all
         root,
         target,
         context,
-        pluginIds: selected,
+        pluginIds: installed.rootPlugins.length > 0
+            ? installed.rootPlugins
+            : installed.plugins.map((item) => item.id),
         providers: installed.providers.length > 0 ? installed.providers : undefined,
         force,
     });

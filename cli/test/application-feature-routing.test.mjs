@@ -9,7 +9,7 @@ import { repoRoot } from "./helpers.mjs";
 
 const detectorPath = path.join(
   repoRoot,
-  "packs",
+  "plugins",
   "application",
   "skills",
   "feature-implement",
@@ -18,7 +18,7 @@ const detectorPath = path.join(
 );
 const schemaPath = path.join(
   repoRoot,
-  "packs",
+  "plugins",
   "application",
   "schemas",
   "feature-context.schema.json",

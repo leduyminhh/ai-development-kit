@@ -21,7 +21,7 @@ test("doctor validates initialized projects and generated adapters", async () =>
 
     const result = await doctorProject({ target });
     assert.equal(result.status, "pass");
-    assert.deepEqual(result.packs, ["architecture", "application"]);
+    assert.deepEqual(result.plugins, ["architecture", "application"]);
   } finally {
     await rm(target, { recursive: true, force: true });
   }
@@ -99,6 +99,26 @@ test("doctor rejects deprecated target plugin roots", async () => {
     await assert.rejects(
       doctorProject({ target }),
       /deprecated target plugin folder remains active: .codex-plugin/,
+    );
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
+test("doctor rejects missing Claude-native instructions", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-doctor-claude-"));
+  try {
+    await installPlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["application"],
+      providers: ["claude"],
+    });
+    await rm(path.join(target, "CLAUDE.md"));
+
+    await assert.rejects(
+      doctorProject({ target }),
+      /adapter files are missing for claude: CLAUDE.md/,
     );
   } finally {
     await rm(target, { recursive: true, force: true });

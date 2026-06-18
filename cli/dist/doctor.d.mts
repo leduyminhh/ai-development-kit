@@ -4,7 +4,7 @@ export function doctorProject({ target, context }: {
 }): Promise<{
     status: string;
     scope: any;
-    packs: any[];
+    plugins: any[];
     providers: never[];
     mcpServers: any[];
     nativeChecks: {

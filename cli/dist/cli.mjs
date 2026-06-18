@@ -19,40 +19,85 @@ Alias:
   aie = ai-engineering
 
 Usage:
-  ai-engineering --help
-  ai-engineering --version
-  ai-engineering init
-  ai-engineering doctor
-  ai-engineering check
-  ai-engineering install <pack...> --target <agent>
-  ai-engineering uninstall <pack...>
-  ai-engineering list
-  ai-engineering list --available
-  ai-engineering update <pack...>
-  ai-engineering upgrade
-  ai-engineering generate-adapter <pack...> --target <agent>
-  ai-engineering migrate --dry-run
-  ai-engineering migrate --delete-legacy
-  ai-engineering plugin install <plugin...>
-  ai-engineering install --all
-  ai-engineering plugin update <plugin>
-  ai-engineering update --all
-  ai-engineering plugin remove <plugin>
-  ai-engineering remove --all
+  aie <command> [options]
+
+Quick start:
+  aie init
+  aie install --all --target codex,claude
+  aie check
+
+Plugin lifecycle:
+  aie available
+  aie install <plugin...> --target <provider[,provider...]> [--scope <project|global>]
+  aie install --all --target <provider[,provider...]> [--scope <project|global>]
+  aie update <plugin...> [--dry-run]
+  aie update --all
+  aie remove <plugin...>
+  aie remove --all
+
+Status and discovery:
+  aie installed [--scope <project|global>|-g]
+  aie check [--scope <project|global>|-g]
+  aie doctor [--scope <project|global>|-g]
+  aie list [--available]
+
+Maintainer commands:
+  aie validate
+  aie build --all
+  aie artifact verify --all
+  aie registry generate
+  aie migrate --dry-run
+  aie migrate --delete-legacy
+  aie generate-adapter <plugin...> --target <provider[,provider...]>
+
+Compatibility aliases:
+  aie uninstall <plugin...>
+  aie upgrade
+  aie plugin install <plugin...> --target <provider[,provider...]>
+  aie plugin remove <plugin...>
+  aie plugin list [--available]
+  aie plugin outdated
+  aie plugin update <plugin...>
 
 Options:
-  --scope <project|global>  Installation scope (default: project)
+  --target <providers>      codex, claude, cursor
+  --provider <providers>    Alias for --target
+  --scope <project|global>  Installation scope
+  -g, --global              Install to global AI IDE settings
+  --all                     Select every installed or available plugin
+  --force                   Replace managed drift or unmanaged conflicts
+  --dry-run                 Plan update or migration without writing changes
+  --delete-legacy           Delete legacy paths during migration after backup
+  --json                    Print machine-readable output
+
+Native install paths:
+  Codex project: AGENTS.md, .agents/skills, .codex/agents, .codex/workflows, .codex/config.toml
+  Codex global: ~/.codex/AGENTS.md, ~/.agents/skills, ~/.codex/agents, ~/.codex/workflows, ~/.codex/config.toml
+  Claude project: CLAUDE.md, .claude/skills, .claude/commands, .claude-plugin/plugin.json, .mcp.json
+  Claude global: ~/.claude/CLAUDE.md, ~/.claude/skills, ~/.claude/commands, ~/.claude.json
+  Cursor project: AGENTS.md, .cursor/rules, .cursor/mcp.json
+  Cursor global: ~/.cursor/mcp.json
+
+Default scope: project
 `;
 function formatAvailable(result) {
-    const lines = ["Installable packs:"];
-    for (const pack of result.packs.available) {
-        lines.push(`- ${pack.id}@${pack.version}: ${pack.description}`);
-        lines.push(`  required: ${pack.dependencies.required.join(", ") || "none"}`);
-        lines.push(`  optional: ${pack.dependencies.optional.join(", ") || "none"}`);
-        lines.push(`  skills: ${pack.assets.skills.join(", ") || "none"}`);
-        lines.push(`  commands: ${pack.assets.commands.join(", ") || "none"}`);
+    const lines = ["Installable plugins:"];
+    for (const plugin of result.plugins.available) {
+        lines.push(`- ${plugin.id}@${plugin.version}: ${plugin.description}`);
+        lines.push(`  required: ${plugin.dependencies.required.join(", ") || "none"}`);
+        lines.push(`  optional: ${plugin.dependencies.optional.join(", ") || "none"}`);
+        lines.push(`  skills: ${plugin.assets.skills.join(", ") || "none"}`);
+        lines.push(`  commands: ${plugin.assets.commands.join(", ") || "none"}`);
     }
     return `${lines.join("\n")}\n`;
+}
+function formatInstalled(result, scope) {
+    if (result.plugins.length === 0) {
+        const alternate = scope === "global" ? "project" : "global";
+        const hint = scope === "global" ? "aie installed" : "aie installed -g";
+        return `No plugins installed in ${scope} scope. Use \`${hint}\` to check ${alternate} scope.\n`;
+    }
+    return `${result.plugins.map((item) => `${item.id}@${item.version}`).join("\n")}\n`;
 }
 function formatCheck(result) {
     const formatItems = (items) => items.length > 0
@@ -69,9 +114,9 @@ function formatCheck(result) {
         `Platform: ${result.current.platformVersion ?? "unknown"}`,
         `Install state: ${result.current.installState}`,
         "",
-        `Packs (${result.packs.installed.length}):`,
-        ...(result.packs.installed.length > 0
-            ? result.packs.installed.map((item) => `- ${item.id}@${item.version}`)
+        `Plugins (${result.plugins.installed.length}):`,
+        ...(result.plugins.installed.length > 0
+            ? result.plugins.installed.map((item) => `- ${item.id}@${item.version}`)
             : ["- none"]),
         "",
         `MCP (${result.mcp.count}):`,
@@ -120,6 +165,10 @@ function parseInstallArgs(args) {
             skipNext = true;
             continue;
         }
+        if (item === "-g" || item === "--global") {
+            scope = "global";
+            continue;
+        }
         if (item.startsWith("--")) {
             continue;
         }
@@ -128,6 +177,13 @@ function parseInstallArgs(args) {
     return { plugins, providers, source, scope };
 }
 function resolveContext(args) {
+    if (args.includes("-g") || args.includes("--global")) {
+        return resolveInstallContext({
+            scope: "global",
+            projectRoot: process.cwd(),
+            homeRoot: os.homedir(),
+        });
+    }
     const scopeIndex = args.indexOf("--scope");
     return resolveInstallContext({
         scope: scopeIndex === -1 ? "project" : args[scopeIndex + 1],
@@ -162,7 +218,7 @@ export async function run(args, streams = process) {
         });
         streams.stdout.write(args.includes("--json")
             ? `${JSON.stringify(result)}\n`
-            : `Doctor passed for ${result.packs.length} installed packs.\n`);
+            : `Doctor passed for ${result.plugins.length} installed plugins.\n`);
         return 0;
     }
     if (args[0] === "check") {
@@ -247,13 +303,7 @@ export async function run(args, streams = process) {
         const root = REPOSITORY_ROOT;
         const all = args[0] === "install" && args.includes("--all");
         const offset = args[0] === "plugin" ? 2 : 1;
-        const parsed = all
-            ? {
-                plugins: [],
-                providers: undefined,
-                scope: resolveContext(args).scope,
-            }
-            : parseInstallArgs(args.slice(offset));
+        const parsed = parseInstallArgs(args.slice(offset));
         const context = resolveInstallContext({
             scope: parsed.scope,
             projectRoot: process.cwd(),
@@ -270,11 +320,11 @@ export async function run(args, streams = process) {
         });
         streams.stdout.write(args.includes("--json")
             ? `${JSON.stringify(result)}\n`
-            : `Installed ${result.plugins.join(", ")}.\n`);
+            : `Installed ${result.plugins.join(", ")} to ${context.scope} scope.\n`);
         return 0;
     }
     if ((args[0] === "plugin" && args[1] === "remove") ||
-        (args[0] === "remove" && args.includes("--all")) ||
+        args[0] === "remove" ||
         args[0] === "uninstall") {
         const root = REPOSITORY_ROOT;
         const all = args[0] === "remove" && args.includes("--all");
@@ -301,8 +351,10 @@ export async function run(args, streams = process) {
         return 0;
     }
     if ((args[0] === "plugin" && args[1] === "list") ||
+        args[0] === "available" ||
+        args[0] === "installed" ||
         args[0] === "list") {
-        if (args.includes("--available")) {
+        if (args[0] === "available" || args.includes("--available")) {
             const result = await listAvailable({ root: REPOSITORY_ROOT });
             streams.stdout.write(args.includes("--json") ? `${JSON.stringify(result)}\n` : formatAvailable(result));
             return 0;
@@ -311,12 +363,16 @@ export async function run(args, streams = process) {
         const result = await listInstalled({ target: context.targetRoot, context });
         streams.stdout.write(args.includes("--json")
             ? `${JSON.stringify(result)}\n`
-            : `${result.plugins.map((item) => `${item.id}@${item.version}`).join("\n")}\n`);
+            : formatInstalled(result, context.scope));
         return 0;
     }
     if (args[0] === "plugin" && args[1] === "outdated") {
         const context = resolveContext(args);
-        const result = await findOutdated({ target: context.targetRoot, context });
+        const result = await findOutdated({
+            root: REPOSITORY_ROOT,
+            target: context.targetRoot,
+            context,
+        });
         streams.stdout.write(args.includes("--json")
             ? `${JSON.stringify(result)}\n`
             : `${result.updates.map((item) => `${item.id} ${item.current} -> ${item.latest}`).join("\n")}\n`);

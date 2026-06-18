@@ -43,7 +43,7 @@ function manifest(context, provider) {
 export function projectCodex(context) {
   const providerManifest = manifest(context, "codex");
   const workflow = context.commands.map(commandBody).join("\n");
-  const projectFiles = [
+  const codexFiles = [
     {
       path: ".codex/agents/openai.yaml",
       content: json(providerManifest),
@@ -57,7 +57,7 @@ export function projectCodex(context) {
     manifest: providerManifest,
     workflow,
     intent: context.commands[0]?.intent ?? "",
-    files: context.scope === "global" ? [] : projectFiles,
+    files: codexFiles,
     mcpConfig: {
       provider: "codex",
       format: "toml",
@@ -70,7 +70,7 @@ export function projectCodex(context) {
 export function projectClaude(context) {
   const providerManifest = manifest(context, "claude");
   const commands = context.commands.map((command) => ({
-    path: `commands/${command.id}.md`,
+    path: `.claude/commands/${command.id}.md`,
     content: `---\ndescription: ${command.description}\n---\n\n${commandBody(command)}`,
   }));
   const projectFiles = [
@@ -84,7 +84,7 @@ export function projectClaude(context) {
     manifest: providerManifest,
     command: commands[0]?.content ?? "",
     intent: context.commands[0]?.intent ?? "",
-    files: context.scope === "global" ? [] : projectFiles,
+    files: context.scope === "global" ? commands : projectFiles,
     mcpConfig: {
       provider: "claude",
       format: "json",

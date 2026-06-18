@@ -92,7 +92,7 @@ export async function doctorProject({ target, context }) {
     for (const required of [
         ".ai-engineering/manifest.yaml",
         ".ai-engineering/lockfile.yaml",
-        ".ai-engineering/installed-packs.yaml",
+        ".ai-engineering/installed-plugins.yaml",
         ".ai-engineering/platform.lock",
     ]) {
         if (required === ".ai-engineering/manifest.yaml" &&
@@ -120,22 +120,25 @@ export async function doctorProject({ target, context }) {
         }
     }
     if ((lock.plugins ?? []).length === 0)
-        errors.push("no capability packs are installed");
-    if (await exists(path.join(target, ".ai-engineering", "installed-packs.yaml"))) {
-        const installedPacks = await readJson(path.join(target, ".ai-engineering", "installed-packs.yaml"));
+        errors.push("no plugins are installed");
+    const installedPluginsPath = (await exists(path.join(target, ".ai-engineering", "installed-plugins.yaml")))
+        ? path.join(target, ".ai-engineering", "installed-plugins.yaml")
+        : path.join(target, ".ai-engineering", "installed-packs.yaml");
+    if (await exists(installedPluginsPath)) {
+        const installedPlugins = await readJson(installedPluginsPath);
         const expected = (lock.plugins ?? []).map((item) => item.id);
-        const actual = (installedPacks.packs ?? []).map((item) => item.id);
+        const actual = (installedPlugins.plugins ?? installedPlugins.packs ?? []).map((item) => item.id);
         if (JSON.stringify(actual) !== JSON.stringify(expected)) {
-            errors.push("installed-packs.yaml does not match platform.lock");
+            errors.push(`${path.basename(installedPluginsPath)} does not match platform.lock`);
         }
     }
     const adapterChecks = {
         codex: scope === "project"
             ? [".codex/agents/openai.yaml", ".codex/config.toml"]
-            : [".codex/config.toml"],
+            : [".codex/AGENTS.md", ".codex/config.toml"],
         claude: scope === "project"
-            ? [".claude-plugin/plugin.json", ".mcp.json"]
-            : [".claude.json"],
+            ? ["CLAUDE.md", ".claude-plugin/plugin.json", ".mcp.json"]
+            : [".claude/CLAUDE.md", ".claude.json"],
         cursor: scope === "project"
             ? [".cursor/rules/provider.json", ".cursor/mcp.json"]
             : [".cursor/mcp.json"],
@@ -207,7 +210,7 @@ export async function doctorProject({ target, context }) {
     return {
         status: "pass",
         scope,
-        packs: (lock.plugins ?? []).map((item) => item.id),
+        plugins: (lock.plugins ?? []).map((item) => item.id),
         providers: lock.providers ?? [],
         mcpServers,
         nativeChecks: (lock.providers ?? []).map((provider) => ({

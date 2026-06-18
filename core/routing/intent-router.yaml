@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "routes": [
-    { "pack": "architecture", "keywords": ["architecture", "adr", "ddd", "cqrs", "microservices"] },
-    { "pack": "application", "keywords": ["backend", "frontend", "api", "spring", "react", "kafka"] },
-    { "pack": "data", "keywords": ["postgres", "mysql", "mongodb", "schema", "index", "migration", "cdc"] },
-    { "pack": "security", "keywords": ["security", "owasp", "cwe", "secrets", "threat model"] },
-    { "pack": "quality", "keywords": ["test", "coverage", "code review", "performance"] },
-    { "pack": "platform", "keywords": ["docker", "kubernetes", "deploy", "observability", "sre"] },
-    { "pack": "knowledge", "keywords": ["documentation", "readme", "runbook", "onboarding", "changelog"] }
+    { "plugin": "architecture", "keywords": ["architecture", "adr", "ddd", "cqrs", "microservices"] },
+    { "plugin": "application", "keywords": ["backend", "frontend", "api", "spring", "react", "kafka"] },
+    { "plugin": "data", "keywords": ["postgres", "mysql", "mongodb", "schema", "index", "migration", "cdc"] },
+    { "plugin": "security", "keywords": ["security", "owasp", "cwe", "secrets", "threat model"] },
+    { "plugin": "quality", "keywords": ["test", "coverage", "code review", "performance"] },
+    { "plugin": "platform", "keywords": ["docker", "kubernetes", "deploy", "observability", "sre"] },
+    { "plugin": "knowledge", "keywords": ["documentation", "readme", "runbook", "onboarding", "changelog"] }
   ]
 }

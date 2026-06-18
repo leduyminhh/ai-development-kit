@@ -1,19 +1,17 @@
 # AI Engineering Platform
 
-Nền tảng kỹ thuật MCP-first gồm các capability pack có thể cài đặt, quy trình
-khởi tạo dự án an toàn và adapter được sinh cho Codex, Claude và Cursor.
+Nền tảng plugin cho Codex, Claude Code và Cursor. Nội dung capability chuẩn nằm
+trong `plugins/`; CLI và `adapters/` sinh projection riêng cho từng provider.
+MCP server là lớp runtime tùy chọn.
 
 ## Năng Lực
 
-- Bảy capability pack: architecture, application, data, security, quality, platform và knowledge.
-- Mỗi capability pack có một MCP server contract riêng.
-- Tạo hoặc merge `AGENTS.md` an toàn, chỉ cập nhật managed block và luôn backup.
-- Cài đặt, gỡ bỏ pack có xử lý dependency.
-- Sinh cấu hình MCP native cho Codex, Claude và Cursor.
-- Hỗ trợ cài đặt theo phạm vi project và global của người dùng.
-- Kiểm tra trạng thái đã cài theo nhóm MCP server, skill, command, agent và pack.
-- Liệt kê catalog pack có thể cài, gồm dependency, skill, command và hook.
-- Validate repository, doctor dự án đích, lập kế hoạch và dọn dẹp migration.
+- Bảy plugin có thể cài đặt: architecture, application, data, security, quality,
+  platform và knowledge.
+- Cài đặt, cập nhật, gỡ bỏ, liệt kê và chẩn đoán có xử lý dependency.
+- Projection theo phạm vi project và global cho Codex, Claude và Cursor.
+- Instruction file được quản lý nhưng vẫn bảo toàn nội dung do người dùng sở hữu.
+- Theo dõi ownership theo transaction cho file sinh ra và cấu hình MCP được merge.
 
 ## Cài Đặt
 
@@ -27,70 +25,104 @@ npm run build
 npm link
 ```
 
-Sau khi cài đặt hoặc chạy `npm link`, có thể dùng `ai-engineering` hoặc alias
-ngắn hơn là `aie`:
+Có thể dùng cả `ai-engineering` và alias ngắn `aie`.
+
+## Workflow Cho Project
 
 ```bash
+cd /path/to/project
+
+# Khởi tạo managed baseline trong AGENTS.
+aie init
+
+# Cài cho một provider hoặc tất cả provider được hỗ trợ.
+aie install --all --target codex
+aie install --all --target claude
+aie install --all --target cursor
+aie install --all --target codex,claude,cursor
+
+# Xác minh sau khi cài đặt hoàn tất.
+aie doctor
 aie check
-aie list --available
-aie install application --target cursor
+
+# Xem, cập nhật và gỡ plugin.
+aie available
+aie installed
+aie update application
+aie update --all
+aie remove security
+aie remove --all
+
+# Cài tập plugin nhỏ hơn khi cần.
+aie install application --target codex
+aie install security quality --target cursor
+
+# Cài vào vị trí global của người dùng.
+aie install --all --target codex -g
+aie install --all --target claude -g
+aie install --all --target cursor -g
 ```
 
-## CLI
+Lệnh `update` so sánh version đã cài với manifest plugin chuẩn trong source CLI
+hiện tại, sau đó dựng lại đầy đủ tập root plugin đã cài. Lifecycle hiện chưa tải
+artifact từ remote registry.
 
-```bash
-ai-engineering init
-ai-engineering install application --target cursor --scope project
-ai-engineering install --all --target codex,claude,cursor --scope global
-ai-engineering doctor --scope project
-ai-engineering doctor --scope global
-ai-engineering check --scope project
-ai-engineering uninstall security --scope project
-ai-engineering list --scope global
-ai-engineering list --available
-ai-engineering update application
-ai-engineering upgrade
-ai-engineering generate-adapter quality --target codex
-ai-engineering validate
-ai-engineering migrate --dry-run
-ai-engineering migrate --delete-legacy
-```
+MCP registration được sinh với đường dẫn runtime local tuyệt đối, vì vậy cần chạy
+lệnh cài đặt trên từng máy.
 
-Lệnh `init` không ghi đè nội dung AGENTS do dự án sở hữu. Lệnh chỉ tạo hoặc cập
-nhật managed baseline block và ghi trạng thái dưới `.ai-engineering/`.
+## Đường Dẫn Native Theo Provider
 
-Project scope ghi runtime dưới `<project>/.ai-engineering/`. Global scope ghi
-runtime dưới `<home>/.ai-engineering/` và không sinh command, skill, rule hoặc
-`AGENTS.md` cho project.
+Mọi scope đều lưu runtime, ownership, lock và backup dưới
+`<scope-root>/.ai-engineering/`.
 
-Mỗi máy phải chạy lệnh install vì MCP stdio registration sử dụng đường dẫn
-entrypoint tuyệt đối trên chính máy đó.
+| Provider | Project scope | Global scope |
+| --- | --- | --- |
+| Codex | `AGENTS.md`, `.agents/skills`, `.codex/agents`, `.codex/workflows/commands.md`, `.codex/config.toml` | `~/.codex/AGENTS.md`, `~/.agents/skills`, `~/.codex/agents`, `~/.codex/workflows/commands.md`, `~/.codex/config.toml` |
+| Claude | `CLAUDE.md`, `.claude/skills`, `.claude/commands`, `.claude-plugin/plugin.json`, `.mcp.json` | `~/.claude/CLAUDE.md`, `~/.claude/skills`, `~/.claude/commands`, `~/.claude.json` |
+| Cursor | `AGENTS.md`, `.cursor/rules`, `.cursor/mcp.json` | `~/.cursor/mcp.json` |
 
-## Cấu Trúc
+Khi cập nhật instruction file, hệ thống giữ nguyên nội dung nằm ngoài managed
+baseline block và ghi backup dưới `.ai-engineering/backups/`.
+
+## Cấu Trúc Repository
 
 ```text
-core/          contract, routing, policy, template và schema dùng chung
-packs/         capability pack có thể cài đặt
-mcp-servers/   MCP server skeleton theo namespace
-adapters/      provider template và metadata nguồn
-cli/           TypeScript CLI và shell utility còn được sử dụng
-docs/          tài liệu migration và kiến trúc
-tests/         integration test xuyên package
+adapters/      metadata nguồn theo provider và định nghĩa agent cho Codex
+cli/           runtime CLI, dist sinh ra, test, hook và shell tool
+core/          policy, routing, schema, template, prompt và workflow dùng chung
+docs/          hồ sơ migration và kế hoạch triển khai
+mcp-servers/   MCP runtime server tùy chọn theo namespace
+plugins/       manifest, command và skill chuẩn có thể cài đặt
 ```
 
-Mỗi pack gồm:
+Mỗi `plugins/<plugin-id>/` dùng boundary chuẩn sau:
 
 ```text
-README.md
-pack.yaml
+plugin.yaml
 commands/
 skills/
+agents/
+rules/
 templates/
 workflows/
 schemas/
 ```
 
-## Phát Triển
+Asset group chưa dùng được khai báo là `none` trong `plugin.yaml`. Không tạo
+README placeholder chỉ để giữ thư mục. Source root `packs/` cũ không còn active.
+
+## Lệnh Cho Maintainer
+
+```bash
+aie validate
+aie build --all
+aie artifact verify --all
+aie registry generate
+aie migrate --dry-run
+aie migrate --delete-legacy
+```
+
+## Xác Minh
 
 ```bash
 npm test

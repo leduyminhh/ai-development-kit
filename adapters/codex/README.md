@@ -7,10 +7,15 @@ Generated projects receive:
 
 ```text
 AGENTS.md
+.agents/skills/
+.codex/agents/*.toml
 .codex/agents/openai.yaml
 .codex/workflows/commands.md
 .codex/config.toml
 ```
+
+Global installs use the corresponding user paths, including
+`~/.codex/AGENTS.md`, `~/.agents/skills/`, and `~/.codex/`.
 
 Canonical skills remain owned by `plugins/*/skills/`; MCP runtime and hook
 support remain owned by `mcp-servers/`, `core/mcp/`, and `cli/scripts/hooks/`.

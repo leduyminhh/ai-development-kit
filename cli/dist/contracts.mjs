@@ -10,6 +10,8 @@ const PLUGIN_KEYS = new Set([
     "dependencies",
     "assets",
     "install",
+    "runtime",
+    "targets",
     "id",
     "name",
     "version",
@@ -52,25 +54,63 @@ export async function loadPlatform(root) {
     }
     return value;
 }
+function normalizeList(value) {
+    if (value === undefined || value === null || value === "none")
+        return [];
+    return value;
+}
+function normalizePluginManifest(plugin) {
+    const assets = plugin.assets ?? {};
+    return {
+        ...plugin,
+        assets: {
+            ...assets,
+            commands: normalizeList(assets.commands),
+            skills: normalizeList(assets.skills),
+            agents: normalizeList(assets.agents),
+            rules: normalizeList(assets.rules),
+            templates: normalizeList(assets.templates),
+            workflows: normalizeList(assets.workflows),
+            schemas: normalizeList(assets.schemas),
+            hooks: normalizeList(assets.hooks),
+        },
+    };
+}
+async function resolvePluginSource(root) {
+    const pluginsRoot = path.join(root, "plugins");
+    if (await exists(pluginsRoot)) {
+        return {
+            directoryName: "plugins",
+            root: pluginsRoot,
+            manifestName: "plugin.yaml",
+        };
+    }
+    return {
+        directoryName: "packs",
+        root: path.join(root, "packs"),
+        manifestName: "pack.yaml",
+    };
+}
 export async function loadPlugins(root) {
     const plugins = new Map();
-    const packsRoot = path.join(root, "packs");
-    const entries = await readdir(packsRoot, { withFileTypes: true });
+    const pluginSource = await resolvePluginSource(root);
+    const entries = await readdir(pluginSource.root, { withFileTypes: true });
     for (const entry of entries.filter((item) => item.isDirectory())) {
-        const packRoot = path.join(packsRoot, entry.name);
-        const plugin = await readJson(path.join(packRoot, "pack.yaml"));
+        const pluginRoot = path.join(pluginSource.root, entry.name);
+        const plugin = normalizePluginManifest(await readJson(path.join(pluginRoot, pluginSource.manifestName)));
         const pluginId = plugin.metadata?.id;
         const unknownKeys = Object.keys(plugin).filter((key) => !PLUGIN_KEYS.has(key));
         if (unknownKeys.length > 0) {
-            throw new PlatformError(`pack ${pluginId} has unknown keys: ${unknownKeys.sort().join(", ")}`, { code: "AI_ENGINEERING_INVALID_CONTRACT" });
+            throw new PlatformError(`plugin ${pluginId} has unknown keys: ${unknownKeys.sort().join(", ")}`, { code: "AI_ENGINEERING_INVALID_CONTRACT" });
         }
         plugins.set(pluginId, plugin);
     }
     return new Map([...plugins].sort(([left], [right]) => left.localeCompare(right)));
 }
 export async function findSkillPath(root, skillId) {
-    for (const pack of await readdir(path.join(root, "packs"))) {
-        const candidate = path.join(root, "packs", pack, "skills", skillId);
+    const pluginSource = await resolvePluginSource(root);
+    for (const pluginId of await readdir(pluginSource.root)) {
+        const candidate = path.join(pluginSource.root, pluginId, "skills", skillId);
         try {
             await readFile(path.join(candidate, "SKILL.md"), "utf8");
             return candidate;
@@ -82,8 +122,9 @@ export async function findSkillPath(root, skillId) {
     return undefined;
 }
 export async function findCommandPath(root, commandId) {
-    for (const pack of await readdir(path.join(root, "packs"))) {
-        const candidate = path.join(root, "packs", pack, "commands", `${commandId}.md`);
+    const pluginSource = await resolvePluginSource(root);
+    for (const pluginId of await readdir(pluginSource.root)) {
+        const candidate = path.join(pluginSource.root, pluginId, "commands", `${commandId}.md`);
         try {
             await readFile(candidate, "utf8");
             return candidate;
@@ -170,17 +211,19 @@ function skillIdFromPackPath(skill) {
 }
 export async function loadSkillRegistry(root) {
     const registry = await readJson(path.join(root, "core", "routing", "skill-registry.yaml"));
+    const registryPlugins = registry.plugins ?? registry.packs ?? {};
     return {
         ...registry,
-        packs: Object.fromEntries(Object.entries(registry.packs ?? {})
+        plugins: Object.fromEntries(Object.entries(registryPlugins)
             .sort(([left], [right]) => left.localeCompare(right))
             .map(([packId, skillIds]) => [packId, sortedUnique(skillIds)])),
     };
 }
 async function loadOwnedSkillFolders(root) {
     const result = new Map();
-    for (const pack of await readdir(path.join(root, "packs"))) {
-        const skillRoot = path.join(root, "packs", pack, "skills");
+    const pluginSource = await resolvePluginSource(root);
+    for (const pluginId of await readdir(pluginSource.root)) {
+        const skillRoot = path.join(pluginSource.root, pluginId, "skills");
         try {
             const entries = await readdir(skillRoot, { withFileTypes: true });
             const skills = [];
@@ -190,10 +233,10 @@ async function loadOwnedSkillFolders(root) {
                     skills.push(entry.name);
                 }
             }
-            result.set(pack, skills.sort());
+            result.set(pluginId, skills.sort());
         }
         catch {
-            result.set(pack, []);
+            result.set(pluginId, []);
         }
     }
     return result;
@@ -228,6 +271,7 @@ export function validateStructuredToolContract(tool) {
     return errors;
 }
 async function validateRoutingAndMcp(root, plugins, errors, ownedSkillsByPack) {
+    const pluginSource = await resolvePluginSource(root);
     const routingRoot = path.join(root, "core", "routing");
     const intentRouter = await readJson(path.join(routingRoot, "intent-router.yaml"));
     const commandRegistry = await readJson(path.join(routingRoot, "command-registry.yaml"));
@@ -261,22 +305,23 @@ async function validateRoutingAndMcp(root, plugins, errors, ownedSkillsByPack) {
         }
     }
     for (const route of intentRouter.routes ?? []) {
-        if (!plugins.has(route.pack)) {
-            errors.push(`intent route references unknown pack ${route.pack}`);
+        const pluginId = route.plugin ?? route.pack;
+        if (!plugins.has(pluginId)) {
+            errors.push(`intent route references unknown plugin ${pluginId}`);
         }
     }
-    for (const [packId, registeredSkills] of Object.entries(skillRegistry.packs ?? {})) {
+    for (const [packId, registeredSkills] of Object.entries(skillRegistry.plugins ?? {})) {
         if (!plugins.has(packId)) {
-            errors.push(`skill registry references unknown pack ${packId}`);
+            errors.push(`skill registry references unknown plugin ${packId}`);
             continue;
         }
         const ownedSkills = ownedSkillsByPack.get(packId) ?? [];
         const canonicalSkills = (plugins.get(packId)?.skills ?? []).map(skillIdFromPackPath);
         if (!sameValues(registeredSkills, ownedSkills)) {
-            errors.push(`skill registry for pack ${packId} must match skill folders: expected ${ownedSkills.join(", ")}, got ${registeredSkills.join(", ")}`);
+            errors.push(`skill registry for plugin ${packId} must match skill folders: expected ${ownedSkills.join(", ")}, got ${registeredSkills.join(", ")}`);
         }
         if (!sameValues(registeredSkills, canonicalSkills)) {
-            errors.push(`pack ${packId} canonical skills must match skill registry: expected ${registeredSkills.join(", ")}, got ${canonicalSkills.sort().join(", ")}`);
+            errors.push(`plugin ${packId} canonical skills must match skill registry: expected ${registeredSkills.join(", ")}, got ${canonicalSkills.sort().join(", ")}`);
         }
         for (const skill of registeredSkills) {
             if (!plugins.get(packId)?.assets?.skills?.includes(skill)) {
@@ -285,40 +330,41 @@ async function validateRoutingAndMcp(root, plugins, errors, ownedSkillsByPack) {
         }
     }
     for (const packId of plugins.keys()) {
-        if (!Object.hasOwn(skillRegistry.packs ?? {}, packId)) {
-            errors.push(`skill registry is missing pack ${packId}`);
+        if (!Object.hasOwn(skillRegistry.plugins ?? {}, packId)) {
+            errors.push(`skill registry is missing plugin ${packId}`);
         }
     }
     for (const command of commandRegistry.commands ?? []) {
-        if (!plugins.has(command.pack)) {
-            errors.push(`command registry references unknown pack ${command.pack}`);
+        const pluginId = command.plugin ?? command.pack;
+        if (!plugins.has(pluginId)) {
+            errors.push(`command registry references unknown plugin ${pluginId}`);
         }
         if (!mcpTools.has(command.id)) {
             errors.push(`command ${command.id} references missing MCP tool`);
         }
-        if (!(await exists(path.join(root, "packs", command.pack, command.file)))) {
-            errors.push(`command registry references missing file ${command.pack}/${command.file}`);
+        if (!(await exists(path.join(pluginSource.root, pluginId, command.file)))) {
+            errors.push(`command registry references missing file ${pluginId}/${command.file}`);
         }
     }
     for (const [packId, pack] of plugins) {
         for (const command of pack.commands ?? []) {
             if (!command.id || !command.file || !command.mcp_tool) {
-                errors.push(`pack ${packId} has invalid command metadata`);
+                errors.push(`plugin ${packId} has invalid command metadata`);
                 continue;
             }
             if (!mcpTools.has(command.mcp_tool)) {
-                errors.push(`pack ${packId} command ${command.id} references missing MCP tool ${command.mcp_tool}`);
+                errors.push(`plugin ${packId} command ${command.id} references missing MCP tool ${command.mcp_tool}`);
             }
-            if (!(await exists(path.join(root, "packs", packId, command.file)))) {
-                errors.push(`pack ${packId} command ${command.id} references missing file`);
+            if (!(await exists(path.join(pluginSource.root, packId, command.file)))) {
+                errors.push(`plugin ${packId} command ${command.id} references missing file`);
             }
         }
         for (const skill of pack.skills ?? []) {
             if (!skill.id || !skill.path) {
-                errors.push(`pack ${packId} has invalid skill metadata`);
+                errors.push(`plugin ${packId} has invalid skill metadata`);
             }
-            else if (!(await exists(path.join(root, "packs", packId, skill.path)))) {
-                errors.push(`pack ${packId} skill ${skill.id} references missing file`);
+            else if (!(await exists(path.join(pluginSource.root, packId, skill.path)))) {
+                errors.push(`plugin ${packId} skill ${skill.id} references missing file`);
             }
         }
     }
@@ -327,6 +373,7 @@ async function validateRoutingAndMcp(root, plugins, errors, ownedSkillsByPack) {
 export async function validateRepository(root) {
     const platform = await loadPlatform(root);
     const plugins = await loadPlugins(root);
+    const pluginSource = await resolvePluginSource(root);
     const ownedSkillsByPack = await loadOwnedSkillFolders(root);
     const skills = new Set([...ownedSkillsByPack.values()].flat());
     const agents = new Set((await readdir(path.join(root, "adapters", "codex", "agents"), {
@@ -342,9 +389,9 @@ export async function validateRepository(root) {
     if (platform.product?.cli !== "ai-engineering") {
         errors.push("platform CLI name must be ai-engineering");
     }
-    const enabledPacks = [...(platform.packs?.enabled ?? [])].sort();
-    if (JSON.stringify(enabledPacks) !== JSON.stringify([...plugins.keys()].sort())) {
-        errors.push("configured pack ids must match canonical packs");
+    const enabledPlugins = [...(platform.plugins?.enabled ?? platform.packs?.enabled ?? [])].sort();
+    if (JSON.stringify(enabledPlugins) !== JSON.stringify([...plugins.keys()].sort())) {
+        errors.push("configured plugin ids must match canonical plugins");
     }
     for (const required of [
         "core/agents/AGENTS.template.md",
@@ -360,6 +407,7 @@ export async function validateRepository(root) {
         ".codex-plugin",
         ".cursor-plugin",
         "skills",
+        "packs",
         "platform",
         "registry",
         "schemas",
@@ -373,16 +421,15 @@ export async function validateRepository(root) {
     }
     for (const [pluginId, plugin] of plugins) {
         for (const required of [
-            "README.md",
-            "pack.yaml",
+            pluginSource.manifestName,
             "commands",
             "skills",
             "templates",
             "workflows",
             "schemas",
         ]) {
-            if (!(await exists(path.join(root, "packs", pluginId, required)))) {
-                errors.push(`pack ${pluginId} is missing ${required}`);
+            if (!(await exists(path.join(pluginSource.root, pluginId, required)))) {
+                errors.push(`plugin ${pluginId} is missing ${required}`);
             }
         }
         if (plugin.apiVersion !== "ai-engineering.dev/v1alpha1") {
@@ -391,20 +438,20 @@ export async function validateRepository(root) {
         if (plugin.id !== pluginId ||
             plugin.name !== plugin.metadata?.name ||
             plugin.version !== plugin.metadata?.version ||
-            plugin.category !== "capability-pack") {
-            errors.push(`pack ${pluginId} canonical metadata is invalid`);
+            plugin.category !== "ai-ide-plugin") {
+            errors.push(`plugin ${pluginId} canonical metadata is invalid`);
         }
         if ((plugin.triggers?.keywords ?? []).length === 0) {
-            errors.push(`pack ${pluginId} must declare trigger keywords`);
+            errors.push(`plugin ${pluginId} must declare trigger keywords`);
         }
         if ((plugin.commands ?? []).length === 0) {
-            errors.push(`pack ${pluginId} must declare canonical commands`);
+            errors.push(`plugin ${pluginId} must declare canonical commands`);
         }
         if ((plugin.skills ?? []).length === 0) {
-            errors.push(`pack ${pluginId} must declare canonical skills`);
+            errors.push(`plugin ${pluginId} must declare canonical skills`);
         }
-        if (plugin.kind !== "CapabilityPack") {
-            errors.push(`invalid pack kind: ${pluginId}`);
+        if (plugin.kind !== "AiIdePlugin") {
+            errors.push(`invalid plugin kind: ${pluginId}`);
         }
         if (plugin.metadata?.id !== pluginId) {
             errors.push(`plugin id must match directory: ${pluginId}`);

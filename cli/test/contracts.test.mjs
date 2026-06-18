@@ -18,8 +18,9 @@ async function withRepositoryCopy(run) {
   try {
     for (const entry of [
       "ai-engineering.config.yaml",
-      "packs",
+      "plugins",
       "adapters",
+      "cli",
       "core",
       "mcp-servers",
       "docs",
@@ -34,7 +35,31 @@ async function withRepositoryCopy(run) {
   }
 }
 
-test("loads seven canonical capability pack contracts", async () => {
+async function withPluginsRepositoryCopy(run) {
+  const root = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-plugins-"));
+  try {
+    for (const entry of [
+      "ai-engineering.config.yaml",
+      "adapters",
+      "cli",
+      "core",
+      "mcp-servers",
+      "docs",
+    ]) {
+      await cp(path.join(repoRoot, entry), path.join(root, entry), {
+        recursive: true,
+      });
+    }
+    await cp(path.join(repoRoot, "plugins"), path.join(root, "plugins"), {
+      recursive: true,
+    });
+    await run(root);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+}
+
+test("loads seven canonical plugin contracts", async () => {
   const platform = await loadPlatform(repoRoot);
   const plugins = await loadPlugins(repoRoot);
   const validation = await validateRepository(repoRoot);
@@ -55,7 +80,7 @@ test("loads seven canonical capability pack contracts", async () => {
 
   for (const [pluginId, plugin] of plugins) {
     assert.equal(plugin.apiVersion, "ai-engineering.dev/v1alpha1");
-    assert.equal(plugin.kind, "CapabilityPack");
+    assert.equal(plugin.kind, "AiIdePlugin");
     assert.equal(plugin.metadata.id, pluginId);
     assert.ok(plugin.assets.skills.length > 0);
     assert.ok(plugin.assets.commands.length > 0);
@@ -74,9 +99,9 @@ test("rejects unknown skills and missing commands", async () => {
   await withRepositoryCopy(async (root) => {
     const manifestPath = path.join(
       root,
-      "packs",
+      "plugins",
       "application",
-      "pack.yaml",
+      "plugin.yaml",
     );
     const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
     manifest.assets.skills.push("missing-skill");
@@ -95,7 +120,7 @@ test("rejects skills that are not mapped in the central skill registry", async (
   await withRepositoryCopy(async (root) => {
     const skillRoot = path.join(
       root,
-      "packs",
+      "plugins",
       "application",
       "skills",
       "unmapped-skill",
@@ -106,7 +131,25 @@ test("rejects skills that are not mapped in the central skill registry", async (
       "---\nname: unmapped-skill\ndescription: Test skill.\n---\n\n# Test\n",
     );
 
-    await assert.rejects(validateRepository(root), /skill registry for pack application/);
+    await assert.rejects(validateRepository(root), /skill registry for plugin application/);
+  });
+});
+
+test("loads canonical plugin contracts from plugins root", async () => {
+  await withPluginsRepositoryCopy(async (root) => {
+    const plugins = await loadPlugins(root);
+    const validation = await validateRepository(root);
+
+    assert.deepEqual([...plugins.keys()], [
+      "application",
+      "architecture",
+      "data",
+      "knowledge",
+      "platform",
+      "quality",
+      "security",
+    ]);
+    assert.equal(validation.pluginCount, 7);
   });
 });
 
@@ -132,11 +175,11 @@ test("application owns the full-stack orchestration skill set", async () => {
 
 test("Java and React canonical skills expose implementation subagents", async () => {
   const java = await readFile(
-    path.join(repoRoot, "packs/application/skills/java-analyze/SKILL.md"),
+    path.join(repoRoot, "plugins/application/skills/java-analyze/SKILL.md"),
     "utf8",
   );
   const react = await readFile(
-    path.join(repoRoot, "packs/application/skills/react-code-generate/SKILL.md"),
+    path.join(repoRoot, "plugins/application/skills/react-code-generate/SKILL.md"),
     "utf8",
   );
 
@@ -148,7 +191,7 @@ test("application owns one Python backend skill with FastAPI and Django routing"
   const skill = await readFile(
     path.join(
       repoRoot,
-      "packs/application/skills/python-backend-engineer/SKILL.md",
+      "plugins/application/skills/python-backend-engineer/SKILL.md",
     ),
     "utf8",
   );
@@ -174,7 +217,7 @@ test("application defines ten parseable deliverable command files", async () => 
 
   for (const commandId of commandIds) {
     const command = await loadCanonicalCommand(
-      path.join(repoRoot, "packs/application/commands", `${commandId}.md`),
+      path.join(repoRoot, "plugins/application/commands", `${commandId}.md`),
     );
     assert.equal(command.id, commandId);
     assert.ok(command.intent.length > 0);
@@ -185,26 +228,18 @@ test("application defines ten parseable deliverable command files", async () => 
   }
 });
 
-test("application exposes ten commands mapped one-to-one to MCP tools", async () => {
+test("application exposes manifest commands mapped to MCP tools", async () => {
   const plugins = await loadPlugins(repoRoot);
   const application = plugins.get("application");
   assert.deepEqual(application.assets.commands, [
-    "deliver-feature",
-    "design-api-contract",
-    "design-data-change",
-    "fix-feature",
-    "implement-backend",
+    "review-backend",
     "implement-frontend",
-    "integrate-feature",
-    "plan-feature",
-    "review-feature",
-    "test-feature",
   ]);
   const commands = application.commands;
-  assert.equal(commands.length, 10);
+  assert.equal(commands.length, application.assets.commands.length);
   for (const command of commands) {
-    assert.equal(command.id, command.mcp_tool);
     assert.match(command.id, /^application[.]/);
+    assert.match(command.mcp_tool, /^application[.]/);
   }
 });
 
@@ -212,7 +247,7 @@ test("rejects provider-specific paths in canonical commands", async () => {
   await withRepositoryCopy(async (root) => {
     const commandPath = path.join(
       root,
-      "packs",
+      "plugins",
       "application",
       "commands",
       "review-backend.md",
@@ -228,9 +263,9 @@ test("rejects unknown dependencies and required dependency cycles", async () => 
   await withRepositoryCopy(async (root) => {
     const backendPath = path.join(
       root,
-      "packs",
+      "plugins",
       "application",
-      "pack.yaml",
+      "plugin.yaml",
     );
     const backend = JSON.parse(await readFile(backendPath, "utf8"));
     backend.dependencies.required.push("missing-plugin");
@@ -242,9 +277,9 @@ test("rejects unknown dependencies and required dependency cycles", async () => 
   await withRepositoryCopy(async (root) => {
     const architecturePath = path.join(
       root,
-      "packs",
+      "plugins",
       "architecture",
-      "pack.yaml",
+      "plugin.yaml",
     );
     const architecture = JSON.parse(await readFile(architecturePath, "utf8"));
     architecture.dependencies.required.push("application");

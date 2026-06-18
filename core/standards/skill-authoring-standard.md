@@ -1,15 +1,15 @@
 # Skill Authoring Standard
 
-- Moi skill co `SKILL.md` voi `name` va `description`.
-- Dung progressive disclosure qua `resources/`, `scripts/`, va `subagents/`.
-- Khong tron logic domain vao core validator.
-- Moi runtime skill co dung mot canonical owner: pack chua
+- Mỗi skill có `SKILL.md` với `name` và `description`.
+- Dùng progressive disclosure qua `resources/`, `scripts/`, và `subagents/`.
+- Không trộn logic domain vào core validator.
+- Mỗi runtime skill có đúng một canonical owner: plugin chứa
   `skills/<skill>/SKILL.md`.
-- `core/routing/skill-registry.yaml` phai map dung canonical owner va khop voi
-  `pack.yaml.skills`.
-- `pack.yaml.assets.skills` co the ke skill dung chung tu pack khac de cai dat
-  theo command, nhung khong thay doi canonical owner.
-- Dat skill trien khai, stack, source-code trong `application`; dat skill ve
-  boundary he thong va phuong phap thiet ke trong `architecture`; dat policy
-  toan repo va managed agent baseline trong `core/agents`, khong tao runtime
-  skill rieng.
+- `core/routing/skill-registry.yaml` phải map đúng canonical owner và khớp với
+  `plugin.yaml.skills`.
+- `plugin.yaml.assets.skills` có thể kê skill dùng chung từ plugin khác để cài
+  đặt theo command, nhưng không thay đổi canonical owner.
+- Đặt skill triển khai, stack, source-code trong `application`; đặt skill về
+  boundary hệ thống và phương pháp thiết kế trong `architecture`; đặt policy
+  toàn repo và managed agent baseline trong `core/agents`, không tạo runtime
+  skill riêng.

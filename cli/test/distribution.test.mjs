@@ -45,18 +45,33 @@ test("prepares equivalent npm and GitHub release plugin artifacts", async () => 
 
 test("documents AI Engineering lifecycle commands in both readmes", async () => {
   const expected = [
-    "ai-engineering init",
-    "ai-engineering install application --target cursor --scope project",
-    "ai-engineering install --all --target codex,claude,cursor --scope global",
-    "ai-engineering doctor --scope project",
-    "ai-engineering doctor --scope global",
-    "ai-engineering check --scope project",
-    "ai-engineering list --available",
-    "ai-engineering update application",
-    "ai-engineering uninstall security --scope project",
-    "ai-engineering migrate --dry-run",
-    "aie check",
-    "aie list --available",
+    "aie init",
+    "aie doctor",
+    "aie available",
+    "aie installed",
+    "aie install --all --target codex",
+    "aie install --all --target claude",
+    "aie install --all --target cursor",
+    "aie install --all --target codex,claude,cursor",
+    "aie install --all --target codex -g",
+    "aie update application",
+    "aie update --all",
+    "aie remove security",
+    "aie remove --all",
+    "aie install application --target codex",
+    "aie install security quality --target cursor",
+    ".agents/skills",
+    ".codex/agents",
+    ".codex/workflows/commands.md",
+    ".codex/AGENTS.md",
+    ".claude/skills",
+    ".claude/commands",
+    ".claude/CLAUDE.md",
+    "CLAUDE.md",
+    ".codex/config.toml",
+    ".mcp.json",
+    ".claude.json",
+    ".cursor/rules",
     "npm install",
     "npm run build",
   ];
@@ -65,6 +80,28 @@ test("documents AI Engineering lifecycle commands in both readmes", async () => 
     for (const text of expected) {
       assert.match(content, new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
     }
+  }
+});
+
+test("keeps Vietnamese documentation readable as UTF-8", async () => {
+  const files = [
+    "README_VI.md",
+    "cli/README_VI.md",
+    "core/README_VI.md",
+    "docs/README_VI.md",
+    "mcp-servers/README_VI.md",
+    "plugins/README_VI.md",
+    "core/standards/output-format-standard.md",
+    "core/standards/skill-authoring-standard.md",
+  ];
+  const mojibake = /Ã|Ä|á»|áº|Â|Æ|Å/;
+  const vietnameseDiacritic =
+    /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i;
+
+  for (const file of files) {
+    const content = await readFile(path.join(repoRoot, file), "utf8");
+    assert.doesNotMatch(content, mojibake, file);
+    assert.match(content, vietnameseDiacritic, file);
   }
 });
 
