@@ -1,0 +1,37 @@
+export function buildProjectionInput({ root, graph, plugins, scope, provider, mcpServers, }: {
+    root: any;
+    graph: any;
+    plugins: any;
+    scope: any;
+    provider: any;
+    mcpServers: any;
+}): Promise<{
+    schemaVersion: number;
+    scope: any;
+    provider: any;
+    plugins: any;
+    skills: {
+        id: any;
+        sourcePath: string;
+        owners: any[];
+    }[];
+    commands: {
+        intent: any;
+        inputs: any[];
+        requiredSkills: any[];
+        steps: any[];
+        outputContract: any[];
+        sourcePath: any;
+        markdown: string;
+        owners: any[];
+        mcpTool?: any;
+        id: any;
+        pluginId: any;
+        slug: any;
+        description: any;
+        version: any;
+    }[];
+    agents: any;
+    hooks: any;
+    mcpServers: any;
+}>;

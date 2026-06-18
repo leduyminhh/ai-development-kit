@@ -1,0 +1,93 @@
+function json(value) {
+  return `${JSON.stringify(value, null, 2)}\n`;
+}
+
+function owners(input) {
+  return input.plugins.map((item) => item.id).sort();
+}
+
+function ruleBody(command) {
+  return `---
+description: ${command.description}
+alwaysApply: false
+---
+
+# ${command.id} (${command.slug})
+
+## Intent
+
+${command.intent}
+
+## Required Skills
+
+${command.requiredSkills.map((skill) => `- ${skill}`).join("\n")}
+
+## Steps
+
+${command.steps.map((step, index) => `${index + 1}. ${step}`).join("\n")}
+
+## Output Contract
+
+${command.outputContract.map((item) => `- ${item}`).join("\n")}
+`;
+}
+
+export function project(input) {
+  const allOwners = owners(input);
+  const assets =
+    input.scope === "global"
+      ? []
+      : [
+          {
+            operation: "render",
+            assetType: "provider-manifest",
+            assetId: "cursor.provider",
+            destinationPath: ".cursor/rules/provider.json",
+            content: json({
+              apiVersion: "ai-engineering.dev/v1alpha1",
+              kind: "ProviderProjection",
+              provider: "cursor",
+              plugins: input.plugins,
+              commands: input.commands.map((item) => ({
+                id: item.id,
+                slug: item.slug,
+              })),
+            }),
+            owners: allOwners,
+            shared: allOwners.length > 1,
+          },
+          ...input.commands.map((command) => ({
+            operation: "render",
+            assetType: "command",
+            assetId: command.id,
+            destinationPath: `.cursor/rules/${command.slug}.mdc`,
+            content: ruleBody(command),
+            owners: command.owners,
+            shared: command.owners.length > 1,
+          })),
+        ].sort((left, right) =>
+          left.destinationPath.localeCompare(right.destinationPath),
+        );
+
+  return {
+    schemaVersion: 1,
+    provider: "cursor",
+    scope: input.scope,
+    assets,
+    instructions:
+      input.scope === "project"
+        ? [
+            {
+              destinationPath: "AGENTS.md",
+              templatePath: "core/agents/AGENTS.template.md",
+            },
+          ]
+        : [],
+    mcpConfig: {
+      destinationPath: ".cursor/mcp.json",
+      format: "json",
+      rootKey: "mcpServers",
+      servers: input.mcpServers,
+    },
+  };
+}

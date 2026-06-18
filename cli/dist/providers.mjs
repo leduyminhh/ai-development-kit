@@ -1,124 +1,104 @@
-function json(value) {
-    return `${JSON.stringify(value, null, 2)}\n`;
+import { validateProjectionInput, validateProjectionPlan, } from "./projection-contracts.mjs";
+import { PlatformError } from "./errors.mjs";
+const adapterUrl = (provider) => new URL(`../../adapters/${provider}/projector.mjs`, import.meta.url).href;
+const [{ project: projectCodexAdapter }, { project: projectClaudeAdapter }, { project: projectCursorAdapter },] = await Promise.all([
+    import(adapterUrl("codex")),
+    import(adapterUrl("claude")),
+    import(adapterUrl("cursor")),
+]);
+const PROJECTORS = {
+    codex: projectCodexAdapter,
+    claude: projectClaudeAdapter,
+    cursor: projectCursorAdapter,
+};
+export function projectProvider(input) {
+    const projector = PROJECTORS[input.provider];
+    if (!projector) {
+        throw new PlatformError(`unsupported provider ${input.provider}`, {
+            code: "AI_ENGINEERING_INCOMPATIBLE",
+        });
+    }
+    return validateProjectionPlan(projector(validateProjectionInput(input)));
 }
-function commandBody(command) {
-    return `# ${command.id} (${command.slug})
-
-## Intent
-
-${command.intent}
-
-## Required Skills
-
-${command.requiredSkills.map((skill) => `- ${skill}`).join("\n")}
-
-## Steps
-
-${command.steps.map((step, index) => `${index + 1}. ${step}`).join("\n")}
-
-## Output Contract
-
-${command.outputContract.map((item) => `- ${item}`).join("\n")}
-`;
-}
-function manifest(context, provider) {
+function legacyInput(context, provider) {
+    const pluginIds = context.plugin?.metadata?.id
+        ? [context.plugin.metadata.id]
+        : ["platform"];
     return {
-        apiVersion: "ai-engineering.dev/v1alpha1",
-        kind: "ProviderProjection",
+        schemaVersion: 1,
         provider,
-        plugin: {
-            id: context.plugin.metadata.id,
-            name: context.plugin.metadata.name,
-            version: context.plugin.metadata.version,
-        },
-        skills: [...context.skills].sort(),
-        agents: [...context.agents].sort(),
-        hooks: [...context.hooks].sort(),
-        commands: context.commands.map((command) => command.id).sort(),
+        scope: context.scope ?? "project",
+        plugins: pluginIds.map((id) => ({
+            id,
+            version: context.plugin?.metadata?.version ?? "1.0.0",
+        })),
+        skills: (context.skills ?? []).map((id) => ({
+            id,
+            sourcePath: `plugins/platform/skills/${id}`,
+            owners: pluginIds,
+        })),
+        commands: (context.commands ?? []).map((command) => ({
+            ...command,
+            pluginId: command.pluginId ?? command.id.split(".")[0],
+            owners: command.owners ?? pluginIds,
+        })),
+        agents: (context.agents ?? []).map((id) => ({
+            id,
+            sourcePath: `adapters/codex/agents/${id}.toml`,
+            owners: pluginIds,
+        })),
+        hooks: (context.hooks ?? []).map((id) => ({
+            id,
+            owners: pluginIds,
+        })),
+        mcpServers: context.mcpServers ?? {},
     };
+}
+function legacyProjection(plan, input) {
+    const files = plan.assets
+        .filter((asset) => asset.operation === "render")
+        .map((asset) => ({
+        path: asset.destinationPath,
+        content: asset.content,
+    }));
+    const commandAsset = plan.assets.find((asset) => asset.assetType === "command");
+    const workflowAsset = plan.assets.find((asset) => asset.assetType === "command-catalog");
+    return {
+        manifest: JSON.parse(plan.assets.find((asset) => asset.assetType === "provider-manifest")
+            ?.content ?? "{}"),
+        workflow: workflowAsset?.content ?? "",
+        command: commandAsset?.content ?? "",
+        rule: commandAsset?.content ?? "",
+        intent: input.commands[0]?.intent ?? "",
+        files,
+        mcpConfig: {
+            provider: plan.provider,
+            format: plan.mcpConfig.format,
+            path: plan.mcpConfig.destinationPath,
+            servers: plan.mcpConfig.servers,
+        },
+    };
+}
+function projectLegacy(context, provider) {
+    const input = legacyInput(context, provider);
+    return legacyProjection(projectProvider(input), input);
 }
 export function projectCodex(context) {
-    const providerManifest = manifest(context, "codex");
-    const workflow = context.commands.map(commandBody).join("\n");
-    const codexFiles = [
-        {
-            path: ".codex/agents/openai.yaml",
-            content: json(providerManifest),
-        },
-        {
-            path: ".codex/workflows/commands.md",
-            content: workflow,
-        },
-    ];
-    return {
-        manifest: providerManifest,
-        workflow,
-        intent: context.commands[0]?.intent ?? "",
-        files: codexFiles,
-        mcpConfig: {
-            provider: "codex",
-            format: "toml",
-            path: ".codex/config.toml",
-            servers: context.mcpServers ?? {},
-        },
-    };
+    return projectLegacy(context, "codex");
 }
 export function projectClaude(context) {
-    const providerManifest = manifest(context, "claude");
-    const commands = context.commands.map((command) => ({
-        path: `.claude/commands/${command.slug}.md`,
-        content: `---\ndescription: ${command.description}\n---\n\n${commandBody(command)}`,
-    }));
-    const projectFiles = [
-        {
-            path: ".claude-plugin/plugin.json",
-            content: json(providerManifest),
-        },
-        ...commands,
-    ];
-    return {
-        manifest: providerManifest,
-        command: commands[0]?.content ?? "",
-        intent: context.commands[0]?.intent ?? "",
-        files: context.scope === "global" ? commands : projectFiles,
-        mcpConfig: {
-            provider: "claude",
-            format: "json",
-            path: context.scope === "global" ? ".claude.json" : ".mcp.json",
-            servers: context.mcpServers ?? {},
-        },
-    };
+    return projectLegacy(context, "claude");
 }
 export function projectCursor(context) {
-    const providerManifest = manifest(context, "cursor");
-    const rules = context.commands.map((command) => ({
-        path: `.cursor/rules/${command.slug}.mdc`,
-        content: `---\ndescription: ${command.description}\nalwaysApply: false\n---\n\n${commandBody(command)}`,
-    }));
-    const projectFiles = [
-        {
-            path: ".cursor/rules/provider.json",
-            content: json(providerManifest),
-        },
-        ...rules,
-    ];
-    return {
-        manifest: providerManifest,
-        rule: rules[0]?.content ?? "",
-        intent: context.commands[0]?.intent ?? "",
-        files: context.scope === "global" ? [] : projectFiles,
-        mcpConfig: {
-            provider: "cursor",
-            format: "json",
-            path: ".cursor/mcp.json",
-            servers: context.mcpServers ?? {},
-        },
-    };
+    return projectLegacy(context, "cursor");
 }
-export function projectProviders(context) {
+export function projectProviders(input) {
+    if (Array.isArray(input)) {
+        return Object.fromEntries(input.map((item) => [item.provider, projectProvider(item)]));
+    }
     return {
-        codex: projectCodex(context),
-        claude: projectClaude(context),
-        cursor: projectCursor(context),
+        codex: projectCodex(input),
+        claude: projectClaude(input),
+        cursor: projectCursor(input),
     };
 }

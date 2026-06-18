@@ -30,6 +30,27 @@ test("resolves required dependencies and deduplicates shared assets", async () =
   assert.deepEqual(combined.pluginIds, ["architecture", "application", "security"]);
 });
 
+test("separates root required and selected optional plugins", async () => {
+  const plugins = await loadPlugins(repoRoot);
+  const graph = resolvePluginGraph({
+    requested: ["application"],
+    optional: ["quality"],
+    plugins,
+    platformVersion: "1.0.0",
+    providers: ["codex", "claude"],
+  });
+
+  assert.deepEqual(graph.rootPlugins, ["application"]);
+  assert.deepEqual(graph.requiredPlugins, ["architecture"]);
+  assert.deepEqual(graph.optionalPlugins, ["quality"]);
+  assert.deepEqual(graph.pluginIds, [
+    "architecture",
+    "application",
+    "quality",
+  ]);
+  assert.ok(graph.commands.includes("application.review_backend"));
+});
+
 test("rejects unknown plugins and required dependency cycles", async () => {
   const plugins = await loadPlugins(repoRoot);
   assert.throws(

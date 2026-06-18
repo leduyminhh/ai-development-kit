@@ -4,6 +4,7 @@ import test from "node:test";
 
 import { findCommandPath, loadCanonicalCommand } from "../src/contracts.mjs";
 import {
+  projectProvider,
   projectClaude,
   projectCodex,
   projectCursor,
@@ -52,7 +53,7 @@ test("projects canonical command semantics for all providers", async () => {
   );
   assert.deepEqual(
     claude.files.map((file) => file.path),
-    [".claude-plugin/plugin.json", ".claude/commands/review-backend.md"],
+    [".claude/commands/review-backend.md", ".claude-plugin/plugin.json"],
   );
 });
 
@@ -121,4 +122,97 @@ test("global projections expose native files and user-level MCP configs", async 
   assert.equal(outputs.codex.mcpConfig.path, ".codex/config.toml");
   assert.equal(outputs.claude.mcpConfig.path, ".claude.json");
   assert.equal(outputs.cursor.mcpConfig.path, ".cursor/mcp.json");
+});
+
+function projectionInput(provider, scope) {
+  return {
+    schemaVersion: 1,
+    provider,
+    scope,
+    plugins: [{ id: "application", version: "1.0.0" }],
+    skills: [
+      {
+        id: "java-analyze",
+        sourcePath: "plugins/application/skills/java-analyze",
+        owners: ["application"],
+      },
+    ],
+    commands: [
+      {
+        id: "application.review_backend",
+        pluginId: "application",
+        slug: "review-backend",
+        description: "Review backend source code.",
+        version: "1.0.0",
+        intent: "Review backend.",
+        inputs: ["source scope"],
+        requiredSkills: ["java-analyze"],
+        steps: ["Inspect source."],
+        outputContract: ["summary"],
+        sourcePath: "plugins/application/commands/review-backend.md",
+        markdown: "# Review Backend",
+        owners: ["application"],
+      },
+    ],
+    agents: [
+      {
+        id: "java-analyze",
+        sourcePath: "adapters/codex/agents/java-analyze.toml",
+        owners: ["application"],
+      },
+    ],
+    hooks: [],
+    mcpServers: {},
+  };
+}
+
+test("projects exact provider-native project layouts", () => {
+  const codex = projectProvider(projectionInput("codex", "project"));
+  const claude = projectProvider(projectionInput("claude", "project"));
+  const cursor = projectProvider(projectionInput("cursor", "project"));
+
+  assert.deepEqual(
+    codex.assets.map((item) => item.destinationPath),
+    [
+      ".agents/skills/java-analyze",
+      ".codex/agents/java-analyze.toml",
+      ".codex/agents/openai.yaml",
+      ".codex/workflows/commands.md",
+    ],
+  );
+  assert.deepEqual(
+    claude.assets.map((item) => item.destinationPath),
+    [
+      ".claude/commands/review-backend.md",
+      ".claude-plugin/plugin.json",
+      ".claude/skills/java-analyze",
+    ],
+  );
+  assert.deepEqual(
+    cursor.assets.map((item) => item.destinationPath),
+    [
+      ".cursor/rules/provider.json",
+      ".cursor/rules/review-backend.mdc",
+    ],
+  );
+  assert.equal(codex.instructions[0].destinationPath, "AGENTS.md");
+  assert.equal(claude.instructions[0].destinationPath, "CLAUDE.md");
+  assert.equal(cursor.instructions[0].destinationPath, "AGENTS.md");
+});
+
+test("projects exact provider-native global layouts", () => {
+  const codex = projectProvider(projectionInput("codex", "global"));
+  const claude = projectProvider(projectionInput("claude", "global"));
+  const cursor = projectProvider(projectionInput("cursor", "global"));
+
+  assert.equal(codex.instructions[0].destinationPath, ".codex/AGENTS.md");
+  assert.equal(claude.instructions[0].destinationPath, ".claude/CLAUDE.md");
+  assert.equal(
+    claude.assets.some(
+      (item) => item.destinationPath === ".claude-plugin/plugin.json",
+    ),
+    false,
+  );
+  assert.deepEqual(cursor.assets, []);
+  assert.equal(cursor.mcpConfig.destinationPath, ".cursor/mcp.json");
 });

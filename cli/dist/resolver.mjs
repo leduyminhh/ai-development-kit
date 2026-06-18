@@ -17,7 +17,7 @@ function addOwners(target, values, pluginId) {
         target[value] = owners;
     }
 }
-export function resolvePluginGraph({ requested, plugins, platformVersion, providers, }) {
+export function resolvePluginGraph({ requested, optional = [], plugins, platformVersion, providers, }) {
     for (const provider of providers) {
         if (!SUPPORTED_PROVIDERS.has(provider)) {
             throw new PlatformError(`unsupported provider ${provider}`, {
@@ -59,7 +59,18 @@ export function resolvePluginGraph({ requested, plugins, platformVersion, provid
         visited.add(pluginId);
         resolved.push(pluginId);
     }
-    for (const pluginId of [...new Set(requested)].sort()) {
+    const rootPlugins = [...new Set(requested)].sort();
+    const optionalPlugins = [...new Set(optional)].sort();
+    const allowedOptional = new Set(rootPlugins.flatMap((pluginId) => plugins.get(pluginId)?.dependencies?.optional ?? []));
+    for (const pluginId of optionalPlugins) {
+        if (!allowedOptional.has(pluginId)) {
+            throw new PlatformError(`plugin ${pluginId} is not an optional dependency of the selected roots`, { code: "AI_ENGINEERING_INCOMPATIBLE" });
+        }
+    }
+    for (const pluginId of rootPlugins) {
+        visit(pluginId);
+    }
+    for (const pluginId of optionalPlugins) {
         visit(pluginId);
     }
     const skills = new Set();
@@ -71,18 +82,31 @@ export function resolvePluginGraph({ requested, plugins, platformVersion, provid
         const assets = plugins.get(pluginId).assets;
         for (const value of assets.skills ?? [])
             skills.add(value);
-        for (const value of assets.commands ?? [])
-            commands.add(value);
+        for (const value of assets.commands ?? []) {
+            const slug = value
+                .replace(/^commands\//, "")
+                .replace(/\.md$/, "");
+            commands.add(`${pluginId}.${slug.replaceAll("-", "_")}`);
+        }
         for (const value of assets.agents ?? [])
             agents.add(value);
         for (const value of assets.hooks ?? [])
             hooks.add(value);
         addOwners(ownership.skills, assets.skills ?? [], pluginId);
-        addOwners(ownership.commands, assets.commands ?? [], pluginId);
+        addOwners(ownership.commands, (assets.commands ?? []).map((value) => {
+            const slug = value
+                .replace(/^commands\//, "")
+                .replace(/\.md$/, "");
+            return `${pluginId}.${slug.replaceAll("-", "_")}`;
+        }), pluginId);
         addOwners(ownership.agents, assets.agents ?? [], pluginId);
         addOwners(ownership.hooks, assets.hooks ?? [], pluginId);
     }
     return {
+        rootPlugins,
+        requiredPlugins: resolved.filter((pluginId) => !rootPlugins.includes(pluginId) &&
+            !optionalPlugins.includes(pluginId)),
+        optionalPlugins,
         pluginIds: resolved,
         skills: [...skills].sort(),
         commands: [...commands].sort(),
