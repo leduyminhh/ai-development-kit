@@ -35,7 +35,7 @@ ${command.outputContract.map((item) => `- ${item}`).join("\n")}
 export function project(input) {
   const allOwners = owners(input);
   const assets =
-    input.scope === "global"
+    input.plugins.length === 0 || input.scope === "global"
       ? []
       : [
           {
@@ -75,7 +75,7 @@ export function project(input) {
     scope: input.scope,
     assets,
     instructions:
-      input.scope === "project"
+      input.plugins.length > 0 && input.scope === "project"
         ? [
             {
               destinationPath: "AGENTS.md",

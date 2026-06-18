@@ -50,8 +50,9 @@ export async function planTransaction({
     const destination = resolveInside(target, relativePath);
     const current = await readTextIfExists(destination);
     const ownedBefore = Boolean(previousOwnership.files?.[relativePath]);
-    const mergeManaged =
-      ownership.files?.[relativePath]?.mergeStrategy === "mcp-config";
+    const mergeManaged = Boolean(
+      ownership.files?.[relativePath]?.mergeStrategy,
+    );
     let action = "create";
     if (current !== null && !ownedBefore && !force && !mergeManaged) {
       throw new Error(`conflict: unmanaged file exists: ${relativePath}`);
@@ -115,7 +116,10 @@ export async function planTransaction({
     target,
     actions,
     lock,
-    ownership: { schemaVersion: 1, files },
+    ownership: {
+      schemaVersion: ownership.schemaVersion ?? 1,
+      files,
+    },
     validateApplied,
     transactionId: randomUUID(),
     backupRelativePaths,

@@ -124,3 +124,23 @@ test("doctor rejects missing Claude-native instructions", async () => {
     await rm(target, { recursive: true, force: true });
   }
 });
+
+test("doctor rejects a missing projected command", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "doctor-projection-"));
+  try {
+    await installPlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["application"],
+      providers: ["claude"],
+    });
+    await rm(path.join(target, ".claude/commands/review-backend.md"));
+
+    await assert.rejects(
+      doctorProject({ root: repoRoot, target }),
+      /projected asset is missing: .claude\/commands\/review-backend.md/,
+    );
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});

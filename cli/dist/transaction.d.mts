@@ -15,7 +15,7 @@ export function planTransaction({ target, desiredFiles, lock, ownership, force, 
     }[];
     lock: any;
     ownership: {
-        schemaVersion: number;
+        schemaVersion: any;
         files: {};
     };
     validateApplied: any;

@@ -6,14 +6,18 @@ import { PlatformError } from "./errors.mjs";
 
 const adapterUrl = (provider) =>
   new URL(`../../adapters/${provider}/projector.mjs`, import.meta.url).href;
+const dynamicImport = new Function(
+  "specifier",
+  "return import(specifier)",
+);
 const [
   { project: projectCodexAdapter },
   { project: projectClaudeAdapter },
   { project: projectCursorAdapter },
 ] = await Promise.all([
-  import(adapterUrl("codex")),
-  import(adapterUrl("claude")),
-  import(adapterUrl("cursor")),
+  dynamicImport(adapterUrl("codex")),
+  dynamicImport(adapterUrl("claude")),
+  dynamicImport(adapterUrl("cursor")),
 ]);
 
 const PROJECTORS = {

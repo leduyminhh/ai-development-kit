@@ -157,6 +157,43 @@ test("installs Claude project-native skills and commands", async () => {
   }
 });
 
+test("materializes adapter projections with typed ownership", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "projection-ownership-"));
+  try {
+    await installPlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["application"],
+      providers: ["claude"],
+    });
+    const ownership = JSON.parse(
+      await readFile(
+        path.join(target, ".ai-engineering/ownership.json"),
+        "utf8",
+      ),
+    );
+    const command =
+      ownership.files[".claude/commands/review-backend.md"];
+    assert.equal(ownership.schemaVersion, 2);
+    assert.equal(command.assetType, "command");
+    assert.equal(command.assetId, "application.review_backend");
+    assert.deepEqual(command.owners, ["application"]);
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
+test("lifecycle does not own provider destination paths", async () => {
+  const lifecycleSource = await readFile(
+    path.join(repoRoot, "cli/src/lifecycle.mjs"),
+    "utf8",
+  );
+  assert.doesNotMatch(
+    lifecycleSource,
+    /["'`]\.(?:agents\/skills|claude\/skills|cursor\/rules|codex\/agents)/,
+  );
+});
+
 test("installs Claude global-native skills and commands", async () => {
   const project = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-claude-global-project-"));
   const home = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-claude-global-home-"));

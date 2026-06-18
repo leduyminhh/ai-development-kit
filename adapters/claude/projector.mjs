@@ -46,7 +46,7 @@ function providerManifest(input) {
 
 export function project(input) {
   const allOwners = owners(input);
-  const assets = [
+  const assets = input.plugins.length === 0 ? [] : [
     ...input.skills.map((skill) => ({
       operation: "copy",
       assetType: "skill",
@@ -66,7 +66,7 @@ export function project(input) {
       shared: command.owners.length > 1,
     })),
   ];
-  if (input.scope === "project") {
+  if (input.plugins.length > 0 && input.scope === "project") {
     assets.push({
       operation: "render",
       assetType: "provider-manifest",
@@ -93,7 +93,7 @@ export function project(input) {
     provider: "claude",
     scope: input.scope,
     assets,
-    instructions: [
+    instructions: input.plugins.length === 0 ? [] : [
       {
         destinationPath:
           input.scope === "global" ? ".claude/CLAUDE.md" : "CLAUDE.md",

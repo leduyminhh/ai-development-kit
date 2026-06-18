@@ -16,7 +16,7 @@ async function readIfExists(pathname) {
   }
 }
 
-function mergeManagedBlock(existing, baseline, relativePath) {
+export function mergeManagedBlock(existing, baseline, relativePath) {
   const start = existing.indexOf(BEGIN);
   const end = existing.indexOf(END);
   if (start === -1 && end === -1) {
@@ -30,6 +30,25 @@ function mergeManagedBlock(existing, baseline, relativePath) {
   return `${existing.slice(0, start)}${baseline.trim()}${existing.slice(
     end + END.length,
   )}`;
+}
+
+export async function prepareInstructionFileContent({
+  root,
+  target,
+  relativePath,
+}) {
+  const template = await readFile(
+    path.join(root, "core", "agents", "AGENTS.template.md"),
+    "utf8",
+  );
+  const baseline = await readFile(
+    path.join(root, "core", "agents", "AGENTS.baseline.md"),
+    "utf8",
+  );
+  const existing = await readIfExists(path.join(target, relativePath));
+  return existing === null
+    ? template
+    : mergeManagedBlock(existing, baseline, relativePath);
 }
 
 export async function initializeInstructionFile({

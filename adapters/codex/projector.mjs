@@ -45,7 +45,7 @@ function providerManifest(input) {
 
 export function project(input) {
   const allOwners = owners(input);
-  const assets = [
+  const assets = input.plugins.length === 0 ? [] : [
     ...input.skills.map((skill) => ({
       operation: "copy",
       assetType: "skill",
@@ -91,7 +91,7 @@ export function project(input) {
     provider: "codex",
     scope: input.scope,
     assets,
-    instructions: [
+    instructions: input.plugins.length === 0 ? [] : [
       {
         destinationPath:
           input.scope === "global" ? ".codex/AGENTS.md" : "AGENTS.md",

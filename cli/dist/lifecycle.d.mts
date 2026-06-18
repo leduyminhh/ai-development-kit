@@ -1,3 +1,63 @@
+export function prepareInstallation({ root, context, rootPlugins, optionalPlugins, providers, force, all, }: {
+    root: any;
+    context: any;
+    rootPlugins?: never[] | undefined;
+    optionalPlugins?: never[] | undefined;
+    providers: any;
+    force?: boolean | undefined;
+    all?: boolean | undefined;
+}): Promise<{
+    desiredFiles: Map<any, any>;
+    lock: {
+        schemaVersion: number;
+        platformVersion: any;
+        scope: any;
+        providers: any[];
+        rootPlugins: any;
+        optionalPlugins: any[];
+        plugins: {
+            id: any;
+            version: any;
+        }[];
+        managedMcpServers: any;
+    };
+    ownership: {
+        schemaVersion: number;
+        files: {};
+    };
+    projections: {};
+    graph: {
+        rootPlugins: any[];
+        requiredPlugins: any[];
+        optionalPlugins: any[];
+        pluginIds: any[];
+        skills: any[];
+        commands: any[];
+        agents: any[];
+        hooks: any[];
+        providers: any[];
+        ownership: {
+            skills: {};
+            commands: {};
+            agents: {};
+            hooks: {};
+        };
+    };
+    mcpServers: any;
+    plugins: any[];
+    providers: any[];
+}>;
+export function applyPreparedInstallation({ prepared, context, force, }: {
+    prepared: any;
+    context: any;
+    force?: boolean | undefined;
+}): Promise<{
+    status: string;
+    scope: any;
+    plugins: any;
+    providers: any;
+    optionalPlugins: any;
+}>;
 export function installPlugins({ root, target, context, pluginIds, all, providers, force, }: {
     root: any;
     target: any;
@@ -9,8 +69,9 @@ export function installPlugins({ root, target, context, pluginIds, all, provider
 }): Promise<{
     status: string;
     scope: any;
-    plugins: any[];
-    providers: any[];
+    plugins: any;
+    providers: any;
+    optionalPlugins: any;
 }>;
 export function listInstalled({ target }: {
     target: any;
@@ -19,6 +80,7 @@ export function listInstalled({ target }: {
     scope: any;
     plugins: any;
     rootPlugins: any;
+    optionalPlugins: any;
     providers: any;
     platformVersion: any;
     managedMcpServers: any;
@@ -135,8 +197,9 @@ export function updatePlugins({ root, target, context, pluginIds, all, registry,
     }[];
     status: string;
     scope: any;
-    plugins: any[];
-    providers: any[];
+    plugins: any;
+    providers: any;
+    optionalPlugins: any;
 }>;
 export function removePlugins({ root, target, context, pluginIds, all, force, }: {
     root: any;

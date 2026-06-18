@@ -121,6 +121,26 @@ export async function doctorProject({ target, context }) {
     lock = await readJson(path.join(target, ".ai-engineering", "platform.lock"));
   }
   const scope = context?.scope ?? lock.scope ?? "project";
+  const ownershipPath = path.join(
+    target,
+    ".ai-engineering",
+    "ownership.json",
+  );
+  if (await exists(ownershipPath)) {
+    const ownership = await readJson(ownershipPath);
+    for (const [relativePath, metadata] of Object.entries(
+      ownership.files ?? {},
+    )) {
+      if (
+        ["command", "skill", "agent", "provider-manifest", "command-catalog"].includes(
+          metadata.assetType,
+        ) &&
+        !(await exists(path.join(target, relativePath)))
+      ) {
+        errors.push(`projected asset is missing: ${relativePath}`);
+      }
+    }
+  }
   if (scope === "project") {
     const agentsPath = path.join(target, "AGENTS.md");
     const agents = (await exists(agentsPath))

@@ -1,10 +1,7 @@
-import { readFile, rm } from "node:fs/promises";
+import { readFile, rm, stat } from "node:fs/promises";
 import path from "node:path";
 
 import {
-  findCommandPath,
-  findSkillPath,
-  loadCanonicalCommand,
   loadPlatform,
   loadPlugins,
 } from "./contracts.mjs";
@@ -14,13 +11,14 @@ import {
   mergeCodexMcpConfig,
   mergeJsonMcpConfig,
 } from "./mcp-config.mjs";
-import { projectProviders } from "./providers.mjs";
+import { projectProvider } from "./providers.mjs";
+import { buildProjectionInput } from "./projection-input.mjs";
 import { resolvePluginGraph } from "./resolver.mjs";
 import { readPlatformState } from "./state.mjs";
 import { applyTransaction, planTransaction } from "./transaction.mjs";
 import {
-  initializeInstructionFile,
   initializeProject,
+  prepareInstructionFileContent,
 } from "./init.mjs";
 
 const CORE_RUNTIME_DIRECTORIES = [
@@ -76,131 +74,67 @@ function addOwnership(
   files,
   relativePath,
   owners,
-  source,
+  assetId,
   shared = false,
   extra = {},
 ) {
   files[relativePath] = {
     owners: [...owners].sort(),
-    source,
+    assetType: extra.assetType ?? "runtime",
+    assetId,
     checksum: "",
     shared,
     ...extra,
   };
+  delete files[relativePath].source;
 }
 
-async function addProjectAssets({
+async function materializeProjectionAsset({
   root,
-  graph,
-  plugins,
+  asset,
   desiredFiles,
   ownershipFiles,
 }) {
-  for (const skill of graph.skills) {
-    const prefixes = new Set();
-    if (graph.providers.includes("codex")) {
-      prefixes.add(`.agents/skills/${skill}`);
-    }
-    if (graph.providers.includes("claude")) {
-      prefixes.add(`.claude/skills/${skill}`);
-    }
-    for (const prefix of prefixes) {
-      for (const [relativePath, content] of await readDirectoryFiles(
-        await findSkillPath(root, skill),
-        prefix,
-      )) {
-        desiredFiles.set(relativePath, content);
-        addOwnership(
-          ownershipFiles,
-          relativePath,
-          graph.ownership.skills[skill] ?? graph.pluginIds,
-          skill,
-          (graph.ownership.skills[skill] ?? []).length > 1,
-        );
-      }
-    }
-  }
-
-  const commands = [];
-  for (const pluginId of graph.pluginIds) {
-    const plugin = plugins.get(pluginId);
-    for (const commandId of plugin.assets.commands) {
-      const source = await findCommandPath(root, commandId);
-      commands.push(await loadCanonicalCommand(source));
-    }
-  }
-
-  if (graph.providers.includes("codex")) {
-    await addCodexAgents({ root, graph, desiredFiles, ownershipFiles });
-  }
-  return commands;
-}
-
-async function addCodexAgents({
-  root,
-  graph,
-  desiredFiles,
-  ownershipFiles,
-}) {
-  for (const agent of graph.agents) {
-    const relativePath = `.codex/agents/${agent}.toml`;
-    desiredFiles.set(
-      relativePath,
-      await readFile(
-        path.join(root, "adapters", "codex", "agents", `${agent}.toml`),
-        "utf8",
-      ),
-    );
+  if (asset.operation === "render") {
+    desiredFiles.set(asset.destinationPath, asset.content);
     addOwnership(
       ownershipFiles,
-      relativePath,
-      graph.ownership.agents[agent] ?? graph.pluginIds,
-      agent,
-      (graph.ownership.agents[agent] ?? []).length > 1,
+      asset.destinationPath,
+      asset.owners,
+      asset.assetId,
+      asset.shared,
+      { assetType: asset.assetType },
     );
+    return;
   }
-}
-
-async function loadGraphCommands({ root, graph, plugins }) {
-  const commands = [];
-  for (const pluginId of graph.pluginIds) {
-    const plugin = plugins.get(pluginId);
-    for (const commandId of plugin.assets.commands) {
-      commands.push(await loadCanonicalCommand(await findCommandPath(root, commandId)));
-    }
-  }
-  return commands;
-}
-
-async function addGlobalProviderSkills({
-  root,
-  graph,
-  provider,
-  desiredFiles,
-  ownershipFiles,
-}) {
-  const prefixByProvider = {
-    codex: ".agents/skills",
-    claude: ".claude/skills",
-  };
-  const rootPrefix = prefixByProvider[provider];
-  if (!rootPrefix) return;
-  for (const skill of graph.skills) {
-    const prefix = `${rootPrefix}/${skill}`;
+  const source = path.join(root, asset.sourcePath);
+  const sourceStat = await stat(source);
+  if (sourceStat.isDirectory()) {
     for (const [relativePath, content] of await readDirectoryFiles(
-      await findSkillPath(root, skill),
-      prefix,
+      source,
+      asset.destinationPath,
     )) {
       desiredFiles.set(relativePath, content);
       addOwnership(
         ownershipFiles,
         relativePath,
-        graph.ownership.skills[skill] ?? graph.pluginIds,
-        skill,
-        (graph.ownership.skills[skill] ?? []).length > 1,
+        asset.owners,
+        asset.assetId,
+        asset.shared,
+        { assetType: asset.assetType },
       );
     }
+    return;
   }
+  desiredFiles.set(asset.destinationPath, await readFile(source, "utf8"));
+  addOwnership(
+    ownershipFiles,
+    asset.destinationPath,
+    asset.owners,
+    asset.assetId,
+    asset.shared,
+    { assetType: asset.assetType },
+  );
 }
 
 async function addRuntimeFiles({
@@ -282,6 +216,7 @@ async function buildDesiredState({
   all = false,
   providers,
   rootPlugins,
+  optionalPlugins = [],
   force = false,
 }) {
   const installContext = normalizeContext(target, context);
@@ -290,6 +225,7 @@ async function buildDesiredState({
   const requested = all ? [...plugins.keys()] : pluginIds;
   const graph = resolvePluginGraph({
     requested,
+    optional: optionalPlugins,
     plugins,
     platformVersion: platform.product.version,
     providers: providers ?? platform.providers.enabled,
@@ -298,92 +234,73 @@ async function buildDesiredState({
   const desiredFiles = new Map();
   const ownershipFiles = {};
 
-  let commands = [];
-  if (installContext.projectAssets) {
-    commands = await addProjectAssets({
-        root,
-        graph,
-        plugins,
-        desiredFiles,
-        ownershipFiles,
-      });
-  } else if (installContext.scope === "global") {
-    commands = await loadGraphCommands({ root, graph, plugins });
-    for (const provider of graph.providers) {
-      await addGlobalProviderSkills({
-        root,
-        graph,
-        provider,
-        desiredFiles,
-        ownershipFiles,
-      });
-      if (provider === "codex") {
-        await addCodexAgents({
-          root,
-          graph,
-          desiredFiles,
-          ownershipFiles,
-        });
-      }
-    }
-  }
-
   await addRuntimeFiles({ root, graph, desiredFiles, ownershipFiles });
 
   const mcpServers = createMcpRegistrations({
     packIds: graph.pluginIds,
     runtimeRoot: path.join(installContext.targetRoot, ".ai-engineering"),
   });
-  const projections = projectProviders({
-    scope: installContext.scope,
-    plugin: {
-      metadata: {
-        id: "platform",
-        name: platform.product.displayName,
-        version: platform.product.version,
-      },
-    },
-    commands,
-    skills: graph.skills,
-    agents: graph.agents,
-    hooks: graph.hooks,
-    mcpServers,
-  });
+  const projections = {};
 
   for (const provider of graph.providers) {
-    const projection = projections[provider];
-    const globalProviderFiles = new Set(["codex", "claude"]);
-    const writeProviderFiles =
-      installContext.projectAssets ||
-      (installContext.scope === "global" && globalProviderFiles.has(provider));
-    if (writeProviderFiles && graph.pluginIds.length > 0) {
-      for (const file of projection.files) {
-        desiredFiles.set(file.path, file.content);
+    const projectionInput = await buildProjectionInput({
+      root,
+      graph,
+      plugins,
+      scope: installContext.scope,
+      provider,
+      mcpServers,
+    });
+    const projection = projectProvider(projectionInput);
+    projections[provider] = projection;
+    if (graph.pluginIds.length > 0) {
+      for (const asset of projection.assets) {
+        await materializeProjectionAsset({
+          root,
+          asset,
+          desiredFiles,
+          ownershipFiles,
+        });
+      }
+      for (const instruction of projection.instructions) {
+        const content = await prepareInstructionFileContent({
+          root,
+          target: installContext.targetRoot,
+          relativePath: instruction.destinationPath,
+        });
+        desiredFiles.set(instruction.destinationPath, content);
         addOwnership(
           ownershipFiles,
-          file.path,
+          instruction.destinationPath,
           graph.pluginIds,
-          provider,
+          `${provider}.instructions`,
+          true,
+          { assetType: "instruction", mergeStrategy: "managed-block" },
         );
       }
     }
 
     const merged = await mergeProviderConfig({
       provider,
-      projection,
+      projection: {
+        mcpConfig: {
+          ...projection.mcpConfig,
+          path: projection.mcpConfig.destinationPath,
+        },
+      },
       target: installContext.targetRoot,
       previousState,
       force,
     });
     if (!merged.empty) {
-      desiredFiles.set(projection.mcpConfig.path, merged.content);
+      desiredFiles.set(projection.mcpConfig.destinationPath, merged.content);
       addOwnership(
         ownershipFiles,
-        projection.mcpConfig.path,
+        projection.mcpConfig.destinationPath,
         graph.pluginIds,
-        `${provider}-mcp-config`,
+        `${provider}.mcp-config`,
         true,
-        { mergeStrategy: "mcp-config" },
+        { assetType: "mcp-config", mergeStrategy: "mcp-config" },
       );
     }
   }
@@ -396,6 +313,7 @@ async function buildDesiredState({
     scope: installContext.scope,
     providers: activeProviders,
     rootPlugins: rootPlugins ?? requested,
+    optionalPlugins: graph.optionalPlugins,
     plugins: graph.pluginIds.map((id) => ({
       id,
       version: plugins.get(id).metadata.version,
@@ -410,10 +328,35 @@ async function buildDesiredState({
   return {
     desiredFiles,
     lock,
-    ownership: { schemaVersion: 1, files: ownershipFiles },
+    ownership: { schemaVersion: 2, files: ownershipFiles },
+    projections,
+    graph,
+    mcpServers,
     plugins: graph.pluginIds,
     providers: activeProviders,
   };
+}
+
+export async function prepareInstallation({
+  root,
+  context,
+  rootPlugins = [],
+  optionalPlugins = [],
+  providers,
+  force = false,
+  all = false,
+}) {
+  return buildDesiredState({
+    root,
+    target: context.targetRoot,
+    context,
+    pluginIds: rootPlugins,
+    rootPlugins,
+    optionalPlugins,
+    providers,
+    force,
+    all,
+  });
 }
 
 async function writeLifecycleState(target, lock) {
@@ -424,7 +367,7 @@ async function writeLifecycleState(target, lock) {
     return;
   }
   await writeJsonAtomic(path.join(stateRoot, "installed-plugins.yaml"), {
-    schemaVersion: 1,
+    schemaVersion: 2,
     plugins: lock.plugins,
   });
   await writeJsonAtomic(path.join(stateRoot, "lockfile.yaml"), {
@@ -436,20 +379,27 @@ async function writeLifecycleState(target, lock) {
   });
 }
 
-async function initializeProviderInstructions({ root, context, providers }) {
-  const relativePaths = [];
-  if (context.scope === "project" && providers.includes("claude")) {
-    relativePaths.push("CLAUDE.md");
-  }
-  if (context.scope === "global" && providers.includes("codex")) {
-    relativePaths.push(".codex/AGENTS.md");
-  }
-  if (context.scope === "global" && providers.includes("claude")) {
-    relativePaths.push(".claude/CLAUDE.md");
-  }
-  for (const relativePath of relativePaths) {
-    await initializeInstructionFile({ root, target: context.targetRoot, relativePath });
-  }
+export async function applyPreparedInstallation({
+  prepared,
+  context,
+  force = false,
+}) {
+  const plan = await planTransaction({
+    target: context.targetRoot,
+    desiredFiles: prepared.desiredFiles,
+    lock: prepared.lock,
+    ownership: prepared.ownership,
+    force,
+  });
+  await applyTransaction(plan);
+  await writeLifecycleState(context.targetRoot, prepared.lock);
+  return {
+    status: "pass",
+    scope: context.scope,
+    plugins: prepared.plugins,
+    providers: prepared.providers,
+    optionalPlugins: prepared.lock.optionalPlugins ?? [],
+  };
 }
 
 export async function installPlugins({
@@ -474,28 +424,11 @@ export async function installPlugins({
     providers,
     force,
   });
-  if (desired.plugins.length > 0) {
-    await initializeProviderInstructions({
-      root,
-      context: installContext,
-      providers: desired.providers,
-    });
-  }
-  const plan = await planTransaction({
-    target: installContext.targetRoot,
-    desiredFiles: desired.desiredFiles,
-    lock: desired.lock,
-    ownership: desired.ownership,
+  return applyPreparedInstallation({
+    prepared: desired,
+    context: installContext,
     force,
   });
-  await applyTransaction(plan);
-  await writeLifecycleState(installContext.targetRoot, desired.lock);
-  return {
-    status: "pass",
-    scope: installContext.scope,
-    plugins: desired.plugins,
-    providers: desired.providers,
-  };
 }
 
 export async function listInstalled({ target }) {
@@ -505,6 +438,7 @@ export async function listInstalled({ target }) {
     scope: state.lock?.scope ?? "project",
     plugins: state.lock?.plugins ?? [],
     rootPlugins: state.lock?.rootPlugins ?? [],
+    optionalPlugins: state.lock?.optionalPlugins ?? [],
     providers: state.lock?.providers ?? [],
     platformVersion: state.lock?.platformVersion,
     managedMcpServers: state.lock?.managedMcpServers ?? {},
