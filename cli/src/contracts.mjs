@@ -496,6 +496,12 @@ export async function validateRepository(root) {
         errors.push(`plugin ${pluginId} references unknown agent ${agent}`);
       }
     }
+    for (const wfWorkflow of plugin.assets?.workflows ?? []) {
+      const wfPath = path.join(pluginSource.root, pluginId, wfWorkflow);
+      if (!(await exists(wfPath))) {
+        errors.push(`plugin ${pluginId} references missing workflow ${wfWorkflow}`);
+      }
+    }
     if ((plugin.assets?.skills ?? []).length === 0) {
       errors.push(`plugin ${pluginId} must declare at least one skill`);
     }

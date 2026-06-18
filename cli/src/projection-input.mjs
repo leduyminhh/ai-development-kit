@@ -75,6 +75,15 @@ export async function buildProjectionInput({
       id,
       owners: ownersFor(graph, "hooks", id),
     })),
+    workflows: graph.workflows.map((id) => {
+      const workflowOwners = ownersFor(graph, "workflows", id);
+      const ownerPlugin = workflowOwners[0];
+      return {
+        id,
+        sourcePath: `plugins/${ownerPlugin}/workflows/${id}.yaml`,
+        owners: workflowOwners,
+      };
+    }),
     mcpServers: mcpServers ?? {},
   };
 }

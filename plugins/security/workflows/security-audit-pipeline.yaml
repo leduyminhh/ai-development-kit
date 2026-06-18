@@ -1,0 +1,40 @@
+﻿id: security-audit-pipeline
+description: "Security audit: dependency scan -> code review -> threat model -> report"
+version: 1.0.0
+changelog:
+  1.0.0: "Initial workflow"
+
+input:
+  source: "$context.source"
+
+steps:
+  - id: dependency-scan
+    uses: security/security-code-review
+    input:
+      source: "$context.source"
+      focus: "dependencies"
+
+  - id: code-review
+    uses: security/security-code-review
+    depends: [dependency-scan]
+    input:
+      source: "$context.source"
+      findings: "$steps.dependency-scan.output"
+
+  - id: threat-model
+    uses: security/security-code-review
+    depends: [code-review]
+    input:
+      source: "$context.source"
+      findings: "$steps.code-review.output"
+    gates: [pass]
+    onError:
+      policy: fallback
+      fallbackStep: generate-report
+
+  - id: generate-report
+    uses: quality/test-qa-review
+    depends: [code-review]
+    input:
+      source: "$context.source"
+      findings: "$steps.code-review.output"

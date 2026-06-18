@@ -1,0 +1,97 @@
+﻿{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-engineering.dev/schemas/workflow-definition.schema.json",
+  "title": "AI Engineering Workflow Definition",
+  "description": "Declarative workflow definition for composing skills from any plugin into an executable dependency graph.",
+  "type": "object",
+  "required": ["id", "description", "version", "steps"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "description": "Unique workflow identifier"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "changelog": {
+      "type": "object",
+      "patternProperties": {
+        "^[0-9]+\\.[0-9]+\\.[0-9]+$": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "input": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z_][a-zA-Z0-9_]*$": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "uses"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "uses": {
+            "type": "string",
+            "pattern": "^[a-z]+/[a-z0-9_-]+$"
+          },
+          "depends": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          },
+          "input": {
+            "type": "object",
+            "patternProperties": {
+              "^.*$": { "type": "string" }
+            },
+            "additionalProperties": false
+          },
+          "gates": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["pass", "fail"]
+            }
+          },
+          "onError": {
+            "type": "object",
+            "properties": {
+              "policy": {
+                "type": "string",
+                "enum": ["stop", "retry", "skip", "fallback"]
+              },
+              "retryDelay": {
+                "type": "string",
+                "pattern": "^[0-9]+[smh]$"
+              },
+              "fallbackStep": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "notify": { "type": "boolean" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

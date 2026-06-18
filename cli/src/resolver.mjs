@@ -1,4 +1,4 @@
-import { PlatformError } from "./errors.mjs";
+﻿import { PlatformError } from "./errors.mjs";
 
 const SUPPORTED_PROVIDERS = new Set(["codex", "claude", "cursor"]);
 
@@ -107,7 +107,8 @@ export function resolvePluginGraph({
   const commands = new Set();
   const agents = new Set();
   const hooks = new Set();
-  const ownership = { skills: {}, commands: {}, agents: {}, hooks: {} };
+const workflows = new Set();
+  const ownership = { skills: {}, commands: {}, agents: {}, hooks: {}, workflows: {} };
   for (const pluginId of resolved) {
     const assets = plugins.get(pluginId).assets;
     for (const value of assets.skills ?? []) skills.add(value);
@@ -119,6 +120,12 @@ export function resolvePluginGraph({
     }
     for (const value of assets.agents ?? []) agents.add(value);
     for (const value of assets.hooks ?? []) hooks.add(value);
+    for (const value of assets.workflows ?? []) {
+      const wfSlug = value
+        .replace(/^workflows\//, "")
+        .replace(/\.yaml$/, "");
+      workflows.add(wfSlug);
+    }
     addOwners(ownership.skills, assets.skills ?? [], pluginId);
     addOwners(
       ownership.commands,
@@ -132,6 +139,9 @@ export function resolvePluginGraph({
     );
     addOwners(ownership.agents, assets.agents ?? [], pluginId);
     addOwners(ownership.hooks, assets.hooks ?? [], pluginId);
+    addOwners(ownership.workflows, (assets.workflows ?? []).map((value) => {
+      return value.replace(/^workflows\//, "").replace(/\.yaml$/, "");
+    }), pluginId);
   }
 
   return {
@@ -147,7 +157,9 @@ export function resolvePluginGraph({
     commands: [...commands].sort(),
     agents: [...agents].sort(),
     hooks: [...hooks].sort(),
+    workflows: [...workflows].sort(),
     providers: [...new Set(providers)].sort(),
     ownership,
   };
 }
+

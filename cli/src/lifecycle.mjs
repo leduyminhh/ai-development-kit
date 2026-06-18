@@ -421,6 +421,7 @@ function collectInstalledAssets(ownership) {
   const skills = new Map();
   const commands = new Map();
   const agents = new Map();
+  const workflows = new Map();
   for (const [file, metadata] of entries) {
     if (metadata.assetType === "skill") {
       upsertAsset(skills, {
@@ -470,11 +471,19 @@ function collectInstalledAssets(ownership) {
     if (agent) {
       upsertAsset(agents, { id: agent, path: file, metadata });
     }
+
+    const workflow = file.match(
+      /^\.ai-engineering\/workflows\/definitions\/([^/]+)\.yaml$/,
+    )?.[1];
+    if (workflow) {
+      upsertAsset(workflows, { id: workflow, path: file, metadata });
+    }
   }
   return {
     skills: normalizeAssets(skills),
     commands: normalizeAssets(commands),
     agents: normalizeAssets(agents),
+    workflows: normalizeAssets(workflows),
   };
 }
 
@@ -545,6 +554,11 @@ export async function checkInstalled({ target }) {
       count: assets.agents.length,
       installed: assets.agents,
       byOwner: groupByOwner(assets.agents),
+    },
+    workflows: {
+      count: assets.workflows.length,
+      installed: assets.workflows,
+      byOwner: groupByOwner(assets.workflows),
     },
   };
 }

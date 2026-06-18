@@ -19,6 +19,19 @@ import { fileURLToPath } from "node:url";
 import { initializeProject } from "./init.mjs";
 import { doctorProject } from "./doctor.mjs";
 import { migrateProject } from "./migration.mjs";
+import {
+  workflowInit,
+  workflowList,
+  workflowValidate,
+  workflowBuild,
+  workflowRun,
+  workflowStatus,
+  workflowHistory,
+  workflowLogs,
+  workflowClean,
+  workflowInstall,
+  WORKFLOW_HELP,
+} from "./workflow.mjs";
 import { resolveInstallContext } from "./install-scope.mjs";
 import {
   finalizeNonInteractiveDraft,
@@ -91,6 +104,18 @@ Options:
   --json                    Print machine-readable output
 
 Default scope: project
+
+Workflow:
+  aie workflow init                        Create workflow directory structure
+  aie workflow list                        List workflow definitions
+  aie workflow validate                    Validate workflow definitions
+  aie workflow build <id>                  Build workflow step instructions
+  aie workflow run <id>                    Execute a workflow
+  aie workflow status <id> [run]           Show workflow run status
+  aie workflow history <id>                Show workflow run history
+  aie workflow logs <id> <run>             Show workflow run logs
+  aie workflow clean                       Remove workflow run data
+  aie workflow install <plugin>            Install workflow definitions from plugin
 `;
 
 function formatAvailable(result) {
@@ -546,6 +571,100 @@ export async function run(args, streams = process) {
         ? `${JSON.stringify(result)}\n`
         : `${result.changed ? "Updated" : "No updates"}.\n`,
     );
+    return 0;
+  }
+
+  if (args[0] === "workflow") {
+    const sub = args[1];
+    const subargs = args.slice(2);
+    const target = process.cwd();
+
+    if (sub === "init") {
+      const result = await workflowInit({ target });
+      streams.stdout.write(JSON.stringify(result) + "\n");
+      return 0;
+    }
+    if (sub === "list") {
+      const result = await workflowList({ target, core: REPOSITORY_ROOT });
+      if (subargs.includes("--json")) {
+        streams.stdout.write(JSON.stringify(result) + "\n");
+      } else {
+        for (const wf of result.workflows) {
+          streams.stdout.write(`- ${wf.id} (${wf.source})\n`);
+        }
+      }
+      return 0;
+    }
+    if (sub === "validate") {
+      const result = await workflowValidate({ target, core: REPOSITORY_ROOT });
+      streams.stdout.write(JSON.stringify(result) + "\n");
+      return 0;
+    }
+    if (sub === "build") {
+      if (!subargs[0]) {
+        streams.stdout.write("Usage: aie workflow build <workflow-id>\n");
+        return 1;
+      }
+      const result = await workflowBuild({ target, core: REPOSITORY_ROOT, workflowId: subargs[0] });
+      if (result.instructions) {
+        streams.stdout.write(result.instructions + "\n");
+      } else {
+        streams.stdout.write(JSON.stringify(result) + "\n");
+      }
+      return 0;
+    }
+    if (sub === "run") {
+      if (!subargs[0]) {
+        streams.stdout.write("Usage: aie workflow run <workflow-id>\n");
+        return 1;
+      }
+      const result = await workflowRun({ target, workflowId: subargs[0] });
+      streams.stdout.write(JSON.stringify(result, null, 2) + "\n");
+      return 0;
+    }
+    if (sub === "status") {
+      if (!subargs[0]) {
+        streams.stdout.write("Usage: aie workflow status <workflow-id> [run-id]\n");
+        return 1;
+      }
+      const result = await workflowStatus({ target, workflowId: subargs[0], runId: subargs[1] });
+      streams.stdout.write(JSON.stringify(result, null, 2) + "\n");
+      return 0;
+    }
+    if (sub === "history") {
+      if (!subargs[0]) {
+        streams.stdout.write("Usage: aie workflow history <workflow-id>\n");
+        return 1;
+      }
+      const result = await workflowHistory({ target, workflowId: subargs[0] });
+      streams.stdout.write(JSON.stringify(result, null, 2) + "\n");
+      return 0;
+    }
+    if (sub === "logs") {
+      if (!subargs[0] || !subargs[1]) {
+        streams.stdout.write("Usage: aie workflow logs <workflow-id> <run-id>\n");
+        return 1;
+      }
+      const result = await workflowLogs({ target, workflowId: subargs[0], runId: subargs[1] });
+      streams.stdout.write(JSON.stringify(result, null, 2) + "\n");
+      return 0;
+    }
+    if (sub === "clean") {
+      const result = await workflowClean({ target });
+      streams.stdout.write(JSON.stringify(result) + "\n");
+      return 0;
+    }
+    if (sub === "install") {
+      if (!subargs[0]) {
+        streams.stdout.write("Usage: aie workflow install <plugin>\n");
+        return 1;
+      }
+      const result = await workflowInstall({ root: REPOSITORY_ROOT, target, pluginId: subargs[0] });
+      streams.stdout.write(JSON.stringify(result) + "\n");
+      return 0;
+    }
+
+    streams.stdout.write(WORKFLOW_HELP);
     return 0;
   }
 

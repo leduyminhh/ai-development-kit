@@ -44,6 +44,7 @@ export function validateProjectionInput(input) {
     input.commands,
     input.agents,
     input.hooks,
+    input.workflows ?? [],
   ]) {
     if (!Array.isArray(collection)) {
       throw projectionError("projection input collections must be arrays");

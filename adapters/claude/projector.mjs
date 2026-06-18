@@ -47,6 +47,15 @@ function providerManifest(input) {
 export function project(input) {
   const allOwners = owners(input);
   const assets = input.plugins.length === 0 ? [] : [
+    ...(input.workflows ?? []).map((wf) => ({
+      operation: "copy",
+      assetType: "workflow",
+      assetId: wf.id,
+      sourcePath: wf.sourcePath,
+      destinationPath: `.ai-engineering/workflows/definitions/${wf.id}.yaml`,
+      owners: wf.owners,
+      shared: wf.owners.length > 1,
+    })),
     ...input.skills.map((skill) => ({
       operation: "copy",
       assetType: "skill",

@@ -1,4 +1,4 @@
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 
 const BEGIN = "<!-- AI-ENGINEERING:BEGIN AGENTS_BASELINE -->";
@@ -53,7 +53,7 @@ export async function doctorProject({ target, context }) {
       ownership.files ?? {},
     )) {
       if (
-        ["command", "skill", "agent", "provider-manifest", "command-catalog"].includes(
+        ["command", "skill", "agent", "provider-manifest", "command-catalog", "workflow"].includes(
           metadata.assetType,
         ) &&
         !(await exists(path.join(target, relativePath)))
@@ -108,6 +108,16 @@ export async function doctorProject({ target, context }) {
       }
     }
   }
+  const workflowsPath = path.join(target, ".ai-engineering", "workflows", "definitions");
+  if (await exists(workflowsPath)) {
+    const workflowDefs = await readdir(workflowsPath);
+    for (const wfFile of workflowDefs) {
+      if (!wfFile.endsWith(".yaml")) {
+        errors.push(`invalid workflow definition file: .ai-engineering/workflows/definitions/${wfFile}`);
+      }
+    }
+  }
+
   for (const deprecated of [".codex-plugin", ".cursor-plugin"]) {
     if (await exists(path.join(target, deprecated))) {
       errors.push(`deprecated target plugin folder remains active: ${deprecated}`);

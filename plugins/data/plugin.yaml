@@ -32,7 +32,9 @@
     "hooks": [],
     "rules": "none",
     "templates": "none",
-    "workflows": "none",
+    "workflows": [
+      "workflows/db-migration-pipeline.yaml"
+    ],
     "schemas": "none"
   },
   "install": {

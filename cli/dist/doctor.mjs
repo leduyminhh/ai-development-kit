@@ -1,4 +1,4 @@
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 const BEGIN = "<!-- AI-ENGINEERING:BEGIN AGENTS_BASELINE -->";
 const END = "<!-- AI-ENGINEERING:END AGENTS_BASELINE -->";
@@ -39,7 +39,7 @@ export async function doctorProject({ target, context }) {
     if (await exists(ownershipPath)) {
         const ownership = await readJson(ownershipPath);
         for (const [relativePath, metadata] of Object.entries(ownership.files ?? {})) {
-            if (["command", "skill", "agent", "provider-manifest", "command-catalog"].includes(metadata.assetType) &&
+            if (["command", "skill", "agent", "provider-manifest", "command-catalog", "workflow"].includes(metadata.assetType) &&
                 !(await exists(path.join(target, relativePath)))) {
                 errors.push(`projected asset is missing: ${relativePath}`);
             }
@@ -84,6 +84,15 @@ export async function doctorProject({ target, context }) {
         for (const relativePath of adapterChecks[provider] ?? []) {
             if (!(await exists(path.join(target, relativePath)))) {
                 errors.push(`adapter files are missing for ${provider}: ${relativePath}`);
+            }
+        }
+    }
+    const workflowsPath = path.join(target, ".ai-engineering", "workflows", "definitions");
+    if (await exists(workflowsPath)) {
+        const workflowDefs = await readdir(workflowsPath);
+        for (const wfFile of workflowDefs) {
+            if (!wfFile.endsWith(".yaml")) {
+                errors.push(`invalid workflow definition file: .ai-engineering/workflows/definitions/${wfFile}`);
             }
         }
     }

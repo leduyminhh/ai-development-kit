@@ -32,5 +32,6 @@ export function buildProjectionInput({ root, graph, plugins, scope, provider, mc
     }[];
     agents: any;
     hooks: any;
+    workflows: any;
     mcpServers: any;
 }>;

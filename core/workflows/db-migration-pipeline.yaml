@@ -1,0 +1,46 @@
+﻿id: db-migration-pipeline
+description: "Schema review -> migration plan -> dry-run -> execute -> verify"
+version: 1.0.0
+changelog:
+  1.0.0: "Initial workflow"
+
+input:
+  source: "$context.source"
+  schema: "$context.schema"
+
+steps:
+  - id: schema-review
+    uses: data/data-migration
+    input:
+      schema: "$context.schema"
+    gates: [pass]
+
+  - id: migration-plan
+    uses: data/data-migration
+    depends: [schema-review]
+    input:
+      schema: "$steps.schema-review.output"
+
+  - id: dry-run
+    uses: data/data-migration
+    depends: [migration-plan]
+    input:
+      plan: "$steps.migration-plan.output"
+    onError:
+      policy: skip
+
+  - id: execute
+    uses: data/data-migration
+    depends: [dry-run]
+    input:
+      plan: "$steps.dry-run.output"
+    onError:
+      policy: retry
+      retryDelay: "30s"
+      notify: true
+
+  - id: verify
+    uses: quality/test-qa-review
+    depends: [execute]
+    input:
+      source: "$context.source"

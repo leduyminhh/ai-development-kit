@@ -56,7 +56,16 @@ export function project(input) {
             owners: allOwners,
             shared: allOwners.length > 1,
           },
-          ...input.commands.map((command) => ({
+          ...(input.workflows ?? []).map((wf) => ({
+      operation: "copy",
+      assetType: "workflow",
+      assetId: wf.id,
+      sourcePath: wf.sourcePath,
+      destinationPath: `.ai-engineering/workflows/definitions/${wf.id}.yaml`,
+      owners: wf.owners,
+      shared: wf.owners.length > 1,
+    })),
+    ...input.commands.map((command) => ({
             operation: "render",
             assetType: "command",
             assetId: command.id,

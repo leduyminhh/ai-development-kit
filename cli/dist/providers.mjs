@@ -52,6 +52,7 @@ function legacyInput(context, provider) {
             id,
             owners: pluginIds,
         })),
+        workflows: [],
         mcpServers: context.mcpServers ?? {},
     };
 }

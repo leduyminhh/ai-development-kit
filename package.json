@@ -37,6 +37,6 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "doctor": "^0.3.0"
+    "doctor": "^0.1.26"
   }
 }

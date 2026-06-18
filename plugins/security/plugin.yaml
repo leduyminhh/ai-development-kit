@@ -36,7 +36,9 @@
     ],
     "rules": "none",
     "templates": "none",
-    "workflows": "none",
+    "workflows": [
+      "workflows/security-audit-pipeline.yaml"
+    ],
     "schemas": "none"
   },
   "install": {

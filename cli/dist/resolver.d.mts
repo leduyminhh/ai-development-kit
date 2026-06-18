@@ -13,11 +13,13 @@ export function resolvePluginGraph({ requested, optional, plugins, platformVersi
     commands: any[];
     agents: any[];
     hooks: any[];
+    workflows: any[];
     providers: any[];
     ownership: {
         skills: {};
         commands: {};
         agents: {};
         hooks: {};
+        workflows: {};
     };
 };

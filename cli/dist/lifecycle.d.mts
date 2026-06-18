@@ -34,12 +34,14 @@ export function prepareInstallation({ root, context, rootPlugins, optionalPlugin
         commands: any[];
         agents: any[];
         hooks: any[];
+        workflows: any[];
         providers: any[];
         ownership: {
             skills: {};
             commands: {};
             agents: {};
             hooks: {};
+            workflows: {};
         };
     };
     mcpServers: {};
@@ -147,6 +149,13 @@ export function checkInstalled({ target }: {
         };
     };
     agents: {
+        count: number;
+        installed: any[];
+        byOwner: {
+            [k: string]: any;
+        };
+    };
+    workflows: {
         count: number;
         installed: any[];
         byOwner: {

@@ -77,7 +77,8 @@ export function resolvePluginGraph({ requested, optional = [], plugins, platform
     const commands = new Set();
     const agents = new Set();
     const hooks = new Set();
-    const ownership = { skills: {}, commands: {}, agents: {}, hooks: {} };
+    const workflows = new Set();
+    const ownership = { skills: {}, commands: {}, agents: {}, hooks: {}, workflows: {} };
     for (const pluginId of resolved) {
         const assets = plugins.get(pluginId).assets;
         for (const value of assets.skills ?? [])
@@ -92,6 +93,12 @@ export function resolvePluginGraph({ requested, optional = [], plugins, platform
             agents.add(value);
         for (const value of assets.hooks ?? [])
             hooks.add(value);
+        for (const value of assets.workflows ?? []) {
+            const wfSlug = value
+                .replace(/^workflows\//, "")
+                .replace(/\.yaml$/, "");
+            workflows.add(wfSlug);
+        }
         addOwners(ownership.skills, assets.skills ?? [], pluginId);
         addOwners(ownership.commands, (assets.commands ?? []).map((value) => {
             const slug = value
@@ -101,6 +108,9 @@ export function resolvePluginGraph({ requested, optional = [], plugins, platform
         }), pluginId);
         addOwners(ownership.agents, assets.agents ?? [], pluginId);
         addOwners(ownership.hooks, assets.hooks ?? [], pluginId);
+        addOwners(ownership.workflows, (assets.workflows ?? []).map((value) => {
+            return value.replace(/^workflows\//, "").replace(/\.yaml$/, "");
+        }), pluginId);
     }
     return {
         rootPlugins,
@@ -112,6 +122,7 @@ export function resolvePluginGraph({ requested, optional = [], plugins, platform
         commands: [...commands].sort(),
         agents: [...agents].sort(),
         hooks: [...hooks].sort(),
+        workflows: [...workflows].sort(),
         providers: [...new Set(providers)].sort(),
         ownership,
     };
