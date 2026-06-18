@@ -29,7 +29,9 @@
                                   "diagram-generate",
                                   "youtube-transcript"
                               ],
-                   "agents":  "none",
+                   "agents":  [
+                                  "youtube-transcript"
+                              ],
                    "commands":  [
                                     "commands/write-technical-doc.md"
                                 ],
