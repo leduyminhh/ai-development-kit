@@ -8,19 +8,21 @@ runtime, provider projection, diagnostics, distribution tooling, and tests.
 | Path | Purpose |
 | --- | --- |
 | `src/index.ts` | Thin executable entrypoint compiled to `dist/index.js`. |
-| `src/*.mjs` | Commands, contracts, lifecycle, provider projection, state, transaction, migration, doctor, registry, and distribution runtime. |
+| `src/*.mjs` | Runtime for commands, contracts, lifecycle, projection, state, transactions, migration, doctor, registry, and distribution. |
 | `dist/` | Generated CLI output from `npm run build:cli`. |
-| `test/` | Node test suite, including install/update/remove and adapter smoke matrices. |
+| `test/` | Node test suite, including install/update/remove and provider matrix checks. |
 | `hooks/` | Provider-facing hook launchers. |
-| `scripts/` | Retained PowerShell hook tools, helpers, fixtures, and focused tests. |
+| `scripts/` | Retained PowerShell tools, helpers, fixtures, and focused tests. |
 
-## User Commands
+## Commands
 
 ```text
 aie available
 aie installed [--scope <project|global>|-g]
-aie install <plugin...> --target <provider[,provider...]>
-aie install --all --target <provider[,provider...]>
+aie install <plugin...> --target <provider[,provider...]> [--yes]
+aie install application --target codex --yes
+aie install --all --target <provider[,provider...]> [--yes]
+aie install application --with quality
 aie update <plugin...> [--dry-run]
 aie update --all
 aie remove <plugin...>
@@ -29,13 +31,9 @@ aie check [--scope <project|global>|-g]
 aie doctor [--scope <project|global>|-g]
 ```
 
-Compatibility aliases remain available through `plugin install`, `plugin
-remove`, `plugin list`, `plugin outdated`, `plugin update`, `uninstall`, and
-`upgrade`.
-
-`project` is the default scope. `update` compares installed versions with the
-canonical manifests available in the current CLI source and preserves every
-installed root plugin while rebuilding the desired state.
+`project` is the default scope. Non-interactive installs require `--yes` with
+explicit root plugins and providers. Compatibility aliases remain available
+through `plugin`, `uninstall`, and `upgrade`.
 
 ## Provider Projections
 
@@ -46,8 +44,7 @@ installed root plugin while rebuilding the desired state.
 | Cursor | `AGENTS.md`, `.cursor/rules`, `.cursor/mcp.json` | `~/.cursor/mcp.json` |
 
 Runtime and lifecycle state are written under `.ai-engineering/` at the selected
-scope root. Managed instruction files are backed up before their baseline block
-is refreshed.
+scope root.
 
 ## Maintainer Commands
 
@@ -62,6 +59,9 @@ aie migrate --delete-legacy
 aie generate-adapter <plugin...> --target <provider[,provider...]>
 ```
 
+Command Markdown is canonical. `core/routing/command-registry.yaml` is a
+deterministic derived index using schema version 2.
+
 ## Verification
 
 ```bash
@@ -70,21 +70,4 @@ npm run validate
 npm run build:cli
 ```
 
-After changing `cli/src/`, rebuild `dist/`. Keep canonical plugin content under
-`plugins/`; provider-specific generation belongs in `cli/src/providers.mjs`,
-`cli/src/lifecycle.mjs`, and `adapters/`.
-
-## Hybrid Install Contract
-
-Interactive install collects only missing choices, renders the exact projection
-preview, and ends with `Install / Back / Cancel`. CI must provide explicit
-plugins and providers:
-
-```bash
-aie install application --target codex --yes
-aie install application --with quality
-```
-
-Command Markdown is canonical. `core/routing/command-registry.yaml` is a
-deterministic derived index using schema version 2; it is not a second semantic
-source.
+After changing `cli/src/`, rebuild `dist/`.

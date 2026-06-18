@@ -1,17 +1,8 @@
 # AI Engineering Platform
 
 Nền tảng plugin cho Codex, Claude Code và Cursor. Nội dung capability chuẩn nằm
-trong `plugins/`; CLI và `adapters/` sinh projection riêng cho từng provider.
-MCP server là lớp runtime tùy chọn.
-
-## Năng Lực
-
-- Bảy plugin có thể cài đặt: architecture, application, data, security, quality,
-  platform và knowledge.
-- Cài đặt, cập nhật, gỡ bỏ, liệt kê và chẩn đoán có xử lý dependency.
-- Projection theo phạm vi project và global cho Codex, Claude và Cursor.
-- Instruction file được quản lý nhưng vẫn bảo toàn nội dung do người dùng sở hữu.
-- Theo dõi ownership theo transaction cho file sinh ra và cấu hình MCP được merge.
+trong `plugins/`; CLI project nội dung đó thành file native theo từng provider
+và các MCP runtime registration tùy chọn.
 
 ## Cài Đặt
 
@@ -27,50 +18,51 @@ npm link
 
 Có thể dùng cả `ai-engineering` và alias ngắn `aie`.
 
-## Workflow Cho Project
+## Workflow Nhanh
 
 ```bash
 cd /path/to/project
 
-# Khởi tạo managed baseline trong AGENTS.
 aie init
-
-# Cài cho một provider hoặc tất cả provider được hỗ trợ.
 aie install --all --target codex
 aie install --all --target claude
 aie install --all --target cursor
 aie install --all --target codex,claude,cursor
 
-# Xác minh sau khi cài đặt hoàn tất.
 aie doctor
 aie check
-
-# Xem, cập nhật và gỡ plugin.
 aie available
 aie installed
+
 aie update application
 aie update --all
 aie remove security
 aie remove --all
-
-# Cài tập plugin nhỏ hơn khi cần.
-aie install application --target codex
-aie install security quality --target cursor
-
-# Cài vào vị trí global của người dùng.
-aie install --all --target codex -g
-aie install --all --target claude -g
-aie install --all --target cursor -g
 ```
 
-Lệnh `update` so sánh version đã cài với manifest plugin chuẩn trong source CLI
-hiện tại, sau đó dựng lại đầy đủ tập root plugin đã cài. Lifecycle hiện chưa tải
-artifact từ remote registry.
+Cài một phần plugin hoặc optional dependency khi không cần toàn bộ capability:
 
-MCP registration được sinh với đường dẫn runtime local tuyệt đối, vì vậy cần chạy
-lệnh cài đặt trên từng máy.
+```bash
+aie install application --target codex --yes
+aie install security quality --target cursor
+aie install application --with quality
+```
 
-## Đường Dẫn Native Theo Provider
+Scope mặc định là project. Dùng `-g` hoặc `--scope global` để cài vào vị trí
+global của người dùng:
+
+```bash
+aie install --all --target codex -g
+```
+
+Trong môi trường không tương tác, install phải truyền `--yes` kèm root plugin và
+provider target rõ ràng. Trong terminal tương tác, CLI chỉ hỏi lựa chọn còn
+thiếu và hiển thị plan trước khi ghi file.
+
+MCP registration được sinh với đường dẫn runtime local tuyệt đối, vì vậy cần
+chạy install trên từng máy sẽ dùng provider integration.
+
+## Đường Dẫn Provider
 
 Mọi scope đều lưu runtime, ownership, lock và backup dưới
 `<scope-root>/.ai-engineering/`.
@@ -81,13 +73,14 @@ Mọi scope đều lưu runtime, ownership, lock và backup dưới
 | Claude | `CLAUDE.md`, `.claude/skills`, `.claude/commands`, `.claude-plugin/plugin.json`, `.mcp.json` | `~/.claude/CLAUDE.md`, `~/.claude/skills`, `~/.claude/commands`, `~/.claude.json` |
 | Cursor | `AGENTS.md`, `.cursor/rules`, `.cursor/mcp.json` | `~/.cursor/mcp.json` |
 
-Khi cập nhật instruction file, hệ thống giữ nguyên nội dung nằm ngoài managed
-baseline block và ghi backup dưới `.ai-engineering/backups/`.
+Khi cập nhật instruction file, hệ thống giữ nguyên nội dung do người dùng sở hữu
+nằm ngoài AI Engineering baseline block và ghi backup dưới
+`.ai-engineering/backups/`.
 
 ## Cấu Trúc Repository
 
 ```text
-adapters/      metadata nguồn theo provider và định nghĩa agent cho Codex
+adapters/      metadata projection theo provider và định nghĩa agent cho Codex
 cli/           runtime CLI, dist sinh ra, test, hook và shell tool
 core/          policy, routing, schema, template, prompt và workflow dùng chung
 docs/          hồ sơ migration và kế hoạch triển khai
@@ -95,21 +88,8 @@ mcp-servers/   MCP runtime server tùy chọn theo namespace
 plugins/       manifest, command và skill chuẩn có thể cài đặt
 ```
 
-Mỗi `plugins/<plugin-id>/` dùng boundary chuẩn sau:
-
-```text
-plugin.yaml
-commands/
-skills/
-agents/
-rules/
-templates/
-workflows/
-schemas/
-```
-
-Asset group chưa dùng được khai báo là `none` trong `plugin.yaml`. Không tạo
-README placeholder chỉ để giữ thư mục. Source root `packs/` cũ không còn active.
+Markdown command trong `plugins/<plugin>/commands/*.md` là nguồn command chuẩn.
+`core/routing/command-registry.yaml` là chỉ mục dẫn xuất xác định dùng schema version 2.
 
 ## Lệnh Cho Maintainer
 
@@ -132,20 +112,3 @@ npm run build:cli
 
 Quyết định migration được ghi tại
 [`docs/migration/legacy-review-matrix.md`](docs/migration/legacy-review-matrix.md).
-
-## Cài Đặt Kết Hợp Và Hợp Đồng Command
-
-Trong terminal tương tác, CLI chỉ hỏi các lựa chọn chưa được truyền rõ ràng,
-hiển thị trước projection plan, rồi cung cấp `Install / Back / Cancel`. Luồng tự
-động vẫn xác định hoàn toàn:
-
-```bash
-aie install application --target codex --yes
-aie install application --with quality
-```
-
-Trong môi trường không tương tác, `--yes` yêu cầu root plugin và provider phải
-được truyền rõ ràng. Semantic chuẩn của command chỉ nằm trong
-`plugins/<plugin>/commands/*.md`; `core/routing/command-registry.yaml` là chỉ mục
-dẫn xuất dùng schema version 2. Đường dẫn provider do adapter Codex, Claude và
-Cursor sinh ra.

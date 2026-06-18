@@ -105,11 +105,10 @@ test("keeps Vietnamese documentation readable as UTF-8", async () => {
   }
 });
 
-test("documents hybrid install and canonical command contracts", async () => {
+test("documents concise install notes and canonical command contracts", async () => {
   const expected = [
     "aie install application --target codex --yes",
     "aie install application --with quality",
-    "Install / Back / Cancel",
     "command-registry.yaml",
     "schema version 2",
   ];
@@ -123,6 +122,11 @@ test("documents hybrid install and canonical command contracts", async () => {
     for (const text of expected) {
       assert.ok(content.includes(text), `${file} is missing ${text}`);
     }
+    assert.equal(
+      /## Hybrid Install|## Cài Đặt Kết Hợp|## Hợp Đồng Cài Đặt Kết Hợp/.test(content),
+      false,
+      `${file} should not have a standalone hybrid install section`,
+    );
   }
 });
 

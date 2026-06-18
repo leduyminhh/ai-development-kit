@@ -54,14 +54,7 @@ Maintainer commands:
   aie migrate --delete-legacy
   aie generate-adapter <plugin...> --target <provider[,provider...]>
 
-Compatibility aliases:
-  aie uninstall <plugin...>
-  aie upgrade
-  aie plugin install <plugin...> --target <provider[,provider...]>
-  aie plugin remove <plugin...>
-  aie plugin list [--available]
-  aie plugin outdated
-  aie plugin update <plugin...>
+Legacy aliases: plugin, uninstall, upgrade
 
 Options:
   --target <providers>      codex, claude, cursor
@@ -75,14 +68,6 @@ Options:
   --dry-run                 Plan update or migration without writing changes
   --delete-legacy           Delete legacy paths during migration after backup
   --json                    Print machine-readable output
-
-Native install paths:
-  Codex project: AGENTS.md, .agents/skills, .codex/agents, .codex/workflows, .codex/config.toml
-  Codex global: ~/.codex/AGENTS.md, ~/.agents/skills, ~/.codex/agents, ~/.codex/workflows, ~/.codex/config.toml
-  Claude project: CLAUDE.md, .claude/skills, .claude/commands, .claude-plugin/plugin.json, .mcp.json
-  Claude global: ~/.claude/CLAUDE.md, ~/.claude/skills, ~/.claude/commands, ~/.claude.json
-  Cursor project: AGENTS.md, .cursor/rules, .cursor/mcp.json
-  Cursor global: ~/.cursor/mcp.json
 
 Default scope: project
 `;
