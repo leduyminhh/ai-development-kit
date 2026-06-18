@@ -58,13 +58,14 @@ export function applyPreparedInstallation({ prepared, context, force, }: {
     providers: any;
     optionalPlugins: any;
 }>;
-export function installPlugins({ root, target, context, pluginIds, all, providers, force, }: {
+export function installPlugins({ root, target, context, pluginIds, all, providers, optionalPlugins, force, }: {
     root: any;
     target: any;
     context: any;
     pluginIds?: never[] | undefined;
     all?: boolean | undefined;
     providers: any;
+    optionalPlugins?: never[] | undefined;
     force?: boolean | undefined;
 }): Promise<{
     status: string;

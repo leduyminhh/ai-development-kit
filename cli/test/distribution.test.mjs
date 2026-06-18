@@ -105,6 +105,27 @@ test("keeps Vietnamese documentation readable as UTF-8", async () => {
   }
 });
 
+test("documents hybrid install and canonical command contracts", async () => {
+  const expected = [
+    "aie install application --target codex --yes",
+    "aie install application --with quality",
+    "Install / Back / Cancel",
+    "command-registry.yaml",
+    "schema version 2",
+  ];
+  for (const file of [
+    "README.md",
+    "README_VI.md",
+    "cli/README.md",
+    "cli/README_VI.md",
+  ]) {
+    const content = await readFile(path.join(repoRoot, file), "utf8");
+    for (const text of expected) {
+      assert.ok(content.includes(text), `${file} is missing ${text}`);
+    }
+  }
+});
+
 test("exposes package-name and canonical CLI aliases", async () => {
   const packageJson = JSON.parse(
     await readFile(path.join(repoRoot, "package.json"), "utf8"),

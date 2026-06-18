@@ -132,3 +132,20 @@ npm run build:cli
 
 Quyết định migration được ghi tại
 [`docs/migration/legacy-review-matrix.md`](docs/migration/legacy-review-matrix.md).
+
+## Cài Đặt Kết Hợp Và Hợp Đồng Command
+
+Trong terminal tương tác, CLI chỉ hỏi các lựa chọn chưa được truyền rõ ràng,
+hiển thị trước projection plan, rồi cung cấp `Install / Back / Cancel`. Luồng tự
+động vẫn xác định hoàn toàn:
+
+```bash
+aie install application --target codex --yes
+aie install application --with quality
+```
+
+Trong môi trường không tương tác, `--yes` yêu cầu root plugin và provider phải
+được truyền rõ ràng. Semantic chuẩn của command chỉ nằm trong
+`plugins/<plugin>/commands/*.md`; `core/routing/command-registry.yaml` là chỉ mục
+dẫn xuất dùng schema version 2. Đường dẫn provider do adapter Codex, Claude và
+Cursor sinh ra.

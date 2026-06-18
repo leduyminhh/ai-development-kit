@@ -299,7 +299,7 @@ test("cli installs a plugin into the current project", async () => {
   const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-cli-install-"));
   try {
     const result = await runCli(
-      ["plugin", "install", "application", "--provider", "codex", "--json"],
+      ["plugin", "install", "application", "--provider", "codex", "--yes", "--json"],
       { cwd: target },
     );
     assert.equal(result.exitCode, 0);
@@ -316,7 +316,7 @@ test("cli -g installs into global AI IDE settings", async () => {
   const home = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-cli-global-home-"));
   try {
     const result = await runCli(
-      ["install", "platform", "--target", "codex", "-g", "--json"],
+      ["install", "platform", "--target", "codex", "-g", "--yes", "--json"],
       {
         cwd: project,
         env: {
@@ -430,7 +430,7 @@ test("updates from canonical source and preserves unrelated root plugins", async
 test("cli lists installed plugins and reports outdated plugins", async () => {
   const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-cli-update-"));
   try {
-    await runCli(["plugin", "install", "application", "--provider", "codex"], { cwd: target });
+    await runCli(["plugin", "install", "application", "--provider", "codex", "--yes"], { cwd: target });
     const list = await runCli(["plugin", "list", "--json"], { cwd: target });
     assert.equal(list.exitCode, 0);
     assert.deepEqual(
@@ -554,7 +554,7 @@ test("removes plugins by ownership and preserves user-owned files", async () => 
 test("cli removes an installed plugin", async () => {
   const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-cli-remove-"));
   try {
-    await runCli(["plugin", "install", "application", "--provider", "codex"], { cwd: target });
+    await runCli(["plugin", "install", "application", "--provider", "codex", "--yes"], { cwd: target });
     const result = await runCli(["plugin", "remove", "application", "--json"], { cwd: target });
     assert.equal(result.exitCode, 0);
     assert.equal(JSON.parse(result.stdout).status, "pass");

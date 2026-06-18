@@ -73,3 +73,18 @@ npm run build:cli
 After changing `cli/src/`, rebuild `dist/`. Keep canonical plugin content under
 `plugins/`; provider-specific generation belongs in `cli/src/providers.mjs`,
 `cli/src/lifecycle.mjs`, and `adapters/`.
+
+## Hybrid Install Contract
+
+Interactive install collects only missing choices, renders the exact projection
+preview, and ends with `Install / Back / Cancel`. CI must provide explicit
+plugins and providers:
+
+```bash
+aie install application --target codex --yes
+aie install application --with quality
+```
+
+Command Markdown is canonical. `core/routing/command-registry.yaml` is a
+deterministic derived index using schema version 2; it is not a second semantic
+source.

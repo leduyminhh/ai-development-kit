@@ -51,7 +51,7 @@ test("supports direct plugin install with target adapter", async () => {
   const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-direct-install-"));
   try {
     const result = await runCli(
-      ["install", "quality", "--target", "cursor", "--json"],
+      ["install", "quality", "--target", "cursor", "--yes", "--json"],
       { cwd: target },
     );
     assert.equal(result.exitCode, 0);
@@ -65,11 +65,35 @@ test("supports direct plugin install with target adapter", async () => {
   }
 });
 
+test("non-TTY install requires --yes", async () => {
+  const result = await runCli([
+    "install",
+    "application",
+    "--target",
+    "codex",
+  ]);
+  assert.equal(result.exitCode, 2);
+  assert.match(result.stderr, /Pass --yes/);
+});
+
+test("--yes requires an explicit provider", async () => {
+  const result = await runCli([
+    "install",
+    "application",
+    "--yes",
+  ]);
+  assert.equal(result.exitCode, 2);
+  assert.match(
+    result.stderr,
+    /Missing install choices in non-interactive mode: providers/,
+  );
+});
+
 test("respects target adapter when installing all plugins", async () => {
   const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-all-target-"));
   try {
     const result = await runCli(
-      ["install", "--all", "--target", "codex", "--json"],
+      ["install", "--all", "--target", "codex", "--yes", "--json"],
       { cwd: target },
     );
     assert.equal(result.exitCode, 0);
@@ -149,7 +173,7 @@ test("prints scope-aware installed output", async () => {
     assert.match(emptyProject.stdout, /Use `aie installed -g`/);
 
     const installGlobal = await runCli(
-      ["install", "--all", "--target", "codex", "-g"],
+      ["install", "--all", "--target", "codex", "-g", "--yes"],
       { cwd: target, env: { USERPROFILE: home } },
     );
     assert.equal(installGlobal.exitCode, 0);

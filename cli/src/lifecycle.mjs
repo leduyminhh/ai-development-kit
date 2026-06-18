@@ -409,6 +409,7 @@ export async function installPlugins({
   pluginIds = [],
   all = false,
   providers,
+  optionalPlugins = [],
   force = false,
 }) {
   const installContext = normalizeContext(target, context);
@@ -422,6 +423,7 @@ export async function installPlugins({
     pluginIds,
     all,
     providers,
+    optionalPlugins,
     force,
   });
   return applyPreparedInstallation({
@@ -489,6 +491,30 @@ function collectInstalledAssets(ownership) {
   const commands = new Map();
   const agents = new Map();
   for (const [file, metadata] of entries) {
+    if (metadata.assetType === "skill") {
+      upsertAsset(skills, {
+        id: metadata.assetId,
+        path: file.replace(/^(.*?\/[^/]+)\/.*$/, "$1"),
+        metadata,
+      });
+      continue;
+    }
+    if (metadata.assetType === "command") {
+      upsertAsset(commands, {
+        id: metadata.assetId,
+        path: file,
+        metadata,
+      });
+      continue;
+    }
+    if (metadata.assetType === "agent") {
+      upsertAsset(agents, {
+        id: metadata.assetId,
+        path: file,
+        metadata,
+      });
+      continue;
+    }
     const skill = file.match(
       /^(?:\.agents\/skills|\.claude\/skills|\.codex\/skills|skills)\/([^/]+)\//,
     )?.[1];
@@ -663,6 +689,7 @@ export async function updatePlugins({
         : installed.plugins.map((item) => item.id),
     providers:
       installed.providers.length > 0 ? installed.providers : undefined,
+    optionalPlugins: installed.optionalPlugins,
     force,
   });
   return { ...result, changed: true, updates: applicable };
@@ -692,6 +719,9 @@ export async function removePlugins({
     context: installContext,
     pluginIds: remainingRoots,
     providers: installed.providers,
+    optionalPlugins: installed.optionalPlugins.filter(
+      (id) => !removeIds.has(id),
+    ),
     rootPlugins: remainingRoots,
     force,
   });

@@ -133,3 +133,20 @@ npm run build:cli
 
 Migration decisions are recorded in
 [`docs/migration/legacy-review-matrix.md`](docs/migration/legacy-review-matrix.md).
+
+## Hybrid Install And Command Contracts
+
+Interactive terminals ask only for choices not supplied explicitly, preview the
+projection plan, then offer `Install / Back / Cancel`. Automation remains
+deterministic:
+
+```bash
+aie install application --target codex --yes
+aie install application --with quality
+```
+
+In non-interactive environments, `--yes` requires explicit root plugins and
+providers. Canonical command semantics live only in
+`plugins/<plugin>/commands/*.md`; `core/routing/command-registry.yaml` is a
+derived lookup index using schema version 2. Provider paths are produced by the
+Codex, Claude, and Cursor adapters.

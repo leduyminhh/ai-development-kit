@@ -71,3 +71,17 @@ npm run build:cli
 Sau khi thay đổi `cli/src/`, cần build lại `dist/`. Nội dung plugin chuẩn phải
 nằm trong `plugins/`; logic sinh riêng theo provider thuộc
 `cli/src/providers.mjs`, `cli/src/lifecycle.mjs` và `adapters/`.
+
+## Hợp Đồng Cài Đặt Kết Hợp
+
+Luồng cài đặt tương tác chỉ thu thập lựa chọn còn thiếu, hiển thị đúng projection
+preview và kết thúc bằng `Install / Back / Cancel`. CI phải truyền rõ plugin và
+provider:
+
+```bash
+aie install application --target codex --yes
+aie install application --with quality
+```
+
+Markdown command là nguồn chuẩn. `core/routing/command-registry.yaml` là chỉ mục
+dẫn xuất xác định dùng schema version 2, không phải nguồn semantic thứ hai.

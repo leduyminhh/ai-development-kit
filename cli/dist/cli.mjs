@@ -4,13 +4,17 @@ import { buildAllPlugins, verifyPluginArtifact } from "./builder.mjs";
 import { readdir } from "node:fs/promises";
 import os from "node:os";
 import { generateRegistry } from "./registry.mjs";
-import { checkInstalled, findOutdated, installPlugins, listAvailable, listInstalled, removePlugins, updatePlugins, } from "./lifecycle.mjs";
+import { checkInstalled, findOutdated, applyPreparedInstallation, listAvailable, listInstalled, prepareInstallation, removePlugins, updatePlugins, } from "./lifecycle.mjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { initializeProject } from "./init.mjs";
 import { doctorProject } from "./doctor.mjs";
 import { migrateProject } from "./migration.mjs";
 import { resolveInstallContext } from "./install-scope.mjs";
+import { finalizeNonInteractiveDraft, parseInstallRequest, } from "./install-request.mjs";
+import { detectProviders } from "./provider-detection.mjs";
+import { buildInstallPlan, renderInstallPlan } from "./install-plan.mjs";
+import { createTerminalPrompter, runInstallWizard, } from "./install-wizard.mjs";
 export const VERSION = "1.0.0";
 const REPOSITORY_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const HELP = `AI Engineering Platform
@@ -65,6 +69,8 @@ Options:
   --scope <project|global>  Installation scope
   -g, --global              Install to global AI IDE settings
   --all                     Select every installed or available plugin
+  --with <plugins>          Select optional dependencies
+  --yes                     Skip confirmation with explicit plugin/provider input
   --force                   Replace managed drift or unmanaged conflicts
   --dry-run                 Plan update or migration without writing changes
   --delete-legacy           Delete legacy paths during migration after backup
@@ -301,22 +307,94 @@ export async function run(args, streams = process) {
         args[0] === "install" ||
         args[0] === "generate-adapter") {
         const root = REPOSITORY_ROOT;
-        const all = args[0] === "install" && args.includes("--all");
         const offset = args[0] === "plugin" ? 2 : 1;
-        const parsed = parseInstallArgs(args.slice(offset));
+        const draft = parseInstallRequest(args.slice(offset));
+        const interactive = Boolean(streams.stdin?.isTTY && streams.stdout?.isTTY);
+        let intent;
+        if (draft.confirm.value) {
+            intent = finalizeNonInteractiveDraft(draft);
+        }
+        else if (!interactive) {
+            throw new PlatformError("Install requires confirmation in non-interactive mode. Pass --yes with explicit root plugins and --target, or run in an interactive terminal.", {
+                code: "AI_ENGINEERING_MISSING_INSTALL_CHOICES",
+                exitCode: 2,
+            });
+        }
+        else {
+            const catalog = await listAvailable({ root });
+            const prompter = createTerminalPrompter({
+                input: streams.stdin,
+                output: streams.stdout,
+            });
+            try {
+                const wizard = await runInstallWizard({
+                    draft,
+                    availablePlugins: catalog.plugins.available,
+                    detectedProviders: await detectProviders({
+                        projectRoot: process.cwd(),
+                    }),
+                    preparePlan: async (candidate) => {
+                        const candidateContext = resolveInstallContext({
+                            scope: candidate.scope,
+                            projectRoot: process.cwd(),
+                            homeRoot: os.homedir(),
+                        });
+                        const candidatePrepared = await prepareInstallation({
+                            root,
+                            context: candidateContext,
+                            rootPlugins: candidate.rootPlugins,
+                            optionalPlugins: candidate.optionalPlugins,
+                            all: candidate.all,
+                            providers: candidate.providers,
+                            force: candidate.force,
+                        });
+                        return buildInstallPlan({
+                            prepared: candidatePrepared,
+                            context: candidateContext,
+                            force: candidate.force,
+                        });
+                    },
+                    prompter,
+                });
+                if (wizard.action === "cancel") {
+                    streams.stdout.write("Installation cancelled.\n");
+                    return 0;
+                }
+                intent = wizard.intent;
+            }
+            finally {
+                prompter.close();
+            }
+        }
         const context = resolveInstallContext({
-            scope: parsed.scope,
+            scope: intent.scope,
             projectRoot: process.cwd(),
             homeRoot: os.homedir(),
         });
-        const result = await installPlugins({
+        const prepared = await prepareInstallation({
             root,
-            target: context.targetRoot,
             context,
-            pluginIds: parsed.plugins,
-            all,
-            providers: parsed.providers,
-            force: args.includes("--force"),
+            rootPlugins: intent.rootPlugins,
+            optionalPlugins: intent.optionalPlugins,
+            all: intent.all,
+            providers: intent.providers,
+            force: intent.force,
+        });
+        const plan = await buildInstallPlan({
+            prepared,
+            context,
+            force: intent.force,
+        });
+        if (!draft.confirm.value && !draft.json) {
+            streams.stdout.write(renderInstallPlan(plan));
+        }
+        if (context.projectAssets) {
+            await initializeProject({ root, target: context.targetRoot });
+        }
+        const result = await applyPreparedInstallation({
+            prepared,
+            context,
+            force: intent.force,
         });
         streams.stdout.write(args.includes("--json")
             ? `${JSON.stringify(result)}\n`
