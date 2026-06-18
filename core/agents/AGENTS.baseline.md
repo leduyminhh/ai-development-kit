@@ -1,4 +1,5 @@
 <!-- AI-ENGINEERING:BEGIN AGENTS_BASELINE -->
+
 ## AI Engineering Baseline
 
 This managed block is the repository-wide execution baseline for AI agents. It
@@ -39,15 +40,12 @@ completion.
 7. Match codebase conventions. Follow local naming, folder placement,
    validation, commit, and protected-path rules before introducing a new
    convention.
-8. Use UTF-8 Vietnamese when Vietnamese is required. Vietnamese content must
-   include proper diacritics and must not be written as unaccented Vietnamese or
-   mojibake.
-9. Use generated code comments sparingly. Add comments only where purpose or flow
+8. Use generated code comments sparingly. Add comments only where purpose or flow
    is not obvious, especially around complex generated functions.
-10. Keep solutions production-ready. Do not present work as production-ready
+9. Keep solutions production-ready. Do not present work as production-ready
    unless validation, residual risks, and rollback considerations are addressed
    or explicitly scoped out.
-11. Fail loud. Do not claim completion without evidence. Report blockers,
+10. Fail loud. Do not claim completion without evidence. Report blockers,
     skipped verification, uncertainty, and residual risk explicitly.
 
 ### Optional Rules
@@ -62,13 +60,10 @@ completion.
 4. Checkpoint significant steps. For long tasks, report concise checkpoints after
    planning, editing, verification, and publishing.
 
-### Project-Start Commands
+### Language
 
-- `init` or `-init`: copy the canonical project-start template first, then merge
-  compatible existing project-specific instructions without silently overwriting
-  user-owned content.
-- `agents.md` or `-agents.md`: use the same flow when the task is specifically
-  to create, inspect, or update project agent instructions.
+- Use Vietnamese for user-facing repository work.
+- When Vietnamese is used, write proper UTF-8 Vietnamese with diacritics.
 
 ### Verification Contract
 

@@ -9,28 +9,32 @@ Purpose:
 - Package reusable workflows as installable capability packs.
 - Generate provider adapters without maintaining duplicate provider-specific flows.
 
-Language:
-- Use Vietnamese for user-facing repository work.
-- When Vietnamese is used, write proper UTF-8 Vietnamese with diacritics.
-
-## Architecture
+## Repository Boundaries
 
 - `core/` owns shared agents policy, routing, standards, schemas, templates, prompts, and workflows.
-- `packs/<pack>/` owns capability commands, skills, templates, workflows, and schemas.
-- `mcp-servers/<pack>-mcp/` exposes namespaced tools for each capability pack.
-- `adapters/` owns provider source templates and metadata.
-- `cli/` owns the published `ai-engineering` CLI and retained shell utilities.
+- `plugins/<plugin>/` owns canonical plugin manifests, commands, skills, agents, rules, templates, workflows, and schemas.
+- `mcp-servers/<plugin>-mcp/` exposes optional namespaced MCP runtime servers.
+- `adapters/` owns provider projection metadata and provider-specific source templates.
+- `cli/` owns the published `ai-engineering` / `aie` CLI, generated `dist/`, tests, hooks, and retained shell utilities.
+- `docs/` owns migration records, implementation plans, and repository documentation.
 - `tests/` is reserved for cross-package integration tests.
 
-## Workflow Rules
+Deprecated source roots:
 
-- Read the relevant pack, runtime code, and tests before editing.
+- Do not add new source under legacy `packs/`.
+- Do not recreate active root `skills/`, `schemas/`, `scripts/`, or provider plugin folders.
+
+## Repository-Specific Rules
+
+- Read the relevant plugin, runtime code, and tests before editing.
 - Keep dependencies directed toward shared `core/` contracts.
-- Do not recreate active root `skills/`, `registry/`, `schemas/`, `scripts/`, or provider plugin folders.
-- Add or update `pack.yaml` whenever pack commands, skills, dependencies, or adapters change.
+- Add or update `plugin.yaml` whenever plugin commands, skills, dependencies, or adapters change.
 - Keep command ids and MCP tool ids namespaced by capability.
-- Preserve user content outside the managed AGENTS baseline block.
+- Preserve user content outside managed instruction blocks.
 - Back up an existing `AGENTS.md` before updating its managed block.
+
+## Documentation Rules
+
 - At the repository root and in immediate child directories only (depth 0-1),
   every `README.md` must have a sibling `README_VI.md`.
 - Update the English `README.md` first, then synchronize the sibling
@@ -63,6 +67,7 @@ ai-engineering doctor
 - Report skipped checks and residual migration risk explicitly.
 
 <!-- AI-ENGINEERING:BEGIN AGENTS_BASELINE -->
+
 ## AI Engineering Baseline
 
 This managed block is the repository-wide execution baseline for AI agents. It
@@ -103,15 +108,12 @@ completion.
 7. Match codebase conventions. Follow local naming, folder placement,
    validation, commit, and protected-path rules before introducing a new
    convention.
-8. Use UTF-8 Vietnamese when Vietnamese is required. Vietnamese content must
-   include proper diacritics and must not be written as unaccented Vietnamese or
-   mojibake.
-9. Use generated code comments sparingly. Add comments only where purpose or flow
+8. Use generated code comments sparingly. Add comments only where purpose or flow
    is not obvious, especially around complex generated functions.
-10. Keep solutions production-ready. Do not present work as production-ready
+9. Keep solutions production-ready. Do not present work as production-ready
    unless validation, residual risks, and rollback considerations are addressed
    or explicitly scoped out.
-11. Fail loud. Do not claim completion without evidence. Report blockers,
+10. Fail loud. Do not claim completion without evidence. Report blockers,
     skipped verification, uncertainty, and residual risk explicitly.
 
 ### Optional Rules
@@ -126,13 +128,10 @@ completion.
 4. Checkpoint significant steps. For long tasks, report concise checkpoints after
    planning, editing, verification, and publishing.
 
-### Project-Start Commands
+### Language
 
-- `init` or `-init`: copy the canonical project-start template first, then merge
-  compatible existing project-specific instructions without silently overwriting
-  user-owned content.
-- `agents.md` or `-agents.md`: use the same flow when the task is specifically
-  to create, inspect, or update project agent instructions.
+- Use Vietnamese for user-facing repository work.
+- When Vietnamese is used, write proper UTF-8 Vietnamese with diacritics.
 
 ### Verification Contract
 

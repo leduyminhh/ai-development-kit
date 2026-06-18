@@ -67,13 +67,10 @@ completion.
 4. Checkpoint significant steps. For long tasks, report concise checkpoints after
    planning, editing, verification, and publishing.
 
-### Project-Start Commands
+### Language
 
-- `init` or `-init`: copy the canonical project-start template first, then merge
-  compatible existing project-specific instructions without silently overwriting
-  user-owned content.
-- `agents.md` or `-agents.md`: use the same flow when the task is specifically
-  to create, inspect, or update project agent instructions.
+- Use Vietnamese for user-facing repository work.
+- When Vietnamese is used, write proper UTF-8 Vietnamese with diacritics.
 
 ### Verification Contract
 
