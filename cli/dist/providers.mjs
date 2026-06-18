@@ -2,7 +2,7 @@ function json(value) {
     return `${JSON.stringify(value, null, 2)}\n`;
 }
 function commandBody(command) {
-    return `# ${command.id}
+    return `# ${command.id} (${command.slug})
 
 ## Intent
 
@@ -66,7 +66,7 @@ export function projectCodex(context) {
 export function projectClaude(context) {
     const providerManifest = manifest(context, "claude");
     const commands = context.commands.map((command) => ({
-        path: `.claude/commands/${command.id}.md`,
+        path: `.claude/commands/${command.slug}.md`,
         content: `---\ndescription: ${command.description}\n---\n\n${commandBody(command)}`,
     }));
     const projectFiles = [
@@ -92,7 +92,7 @@ export function projectClaude(context) {
 export function projectCursor(context) {
     const providerManifest = manifest(context, "cursor");
     const rules = context.commands.map((command) => ({
-        path: `.cursor/rules/${command.id}.mdc`,
+        path: `.cursor/rules/${command.slug}.mdc`,
         content: `---\ndescription: ${command.description}\nalwaysApply: false\n---\n\n${commandBody(command)}`,
     }));
     const projectFiles = [

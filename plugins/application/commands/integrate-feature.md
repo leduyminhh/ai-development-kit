@@ -1,5 +1,6 @@
 ---
-id: integrate-feature
+id: application.integrate_feature
+slug: integrate-feature
 description: Integrate frontend, API, backend, and data artifacts for a feature.
 version: 1.0.0
 ---

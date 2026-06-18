@@ -30,7 +30,7 @@
       "test-automation-validate"
     ],
     "commands": [
-      "verify-quality"
+      "commands/verify-quality.md"
     ],
     "hooks": [
       "project-audit"
@@ -58,13 +58,6 @@
       "performance"
     ]
   },
-  "commands": [
-    {
-      "id": "quality.verify_quality",
-      "file": "commands/verify-quality.md",
-      "mcp_tool": "quality.generate_test_plan"
-    }
-  ],
   "skills": [
     {
       "id": "quality.naming_rule_validate",

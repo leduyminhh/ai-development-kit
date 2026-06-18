@@ -1,5 +1,6 @@
 ---
-id: design-api-contract
+id: application.design_api_contract
+slug: design-api-contract
 description: Design a shared API contract for a full-stack feature.
 version: 1.0.0
 ---

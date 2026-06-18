@@ -1,6 +1,8 @@
 import { access, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
+import { loadPluginCommands, } from "./command-contracts.mjs";
 import { PlatformError } from "./errors.mjs";
+export { loadCanonicalCommand } from "./command-contracts.mjs";
 const PROVIDERS = ["codex", "claude", "cursor"];
 const PLUGIN_KEYS = new Set([
     "apiVersion",
@@ -31,19 +33,6 @@ async function readJson(pathname) {
             code: "AI_ENGINEERING_INVALID_CONTRACT",
         });
     }
-}
-function parseSectionList(markdown, heading) {
-    const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const match = markdown.match(new RegExp(`^## ${escaped}\\s*$([\\s\\S]*?)(?=^## |(?![\\s\\S]))`, "m"));
-    if (!match) {
-        return [];
-    }
-    return [...match[1].matchAll(/^- (.+)$/gm)].map((item) => item[1].trim());
-}
-function parseSectionText(markdown, heading) {
-    const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const match = markdown.match(new RegExp(`^## ${escaped}\\s*$([\\s\\S]*?)(?=^## |(?![\\s\\S]))`, "m"));
-    return match?.[1].trim() ?? "";
 }
 export async function loadPlatform(root) {
     const value = await readJson(path.join(root, "ai-engineering.config.yaml"));
@@ -107,6 +96,27 @@ export async function loadPlugins(root) {
     }
     return new Map([...plugins].sort(([left], [right]) => left.localeCompare(right)));
 }
+export async function generateCommandRegistry({ root }) {
+    const plugins = await loadPlugins(root);
+    const commands = [];
+    for (const [pluginId, plugin] of plugins) {
+        for (const command of await loadPluginCommands({
+            root,
+            pluginId,
+            plugin,
+        })) {
+            commands.push({
+                id: command.id,
+                plugin: pluginId,
+                slug: command.slug,
+                file: path.posix.join("commands", `${command.slug}.md`),
+                ...(command.mcpTool ? { mcpTool: command.mcpTool } : {}),
+            });
+        }
+    }
+    commands.sort((left, right) => left.id.localeCompare(right.id));
+    return { schemaVersion: 2, commands };
+}
 export async function findSkillPath(root, skillId) {
     const pluginSource = await resolvePluginSource(root);
     for (const pluginId of await readdir(pluginSource.root)) {
@@ -124,7 +134,10 @@ export async function findSkillPath(root, skillId) {
 export async function findCommandPath(root, commandId) {
     const pluginSource = await resolvePluginSource(root);
     for (const pluginId of await readdir(pluginSource.root)) {
-        const candidate = path.join(pluginSource.root, pluginId, "commands", `${commandId}.md`);
+        const relativePath = commandId.includes("/")
+            ? commandId
+            : path.join("commands", `${commandId}.md`);
+        const candidate = path.join(pluginSource.root, pluginId, relativePath);
         try {
             await readFile(candidate, "utf8");
             return candidate;
@@ -134,40 +147,6 @@ export async function findCommandPath(root, commandId) {
         }
     }
     return undefined;
-}
-export async function loadCanonicalCommand(pathname) {
-    let markdown;
-    try {
-        markdown = await readFile(pathname, "utf8");
-    }
-    catch {
-        throw new PlatformError(`missing command ${pathname ? path.basename(pathname, ".md") : "unknown"}`, {
-            code: "AI_ENGINEERING_INVALID_COMMAND",
-        });
-    }
-    const match = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
-    if (!match) {
-        throw new PlatformError(`command ${pathname} has invalid frontmatter`, {
-            code: "AI_ENGINEERING_INVALID_COMMAND",
-        });
-    }
-    const metadata = Object.fromEntries(match[1]
-        .split(/\r?\n/)
-        .filter(Boolean)
-        .map((line) => {
-        const separator = line.indexOf(":");
-        return [line.slice(0, separator).trim(), line.slice(separator + 1).trim()];
-    }));
-    const body = markdown.slice(match[0].length);
-    return {
-        ...metadata,
-        intent: parseSectionText(body, "Intent"),
-        inputs: parseSectionList(body, "Inputs"),
-        requiredSkills: parseSectionList(body, "Required Skills"),
-        steps: [...parseSectionText(body, "Steps").matchAll(/^\d+\. (.+)$/gm)].map((item) => item[1].trim()),
-        outputContract: parseSectionList(body, "Output Contract"),
-        markdown,
-    };
 }
 function detectCycles(plugins, errors) {
     const visiting = new Set();
@@ -334,31 +313,16 @@ async function validateRoutingAndMcp(root, plugins, errors, ownedSkillsByPack) {
             errors.push(`skill registry is missing plugin ${packId}`);
         }
     }
-    for (const command of commandRegistry.commands ?? []) {
-        const pluginId = command.plugin ?? command.pack;
-        if (!plugins.has(pluginId)) {
-            errors.push(`command registry references unknown plugin ${pluginId}`);
-        }
-        if (!mcpTools.has(command.id)) {
-            errors.push(`command ${command.id} references missing MCP tool`);
-        }
-        if (!(await exists(path.join(pluginSource.root, pluginId, command.file)))) {
-            errors.push(`command registry references missing file ${pluginId}/${command.file}`);
+    try {
+        const expectedCommandRegistry = await generateCommandRegistry({ root });
+        if (JSON.stringify(commandRegistry) !== JSON.stringify(expectedCommandRegistry)) {
+            errors.push("command registry must match canonical command files");
         }
     }
+    catch (error) {
+        errors.push(error.message);
+    }
     for (const [packId, pack] of plugins) {
-        for (const command of pack.commands ?? []) {
-            if (!command.id || !command.file || !command.mcp_tool) {
-                errors.push(`plugin ${packId} has invalid command metadata`);
-                continue;
-            }
-            if (!mcpTools.has(command.mcp_tool)) {
-                errors.push(`plugin ${packId} command ${command.id} references missing MCP tool ${command.mcp_tool}`);
-            }
-            if (!(await exists(path.join(pluginSource.root, packId, command.file)))) {
-                errors.push(`plugin ${packId} command ${command.id} references missing file`);
-            }
-        }
         for (const skill of pack.skills ?? []) {
             if (!skill.id || !skill.path) {
                 errors.push(`plugin ${packId} has invalid skill metadata`);
@@ -368,7 +332,7 @@ async function validateRoutingAndMcp(root, plugins, errors, ownedSkillsByPack) {
             }
         }
     }
-    return servers.length;
+    return { mcpServerCount: servers.length, mcpTools };
 }
 export async function validateRepository(root) {
     const platform = await loadPlatform(root);
@@ -382,7 +346,6 @@ export async function validateRepository(root) {
         .filter((entry) => entry.isFile() && entry.name.endsWith(".toml"))
         .map((entry) => path.basename(entry.name, ".toml")));
     const errors = [];
-    const commandOwners = new Map();
     if (platform.product?.name !== "ai-engineering-platform") {
         errors.push("platform product name must be ai-engineering-platform");
     }
@@ -444,9 +407,6 @@ export async function validateRepository(root) {
         if ((plugin.triggers?.keywords ?? []).length === 0) {
             errors.push(`plugin ${pluginId} must declare trigger keywords`);
         }
-        if ((plugin.commands ?? []).length === 0) {
-            errors.push(`plugin ${pluginId} must declare canonical commands`);
-        }
         if ((plugin.skills ?? []).length === 0) {
             errors.push(`plugin ${pluginId} must declare canonical skills`);
         }
@@ -483,50 +443,44 @@ export async function validateRepository(root) {
         if ((plugin.assets?.commands ?? []).length === 0) {
             errors.push(`plugin ${pluginId} must declare at least one command`);
         }
-        for (const commandId of plugin.assets?.commands ?? []) {
-            let command;
-            try {
-                const commandPath = await findCommandPath(root, commandId);
-                if (!commandPath) {
-                    errors.push(`missing command ${commandId}`);
-                    continue;
+    }
+    detectCycles(plugins, errors);
+    const { mcpServerCount, mcpTools } = await validateRoutingAndMcp(root, plugins, errors, ownedSkillsByPack);
+    const commandOwners = new Map();
+    function resolvedSkills(pluginId, visited = new Set()) {
+        if (visited.has(pluginId))
+            return [];
+        visited.add(pluginId);
+        const plugin = plugins.get(pluginId);
+        return [
+            ...(plugin?.assets?.skills ?? []),
+            ...(plugin?.dependencies?.required ?? []).flatMap((dependency) => resolvedSkills(dependency, visited)),
+        ];
+    }
+    for (const [pluginId, plugin] of plugins) {
+        try {
+            const commands = await loadPluginCommands({
+                root,
+                pluginId,
+                plugin,
+                knownSkills: new Set(resolvedSkills(pluginId)),
+                knownMcpTools: mcpTools,
+                validateReferences: true,
+            });
+            for (const command of commands) {
+                if (commandOwners.has(command.id)) {
+                    errors.push(`duplicate command id ${command.id}: ${commandOwners.get(command.id)}, ${pluginId}`);
                 }
-                command = await loadCanonicalCommand(commandPath);
-            }
-            catch (error) {
-                errors.push(error.message);
-                continue;
-            }
-            if (command.id !== commandId) {
-                errors.push(`command id mismatch: ${pluginId}/${commandId}`);
-            }
-            if (commandOwners.has(command.id)) {
-                errors.push(`duplicate command id ${command.id}: ${commandOwners.get(command.id)}, ${pluginId}`);
-            }
-            commandOwners.set(command.id, pluginId);
-            for (const skill of command.requiredSkills) {
-                if (!(plugin.assets?.skills ?? []).includes(skill)) {
-                    errors.push(`command ${commandId} references undeclared skill ${skill}`);
-                }
-            }
-            if (/[.]((claude|cursor|codex)(-plugin)?)[/\\]/i.test(command.markdown)) {
-                errors.push(`command ${commandId} contains provider-specific path`);
-            }
-            for (const heading of [
-                "intent",
-                "inputs",
-                "requiredSkills",
-                "steps",
-                "outputContract",
-            ]) {
-                if (command[heading].length === 0) {
-                    errors.push(`command ${commandId} has empty ${heading}`);
+                commandOwners.set(command.id, pluginId);
+                if (/[.]((claude|cursor|codex)(-plugin)?)[/\\]/i.test(command.markdown)) {
+                    errors.push(`command ${command.id} contains provider-specific path`);
                 }
             }
         }
+        catch (error) {
+            errors.push(...error.message.split("\n"));
+        }
     }
-    detectCycles(plugins, errors);
-    const mcpServerCount = await validateRoutingAndMcp(root, plugins, errors, ownedSkillsByPack);
     for (const required of [
         "cli/package.json",
         "cli/tsconfig.json",

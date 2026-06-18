@@ -31,7 +31,7 @@
       "git-workflow-design"
     ],
     "commands": [
-      "deployment-plan"
+      "commands/deployment-plan.md"
     ],
     "hooks": [
       "project-audit"
@@ -61,13 +61,6 @@
       "sre"
     ]
   },
-  "commands": [
-    {
-      "id": "platform.deployment_plan",
-      "file": "commands/deployment-plan.md",
-      "mcp_tool": "platform.deployment_plan"
-    }
-  ],
   "skills": [
     {
       "id": "platform.git_workflow_design",

@@ -1,5 +1,6 @@
 ---
-id: deliver-feature
+id: application.deliver_feature
+slug: deliver-feature
 description: Orchestrate a full-stack feature lifecycle through release readiness.
 version: 1.0.0
 ---

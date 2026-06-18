@@ -55,12 +55,13 @@ export async function buildPlugin({ root, pluginId, outputRoot }) {
 
     const commands = [];
     for (const ownerId of graph.pluginIds) {
-      for (const commandId of plugins.get(ownerId).assets.commands) {
-        const source = await findCommandPath(root, commandId);
-        const destination = resolveInside(staged, `commands/${commandId}.md`);
+      for (const commandAsset of plugins.get(ownerId).assets.commands) {
+        const source = await findCommandPath(root, commandAsset);
+        const command = await loadCanonicalCommand(source);
+        const destination = resolveInside(staged, `commands/${command.slug}.md`);
         await mkdir(path.dirname(destination), { recursive: true });
         await cp(source, destination);
-        commands.push(await loadCanonicalCommand(source));
+        commands.push(command);
       }
     }
 

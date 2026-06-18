@@ -1,7 +1,9 @@
 ---
-id: write-technical-doc
+id: knowledge.write_technical_doc
+slug: write-technical-doc
 description: Create maintainable technical documentation from repository evidence.
 version: 1.0.0
+mcpTool: knowledge.review_docs
 ---
 
 # Write Technical Documentation

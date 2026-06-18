@@ -1,5 +1,6 @@
 ---
-id: plan-feature
+id: application.plan_feature
+slug: plan-feature
 description: Decompose a full-stack feature into implementation surfaces and acceptance gates.
 version: 1.0.0
 ---

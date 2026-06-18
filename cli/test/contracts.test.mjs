@@ -6,11 +6,13 @@ import test from "node:test";
 
 import {
   findCommandPath,
+  generateCommandRegistry,
   loadCanonicalCommand,
   loadPlatform,
   loadPlugins,
   validateRepository,
 } from "../src/contracts.mjs";
+import { loadPluginCommands } from "../src/command-contracts.mjs";
 import { repoRoot } from "./helpers.mjs";
 
 async function withRepositoryCopy(run) {
@@ -88,7 +90,10 @@ test("loads seven canonical plugin contracts", async () => {
     const command = await loadCanonicalCommand(
       await findCommandPath(repoRoot, plugin.assets.commands[0]),
     );
-    assert.equal(command.id, plugin.assets.commands[0]);
+    assert.equal(
+      command.slug,
+      path.basename(plugin.assets.commands[0], ".md"),
+    );
     assert.ok(
       command.requiredSkills.every((skill) => plugin.assets.skills.includes(skill)),
     );
@@ -219,7 +224,7 @@ test("application defines ten parseable deliverable command files", async () => 
     const command = await loadCanonicalCommand(
       path.join(repoRoot, "plugins/application/commands", `${commandId}.md`),
     );
-    assert.equal(command.id, commandId);
+    assert.equal(command.slug, commandId);
     assert.ok(command.intent.length > 0);
     assert.ok(command.inputs.length > 0);
     assert.ok(command.requiredSkills.length > 0);
@@ -228,19 +233,63 @@ test("application defines ten parseable deliverable command files", async () => 
   }
 });
 
-test("application exposes manifest commands mapped to MCP tools", async () => {
+test("application exposes canonical command files with optional MCP tools", async () => {
   const plugins = await loadPlugins(repoRoot);
   const application = plugins.get("application");
   assert.deepEqual(application.assets.commands, [
-    "review-backend",
-    "implement-frontend",
+    "commands/deliver-feature.md",
+    "commands/design-api-contract.md",
+    "commands/design-data-change.md",
+    "commands/fix-feature.md",
+    "commands/implement-backend.md",
+    "commands/implement-frontend.md",
+    "commands/integrate-feature.md",
+    "commands/plan-feature.md",
+    "commands/review-backend.md",
+    "commands/review-feature.md",
+    "commands/test-feature.md",
   ]);
-  const commands = application.commands;
+  const commands = await loadPluginCommands({
+    root: repoRoot,
+    pluginId: "application",
+    plugin: application,
+  });
   assert.equal(commands.length, application.assets.commands.length);
-  for (const command of commands) {
-    assert.match(command.id, /^application[.]/);
-    assert.match(command.mcp_tool, /^application[.]/);
+  assert.ok(commands.every((command) => /^application[.]/.test(command.id)));
+  assert.deepEqual(
+    commands.filter((command) => command.mcpTool).map((command) => command.mcpTool),
+    ["application.generate_service", "application.review_source_code"],
+  );
+});
+
+test("all command files are canonical manifest assets", async () => {
+  const plugins = await loadPlugins(repoRoot);
+  for (const [pluginId, plugin] of plugins) {
+    assert.equal(Object.hasOwn(plugin, "commands"), false);
+    assert.ok(
+      plugin.assets.commands.every((item) =>
+        /^commands\/[a-z0-9]+(?:-[a-z0-9]+)*\.md$/.test(item),
+      ),
+    );
+    const commands = await loadPluginCommands({
+      root: repoRoot,
+      pluginId,
+      plugin,
+    });
+    assert.equal(commands.length, plugin.assets.commands.length);
   }
+});
+
+test("committed command registry is deterministic schema version 2", async () => {
+  const expected = await generateCommandRegistry({ root: repoRoot });
+  const committed = JSON.parse(
+    await readFile(
+      path.join(repoRoot, "core/routing/command-registry.yaml"),
+      "utf8",
+    ),
+  );
+  assert.deepEqual(committed, expected);
+  assert.equal(committed.schemaVersion, 2);
 });
 
 test("rejects provider-specific paths in canonical commands", async () => {

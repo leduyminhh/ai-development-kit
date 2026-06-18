@@ -1,13 +1,115 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "commands": [
-    { "id": "architecture.review_architecture", "plugin": "architecture", "file": "commands/review-architecture.md" },
-    { "id": "application.review_source_code", "plugin": "application", "file": "commands/review-backend.md" },
-    { "id": "application.generate_service", "plugin": "application", "file": "commands/implement-frontend.md" },
-    { "id": "data.migration_plan", "plugin": "data", "file": "commands/migration-plan.md" },
-    { "id": "security.scan_source", "plugin": "security", "file": "commands/review-security.md" },
-    { "id": "quality.generate_test_plan", "plugin": "quality", "file": "commands/verify-quality.md" },
-    { "id": "platform.deployment_plan", "plugin": "platform", "file": "commands/deployment-plan.md" },
-    { "id": "knowledge.review_docs", "plugin": "knowledge", "file": "commands/write-technical-doc.md" }
+    {
+      "id": "application.deliver_feature",
+      "plugin": "application",
+      "slug": "deliver-feature",
+      "file": "commands/deliver-feature.md"
+    },
+    {
+      "id": "application.design_api_contract",
+      "plugin": "application",
+      "slug": "design-api-contract",
+      "file": "commands/design-api-contract.md"
+    },
+    {
+      "id": "application.design_data_change",
+      "plugin": "application",
+      "slug": "design-data-change",
+      "file": "commands/design-data-change.md"
+    },
+    {
+      "id": "application.fix_feature",
+      "plugin": "application",
+      "slug": "fix-feature",
+      "file": "commands/fix-feature.md"
+    },
+    {
+      "id": "application.implement_backend",
+      "plugin": "application",
+      "slug": "implement-backend",
+      "file": "commands/implement-backend.md"
+    },
+    {
+      "id": "application.implement_frontend",
+      "plugin": "application",
+      "slug": "implement-frontend",
+      "file": "commands/implement-frontend.md",
+      "mcpTool": "application.generate_service"
+    },
+    {
+      "id": "application.integrate_feature",
+      "plugin": "application",
+      "slug": "integrate-feature",
+      "file": "commands/integrate-feature.md"
+    },
+    {
+      "id": "application.plan_feature",
+      "plugin": "application",
+      "slug": "plan-feature",
+      "file": "commands/plan-feature.md"
+    },
+    {
+      "id": "application.review_backend",
+      "plugin": "application",
+      "slug": "review-backend",
+      "file": "commands/review-backend.md",
+      "mcpTool": "application.review_source_code"
+    },
+    {
+      "id": "application.review_feature",
+      "plugin": "application",
+      "slug": "review-feature",
+      "file": "commands/review-feature.md"
+    },
+    {
+      "id": "application.test_feature",
+      "plugin": "application",
+      "slug": "test-feature",
+      "file": "commands/test-feature.md"
+    },
+    {
+      "id": "architecture.review_architecture",
+      "plugin": "architecture",
+      "slug": "review-architecture",
+      "file": "commands/review-architecture.md",
+      "mcpTool": "architecture.review_architecture"
+    },
+    {
+      "id": "data.migration_plan",
+      "plugin": "data",
+      "slug": "migration-plan",
+      "file": "commands/migration-plan.md",
+      "mcpTool": "data.migration_plan"
+    },
+    {
+      "id": "knowledge.write_technical_doc",
+      "plugin": "knowledge",
+      "slug": "write-technical-doc",
+      "file": "commands/write-technical-doc.md",
+      "mcpTool": "knowledge.review_docs"
+    },
+    {
+      "id": "platform.deployment_plan",
+      "plugin": "platform",
+      "slug": "deployment-plan",
+      "file": "commands/deployment-plan.md",
+      "mcpTool": "platform.deployment_plan"
+    },
+    {
+      "id": "quality.verify_quality",
+      "plugin": "quality",
+      "slug": "verify-quality",
+      "file": "commands/verify-quality.md",
+      "mcpTool": "quality.generate_test_plan"
+    },
+    {
+      "id": "security.review_security",
+      "plugin": "security",
+      "slug": "review-security",
+      "file": "commands/review-security.md",
+      "mcpTool": "security.scan_source"
+    }
   ]
 }

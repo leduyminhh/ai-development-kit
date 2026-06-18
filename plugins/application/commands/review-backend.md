@@ -1,7 +1,9 @@
 ---
-id: review-backend
+id: application.review_backend
+slug: review-backend
 description: Review backend source code for production readiness.
 version: 1.0.0
+mcpTool: application.review_source_code
 ---
 
 # Review Backend

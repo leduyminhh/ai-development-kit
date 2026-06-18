@@ -36,10 +36,12 @@
       "feature-test",
       "java-analyze",
       "python-backend-engineer",
+      "data-migration",
       "doc-write",
       "code-shared-design",
       "react-code-generate",
-      "test-automation-validate"
+      "test-automation-validate",
+      "test-qa-review"
     ],
     "agents": [
       "java-analyze",
@@ -47,8 +49,17 @@
       "test-automation-validate"
     ],
     "commands": [
-      "review-backend",
-      "implement-frontend"
+      "commands/deliver-feature.md",
+      "commands/design-api-contract.md",
+      "commands/design-data-change.md",
+      "commands/fix-feature.md",
+      "commands/implement-backend.md",
+      "commands/implement-frontend.md",
+      "commands/integrate-feature.md",
+      "commands/plan-feature.md",
+      "commands/review-backend.md",
+      "commands/review-feature.md",
+      "commands/test-feature.md"
     ],
     "hooks": [
       "project-audit"
@@ -79,18 +90,6 @@
       "redis"
     ]
   },
-  "commands": [
-    {
-      "id": "application.review_backend",
-      "file": "commands/review-backend.md",
-      "mcp_tool": "application.review_source_code"
-    },
-    {
-      "id": "application.implement_frontend",
-      "file": "commands/implement-frontend.md",
-      "mcp_tool": "application.generate_service"
-    }
-  ],
   "skills": [
     {
       "id": "application.api_contract_design",

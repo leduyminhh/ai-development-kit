@@ -32,7 +32,7 @@
       "diagram-generate"
     ],
     "commands": [
-      "write-technical-doc"
+      "commands/write-technical-doc.md"
     ],
     "hooks": [],
     "rules": "none",
@@ -60,13 +60,6 @@
       "changelog"
     ]
   },
-  "commands": [
-    {
-      "id": "knowledge.write_technical_doc",
-      "file": "commands/write-technical-doc.md",
-      "mcp_tool": "knowledge.review_docs"
-    }
-  ],
   "skills": [
     {
       "id": "knowledge.youtube_transcript",

@@ -1,15 +1,19 @@
 export function loadPlatform(root: any): Promise<any>;
 export function loadPlugins(root: any): Promise<Map<any, any>>;
+export function generateCommandRegistry({ root }: {
+    root: any;
+}): Promise<{
+    schemaVersion: number;
+    commands: {
+        mcpTool?: any;
+        id: any;
+        plugin: any;
+        slug: any;
+        file: string;
+    }[];
+}>;
 export function findSkillPath(root: any, skillId: any): Promise<string | undefined>;
 export function findCommandPath(root: any, commandId: any): Promise<string | undefined>;
-export function loadCanonicalCommand(pathname: any): Promise<{
-    intent: any;
-    inputs: any[];
-    requiredSkills: any[];
-    steps: any[];
-    outputContract: any[];
-    markdown: string;
-}>;
 export function loadSkillRegistry(root: any): Promise<any>;
 export function validateStructuredToolContract(tool: any): string[];
 export function validateRepository(root: any): Promise<{
@@ -19,3 +23,4 @@ export function validateRepository(root: any): Promise<{
     mcpServerCount: number;
 }>;
 export function validateArtifactManifest(value: any): Promise<any>;
+export { loadCanonicalCommand } from "./command-contracts.mjs";

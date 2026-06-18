@@ -1,5 +1,6 @@
 ---
-id: review-feature
+id: application.review_feature
+slug: review-feature
 description: Review a full-stack feature for release readiness risks.
 version: 1.0.0
 ---

@@ -29,7 +29,7 @@
       "security-code-review"
     ],
     "commands": [
-      "review-security"
+      "commands/review-security.md"
     ],
     "hooks": [
       "project-audit"
@@ -58,13 +58,6 @@
       "threat model"
     ]
   },
-  "commands": [
-    {
-      "id": "security.review_security",
-      "file": "commands/review-security.md",
-      "mcp_tool": "security.scan_source"
-    }
-  ],
   "skills": [
     {
       "id": "security.security_code_review",

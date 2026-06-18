@@ -1,7 +1,9 @@
 ---
-id: deployment-plan
+id: platform.deployment_plan
+slug: deployment-plan
 description: Produce a deployment and rollback plan.
 version: 1.0.0
+mcpTool: platform.deployment_plan
 ---
 
 # Deployment Plan

@@ -1,5 +1,6 @@
 ---
-id: fix-feature
+id: application.fix_feature
+slug: fix-feature
 description: Fix selected full-stack feature findings or failing tests.
 version: 1.0.0
 ---

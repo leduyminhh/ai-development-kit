@@ -1,7 +1,9 @@
 ---
-id: implement-frontend
+id: application.implement_frontend
+slug: implement-frontend
 description: Implement React frontend work for an approved feature context.
 version: 1.0.0
+mcpTool: application.generate_service
 ---
 
 # Implement Frontend

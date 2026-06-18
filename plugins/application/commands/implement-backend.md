@@ -1,5 +1,6 @@
 ---
-id: implement-backend
+id: application.implement_backend
+slug: implement-backend
 description: Implement backend work for an approved feature context.
 version: 1.0.0
 ---

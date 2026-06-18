@@ -1,5 +1,6 @@
 ---
-id: design-data-change
+id: application.design_data_change
+slug: design-data-change
 description: Design a safe data change for a full-stack feature.
 version: 1.0.0
 ---

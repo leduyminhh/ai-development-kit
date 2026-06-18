@@ -1,5 +1,6 @@
 ---
-id: test-feature
+id: application.test_feature
+slug: test-feature
 description: Verify a full-stack feature against acceptance criteria.
 version: 1.0.0
 ---

@@ -418,7 +418,9 @@ test("lists installable plugins with their commands and skills", async () => {
   assert.equal(application.install.defaultScope, "project");
   assert.deepEqual(application.dependencies.required, ["architecture"]);
   assert.ok(application.assets.skills.includes("react-code-generate"));
-  assert.ok(application.assets.commands.includes("review-backend"));
+  assert.ok(
+    application.assets.commands.includes("commands/review-backend.md"),
+  );
 
   const cliCatalog = await runCli(["list", "--available", "--json"]);
   assert.equal(cliCatalog.exitCode, 0);

@@ -27,7 +27,7 @@
     ],
     "agents": [],
     "commands": [
-      "migration-plan"
+      "commands/migration-plan.md"
     ],
     "hooks": [],
     "rules": "none",
@@ -56,13 +56,6 @@
       "cdc"
     ]
   },
-  "commands": [
-    {
-      "id": "data.migration_plan",
-      "file": "commands/migration-plan.md",
-      "mcp_tool": "data.migration_plan"
-    }
-  ],
   "skills": [
     {
       "id": "data.data_migration",

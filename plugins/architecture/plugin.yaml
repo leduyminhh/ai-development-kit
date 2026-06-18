@@ -33,7 +33,7 @@
       "diagram-generate"
     ],
     "commands": [
-      "review-architecture"
+      "commands/review-architecture.md"
     ],
     "hooks": [
       "project-audit"
@@ -63,13 +63,6 @@
       "microservices"
     ]
   },
-  "commands": [
-    {
-      "id": "architecture.review_architecture",
-      "file": "commands/review-architecture.md",
-      "mcp_tool": "architecture.review_architecture"
-    }
-  ],
   "skills": [
     {
       "id": "architecture.architecture_onion_design",
