@@ -1,63 +1,69 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import test from "node:test";
 
-import { parseInstallRequest } from "../src/install-request.mjs";
 import { runInstallWizard } from "../src/install-wizard.mjs";
+import { parseInstallRequest } from "../src/install-request.mjs";
 
-test("preserves explicit root plugin and asks editable choices", async () => {
-  const steps = [];
-  const answers = {
-    providers: ["codex"],
-    optionalPlugins: [],
-    scope: "project",
-    confirm: "install",
-  };
-  const prompter = {
-    async ask(step) {
-      steps.push(step);
-      return answers[step];
+function scriptedPrompter(answers) {
+  const calls = [];
+  return {
+    calls,
+    async ask(step, options) {
+      calls.push({ step, options });
+      const answer = answers.shift();
+      if (typeof answer === "function") return answer(step, options);
+      return answer;
     },
+    close() {},
   };
+}
+
+const availablePlugins = [
+  { id: "application", dependencies: { optional: [] } },
+  { id: "platform", dependencies: { optional: [] } },
+  { id: "quality", dependencies: { optional: [] } },
+  { id: "security", dependencies: { optional: [] } },
+];
+
+test("wizard starts plugin selection from detected recommendations", async () => {
+  const prompter = scriptedPrompter([
+    ["platform", "quality"],
+    ["codex"],
+    "project",
+    "install",
+  ]);
+
   const result = await runInstallWizard({
-    draft: parseInstallRequest(["application"]),
-    availablePlugins: [
-      {
-        id: "application",
-        dependencies: { required: ["architecture"], optional: ["quality"] },
-      },
-      { id: "quality", dependencies: { required: [], optional: [] } },
-    ],
-    detectedProviders: [],
-    preparePlan: async () => ({ requiredPlugins: ["architecture"] }),
+    draft: parseInstallRequest([]),
+    availablePlugins,
+    detectedProviders: ["codex"],
+    detectedPlugins: [{ pluginId: "platform" }, { pluginId: "quality" }],
+    preparePlan: async () => ({ summary: [] }),
     prompter,
   });
 
-  assert.deepEqual(steps, [
-    "providers",
-    "optionalPlugins",
-    "scope",
-    "confirm",
-  ]);
-  assert.deepEqual(result.intent.rootPlugins, ["application"]);
-  assert.equal(result.action, "install");
+  assert.deepEqual(prompter.calls[0].options.selected, ["platform", "quality"]);
+  assert.deepEqual(result.intent.rootPlugins, ["platform", "quality"]);
+  assert.equal(result.intent.all, false);
 });
 
-test("cancel returns without applying installation", async () => {
-  const prompter = {
-    async ask(step) {
-      if (step === "providers") return ["codex"];
-      if (step === "scope") return "project";
-      return "cancel";
-    },
-  };
+test("wizard supports install all selection", async () => {
+  const prompter = scriptedPrompter([
+    { all: true, selected: [] },
+    ["cursor"],
+    "project",
+    "install",
+  ]);
+
   const result = await runInstallWizard({
-    draft: parseInstallRequest(["application"]),
-    availablePlugins: [
-      { id: "application", dependencies: { required: [], optional: [] } },
-    ],
-    detectedProviders: [],
-    preparePlan: async () => ({}),
+    draft: parseInstallRequest([]),
+    availablePlugins,
+    detectedProviders: ["cursor"],
+    detectedPlugins: [],
+    preparePlan: async () => ({ summary: [] }),
     prompter,
   });
-  assert.equal(result.action, "cancel");
+
+  assert.equal(result.intent.all, true);
+  assert.deepEqual(result.intent.rootPlugins, []);
 });

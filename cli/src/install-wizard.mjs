@@ -1,4 +1,4 @@
-import { createInterface } from "node:readline/promises";
+﻿import { createInterface } from "node:readline/promises";
 
 import {
   applyDetectedProviders,
@@ -9,11 +9,29 @@ function wizardField(value) {
   return { value, source: "wizard", locked: false };
 }
 
+function recommendedPluginSelection(draft, detectedPlugins) {
+  if (draft.rootPlugins.locked || draft.rootPlugins.value.length > 0) {
+    return draft.rootPlugins.value;
+  }
+  return [...new Set((detectedPlugins ?? []).map((item) => item.pluginId))].sort();
+}
+
+function normalizePluginAnswer(answer) {
+  if (Array.isArray(answer)) return { all: false, selected: answer };
+  if (answer && typeof answer === "object") {
+    return { all: Boolean(answer.all), selected: answer.selected ?? [] };
+  }
+  return { all: false, selected: [] };
+}
+
 function optionalCandidates(draft, availablePlugins) {
+  const rootPlugins = Array.isArray(draft.rootPlugins.value)
+    ? draft.rootPlugins.value
+    : [];
   const byId = new Map(availablePlugins.map((item) => [item.id, item]));
   return [
     ...new Set(
-      draft.rootPlugins.value.flatMap(
+      rootPlugins.flatMap(
         (id) => byId.get(id)?.dependencies?.optional ?? [],
       ),
     ),
@@ -24,17 +42,22 @@ export async function runInstallWizard({
   draft: originalDraft,
   availablePlugins,
   detectedProviders,
+  detectedPlugins = [],
   preparePlan,
   prompter,
 }) {
   let draft = applyDetectedProviders(originalDraft, detectedProviders);
-  if (!draft.rootPlugins.locked) {
-    draft.rootPlugins = wizardField(
+  if (!draft.rootPlugins.locked && !draft.all.locked) {
+    const pluginAnswer = normalizePluginAnswer(
       await prompter.ask("rootPlugins", {
         choices: availablePlugins.map((item) => item.id),
-        selected: draft.rootPlugins.value,
+        selected: recommendedPluginSelection(draft, detectedPlugins),
+        detected: detectedPlugins,
+        allowAll: true,
       }),
     );
+    draft.all = wizardField(pluginAnswer.all);
+    draft.rootPlugins = wizardField(pluginAnswer.all ? [] : pluginAnswer.selected);
   }
   if (!draft.providers.locked) {
     draft.providers = wizardField(
