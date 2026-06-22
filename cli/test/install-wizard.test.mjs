@@ -1,69 +1,50 @@
 ﻿import assert from "node:assert/strict";
 import test from "node:test";
 
-import { runInstallWizard } from "../src/install-wizard.mjs";
-import { parseInstallRequest } from "../src/install-request.mjs";
+import { renderChecklistStep, parseChecklistKey } from "../src/install-wizard.mjs";
 
-function scriptedPrompter(answers) {
-  const calls = [];
-  return {
-    calls,
-    async ask(step, options) {
-      calls.push({ step, options });
-      const answer = answers.shift();
-      if (typeof answer === "function") return answer(step, options);
-      return answer;
-    },
-    close() {},
-  };
-}
-
-const availablePlugins = [
-  { id: "application", dependencies: { optional: [] } },
-  { id: "platform", dependencies: { optional: [] } },
-  { id: "quality", dependencies: { optional: [] } },
-  { id: "security", dependencies: { optional: [] } },
-];
-
-test("wizard starts plugin selection from detected recommendations", async () => {
-  const prompter = scriptedPrompter([
-    ["platform", "quality"],
-    ["codex"],
-    "project",
-    "install",
-  ]);
-
-  const result = await runInstallWizard({
-    draft: parseInstallRequest([]),
-    availablePlugins,
-    detectedProviders: ["codex"],
-    detectedPlugins: [{ pluginId: "platform" }, { pluginId: "quality" }],
-    preparePlan: async () => ({ summary: [] }),
-    prompter,
+test("renders plugin checklist with install all and recommendation reasons", () => {
+  const output = renderChecklistStep({
+    title: "Plugins",
+    choices: ["application", "platform", "quality"],
+    selected: ["platform"],
+    cursor: 0,
+    allowAll: true,
+    all: false,
+    detected: [{ pluginId: "platform", reasons: ["baseline runtime"] }],
   });
 
-  assert.deepEqual(prompter.calls[0].options.selected, ["platform", "quality"]);
-  assert.deepEqual(result.intent.rootPlugins, ["platform", "quality"]);
-  assert.equal(result.intent.all, false);
+  assert.match(output, /Plugins/);
+  assert.match(output, /Install all plugins/);
+  assert.match(output, /platform/);
+  assert.match(output, /baseline runtime/);
 });
 
-test("wizard supports install all selection", async () => {
-  const prompter = scriptedPrompter([
-    { all: true, selected: [] },
-    ["cursor"],
-    "project",
-    "install",
-  ]);
+test("parses checklist keys for toggle, submit, and movement", () => {
+  assert.equal(parseChecklistKey(" "), "toggle");
+  assert.equal(parseChecklistKey("\r"), "submit");
+  assert.equal(parseChecklistKey("\n"), "submit");
+  assert.equal(parseChecklistKey("j"), "down");
+  assert.equal(parseChecklistKey("k"), "up");
+  assert.equal(parseChecklistKey("a"), "all");
+  assert.equal(parseChecklistKey("q"), "cancel");
+});
 
-  const result = await runInstallWizard({
-    draft: parseInstallRequest([]),
-    availablePlugins,
-    detectedProviders: ["cursor"],
-    detectedPlugins: [],
-    preparePlan: async () => ({ summary: [] }),
-    prompter,
+test("renderChecklistStep highlights install all when active", () => {
+  const output = renderChecklistStep({
+    title: "Plugins",
+    choices: ["quality"],
+    selected: [],
+    cursor: -1,
+    allowAll: true,
+    all: true,
   });
 
-  assert.equal(result.intent.all, true);
-  assert.deepEqual(result.intent.rootPlugins, []);
+  assert.match(output, /\u203a.*\[x\] Install all plugins/);
+});
+
+test("parseChecklistKey fallback for escape and back keys", () => {
+  assert.equal(parseChecklistKey("\u001b"), "cancel");
+  assert.equal(parseChecklistKey("b"), "back");
+  assert.equal(parseChecklistKey("x"), "ignore");
 });
