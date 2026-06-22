@@ -47,6 +47,14 @@ import {
   runInstallWizard,
 } from "./install-wizard.mjs";
 
+import { detectInstallRecommendations } from "./install-detection.mjs";
+import {
+  cancelInstallSession,
+  completeInstallSession,
+  readInstallSession,
+  writeInstallSession,
+} from "./install-session.mjs";
+
 export const VERSION = "1.0.0";
 const REPOSITORY_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -395,6 +403,15 @@ export async function run(args, streams = process) {
         },
       );
     } else {
+      const projectRoot = process.cwd();
+      const detectedProvidersForWizard = await detectProviders({ projectRoot });
+      const detectedRecommendations = await detectInstallRecommendations({ projectRoot });
+      const sessionContext = resolveInstallContext({
+        scope: draft.scope.value,
+        projectRoot,
+        homeRoot: os.homedir(),
+      });
+      const existingSession = await readInstallSession({ target: sessionContext.targetRoot });
       const catalog = await listAvailable({ root });
       const prompter = createTerminalPrompter({
         input: streams.stdin,
@@ -404,9 +421,18 @@ export async function run(args, streams = process) {
         const wizard = await runInstallWizard({
           draft,
           availablePlugins: catalog.plugins.available,
-          detectedProviders: await detectProviders({
-            projectRoot: process.cwd(),
+          detectedPlugins: detectedRecommendations.plugins,
+          existingSession,
+          onSession: async (sessionDraft, currentStep, planHash) => writeInstallSession({
+            target: sessionContext.targetRoot,
+            currentStep,
+            draft: sessionDraft,
+            detectedProviders: detectedProvidersForWizard,
+            detectedPlugins: detectedRecommendations.plugins,
+            planHash: planHash || "",
           }),
+          availablePlugins: catalog.plugins.available,
+          detectedProviders: detectedProvidersForWizard,
           preparePlan: async (candidate) => {
             const candidateContext = resolveInstallContext({
               scope: candidate.scope,
@@ -432,6 +458,7 @@ export async function run(args, streams = process) {
         });
         if (wizard.action === "cancel") {
           streams.stdout.write("Installation cancelled.\n");
+          await cancelInstallSession({ target: sessionContext.targetRoot });
           return 0;
         }
         intent = wizard.intent;
@@ -469,6 +496,7 @@ export async function run(args, streams = process) {
       context,
       force: intent.force,
     });
+    await completeInstallSession({ target: context.targetRoot });
     streams.stdout.write(
       args.includes("--json")
         ? `${JSON.stringify(result)}\n`
