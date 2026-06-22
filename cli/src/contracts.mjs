@@ -5,10 +5,10 @@ import {
   loadPluginCommands,
 } from "./command-contracts.mjs";
 import { PlatformError } from "./errors.mjs";
+import { SUPPORTED_PROVIDERS } from "./provider-list.mjs";
 
 export { loadCanonicalCommand } from "./command-contracts.mjs";
 
-const PROVIDERS = ["codex", "claude", "cursor"];
 const PLUGIN_KEYS = new Set([
   "apiVersion",
   "kind",
@@ -24,6 +24,10 @@ const PLUGIN_KEYS = new Set([
   "version",
   "description",
   "category",
+  "displayName",
+  "developerName",
+  "icon",
+  "logo",
   "triggers",
   "commands",
   "skills",
@@ -545,7 +549,7 @@ export async function validateRepository(root) {
           );
         }
         commandOwners.set(command.id, pluginId);
-        if (/[.]((claude|cursor|codex)(-plugin)?)[/\\]/i.test(command.markdown)) {
+        if (/[.]((antigravity|claude|cursor|codex)(-plugin)?)[/\\]/i.test(command.markdown)) {
           errors.push(`command ${command.id} contains provider-specific path`);
         }
       }
@@ -577,7 +581,7 @@ export async function validateRepository(root) {
   return {
     status: "pass",
     pluginCount: plugins.size,
-    providerCount: PROVIDERS.length,
+    providerCount: SUPPORTED_PROVIDERS.length,
     mcpProviderExampleCount,
   };
 }

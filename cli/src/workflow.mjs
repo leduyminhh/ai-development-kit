@@ -1,6 +1,6 @@
 ﻿import { access, appendFile, mkdir, readFile, readdir, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
-import yaml from "js-yaml";
+import * as yaml from "js-yaml";
 
 import { PlatformError } from "./errors.mjs";
 import { loadPlugins } from "./contracts.mjs";
@@ -21,7 +21,7 @@ async function fileExists(pathname) {
 }
 
 function parseWorkflowYaml(content) {
-  return yaml.load(content);
+  return yaml.load(content.replace(/^\uFEFF/, ""));
 }
 
 function validateStepIds(steps) {

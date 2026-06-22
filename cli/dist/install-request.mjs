@@ -108,7 +108,7 @@ export function finalizeNonInteractiveDraft(draft) {
     }
     if (missing.length > 0) {
         throw argumentError(`Missing install choices in non-interactive mode: ${missing.join(", ")}.\n` +
-            "Pass --target codex,claude,cursor and --yes, or run in an interactive terminal.");
+            "Pass --target codex,claude,cursor,antigravity and --yes, or run in an interactive terminal.");
     }
     return toInstallIntent(draft);
 }

@@ -11,9 +11,30 @@
       "type": "object",
       "required": ["id", "name", "version", "description"]
     },
-    "compatibility": { "type": "object" },
+    "compatibility": {
+      "type": "object",
+      "properties": {
+        "platform": { "type": "string" },
+        "providers": {
+          "type": "object",
+          "properties": {
+            "antigravity": { "enum": ["supported", "unsupported"] },
+            "codex": { "enum": ["supported", "unsupported"] },
+            "claude": { "enum": ["supported", "unsupported"] },
+            "cursor": { "enum": ["supported", "unsupported"] }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": true
+    },
     "dependencies": { "type": "object" },
-    "assets": { "type": "object" }
+    "assets": { "type": "object" },
+    "displayName": { "type": "string", "minLength": 1 },
+    "developerName": { "type": "string", "minLength": 1 },
+    "category": { "type": "string", "minLength": 1 },
+    "icon": { "type": "string", "minLength": 1 },
+    "logo": { "type": "string", "minLength": 1 }
   },
   "additionalProperties": false
 }

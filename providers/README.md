@@ -3,6 +3,10 @@
 `providers/` owns provider-facing configuration contracts for AI IDEs and MCP
 runtime registration.
 
+The current provider target set is `codex`, `claude`, `cursor`, and
+`antigravity`. Provider-native file projection lives under `adapters/`; this
+directory stays focused on shared MCP registry, policy, schema, and examples.
+
 This repository does not ship active MCP tools by default. MCP entries here are
 registry, policy, schema, and example files so future integrations have a stable
 structure without coupling plugins to executable MCP server source.

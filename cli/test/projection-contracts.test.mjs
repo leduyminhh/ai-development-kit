@@ -65,6 +65,49 @@ test("rejects escaping projection destinations", () => {
   );
 });
 
+test("accepts antigravity projection provider", () => {
+  const result = validateProjectionPlan({
+    schemaVersion: 1,
+    provider: "antigravity",
+    scope: "project",
+    assets: [
+      {
+        operation: "render",
+        assetType: "provider-manifest",
+        assetId: "antigravity.plugin",
+        destinationPath: "antigravity-plugin.json",
+        content: "{}\n",
+        owners: ["application"],
+        shared: false,
+      },
+    ],
+    instructions: [],
+    mcpConfig: {
+      destinationPath: "mcp/mcp.json",
+      format: "json",
+      rootKey: "mcpServers",
+      servers: {},
+    },
+  });
+
+  assert.equal(result.provider, "antigravity");
+  assert.equal(result.mcpConfig.destinationPath, "mcp/mcp.json");
+});
+
+test("rejects unknown projection provider", () => {
+  assert.throws(
+    () =>
+      validateProjectionPlan({
+        schemaVersion: 1,
+        provider: "copilot",
+        scope: "project",
+        assets: [],
+        instructions: [],
+      }),
+    /unsupported projection provider copilot/,
+  );
+});
+
 test("rejects duplicate projection destinations", () => {
   assert.throws(
     () =>

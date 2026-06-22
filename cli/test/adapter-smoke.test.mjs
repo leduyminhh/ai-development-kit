@@ -23,7 +23,9 @@ async function seedUserConfig(root, scope, provider) {
       ? scope === "global"
         ? ".claude.json"
         : ".mcp.json"
-      : ".cursor/mcp.json";
+      : provider === "antigravity"
+        ? "mcp/mcp.json"
+        : ".cursor/mcp.json";
   const pathname = path.join(root, relative);
   await mkdir(path.dirname(pathname), { recursive: true });
   await writeFile(pathname, '{"userSetting":"keep"}\n');
@@ -32,7 +34,7 @@ async function seedUserConfig(root, scope, provider) {
 
 test("all provider and scope combinations install, diagnose, and uninstall", async (t) => {
   for (const scope of ["project", "global"]) {
-    for (const provider of ["codex", "claude", "cursor"]) {
+    for (const provider of ["antigravity", "codex", "claude", "cursor"]) {
       await t.test(`${scope}/${provider}`, async () => {
         const project = await mkdtemp(
           path.join(os.tmpdir(), "ai-engineering-adapter-project-"),

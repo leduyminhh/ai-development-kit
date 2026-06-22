@@ -1,17 +1,13 @@
 import { validateProjectionInput, validateProjectionPlan, } from "./projection-contracts.mjs";
 import { PlatformError } from "./errors.mjs";
+import { SUPPORTED_PROVIDERS } from "./provider-list.mjs";
 const adapterUrl = (provider) => new URL(`../../adapters/${provider}/projector.mjs`, import.meta.url).href;
 const dynamicImport = new Function("specifier", "return import(specifier)");
-const [{ project: projectCodexAdapter }, { project: projectClaudeAdapter }, { project: projectCursorAdapter },] = await Promise.all([
-    dynamicImport(adapterUrl("codex")),
-    dynamicImport(adapterUrl("claude")),
-    dynamicImport(adapterUrl("cursor")),
-]);
-const PROJECTORS = {
-    codex: projectCodexAdapter,
-    claude: projectClaudeAdapter,
-    cursor: projectCursorAdapter,
-};
+const projectorEntries = await Promise.all(SUPPORTED_PROVIDERS.map(async (provider) => {
+    const { project } = await dynamicImport(adapterUrl(provider));
+    return [provider, project];
+}));
+const PROJECTORS = Object.fromEntries(projectorEntries);
 export function projectProvider(input) {
     const projector = PROJECTORS[input.provider];
     if (!projector) {
@@ -94,13 +90,17 @@ export function projectClaude(context) {
 export function projectCursor(context) {
     return projectLegacy(context, "cursor");
 }
+export function projectAntigravity(context) {
+    return projectLegacy(context, "antigravity");
+}
 export function projectProviders(input) {
     if (Array.isArray(input)) {
         return Object.fromEntries(input.map((item) => [item.provider, projectProvider(item)]));
     }
     return {
-        codex: projectCodex(input),
+        antigravity: projectAntigravity(input),
         claude: projectClaude(input),
+        codex: projectCodex(input),
         cursor: projectCursor(input),
     };
 }

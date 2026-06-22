@@ -21,7 +21,7 @@ test("prints lifecycle commands in help", async () => {
   assert.match(result.stdout, /Alias:\s+aie/);
   assert.match(result.stdout, /Quick start:/);
   assert.match(result.stdout, /aie init/);
-  assert.match(result.stdout, /aie install --all --target codex,claude/);
+  assert.match(result.stdout, /aie install --all --target codex,claude,cursor,antigravity/);
   assert.match(result.stdout, /Plugin lifecycle:/);
   assert.match(result.stdout, /aie install <plugin\.\.\.> --target <provider\[,provider\.\.\.\]>/);
   assert.match(result.stdout, /aie install --all --target <provider\[,provider\.\.\.\]>/);
@@ -37,7 +37,7 @@ test("prints lifecycle commands in help", async () => {
   assert.doesNotMatch(result.stdout, /Native install paths:/);
   assert.doesNotMatch(result.stdout, /Codex project:/);
   assert.doesNotMatch(result.stdout, /Claude global:/);
-  assert.match(result.stdout, /--target <providers>\s+codex, claude, cursor/);
+  assert.match(result.stdout, /--target <providers>\s+codex, claude, cursor, antigravity/);
   assert.match(result.stdout, /--provider <providers>\s+Alias for --target/);
   assert.match(result.stdout, /--json\s+Print machine-readable output/);
   assert.match(result.stdout, /Default scope: project/);

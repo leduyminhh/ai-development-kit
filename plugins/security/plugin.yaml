@@ -12,7 +12,8 @@
     "providers": {
       "codex": "supported",
       "claude": "supported",
-      "cursor": "supported"
+      "cursor": "supported",
+      "antigravity": "supported"
     }
   },
   "dependencies": {
@@ -68,5 +69,7 @@
   ],
   "depends_on": {
     "plugins": []
-  }
+  },
+  "displayName": "Security Engineering",
+  "developerName": "AI Engineering Platform"
 }

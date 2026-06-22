@@ -5,6 +5,7 @@ import test from "node:test";
 import { findCommandPath, loadCanonicalCommand } from "../src/contracts.mjs";
 import {
   projectProvider,
+  projectAntigravity,
   projectClaude,
   projectCodex,
   projectCursor,
@@ -35,7 +36,9 @@ test("projects canonical command semantics for all providers", async () => {
   const codex = projectCodex(context);
   const claude = projectClaude(context);
   const cursor = projectCursor(context);
+  const antigravity = projectAntigravity(context);
 
+  assert.equal(antigravity.manifest.provider, "antigravity");
   assert.equal(codex.manifest.provider, "codex");
   assert.match(codex.workflow, /review-backend/);
   assert.match(claude.command, /^---[\s\S]*description:/);
@@ -47,6 +50,7 @@ test("projects canonical command semantics for all providers", async () => {
   assert.equal(codex.mcpConfig.path, ".codex/config.toml");
   assert.equal(claude.mcpConfig.path, ".mcp.json");
   assert.equal(cursor.mcpConfig.path, ".cursor/mcp.json");
+  assert.equal(antigravity.mcpConfig.path, "mcp/mcp.json");
   assert.deepEqual(
     codex.files.map((file) => file.path),
     [".codex/agents/openai.yaml", ".codex/workflows/commands.md"],
@@ -72,6 +76,7 @@ test("emits only contained relative provider paths", async () => {
   });
 
   assert.deepEqual(Object.keys(outputs).sort(), [
+    "antigravity",
     "claude",
     "codex",
     "cursor",
@@ -170,6 +175,7 @@ test("projects exact provider-native project layouts", () => {
   const codex = projectProvider(projectionInput("codex", "project"));
   const claude = projectProvider(projectionInput("claude", "project"));
   const cursor = projectProvider(projectionInput("cursor", "project"));
+  const antigravity = projectProvider(projectionInput("antigravity", "project"));
 
   assert.deepEqual(
     codex.assets.map((item) => item.destinationPath),
@@ -195,15 +201,27 @@ test("projects exact provider-native project layouts", () => {
       ".cursor/rules/review-backend.mdc",
     ],
   );
+  assert.deepEqual(
+    antigravity.assets.map((item) => item.destinationPath),
+    [
+      "antigravity-plugin.json",
+      "commands/review-backend.md",
+      "rules/provider.json",
+      "skills/java-analyze",
+    ],
+  );
   assert.equal(codex.instructions[0].destinationPath, "AGENTS.md");
   assert.equal(claude.instructions[0].destinationPath, "CLAUDE.md");
   assert.equal(cursor.instructions[0].destinationPath, "AGENTS.md");
+  assert.equal(antigravity.instructions[0].destinationPath, "AGENTS.md");
+  assert.equal(antigravity.mcpConfig.destinationPath, "mcp/mcp.json");
 });
 
 test("projects exact provider-native global layouts", () => {
   const codex = projectProvider(projectionInput("codex", "global"));
   const claude = projectProvider(projectionInput("claude", "global"));
   const cursor = projectProvider(projectionInput("cursor", "global"));
+  const antigravity = projectProvider(projectionInput("antigravity", "global"));
 
   assert.equal(codex.instructions[0].destinationPath, ".codex/AGENTS.md");
   assert.equal(claude.instructions[0].destinationPath, ".claude/CLAUDE.md");
@@ -215,4 +233,6 @@ test("projects exact provider-native global layouts", () => {
   );
   assert.deepEqual(cursor.assets, []);
   assert.equal(cursor.mcpConfig.destinationPath, ".cursor/mcp.json");
+  assert.equal(antigravity.instructions[0].destinationPath, ".antigravity/AGENTS.md");
+  assert.equal(antigravity.mcpConfig.destinationPath, "mcp/mcp.json");
 });

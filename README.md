@@ -1,6 +1,6 @@
 # AI Engineering Platform
 
-AI IDE plugin platform for Codex, Claude Code, and Cursor. Canonical capability
+AI IDE plugin platform for Codex, Claude Code, Cursor, and Google Antigravity. Canonical capability
 content lives in `plugins/`; the CLI projects that content into provider-native
 files and optional MCP runtime registrations.
 
@@ -27,7 +27,9 @@ aie init
 aie install --all --target codex
 aie install --all --target claude
 aie install --all --target cursor
+aie install --all --target antigravity
 aie install --all --target codex,claude,cursor
+aie install --all --target codex,claude,cursor,antigravity
 
 aie doctor
 aie check
@@ -72,7 +74,8 @@ All scopes store runtime, ownership, lock, and backup data under
 | --- | --- | --- |
 | Codex | `AGENTS.md`, `.agents/skills`, `.codex/agents`, `.codex/workflows/commands.md` | `~/.codex/AGENTS.md`, `~/.agents/skills`, `~/.codex/agents`, `~/.codex/workflows/commands.md` |
 | Claude | `CLAUDE.md`, `.claude/skills`, `.claude/commands`, `.claude-plugin/plugin.json` | `~/.claude/CLAUDE.md`, `~/.claude/skills`, `~/.claude/commands` |
-| Cursor | `AGENTS.md`, `.cursor/rules` | Provider MCP config is not generated until active tools exist. |
+| Cursor | `AGENTS.md`, `.cursor/rules`, `.cursor/mcp.json` | `.cursor/mcp.json` |
+| Antigravity | `AGENTS.md`, `antigravity-plugin.json`, `skills/`, `commands/`, `rules/`, `mcp/mcp.json` | `.antigravity/AGENTS.md`, `antigravity-plugin.json`, `skills/`, `commands/`, `rules/`, `mcp/mcp.json` |
 
 Managed instruction updates preserve user-owned content outside the AI
 Engineering baseline block and write backups under `.ai-engineering/backups/`.

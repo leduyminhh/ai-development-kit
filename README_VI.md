@@ -1,6 +1,6 @@
 # AI Engineering Platform
 
-Nền tảng plugin cho Codex, Claude Code và Cursor. Nội dung capability chuẩn nằm
+Nền tảng plugin cho Codex, Claude Code, Cursor và Google Antigravity. Nội dung capability chuẩn nằm
 trong `plugins/`; CLI project nội dung đó thành file native theo từng provider
 và các MCP runtime registration tùy chọn.
 
@@ -27,7 +27,9 @@ aie init
 aie install --all --target codex
 aie install --all --target claude
 aie install --all --target cursor
+aie install --all --target antigravity
 aie install --all --target codex,claude,cursor
+aie install --all --target codex,claude,cursor,antigravity
 
 aie doctor
 aie check
@@ -71,7 +73,8 @@ Mọi scope đều lưu runtime, ownership, lock và backup dưới
 | --- | --- | --- |
 | Codex | `AGENTS.md`, `.agents/skills`, `.codex/agents`, `.codex/workflows/commands.md` | `~/.codex/AGENTS.md`, `~/.agents/skills`, `~/.codex/agents`, `~/.codex/workflows/commands.md` |
 | Claude | `CLAUDE.md`, `.claude/skills`, `.claude/commands`, `.claude-plugin/plugin.json` | `~/.claude/CLAUDE.md`, `~/.claude/skills`, `~/.claude/commands` |
-| Cursor | `AGENTS.md`, `.cursor/rules` | Không sinh provider MCP config cho đến khi có active tools. |
+| Cursor | `AGENTS.md`, `.cursor/rules`, `.cursor/mcp.json` | `.cursor/mcp.json` |
+| Antigravity | `AGENTS.md`, `antigravity-plugin.json`, `skills/`, `commands/`, `rules/`, `mcp/mcp.json` | `.antigravity/AGENTS.md`, `antigravity-plugin.json`, `skills/`, `commands/`, `rules/`, `mcp/mcp.json` |
 
 Khi cập nhật instruction file, hệ thống giữ nguyên nội dung do người dùng sở hữu
 nằm ngoài AI Engineering baseline block và ghi backup dưới

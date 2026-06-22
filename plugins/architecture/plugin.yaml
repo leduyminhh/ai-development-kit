@@ -1,94 +1,91 @@
 {
-    "apiVersion":  "ai-engineering.dev/v1alpha1",
-    "kind":  "AiIdePlugin",
-    "metadata":  {
-                     "id":  "architecture",
-                     "name":  "Architecture Engineering",
-                     "version":  "1.0.0",
-                     "description":  "System design, architecture review, ADR, DDD, and integration design."
-                 },
-    "compatibility":  {
-                          "platform":  "\u003e=1.0.0 \u003c2.0.0",
-                          "providers":  {
-                                            "codex":  "supported",
-                                            "claude":  "supported",
-                                            "cursor":  "supported"
-                                        }
-                      },
-    "dependencies":  {
-                         "required":  [
-
-                                      ],
-                         "optional":  [
-
-                                      ]
-                     },
-    "assets":  {
-                   "skills":  [
-                                  "java-analyze",
-                                  "architecture-onion-design",
-                                  "code-shared-design",
-                                  "code-design-pattern",
-                                  "diagram-generate"
-                              ],
-                   "agents":  [
-                                  "architecture-onion-design",
-                                  "code-design-pattern",
-                                  "code-shared-design",
-                                  "diagram-generate"
-                              ],
-                   "commands":  [
-                                    "commands/review-architecture.md"
-                                ],
-                   "hooks":  [
-                                 "project-audit"
-                             ],
-                   "rules":  "none",
-                   "templates":  "none",
-                   "workflows":  "none",
-                   "schemas":  "none"
-               },
-    "install":  {
-                    "defaultScope":  "project",
-                    "supportsCopy":  true,
-                    "supportsLink":  true
-                },
-    "id":  "architecture",
-    "name":  "Architecture Engineering",
-    "version":  "1.0.0",
-    "description":  "System design, architecture review, ADR, DDD, and integration design.",
-    "category":  "ai-ide-plugin",
-    "triggers":  {
-                     "keywords":  [
-                                      "architecture",
-                                      "system design",
-                                      "adr",
-                                      "ddd",
-                                      "cqrs",
-                                      "microservices"
-                                  ]
-                 },
-    "skills":  [
-                   {
-                       "id":  "architecture.architecture_onion_design",
-                       "path":  "skills/architecture-onion-design/SKILL.md"
-                   },
-                   {
-                       "id":  "architecture.code_design_pattern",
-                       "path":  "skills/code-design-pattern/SKILL.md"
-                   },
-                   {
-                       "id":  "architecture.code_shared_design",
-                       "path":  "skills/code-shared-design/SKILL.md"
-                   },
-                   {
-                       "id":  "architecture.diagram_generate",
-                       "path":  "skills/diagram-generate/SKILL.md"
-                   }
-               ],
-    "depends_on":  {
-                       "plugins":  [
-
-                                   ]
-                   }
+  "apiVersion": "ai-engineering.dev/v1alpha1",
+  "kind": "AiIdePlugin",
+  "metadata": {
+    "id": "architecture",
+    "name": "Architecture Engineering",
+    "version": "1.0.0",
+    "description": "System design, architecture review, ADR, DDD, and integration design."
+  },
+  "compatibility": {
+    "platform": ">=1.0.0 <2.0.0",
+    "providers": {
+      "codex": "supported",
+      "claude": "supported",
+      "cursor": "supported",
+      "antigravity": "supported"
+    }
+  },
+  "dependencies": {
+    "required": [],
+    "optional": []
+  },
+  "assets": {
+    "skills": [
+      "java-analyze",
+      "architecture-onion-design",
+      "code-shared-design",
+      "code-design-pattern",
+      "diagram-generate"
+    ],
+    "agents": [
+      "architecture-onion-design",
+      "code-design-pattern",
+      "code-shared-design",
+      "diagram-generate"
+    ],
+    "commands": [
+      "commands/review-architecture.md"
+    ],
+    "hooks": [
+      "project-audit"
+    ],
+    "rules": "none",
+    "templates": "none",
+    "workflows": "none",
+    "schemas": "none"
+  },
+  "install": {
+    "defaultScope": "project",
+    "supportsCopy": true,
+    "supportsLink": true
+  },
+  "id": "architecture",
+  "name": "Architecture Engineering",
+  "version": "1.0.0",
+  "description": "System design, architecture review, ADR, DDD, and integration design.",
+  "category": "ai-ide-plugin",
+  "triggers": {
+    "keywords": [
+      "architecture",
+      "system design",
+      "adr",
+      "ddd",
+      "cqrs",
+      "microservices"
+    ]
+  },
+  "skills": [
+    {
+      "id": "architecture.architecture_onion_design",
+      "path": "skills/architecture-onion-design/SKILL.md"
+    },
+    {
+      "id": "architecture.code_design_pattern",
+      "path": "skills/code-design-pattern/SKILL.md"
+    },
+    {
+      "id": "architecture.code_shared_design",
+      "path": "skills/code-shared-design/SKILL.md"
+    },
+    {
+      "id": "architecture.diagram_generate",
+      "path": "skills/diagram-generate/SKILL.md"
+    }
+  ],
+  "depends_on": {
+    "plugins": []
+  },
+  "displayName": "Architecture Engineering",
+  "developerName": "AI Engineering Platform"
 }

@@ -41,7 +41,7 @@
         "enabled": {
           "type": "array",
           "items": {
-            "enum": ["codex", "claude", "cursor"]
+            "enum": ["antigravity", "codex", "claude", "cursor"]
           },
           "uniqueItems": true
         }

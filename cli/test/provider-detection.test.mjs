@@ -12,7 +12,9 @@ test("detects every provider signal deterministically", async () => {
     await mkdir(path.join(target, ".codex"));
     await writeFile(path.join(target, "CLAUDE.md"), "# Claude\n");
     await mkdir(path.join(target, ".cursor"));
+    await writeFile(path.join(target, "antigravity-plugin.json"), "{}\n");
     assert.deepEqual(await detectProviders({ projectRoot: target }), [
+      "antigravity",
       "claude",
       "codex",
       "cursor",

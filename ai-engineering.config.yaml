@@ -8,7 +8,7 @@
     "description": "Production-grade workflow skills for Codex, Claude Code, Cursor, and other AI coding agents."
   },
   "providers": {
-    "enabled": ["codex", "claude", "cursor"]
+    "enabled": ["codex", "claude", "cursor", "antigravity"]
   },
   "plugins": {
     "enabled": ["architecture", "application", "data", "security", "quality", "platform", "knowledge"]

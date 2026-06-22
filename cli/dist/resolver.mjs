@@ -1,5 +1,5 @@
 import { PlatformError } from "./errors.mjs";
-const SUPPORTED_PROVIDERS = new Set(["codex", "claude", "cursor"]);
+import { SUPPORTED_PROVIDER_SET } from "./provider-list.mjs";
 function isPlatformCompatible(range, version) {
     const major = Number(version.split(".")[0]);
     const minimum = range?.match(/>=([0-9]+)\./);
@@ -19,7 +19,7 @@ function addOwners(target, values, pluginId) {
 }
 export function resolvePluginGraph({ requested, optional = [], plugins, platformVersion, providers, }) {
     for (const provider of providers) {
-        if (!SUPPORTED_PROVIDERS.has(provider)) {
+        if (!SUPPORTED_PROVIDER_SET.has(provider)) {
             throw new PlatformError(`unsupported provider ${provider}`, {
                 code: "AI_ENGINEERING_INCOMPATIBLE",
             });

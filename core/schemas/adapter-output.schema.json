@@ -6,7 +6,7 @@
   "required": ["provider", "path", "ownership", "content"],
   "properties": {
     "provider": {
-      "enum": ["shared", "codex", "claude", "cursor"]
+      "enum": ["shared", "antigravity", "codex", "claude", "cursor"]
     },
     "path": {
       "type": "string",

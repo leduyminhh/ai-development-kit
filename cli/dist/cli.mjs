@@ -28,7 +28,7 @@ Usage:
 
 Quick start:
   aie init
-  aie install --all --target codex,claude
+  aie install --all --target codex,claude,cursor,antigravity
   aie check
 
 Plugin lifecycle:
@@ -58,7 +58,7 @@ Maintainer commands:
 Legacy aliases: plugin, uninstall, upgrade
 
 Options:
-  --target <providers>      codex, claude, cursor
+  --target <providers>      codex, claude, cursor, antigravity
   --provider <providers>    Alias for --target
   --scope <project|global>  Installation scope
   -g, --global              Install to global AI IDE settings

@@ -77,7 +77,7 @@ test("loads seven canonical plugin contracts", async () => {
     "security",
   ]);
   assert.equal(validation.pluginCount, 7);
-  assert.equal(validation.providerCount, 3);
+  assert.equal(validation.providerCount, 4);
   assert.equal(validation.mcpProviderExampleCount, 1);
 
   for (const [pluginId, plugin] of plugins) {

@@ -1,6 +1,6 @@
 import path from "node:path";
 import { PlatformError } from "./errors.mjs";
-const PROVIDERS = new Set(["codex", "claude", "cursor"]);
+import { SUPPORTED_PROVIDER_SET } from "./provider-list.mjs";
 const SCOPES = new Set(["project", "global"]);
 const OPERATIONS = new Set(["copy", "render"]);
 function projectionError(message) {
@@ -21,7 +21,7 @@ function validateHeader(value) {
     if (value?.schemaVersion !== 1) {
         throw projectionError("projection schemaVersion must be 1");
     }
-    if (!PROVIDERS.has(value.provider)) {
+    if (!SUPPORTED_PROVIDER_SET.has(value.provider)) {
         throw projectionError(`unsupported projection provider ${value.provider}`);
     }
     if (!SCOPES.has(value.scope)) {

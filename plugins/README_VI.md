@@ -2,12 +2,17 @@
 
 `plugins/` chứa các plugin AI IDE canonical có thể cài đặt của AI Engineering
 Platform. Plugin là đơn vị người dùng cài bằng các lệnh như
-`ai-engineering install platform security --target cursor`.
+`ai-engineering install platform security --target cursor` hoặc
+`ai-engineering install platform security --target antigravity`.
 
 Mỗi plugin sở hữu command, skill, agent, rule, template, workflow, schema trùng
 lặp provider và metadata `plugin.yaml`. Policy dùng chung thuộc `core/`;
 artifact riêng cho từng provider được sinh bởi `adapters/`; registry, policy và
 ví dụ MCP được cấu hình qua `providers/`.
+
+Các provider target hiện được hỗ trợ là `codex`, `claude`, `cursor` và
+`antigravity`. Mỗi plugin khai báo hỗ trợ trong `compatibility.providers` của
+`plugin.yaml`.
 
 ## Cấu Trúc Một Plugin
 

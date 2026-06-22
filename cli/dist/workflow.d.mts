@@ -1,4 +1,4 @@
-export function loadWorkflow(target: any, workflowId: any): Promise<any>;
+export function loadWorkflow(target: any, workflowId: any): Promise<unknown>;
 export function workflowInit({ target }: {
     target: any;
 }): Promise<{

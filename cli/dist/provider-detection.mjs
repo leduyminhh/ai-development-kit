@@ -1,6 +1,7 @@
 import { access } from "node:fs/promises";
 import path from "node:path";
 const SIGNALS = {
+    antigravity: [".antigravity", "antigravity-plugin.json", "ANTIGRAVITY.md"],
     codex: [".codex", ".agents", "AGENTS.md"],
     claude: [".claude", ".mcp.json", "CLAUDE.md"],
     cursor: [".cursor"],
