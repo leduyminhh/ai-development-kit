@@ -11,7 +11,9 @@ report into `docs/` only when it becomes a maintained project reference.
 
 | Folder | What It Owns | Edit When |
 | --- | --- | --- |
-| `migration/` | Migration specifications, legacy review matrix, and completion checklist. | The repository migration plan, canonical structure, deprecated path list, or acceptance criteria changes. |
+| `migration/` | Migration specifications, historical implementation context, and completion checklist. | The repository migration plan, canonical structure, deprecated path list, or acceptance criteria changes. |
+| `superpowers/plans/` | Implementation plans created during structured development work. | A maintained plan needs to remain traceable after the task. |
+| `superpowers/specs/` | Design specs created during structured development work. | A design decision or implementation boundary should remain traceable. |
 
 ## Migration Documents
 
@@ -20,8 +22,6 @@ report into `docs/` only when it becomes a maintained project reference.
   artifacts.
 - `migration/implementation-spec-v1.1.md`: historical MCP-first migration design
   kept as context for earlier structure decisions.
-- `migration/legacy-review-matrix.md`: decision table for legacy folders and
-  whether they are replaced, deprecated, retained, or removed.
 - `migration/completion-checklist.md`: historical checklist showing earlier
   migration acceptance criteria.
 

@@ -13,9 +13,6 @@ more than one AI IDE plugin. Keep plugin-specific behavior in
 | Folder | What It Owns | Edit When |
 | --- | --- | --- |
 | `agents/` | The managed AGENTS baseline, target-project AGENTS template, and merge policy used by `ai-engineering init`. | The generated project instructions or merge boundaries change. Preserve user-owned AGENTS content outside the managed block. |
-| `checklists/` | Shared checklists that can be referenced by commands, skills, or migration work. | A checklist is genuinely reusable across plugins. Plugin-local checklists belong in the owning plugin. |
-| `mcp/` | Shared local MCP stdio runtime used by optional MCP integrations. | MCP protocol handling, contract loading, or shared transport behavior changes. |
-| `prompts/` | Provider-neutral prompt fragments and reusable prompt building blocks. | Prompt wording applies across providers or plugins. Provider-specific prompt output belongs under `adapters/`. |
 | `routing/` | Intent, command, and skill registries that connect user intent to plugin commands. | Adding, renaming, or removing command ids, skill ids, or intent routes. Keep routes aligned with `plugin.yaml`. |
 | `schemas/` | JSON schemas for platform contracts such as plugin metadata and install state. | A serialized contract changes. Update validators and fixtures in the same change. |
 | `standards/` | Authoring standards for agents, skills, and output formats. | Repository-wide writing or behavior standards change. Do not put plugin-specific process notes here. |
@@ -30,6 +27,8 @@ more than one AI IDE plugin. Keep plugin-specific behavior in
   inside an existing target `AGENTS.md`.
 - `core/routing/command-registry.yaml` must reference command files that exist
   under `plugins/<plugin>/commands/`.
+- `core/workflows/*.yaml` defines shared workflow orchestration that can be
+  listed, validated, built, and used by the CLI workflow commands.
 - MCP registry, policy, and examples belong under `providers/mcp/`.
 
 ## Change Checklist

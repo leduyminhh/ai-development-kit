@@ -56,6 +56,15 @@ export function project(input) {
             owners: allOwners,
             shared: allOwners.length > 1,
           },
+          ...input.skills.map((skill) => ({
+            operation: "copy",
+            assetType: "skill",
+            assetId: skill.id,
+            sourcePath: skill.sourcePath,
+            destinationPath: `.cursor/skills/${skill.id}`,
+            owners: skill.owners,
+            shared: skill.owners.length > 1,
+          })),
           ...(input.workflows ?? []).map((wf) => ({
       operation: "copy",
       assetType: "workflow",

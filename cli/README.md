@@ -35,6 +35,29 @@ aie doctor [--scope <project|global>|-g]
 explicit root plugins and providers. Compatibility aliases remain available
 through `plugin`, `uninstall`, and `upgrade`.
 
+## Workflow Commands
+
+```text
+aie workflow init
+aie workflow list
+aie workflow validate
+aie workflow build <workflow-id>
+aie workflow run <workflow-id>
+aie workflow step-next <workflow-id> [run-id]
+aie workflow step-complete <workflow-id> <run-id> <step-id>
+aie workflow step-fail <workflow-id> <run-id> <step-id>
+aie workflow status <workflow-id> [run-id]
+aie workflow history <workflow-id>
+aie workflow logs <workflow-id> <run-id>
+aie workflow clean
+aie workflow install <plugin>
+```
+
+Workflow definitions are read from project state under
+`.ai-engineering/workflows/definitions/` and from shared definitions in
+`core/workflows/`. Plugin-owned workflow assets can be installed from
+`plugins/<plugin>/workflows/` with `aie workflow install <plugin>`.
+
 ## Provider Projections
 
 | Provider | Project | Global |

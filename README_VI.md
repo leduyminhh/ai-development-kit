@@ -1,8 +1,9 @@
 # AI Engineering Platform
 
-Nền tảng plugin cho Codex, Claude Code, Cursor và Google Antigravity. Nội dung capability chuẩn nằm
-trong `plugins/`; CLI project nội dung đó thành file native theo từng provider
-và các MCP runtime registration tùy chọn.
+Nền tảng plugin AI IDE cho Codex, Claude Code, Cursor và Google Antigravity. Nội dung
+capability chuẩn nằm trong `plugins/`; CLI project nội dung đó thành file native theo
+từng provider, workflow definition, instruction được quản lý và MCP runtime
+registration tùy chọn.
 
 ## Cài Đặt
 
@@ -35,6 +36,10 @@ aie doctor
 aie check
 aie available
 aie installed
+
+aie workflow list
+aie workflow validate
+aie workflow build fullstack-feature
 
 aie update application
 aie update --all
@@ -83,16 +88,21 @@ nằm ngoài AI Engineering baseline block và ghi backup dưới
 ## Cấu Trúc Repository
 
 ```text
-adapters/      metadata projection theo provider và định nghĩa agent cho Codex
+adapters/      logic projection theo provider, hook và định nghĩa agent cho Codex
 cli/           runtime CLI, dist sinh ra, test, hook và shell tool
-core/          policy, routing, schema, template, prompt và workflow dùng chung
-docs/          hồ sơ migration và kế hoạch triển khai
-providers/     registry, schema cấu hình, policy và ví dụ MCP
-plugins/       manifest, command và skill chuẩn có thể cài đặt
+core/          AGENTS policy, routing, schema, standard, template và workflow dùng chung
+docs/          hồ sơ migration, design spec và kế hoạch triển khai
+providers/     registry MCP chưa active, schema cấu hình, policy và ví dụ
+plugins/       manifest, command, skill, workflow và schema chuẩn có thể cài đặt
 ```
 
 Markdown command trong `plugins/<plugin>/commands/*.md` là nguồn command chuẩn.
 `core/routing/command-registry.yaml` là chỉ mục dẫn xuất xác định dùng schema version 2.
+
+Workflow definition nằm trong `core/workflows/` cho orchestration dùng chung và
+trong `plugins/<plugin>/workflows/` cho workflow do plugin sở hữu. CLI có thể
+khởi tạo, liệt kê, validate, build, chạy, inspect và dọn workflow run dưới
+`.ai-engineering/workflows/` trong project đích.
 
 ## Lệnh Cho Maintainer
 
@@ -103,6 +113,7 @@ aie artifact verify --all
 aie registry generate
 aie migrate --dry-run
 aie migrate --delete-legacy
+aie generate-adapter <plugin...> --target <provider[,provider...]>
 ```
 
 ## Xác Minh
@@ -113,5 +124,8 @@ npm run validate
 npm run build:cli
 ```
 
-Quyết định migration được ghi tại
-[`docs/migration/legacy-review-matrix.md`](docs/migration/legacy-review-matrix.md).
+Quyết định migration và acceptance note được ghi trong `docs/migration/`, với
+target plugin-first hiện tại tại
+[`docs/migration/migrate-existing-source-to-plugins-platform.md`](docs/migration/migrate-existing-source-to-plugins-platform.md)
+và tiêu chí hoàn tất tại
+[`docs/migration/completion-checklist.md`](docs/migration/completion-checklist.md).

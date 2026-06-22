@@ -1,25 +1,23 @@
 # Core
 
 `core/` là lớp hợp đồng dùng chung của AI Engineering Platform. Các file ở đây
-định nghĩa rule, registry, schema và template cấp platform để plugin, adapter,
-MCP server và CLI cùng sử dụng.
+định nghĩa rule, registry, schema, standard, template và workflow cấp platform để
+plugin, adapter, provider config và CLI cùng sử dụng.
 
-Dùng thư mục này khi một rule hoặc hợp đồng trùng lặp theo provider và có thể
-tái sử dụng bởi nhiều AI IDE plugin. Hành vi riêng của từng plugin phải nằm
-trong `plugins/<plugin>/`.
+Dùng thư mục này khi một rule hoặc hợp đồng trung lập provider và có thể tái sử
+dụng bởi nhiều AI IDE plugin. Hành vi riêng của từng plugin phải nằm trong
+`plugins/<plugin>/`.
 
 ## Bản Đồ Thư Mục
 
 | Thư mục | Sở hữu nội dung gì | Sửa khi nào |
 | --- | --- | --- |
 | `agents/` | AGENTS baseline được quản lý, template AGENTS cho dự án đích và merge policy dùng bởi `ai-engineering init`. | Khi instruction sinh ra cho project hoặc ranh giới merge thay đổi. Luôn giữ nội dung người dùng sở hữu ngoài managed block. |
-| `checklists/` | Checklist dùng chung có thể được command, skill hoặc migration tham chiếu. | Khi checklist thật sự tái sử dụng được giữa nhiều plugin. Checklist riêng đặt trong plugin sở hữu. |
-| `prompts/` | Mảnh prompt trùng lặp theo provider và các khối prompt tái sử dụng. | Khi wording áp dụng xuyên provider hoặc plugin. Output prompt riêng theo provider đặt dưới `adapters/`. |
 | `routing/` | Registry intent, command và skill để nối user intent với command của plugin. | Khi thêm, đổi tên hoặc xóa command id, skill id hoặc intent route. Giữ khớp với `plugin.yaml`. |
-| `schemas/` | JSON schema cho các hợp đồng platform như metadata plugin và install state. | Khi contract được serialize thay đổi. Cập nhật validator và fixture trong cùng thay đổi. |
+| `schemas/` | JSON schema cho các hợp đồng platform như metadata plugin và install state. | Khi serialized contract thay đổi. Cập nhật validator và fixture trong cùng thay đổi. |
 | `standards/` | Chuẩn authoring cho agent, skill và định dạng output. | Khi chuẩn viết hoặc chuẩn hành vi cấp repository thay đổi. Không đặt ghi chú quy trình riêng của plugin ở đây. |
 | `templates/` | Template tái sử dụng cho tài sản được sinh hoặc scaffold. | Khi nhiều plugin hoặc generator cần cùng một cấu trúc khởi tạo. |
-| `workflows/` | Định nghĩa workflow dùng chung và ghi chú orchestration xuyên plugin. | Khi workflow trải qua nhiều plugin hoặc là một phần baseline platform. |
+| `workflows/` | Workflow definition dùng chung và orchestration xuyên plugin. | Khi workflow trải qua nhiều plugin hoặc là một phần baseline platform. |
 
 ## Hợp Đồng Quan Trọng
 
@@ -28,6 +26,8 @@ trong `plugins/<plugin>/`.
   `AGENTS.md` đã tồn tại ở dự án đích.
 - `core/routing/command-registry.yaml` phải tham chiếu command file có thật dưới
   `plugins/<plugin>/commands/`.
+- `core/workflows/*.yaml` định nghĩa workflow orchestration dùng chung có thể
+  được CLI list, validate, build và sử dụng.
 - Registry, policy và ví dụ MCP thuộc `providers/mcp/`.
 
 ## Checklist Thay Đổi

@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 import { initializeProject } from "./init.mjs";
 import { doctorProject } from "./doctor.mjs";
 import { migrateProject } from "./migration.mjs";
-import { workflowInit, workflowList, workflowValidate, workflowBuild, workflowRun, workflowStatus, workflowHistory, workflowLogs, workflowClean, workflowInstall, WORKFLOW_HELP, } from "./workflow.mjs";
+import { workflowInit, workflowList, workflowValidate, workflowBuild, workflowRun, workflowStatus, workflowHistory, workflowLogs, workflowClean, workflowInstall, workflowStepNext, workflowStepComplete, workflowStepFail, WORKFLOW_HELP, } from "./workflow.mjs";
 import { resolveInstallContext } from "./install-scope.mjs";
 import { finalizeNonInteractiveDraft, parseInstallRequest, } from "./install-request.mjs";
 import { detectProviders } from "./provider-detection.mjs";
@@ -77,7 +77,10 @@ Workflow:
   aie workflow list                        List workflow definitions
   aie workflow validate                    Validate workflow definitions
   aie workflow build <id>                  Build workflow step instructions
-  aie workflow run <id>                    Execute a workflow
+  aie workflow run <id>                    Start workflow execution
+  aie workflow step-next <id> [run]        Get next step to execute
+  aie workflow step-complete <id> <run> <step>  Mark a step as completed
+  aie workflow step-fail <id> <run> <step>     Mark a step as failed
   aie workflow status <id> [run]           Show workflow run status
   aie workflow history <id>                Show workflow run history
   aie workflow logs <id> <run>             Show workflow run logs
@@ -570,6 +573,33 @@ export async function run(args, streams = process) {
             }
             const result = await workflowInstall({ root: REPOSITORY_ROOT, target, pluginId: subargs[0] });
             streams.stdout.write(JSON.stringify(result) + "\n");
+            return 0;
+        }
+        if (sub === "step-next") {
+            if (!subargs[0]) {
+                streams.stdout.write("Usage: aie workflow step-next <workflow-id> [run-id]\n");
+                return 1;
+            }
+            const result = await workflowStepNext({ target, workflowId: subargs[0], runId: subargs[1] });
+            streams.stdout.write(JSON.stringify(result, null, 2) + "\n");
+            return 0;
+        }
+        if (sub === "step-complete") {
+            if (!subargs[0] || !subargs[1] || !subargs[2]) {
+                streams.stdout.write("Usage: aie workflow step-complete <workflow-id> <run-id> <step-id>\n");
+                return 1;
+            }
+            const result = await workflowStepComplete({ target, workflowId: subargs[0], runId: subargs[1], stepId: subargs[2] });
+            streams.stdout.write(JSON.stringify(result, null, 2) + "\n");
+            return 0;
+        }
+        if (sub === "step-fail") {
+            if (!subargs[0] || !subargs[1] || !subargs[2]) {
+                streams.stdout.write("Usage: aie workflow step-fail <workflow-id> <run-id> <step-id>\n");
+                return 1;
+            }
+            const result = await workflowStepFail({ target, workflowId: subargs[0], runId: subargs[1], stepId: subargs[2] });
+            streams.stdout.write(JSON.stringify(result, null, 2) + "\n");
             return 0;
         }
         streams.stdout.write(WORKFLOW_HELP);

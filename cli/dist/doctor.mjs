@@ -96,6 +96,34 @@ export async function doctorProject({ target, context }) {
             }
         }
     }
+    if (scope === "project") {
+        const skillsDir = path.join(target, ".agents", "skills");
+        if (await exists(skillsDir)) {
+            for (const entry of await readdir(skillsDir, { withFileTypes: true })) {
+                if (entry.isDirectory()) {
+                    const skillMd = path.join(skillsDir, entry.name, "SKILL.md");
+                    if (!(await exists(skillMd))) {
+                        errors.push(`skill directory is missing SKILL.md: .agents/skills/${entry.name}`);
+                    }
+                }
+            }
+        }
+    }
+    for (const provider of lock.providers ?? []) {
+        if (provider === "codex") {
+            const agentsDir = path.join(target, ".codex", "agents");
+            if (await exists(agentsDir)) {
+                for (const file of await readdir(agentsDir)) {
+                    if (file.endsWith(".toml") && file !== "openai.yaml") {
+                        const agentToml = path.join(agentsDir, file);
+                        if (!(await exists(agentToml))) {
+                            errors.push(`agent file is missing: .codex/agents/${file}`);
+                        }
+                    }
+                }
+            }
+        }
+    }
     for (const deprecated of [".codex-plugin", ".cursor-plugin"]) {
         if (await exists(path.join(target, deprecated))) {
             errors.push(`deprecated target plugin folder remains active: ${deprecated}`);

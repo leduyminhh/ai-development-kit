@@ -199,6 +199,7 @@ test("projects exact provider-native project layouts", () => {
     [
       ".cursor/rules/provider.json",
       ".cursor/rules/review-backend.mdc",
+      ".cursor/skills/java-analyze",
     ],
   );
   assert.deepEqual(

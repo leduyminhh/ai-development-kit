@@ -35,13 +35,13 @@ Unused asset groups remain as folders and are declared as `none` in
 
 | Plugin | Capability | Required Plugins | Optional Plugins | Installed Assets |
 | --- | --- | --- | --- | --- |
-| `architecture` | System design, architecture review, ADR, DDD, integration design, shared design, patterns, and diagrams. | None | None | Skills: `architecture-onion-design`, `code-shared-design`, `code-design-pattern`, `diagram-generate`; command: `review-architecture`; hook: `project-audit`. |
-| `application` | Backend, frontend, API, Spring, React, Kafka, Redis, Java analysis, and implementation documentation workflows. | `architecture` | `quality`, `security` | Skills: `java-analyze`, `doc-write`, `code-shared-design`, `react-code-generate`, `test-automation-validate`; commands: `review-backend`, `implement-frontend`; hook: `project-audit`. |
-| `data` | Schema review, indexing, migration, backup, restore, and CDC planning. | None | `application` | Skill: `data-migration`; command: `migration-plan`. |
+| `architecture` | System design, architecture review, ADR, DDD, integration design, shared design, patterns, and diagrams. | None | None | Skills: `java-analyze`, `architecture-onion-design`, `code-shared-design`, `code-design-pattern`, `diagram-generate`; command: `review-architecture`; hook: `project-audit`. |
+| `application` | Backend, frontend, API, Spring, React, Kafka, Redis, Java analysis, and implementation documentation workflows. | `architecture` | `quality`, `security` | Skills include API contract, feature delivery/fix/implement/integrate/plan/review/test, `java-analyze`, `python-backend-engineer`, `react-code-generate`, and shared quality/data/doc skills; commands cover feature planning, backend/frontend implementation, integration, review, and tests; workflow: `fullstack-feature`; hook: `project-audit`. |
+| `data` | Schema review, indexing, migration, backup, restore, and CDC planning. | None | `application` | Skill: `data-migration`; command: `migration-plan`; workflow: `db-migration-pipeline`. |
 | `knowledge` | Technical documentation, README work, runbooks, API docs, onboarding, changelogs, diagrams, and transcript workflows. | None | `architecture` | Skills: `doc-write`, `diagram-generate`, `youtube-transcript`; command: `write-technical-doc`. |
 | `platform` | Delivery, deployment, observability, incident response, workflow operations, and git workflow. | None | `quality`, `security` | Skills: `git-workflow-design`, `using-workflow-kit`; command: `deployment-plan`; hook: `project-audit`. |
 | `quality` | QA review, test automation, naming checks, coverage, performance, and quality verification. | None | None | Skills: `test-qa-review`, `test-automation-validate`, `naming-rule-validate`; command: `verify-quality`; hook: `project-audit`. |
-| `security` | OWASP/CWE review, secrets, threat modeling, dependency review, and container security. | None | `quality` | Skill: `security-code-review`; command: `review-security`; hook: `project-audit`. |
+| `security` | OWASP/CWE review, secrets, threat modeling, dependency review, and container security. | None | `quality` | Skill: `security-code-review`; command: `review-security`; workflow: `security-audit-pipeline`; hook: `project-audit`. |
 
 ## Skill Ownership Rules
 

@@ -58,6 +58,69 @@ function detectCycle(steps) {
     }
     return null;
 }
+function topologicalSort(steps) {
+    const stepMap = new Map(steps.map((s) => [s.id, s]));
+    const visited = new Set();
+    const result = [];
+    function visit(stepId) {
+        if (visited.has(stepId))
+            return;
+        visited.add(stepId);
+        const step = stepMap.get(stepId);
+        if (!step)
+            return;
+        for (const dep of (step.depends || [])) {
+            visit(dep);
+        }
+        result.push(stepId);
+    }
+    for (const step of steps) {
+        visit(step.id);
+    }
+    return result;
+}
+async function readRunState(target, workflowId, runId) {
+    const sp = path.join(target, RUNS_DIR, workflowId, runId, "state.snapshot.json");
+    if (!(await fileExists(sp))) {
+        throw new PlatformError("run not found: " + workflowId + "/" + runId, {
+            code: "AI_ENGINEERING_WORKFLOW_RUN_NOT_FOUND",
+        });
+    }
+    return JSON.parse(await readFile(sp, "utf8"));
+}
+async function writeRunState(target, workflowId, runId, state) {
+    const sp = path.join(target, RUNS_DIR, workflowId, runId, "state.snapshot.json");
+    await writeJsonAtomic(sp, state);
+}
+async function logEvent(target, workflowId, runId, eventData) {
+    const ep = path.join(target, RUNS_DIR, workflowId, runId, "events.jsonl");
+    const entry = JSON.stringify({ timestamp: new Date().toISOString(), ...eventData }) + "\n";
+    await appendFile(ep, entry, "utf8");
+}
+function generateStepInstructions(wf, step) {
+    const lines = [];
+    lines.push("## Step: " + step.id);
+    lines.push("- Skill: `" + step.uses + "`");
+    lines.push("- Workflow: " + wf.id + " (" + (wf.description || "") + ")");
+    if (step.depends && step.depends.length)
+        lines.push("- Dependencies: " + step.depends.join(", "));
+    if (step.input) {
+        lines.push("- Input:");
+        for (const [k, v] of Object.entries(step.input)) {
+            lines.push("  - " + k + ": " + v);
+        }
+    }
+    if (step.gates && step.gates.length)
+        lines.push("- Gates: " + step.gates.join(", "));
+    if (step.onError) {
+        lines.push("- Error policy: " + (step.onError.policy || "stop"));
+        if (step.onError.retryDelay)
+            lines.push("  - Retry delay: " + step.onError.retryDelay);
+        if (step.onError.fallbackStep)
+            lines.push("  - Fallback: " + step.onError.fallbackStep);
+    }
+    return lines.join("\n");
+}
 export async function loadWorkflow(target, workflowId) {
     const wfPath = path.join(target, DEFINITIONS_DIR, `${workflowId}.yaml`);
     if (!(await fileExists(wfPath))) {
@@ -215,11 +278,26 @@ export async function workflowValidate({ target, core }) {
     return errors.length > 0 ? { status: "fail", errors } : { status: "pass", errors: [] };
 }
 export async function workflowBuild({ target, core, workflowId }) {
-    const wf = await loadWorkflow(target, workflowId);
+    let wf;
+    const projectPath = path.join(target, DEFINITIONS_DIR, `${workflowId}.yaml`);
+    if (await fileExists(projectPath)) {
+        wf = parseWorkflowYaml(await readFile(projectPath, "utf8"));
+    }
+    else if (core) {
+        const corePath = path.join(core, "core", "workflows", `${workflowId}.yaml`);
+        if (await fileExists(corePath)) {
+            wf = parseWorkflowYaml(await readFile(corePath, "utf8"));
+        }
+    }
+    if (!wf) {
+        throw new PlatformError(`workflow not found: ${workflowId}`, {
+            code: "AI_ENGINEERING_WORKFLOW_NOT_FOUND",
+        });
+    }
     const errs = validateWorkflowDefinition(wf);
     if (errs.length > 0)
         return { status: "fail", workflowId, errors: errs, instructions: null };
-    return { status: "pass", workflowId, errors: [], instructions: generateInstructions(wf) };
+    return { status: "pass", instructions: generateInstructions(wf), stepPlan: topologicalSort(wf.steps) };
 }
 export async function workflowRun({ target, workflowId, context = {} }) {
     const wf = await loadWorkflow(target, workflowId);
@@ -229,13 +307,102 @@ export async function workflowRun({ target, workflowId, context = {} }) {
     const ts = new Date().toISOString().replace(/[:.]/g, "");
     const runDir = path.join(target, RUNS_DIR, workflowId, ts);
     await mkdir(path.join(runDir, "steps"), { recursive: true });
+    const stepPlan = topologicalSort(wf.steps);
     await writeJsonAtomic(path.join(runDir, "state.snapshot.json"), {
         workflowId, runId: ts, startTime: new Date().toISOString(),
         status: "running", context, stepResults: {}, currentStep: null, error: null,
+        stepPlan,
     });
-    const entry = JSON.stringify({ timestamp: new Date().toISOString(), type: "start", data: { workflowId, context } }) + "\n";
-    await appendFile(path.join(runDir, "events.jsonl"), entry, "utf8");
-    return { status: "pass", workflowId, runId: ts, runDir, instructions: generateInstructions(wf) };
+    await logEvent(target, workflowId, ts, { type: "start", data: { workflowId, context, stepPlan } });
+    return { status: "pass", workflowId, runId: ts, runDir, instructions: generateInstructions(wf), stepPlan };
+}
+export async function workflowStepNext({ target, workflowId, runId }) {
+    const state = await readRunState(target, workflowId, runId);
+    if (state.status !== "running")
+        return { status: state.status, workflowId, runId };
+    const wf = await loadWorkflow(target, workflowId);
+    const completedSteps = new Set(Object.entries(state.stepResults)
+        .filter(([, result]) => result.status === "completed")
+        .map(([id]) => id));
+    for (const stepId of state.stepPlan) {
+        if (completedSteps.has(stepId))
+            continue;
+        if (state.stepResults[stepId] && state.stepResults[stepId].status === "running") {
+            const step = wf.steps.find((s) => s.id === stepId);
+            return { status: "pass", workflowId, runId, stepId, step, instructions: generateStepInstructions(wf, step), phase: "in_progress" };
+        }
+        const step = wf.steps.find((s) => s.id === stepId);
+        const depsMet = (step.depends || []).every((dep) => completedSteps.has(dep));
+        if (depsMet) {
+            state.stepResults[stepId] = { status: "running", startedAt: new Date().toISOString() };
+            state.currentStep = stepId;
+            await writeRunState(target, workflowId, runId, state);
+            await logEvent(target, workflowId, runId, { type: "step-start", data: { stepId } });
+            return { status: "pass", workflowId, runId, stepId, step, instructions: generateStepInstructions(wf, step), phase: "started" };
+        }
+    }
+    const failedSteps = Object.entries(state.stepResults)
+        .filter(([, result]) => result.status === "failed")
+        .map(([id]) => id);
+    if (failedSteps.length > 0) {
+        state.status = "failed";
+        state.error = "Steps failed: " + failedSteps.join(", ");
+        state.currentStep = null;
+        await writeRunState(target, workflowId, runId, state);
+        return { status: "failed", workflowId, runId, failedSteps };
+    }
+    state.status = "complete";
+    state.completedAt = new Date().toISOString();
+    state.currentStep = null;
+    await writeRunState(target, workflowId, runId, state);
+    await logEvent(target, workflowId, runId, { type: "complete", data: { completedSteps: [...completedSteps] } });
+    return { status: "complete", workflowId, runId };
+}
+export async function workflowStepComplete({ target, workflowId, runId, stepId, result = {} }) {
+    const state = await readRunState(target, workflowId, runId);
+    if (state.status !== "running") {
+        throw new PlatformError("workflow is not running (status: " + state.status + ")", {
+            code: "AI_ENGINEERING_WORKFLOW_NOT_RUNNING",
+        });
+    }
+    if (!state.stepResults[stepId] || state.stepResults[stepId].status !== "running") {
+        throw new PlatformError("step " + stepId + " is not running", {
+            code: "AI_ENGINEERING_WORKFLOW_STEP_NOT_RUNNING",
+        });
+    }
+    state.stepResults[stepId] = {
+        status: "completed",
+        startedAt: state.stepResults[stepId].startedAt,
+        completedAt: new Date().toISOString(),
+        output: result.output || null,
+    };
+    state.currentStep = null;
+    await writeRunState(target, workflowId, runId, state);
+    await logEvent(target, workflowId, runId, { type: "step-complete", data: { stepId, result } });
+    return { status: "pass", workflowId, runId, stepId, workflowStatus: state.status };
+}
+export async function workflowStepFail({ target, workflowId, runId, stepId, error = "" }) {
+    const state = await readRunState(target, workflowId, runId);
+    if (state.status !== "running") {
+        throw new PlatformError("workflow is not running (status: " + state.status + ")", {
+            code: "AI_ENGINEERING_WORKFLOW_NOT_RUNNING",
+        });
+    }
+    if (!state.stepResults[stepId] || state.stepResults[stepId].status !== "running") {
+        throw new PlatformError("step " + stepId + " is not running", {
+            code: "AI_ENGINEERING_WORKFLOW_STEP_NOT_RUNNING",
+        });
+    }
+    state.stepResults[stepId] = {
+        ...state.stepResults[stepId],
+        status: "failed",
+        failedAt: new Date().toISOString(),
+        error,
+    };
+    state.currentStep = null;
+    await writeRunState(target, workflowId, runId, state);
+    await logEvent(target, workflowId, runId, { type: "step-fail", data: { stepId, error } });
+    return { status: "pass", workflowId, runId, stepId, workflowStatus: state.status };
 }
 export async function workflowStatus({ target, workflowId, runId }) {
     const base = path.join(target, RUNS_DIR, workflowId);

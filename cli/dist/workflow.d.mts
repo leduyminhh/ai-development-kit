@@ -1,4 +1,4 @@
-export function loadWorkflow(target: any, workflowId: any): Promise<unknown>;
+export function loadWorkflow(target: any, workflowId: any): Promise<any>;
 export function workflowInit({ target }: {
     target: any;
 }): Promise<{
@@ -35,11 +35,13 @@ export function workflowBuild({ target, core, workflowId }: {
     workflowId: any;
     errors: string[];
     instructions: null;
+    stepPlan?: undefined;
 } | {
     status: string;
-    workflowId: any;
-    errors: never[];
     instructions: string;
+    stepPlan: any[];
+    workflowId?: undefined;
+    errors?: undefined;
 }>;
 export function workflowRun({ target, workflowId, context }: {
     target: any;
@@ -52,13 +54,73 @@ export function workflowRun({ target, workflowId, context }: {
     instructions: null;
     runId?: undefined;
     runDir?: undefined;
+    stepPlan?: undefined;
 } | {
     status: string;
     workflowId: any;
     runId: string;
     runDir: string;
     instructions: string;
+    stepPlan: any[];
     errors?: undefined;
+}>;
+export function workflowStepNext({ target, workflowId, runId }: {
+    target: any;
+    workflowId: any;
+    runId: any;
+}): Promise<{
+    status: any;
+    workflowId: any;
+    runId: any;
+    stepId?: undefined;
+    step?: undefined;
+    instructions?: undefined;
+    phase?: undefined;
+    failedSteps?: undefined;
+} | {
+    status: string;
+    workflowId: any;
+    runId: any;
+    stepId: any;
+    step: any;
+    instructions: string;
+    phase: string;
+    failedSteps?: undefined;
+} | {
+    status: string;
+    workflowId: any;
+    runId: any;
+    failedSteps: string[];
+    stepId?: undefined;
+    step?: undefined;
+    instructions?: undefined;
+    phase?: undefined;
+}>;
+export function workflowStepComplete({ target, workflowId, runId, stepId, result }: {
+    target: any;
+    workflowId: any;
+    runId: any;
+    stepId: any;
+    result?: {} | undefined;
+}): Promise<{
+    status: string;
+    workflowId: any;
+    runId: any;
+    stepId: any;
+    workflowStatus: any;
+}>;
+export function workflowStepFail({ target, workflowId, runId, stepId, error }: {
+    target: any;
+    workflowId: any;
+    runId: any;
+    stepId: any;
+    error?: string | undefined;
+}): Promise<{
+    status: string;
+    workflowId: any;
+    runId: any;
+    stepId: any;
+    workflowStatus: any;
 }>;
 export function workflowStatus({ target, workflowId, runId }: {
     target: any;

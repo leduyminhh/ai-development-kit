@@ -2,7 +2,8 @@
 
 AI IDE plugin platform for Codex, Claude Code, Cursor, and Google Antigravity. Canonical capability
 content lives in `plugins/`; the CLI projects that content into provider-native
-files and optional MCP runtime registrations.
+files, workflow definitions, managed instructions, and optional MCP runtime
+registrations.
 
 ## Install
 
@@ -35,6 +36,10 @@ aie doctor
 aie check
 aie available
 aie installed
+
+aie workflow list
+aie workflow validate
+aie workflow build fullstack-feature
 
 aie update application
 aie update --all
@@ -83,17 +88,22 @@ Engineering baseline block and write backups under `.ai-engineering/backups/`.
 ## Repository Structure
 
 ```text
-adapters/      provider projection metadata and Codex agent definitions
+adapters/      provider projection logic, hooks, and Codex agent definitions
 cli/           CLI runtime, generated dist output, tests, hooks, and shell tools
-core/          shared policy, routing, schemas, templates, prompts, and workflows
-docs/          migration records and implementation plans
-providers/     MCP registry, config schemas, policies, and examples
-plugins/       canonical installable plugin manifests, commands, and skills
+core/          shared AGENTS policy, routing, schemas, standards, templates, and workflows
+docs/          migration records, design specs, and implementation plans
+providers/     inactive MCP registry, config schemas, policies, and examples
+plugins/       canonical installable plugin manifests, commands, skills, workflows, and schemas
 ```
 
 Command Markdown in `plugins/<plugin>/commands/*.md` is the canonical command
 source. `core/routing/command-registry.yaml` is a deterministic derived index
 using schema version 2.
+
+Workflow definitions live in `core/workflows/` for shared orchestration and in
+`plugins/<plugin>/workflows/` for plugin-owned installable workflows. The CLI can
+initialize, list, validate, build, run, inspect, and clean workflow runs under
+`.ai-engineering/workflows/` in a target project.
 
 ## Maintainer Commands
 
@@ -104,6 +114,7 @@ aie artifact verify --all
 aie registry generate
 aie migrate --dry-run
 aie migrate --delete-legacy
+aie generate-adapter <plugin...> --target <provider[,provider...]>
 ```
 
 ## Verification
@@ -114,5 +125,8 @@ npm run validate
 npm run build:cli
 ```
 
-Migration decisions are recorded in
-[`docs/migration/legacy-review-matrix.md`](docs/migration/legacy-review-matrix.md).
+Migration decisions and acceptance notes are recorded in `docs/migration/`, with
+the current plugin-first target in
+[`docs/migration/migrate-existing-source-to-plugins-platform.md`](docs/migration/migrate-existing-source-to-plugins-platform.md)
+and completion criteria in
+[`docs/migration/completion-checklist.md`](docs/migration/completion-checklist.md).
