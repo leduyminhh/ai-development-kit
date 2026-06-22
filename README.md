@@ -64,8 +64,10 @@ aie install --all --target codex -g
 ```
 
 Non-interactive installs must pass `--yes` with explicit root plugins and
-provider targets. Interactive installs ask only for missing choices and preview
-the plan before writing files.
+provider targets. Interactive installs auto-detect providers and recommend
+plugins based on project context. Use Space to toggle selections, Enter to
+continue, or choose Install all plugins to install everything. The session
+can be resumed if interrupted.
 
 Generated MCP registrations contain absolute local runtime paths, so run install
 on each machine that will use the provider integration.

@@ -63,8 +63,10 @@ aie install --all --target codex -g
 ```
 
 Trong môi trường không tương tác, install phải truyền `--yes` kèm root plugin và
-provider target rõ ràng. Trong terminal tương tác, CLI chỉ hỏi lựa chọn còn
-thiếu và hiển thị plan trước khi ghi file.
+provider target rõ ràng. Trong terminal tương tác, CLI tự phát hiện provider và
+đề xuất plugin dựa trên ngữ cảnh project. Dùng Space để bật/tắt lựa chọn,
+Enter để đi tiếp, hoặc chọn Install all plugins để cài tất cả. Phiên cài
+đặt có thể được tiếp tục nếu bị gián đoạn.
 
 MCP registration được sinh với đường dẫn runtime local tuyệt đối, vì vậy cần
 chạy install trên từng máy sẽ dùng provider integration.
