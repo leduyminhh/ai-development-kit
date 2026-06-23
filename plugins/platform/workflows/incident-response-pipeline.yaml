@@ -1,0 +1,41 @@
+id: incident-response-pipeline
+description: "Incident response: triage -> mitigate -> verify recovery -> postmortem"
+version: 1.0.0
+changelog:
+  1.0.0: "Initial workflow"
+
+input:
+  source: "$context.source"
+
+steps:
+  - id: triage
+    uses: platform/incident-response
+    input:
+      source: "$context.source"
+    gates: [pass]
+
+  - id: mitigate
+    uses: platform/incident-response
+    depends: [triage]
+    input:
+      source: "$context.source"
+      findings: "$steps.triage.output"
+    onError:
+      policy: retry
+      retryDelay: "30s"
+      notify: true
+
+  - id: verify-recovery
+    uses: quality/test-qa-review
+    depends: [mitigate]
+    input:
+      source: "$context.source"
+      mitigation: "$steps.mitigate.output"
+
+  - id: postmortem
+    uses: platform/incident-response
+    depends: [verify-recovery]
+    input:
+      source: "$context.source"
+      mitigation: "$steps.mitigate.output"
+      verification: "$steps.verify-recovery.output"

@@ -41,7 +41,9 @@
     ],
     "rules": "none",
     "templates": "none",
-    "workflows": "none",
+    "workflows": [
+      "workflows/incident-response-pipeline.yaml"
+    ],
     "schemas": [
       "schemas/deployment-context.schema.json"
     ]

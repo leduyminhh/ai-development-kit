@@ -38,7 +38,9 @@
     ],
     "rules": "none",
     "templates": "none",
-    "workflows": "none",
+    "workflows": [
+      "workflows/quality-verification-pipeline.yaml"
+    ],
     "schemas": [
       "schemas/quality-verification-context.schema.json"
     ]

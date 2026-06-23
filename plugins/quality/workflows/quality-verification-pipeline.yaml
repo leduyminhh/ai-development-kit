@@ -1,0 +1,39 @@
+id: quality-verification-pipeline
+description: "Quality verification: QA review -> naming check -> author tests -> verify"
+version: 1.0.0
+changelog:
+  1.0.0: "Initial workflow"
+
+input:
+  source: "$context.source"
+
+steps:
+  - id: qa-review
+    uses: quality/test-qa-review
+    input:
+      source: "$context.source"
+    gates: [pass]
+
+  - id: naming-check
+    uses: quality/naming-rule-validate
+    depends: [qa-review]
+    input:
+      source: "$context.source"
+
+  - id: author-tests
+    uses: quality/test-automation-validate
+    depends: [qa-review]
+    input:
+      source: "$context.source"
+      scenarios: "$steps.qa-review.output"
+
+  - id: verify
+    uses: quality/test-automation-validate
+    depends: [naming-check, author-tests]
+    input:
+      source: "$context.source"
+      tests: "$steps.author-tests.output"
+    onError:
+      policy: retry
+      retryDelay: "30s"
+      notify: true
