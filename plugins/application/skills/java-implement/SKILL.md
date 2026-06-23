@@ -1,5 +1,5 @@
 ---
-name: java-analyze
+name: java-implement
 description: Use when acting as a Java backend architect or implementation agent for Spring Boot or JVM services, especially for flow design, clean code boundaries, architecture review, approved feature implementation, persistence choices, async/concurrency risks, test strategy, or Maven/Gradle verification.
 ---
 

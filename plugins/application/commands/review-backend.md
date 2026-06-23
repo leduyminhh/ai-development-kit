@@ -18,7 +18,7 @@ Review backend implementation and return prioritized findings.
 
 ## Required Skills
 
-- java-analyze
+- java-implement
 - python-backend-engineer
 - code-shared-design
 - test-automation-validate

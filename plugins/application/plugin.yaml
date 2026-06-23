@@ -36,7 +36,7 @@
       "feature-plan",
       "feature-review",
       "feature-test",
-      "java-analyze",
+      "java-implement",
       "python-backend-engineer",
       "data-migration",
       "code-shared-design",
@@ -45,7 +45,7 @@
       "test-qa-review"
     ],
     "agents": [
-      "java-analyze",
+      "java-implement",
       "react-code-generate"
     ],
     "commands": [
@@ -129,7 +129,7 @@
     },
     {
       "id": "application.java_analyze",
-      "path": "skills/java-analyze/SKILL.md"
+      "path": "skills/java-implement/SKILL.md"
     },
     {
       "id": "application.python_backend_engineer",

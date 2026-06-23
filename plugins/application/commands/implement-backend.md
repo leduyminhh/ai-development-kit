@@ -19,7 +19,7 @@ Detect Java/Spring, FastAPI, or Django REST Framework modules and implement the 
 ## Required Skills
 
 - feature-implement
-- java-analyze
+- java-implement
 - python-backend-engineer
 
 ## Steps
