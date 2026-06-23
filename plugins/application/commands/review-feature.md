@@ -19,10 +19,9 @@ Review a feature across correctness, maintainability, API and data compatibility
 
 ## Required Skills
 
-- feature-review
-- java-analyze
-- python-backend-engineer
-- react-code-generate
+- java-implement
+- python-implement
+- react-implement
 
 ## Steps
 

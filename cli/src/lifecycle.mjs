@@ -577,11 +577,11 @@ export async function findOutdated({ root, target, registry = {} }) {
   }
   const updates = [];
   for (const plugin of installed.plugins) {
-    const latest = available[plugin.id]?.latest;
-    if (latest && latest !== plugin.version) {
+    const latest = available[plugin.metadata.id]?.latest;
+    if (latest && latest !== plugin.metadata.version) {
       updates.push({
-        id: plugin.id,
-        current: plugin.version,
+        id: plugin.metadata.id,
+        current: plugin.metadata.version,
         latest,
       });
     }

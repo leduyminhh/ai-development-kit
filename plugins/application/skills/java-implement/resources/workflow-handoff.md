@@ -1,6 +1,6 @@
 # Workflow Handoff
 
-Use this resource when architecture output should feed another agent such as `react-code-generate` or `test-qa-review`.
+Use this resource when architecture output should feed another agent such as `react-implement` or `test-qa-review`.
 
 ## Handoff To React JS
 

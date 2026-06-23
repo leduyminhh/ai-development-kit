@@ -35,7 +35,7 @@
       "incident-response"
     ],
     "commands": [
-      "commands/deployment-plan.md",
+      "commands/plan-deployment.md",
       "commands/respond-incident.md"
     ],
     "hooks": [
@@ -55,10 +55,6 @@
     "supportsCopy": true,
     "supportsLink": true
   },
-  "id": "platform",
-  "name": "Platform Engineering",
-  "version": "1.0.0",
-  "description": "Delivery, deployment, observability, incident response, and workflow operations.",
   "category": "ai-ide-plugin",
   "triggers": {
     "keywords": [

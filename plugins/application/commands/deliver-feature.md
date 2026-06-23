@@ -19,12 +19,9 @@ Coordinate a bounded feature from planning through design, implementation, integ
 
 ## Required Skills
 
-- feature-delivery
-- feature-plan
-- feature-implement
-- feature-integrate
-- feature-review
-- feature-test
+- java-implement
+- python-implement
+- react-implement
 
 ## Steps
 

@@ -28,7 +28,7 @@
     ],
     "agents": [],
     "commands": [
-      "commands/migration-plan.md"
+      "commands/plan-migration.md"
     ],
     "hooks": [],
     "rules": "none",
@@ -45,10 +45,6 @@
     "supportsCopy": true,
     "supportsLink": true
   },
-  "id": "data",
-  "name": "Data Engineering",
-  "version": "1.0.0",
-  "description": "Relational and document database schema and data migration workflows, including compatibility, rollback, and verification.",
   "category": "ai-ide-plugin",
   "triggers": {
     "keywords": [

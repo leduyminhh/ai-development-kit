@@ -25,7 +25,6 @@
   "assets": {
     "skills": [
       "doc-write",
-      "diagram-generate",
       "youtube-transcript",
       "release-notes"
     ],
@@ -53,10 +52,6 @@
     "supportsCopy": true,
     "supportsLink": true
   },
-  "id": "knowledge",
-  "name": "Knowledge Engineering",
-  "version": "1.0.0",
-  "description": "Documentation, README, runbook, API docs, onboarding, and changelog workflows.",
   "category": "ai-ide-plugin",
   "triggers": {
     "keywords": [

@@ -489,9 +489,7 @@ export async function validateRepository(root) {
       errors.push(`unsupported plugin apiVersion: ${pluginId}`);
     }
     if (
-      plugin.id !== pluginId ||
-      plugin.name !== plugin.metadata?.name ||
-      plugin.version !== plugin.metadata?.version ||
+      plugin.metadata?.id !== pluginId ||
       plugin.category !== "ai-ide-plugin"
     ) {
       errors.push(`plugin ${pluginId} canonical metadata is invalid`);

@@ -1,7 +1,6 @@
 ---
 name: git-workflow-design
 description: Use when the user asks to commit, push, create or switch branch, prepare PR, merge, revert, release, hotfix, stage changes, or generate release notes and changelogs from git history, even if `$git-workflow-design` is not explicitly named.
-keywords: [commit, push, branch, merge, revert, release, hotfix, PR, pull request, changelog, git, stage, staging]
 ---
 
 # Git Workflow

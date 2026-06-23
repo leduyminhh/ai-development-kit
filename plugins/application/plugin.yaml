@@ -18,35 +18,23 @@
   },
   "dependencies": {
     "required": [
-      "architecture"
-    ],
-    "optional": [
+      "architecture",
       "quality",
       "security",
       "data"
-    ]
+    ],
+    "optional": []
   },
   "assets": {
     "skills": [
       "api-contract-design",
-      "feature-delivery",
-      "feature-fix",
-      "feature-implement",
-      "feature-integrate",
-      "feature-plan",
-      "feature-review",
-      "feature-test",
-      "java-analyze",
-      "python-backend-engineer",
-      "data-migration",
-      "code-shared-design",
-      "react-code-generate",
-      "test-automation-validate",
-      "test-qa-review"
+      "java-implement",
+      "python-implement",
+      "react-implement"
     ],
     "agents": [
-      "java-analyze",
-      "react-code-generate"
+      "java-implement",
+      "react-implement"
     ],
     "commands": [
       "commands/deliver-feature.md",
@@ -67,7 +55,7 @@
     "rules": "none",
     "templates": "none",
     "workflows": [
-      "workflows/fullstack-feature.yaml"
+      "workflows/feature-delivery-pipeline.yaml"
     ],
     "schemas": [
       "schemas/feature-context.schema.json"
@@ -78,10 +66,6 @@
     "supportsCopy": true,
     "supportsLink": true
   },
-  "id": "application",
-  "name": "Application Engineering",
-  "version": "1.0.0",
-  "description": "Backend, frontend, API, Spring, React, Kafka, and Redis application workflows.",
   "category": "ai-ide-plugin",
   "triggers": {
     "keywords": [
@@ -100,49 +84,24 @@
       "path": "skills/api-contract-design/SKILL.md"
     },
     {
-      "id": "application.feature_delivery",
-      "path": "skills/feature-delivery/SKILL.md"
+      "id": "application.java_implement",
+      "path": "skills/java-implement/SKILL.md"
     },
     {
-      "id": "application.feature_fix",
-      "path": "skills/feature-fix/SKILL.md"
+      "id": "application.python_implement",
+      "path": "skills/python-implement/SKILL.md"
     },
     {
-      "id": "application.feature_implement",
-      "path": "skills/feature-implement/SKILL.md"
-    },
-    {
-      "id": "application.feature_integrate",
-      "path": "skills/feature-integrate/SKILL.md"
-    },
-    {
-      "id": "application.feature_plan",
-      "path": "skills/feature-plan/SKILL.md"
-    },
-    {
-      "id": "application.feature_review",
-      "path": "skills/feature-review/SKILL.md"
-    },
-    {
-      "id": "application.feature_test",
-      "path": "skills/feature-test/SKILL.md"
-    },
-    {
-      "id": "application.java_analyze",
-      "path": "skills/java-analyze/SKILL.md"
-    },
-    {
-      "id": "application.python_backend_engineer",
-      "path": "skills/python-backend-engineer/SKILL.md"
-    },
-    {
-      "id": "application.react_code_generate",
-      "path": "skills/react-code-generate/SKILL.md"
+      "id": "application.react_implement",
+      "path": "skills/react-implement/SKILL.md"
     }
   ],
   "depends_on": {
     "plugins": [
-      "architecture"
+      "architecture",
+      "quality",
+      "security",
+      "data"
     ]
   },
   "displayName": "Application Engineering",

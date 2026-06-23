@@ -49,10 +49,6 @@
     "supportsCopy": true,
     "supportsLink": true
   },
-  "id": "security",
-  "name": "Security Engineering",
-  "version": "1.0.0",
-  "description": "OWASP, CWE, secrets, threat modeling, dependency, and container security.",
   "category": "ai-ide-plugin",
   "triggers": {
     "keywords": [

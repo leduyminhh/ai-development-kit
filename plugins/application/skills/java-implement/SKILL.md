@@ -1,5 +1,5 @@
 ---
-name: java-analyze
+name: java-implement
 description: Use when acting as a Java backend architect or implementation agent for Spring Boot or JVM services, especially for flow design, clean code boundaries, architecture review, approved feature implementation, persistence choices, async/concurrency risks, test strategy, or Maven/Gradle verification.
 ---
 
@@ -127,5 +127,5 @@ For design, implementation, or review tasks, return:
 
 ### Validation Commands
 
-- `powershell -ExecutionPolicy Bypass -File skills/java-analyze/scripts/test-architecture-skills.ps1`
-- `powershell -ExecutionPolicy Bypass -File skills/naming-rule-validate/scripts/validate-naming-rule.ps1 -Root . -PathList "skills/java-analyze/SKILL.md"`
+- `powershell -ExecutionPolicy Bypass -File skills/java-implement/scripts/test-architecture-skills.ps1`
+- `powershell -ExecutionPolicy Bypass -File skills/naming-rule-validate/scripts/validate-naming-rule.ps1 -Root . -PathList "skills/java-implement/SKILL.md"`

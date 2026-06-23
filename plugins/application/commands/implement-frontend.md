@@ -18,13 +18,12 @@ Implement the approved React user flow with API integration, UX states, accessib
 
 ## Required Skills
 
-- feature-implement
-- react-code-generate
+- react-implement
 
 ## Steps
 
 1. Inspect the approved feature context, frontend source scope, route structure, and component conventions.
-2. Route React feature-context implementation through `react-code-generate`.
+2. Route React feature-context implementation through `react-implement`.
 3. Implement the smallest complete user flow with loading, empty, success, validation, permission, and error states.
 4. Keep API integration aligned with the approved contract.
 5. Run focused frontend verification and report accessibility notes.

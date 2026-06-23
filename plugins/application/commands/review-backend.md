@@ -18,16 +18,18 @@ Review backend implementation and return prioritized findings.
 
 ## Required Skills
 
-- java-analyze
+- java-implement
+- python-implement
 - code-shared-design
 - test-automation-validate
 
 ## Steps
 
-1. Inspect project structure and stack.
+1. Inspect project structure, stack, and language (Java or Python).
 2. Review architecture and API boundaries.
-3. Review persistence, errors, logging, and tests.
-4. Return evidence-backed findings.
+3. Review persistence, error handling, and logging.
+4. Review test coverage and identify gaps.
+5. Return prioritized, evidence-backed findings.
 
 ## Output Contract
 

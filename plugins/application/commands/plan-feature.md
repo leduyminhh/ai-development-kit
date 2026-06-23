@@ -20,7 +20,7 @@ Turn feature requirements into a feature context with UI, API, backend, data, te
 
 ## Required Skills
 
-- feature-plan
+- api-contract-design
 
 ## Steps
 

@@ -19,7 +19,6 @@ Design schema, index, migration, backfill, reconciliation, rollback, and data ga
 
 ## Required Skills
 
-- feature-plan
 - data-migration
 
 ## Steps

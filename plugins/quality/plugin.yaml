@@ -50,10 +50,6 @@
     "supportsCopy": true,
     "supportsLink": true
   },
-  "id": "quality",
-  "name": "Quality Engineering",
-  "version": "1.0.0",
-  "description": "Testing, code review, coverage, performance, and naming validation.",
   "category": "ai-ide-plugin",
   "triggers": {
     "keywords": [

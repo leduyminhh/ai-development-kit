@@ -18,8 +18,8 @@ Connect React, API, backend, and database changes and resolve evidence-backed co
 
 ## Required Skills
 
-- feature-integrate
 - api-contract-design
+- code-shared-design
 
 ## Steps
 
