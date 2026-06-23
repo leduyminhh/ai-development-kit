@@ -20,7 +20,6 @@ Produce focused technical documentation aligned with the implemented system.
 ## Required Skills
 
 - doc-write
-- diagram-generate
 
 ## Steps
 

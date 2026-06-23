@@ -19,7 +19,6 @@ Assess architecture quality and return evidence-backed design findings.
 
 ## Required Skills
 
-- java-analyze
 - architecture-onion-design
 - code-shared-design
 

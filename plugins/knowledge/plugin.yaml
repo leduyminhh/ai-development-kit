@@ -25,7 +25,6 @@
   "assets": {
     "skills": [
       "doc-write",
-      "diagram-generate",
       "youtube-transcript",
       "release-notes"
     ],
