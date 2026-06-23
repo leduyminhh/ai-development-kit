@@ -28,20 +28,20 @@ steps:
       schema: "$steps.design-api.output.schema"
 
   - id: implement-backend
-    uses: application/python-backend-engineer
+    uses: application/python-implement
     depends: [design-api]
     input:
       api: "$steps.design-api.output"
 
   - id: implement-frontend
-    uses: application/react-code-generate
+    uses: application/react-implement
     depends: [design-api, implement-backend]
     input:
       api: "$steps.design-api.output"
       source: "$context.source"
 
   - id: integrate
-    uses: application/feature-integrate
+    uses: application/api-contract-design
     depends: [implement-backend, implement-frontend, plan-data]
     input:
       backend: "$steps.implement-backend.output"

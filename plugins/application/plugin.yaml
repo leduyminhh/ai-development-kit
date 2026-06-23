@@ -28,13 +28,6 @@
   "assets": {
     "skills": [
       "api-contract-design",
-      "feature-deliver",
-      "feature-fix",
-      "feature-implement",
-      "feature-integrate",
-      "feature-plan",
-      "feature-review",
-      "feature-test",
       "java-implement",
       "python-implement",
       "react-implement"
@@ -93,34 +86,6 @@
     {
       "id": "application.api_contract_design",
       "path": "skills/api-contract-design/SKILL.md"
-    },
-    {
-      "id": "application.feature_deliver",
-      "path": "skills/feature-deliver/SKILL.md"
-    },
-    {
-      "id": "application.feature_fix",
-      "path": "skills/feature-fix/SKILL.md"
-    },
-    {
-      "id": "application.feature_implement",
-      "path": "skills/feature-implement/SKILL.md"
-    },
-    {
-      "id": "application.feature_integrate",
-      "path": "skills/feature-integrate/SKILL.md"
-    },
-    {
-      "id": "application.feature_plan",
-      "path": "skills/feature-plan/SKILL.md"
-    },
-    {
-      "id": "application.feature_review",
-      "path": "skills/feature-review/SKILL.md"
-    },
-    {
-      "id": "application.feature_test",
-      "path": "skills/feature-test/SKILL.md"
     },
     {
       "id": "application.java_implement",

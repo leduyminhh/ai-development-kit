@@ -9,13 +9,6 @@
     ],
     "application": [
       "api-contract-design",
-      "feature-deliver",
-      "feature-fix",
-      "feature-implement",
-      "feature-integrate",
-      "feature-plan",
-      "feature-review",
-      "feature-test",
       "java-implement",
       "python-implement",
       "react-implement"

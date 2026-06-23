@@ -18,7 +18,6 @@ Implement the approved React user flow with API integration, UX states, accessib
 
 ## Required Skills
 
-- feature-implement
 - react-implement
 
 ## Steps

@@ -18,8 +18,9 @@ Apply selected review findings or failing-test fixes within an approved source s
 
 ## Required Skills
 
-- feature-fix
-- feature-implement
+- java-implement
+- python-implement
+- react-implement
 - test-automation-validate
 
 ## Steps

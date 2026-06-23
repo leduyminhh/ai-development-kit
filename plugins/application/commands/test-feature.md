@@ -18,7 +18,6 @@ Turn feature acceptance criteria into unit, integration, contract, and end-to-en
 
 ## Required Skills
 
-- feature-test
 - test-qa-review
 - test-automation-validate
 
