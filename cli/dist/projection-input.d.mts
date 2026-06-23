@@ -26,6 +26,7 @@ export function buildProjectionInput({ root, graph, plugins, scope, provider, mc
         requiredSkills: any[];
         steps: any[];
         outputContract: any[];
+        outputSchema: any;
         sourcePath: any;
         markdown: string;
         owners: any[];

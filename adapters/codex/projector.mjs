@@ -24,7 +24,7 @@ ${command.steps.map((step, index) => `${index + 1}. ${step}`).join("\n")}
 ## Output Contract
 
 ${command.outputContract.map((item) => `- ${item}`).join("\n")}
-`;
+${command.outputSchema ? `\n## Output Schema\n\n- ${command.outputSchema}\n` : ""}`;
 }
 
 function providerManifest(input) {

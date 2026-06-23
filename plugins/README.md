@@ -26,7 +26,9 @@ Plugin directories follow this shape:
 - `rules/`: plugin-owned rules when needed.
 - `templates/`: plugin-owned templates when needed.
 - `workflows/`: plugin-owned workflow notes when needed.
-- `schemas/`: plugin-owned schemas when needed.
+- `schemas/`: plugin-owned schemas when needed. A command can reference its
+  output schema with the optional `outputSchema` frontmatter key; the projected
+  command then carries an `Output Schema` section.
 
 Unused asset groups remain as folders and are declared as `none` in
 `plugin.yaml`. Do not add README placeholder files just to keep folders alive.
@@ -35,11 +37,11 @@ Unused asset groups remain as folders and are declared as `none` in
 
 | Plugin | Capability | Required Plugins | Optional Plugins | Installed Assets |
 | --- | --- | --- | --- | --- |
-| `architecture` | System design, architecture review, ADR, DDD, integration design, shared design, patterns, and diagrams. | None | `application` | Skills: `java-analyze`, `architecture-onion-design`, `code-shared-design`, `code-design-pattern`, `diagram-generate`; command: `review-architecture`; hook: `project-audit`. |
+| `architecture` | System design, architecture review, ADR, DDD, integration design, shared design, patterns, and diagrams. | None | `application` | Skills: `java-analyze`, `architecture-onion-design`, `code-shared-design`, `code-design-pattern`, `diagram-generate`; command: `review-architecture`; workflow: `architecture-review-pipeline`; hook: `project-audit`. |
 | `application` | Backend, frontend, API, Spring, React, Kafka, Redis, and Java analysis workflows. | `architecture` | `quality`, `security`, `data` | Skills include API contract, feature delivery/fix/implement/integrate/plan/review/test, `java-analyze`, `python-backend-engineer`, `react-code-generate`, and shared quality/data skills; commands cover feature planning, backend/frontend implementation, integration, review, and tests; workflow: `fullstack-feature`; hook: `project-audit`. |
 | `data` | Relational and document database schema and data migration planning, including compatibility, rollback, and verification. | None | `application` | Skill: `data-migration`; command: `migration-plan`; workflow: `db-migration-pipeline`. |
-| `knowledge` | Technical documentation, README work, runbooks, API docs, onboarding, changelogs, diagrams, and transcript workflows. | None | `architecture` | Skills: `doc-write`, `diagram-generate`, `youtube-transcript`, `release-notes`; command: `write-technical-doc`. |
-| `platform` | Delivery, deployment, observability, incident response, workflow operations, and git workflow. | None | `quality`, `security` | Skills: `git-workflow-design`, `using-workflow-kit`, `incident-response`; command: `deployment-plan`; workflow: `incident-response-pipeline`; hook: `project-audit`. |
+| `knowledge` | Technical documentation, README work, runbooks, API docs, onboarding, changelogs, diagrams, and transcript workflows. | None | `architecture` | Skills: `doc-write`, `diagram-generate`, `youtube-transcript`, `release-notes`; commands: `write-technical-doc`, `write-release-notes`; workflow: `documentation-pipeline`. |
+| `platform` | Delivery, deployment, observability, incident response, workflow operations, and git workflow. | None | `quality`, `security` | Skills: `git-workflow-design`, `using-workflow-kit`, `incident-response`; commands: `deployment-plan`, `respond-incident`; workflow: `incident-response-pipeline`; hook: `project-audit`. |
 | `quality` | QA review, test automation, naming checks, coverage, performance, and quality verification. | None | None | Skills: `test-qa-review`, `test-automation-validate`, `naming-rule-validate`; command: `verify-quality`; workflow: `quality-verification-pipeline`; hook: `project-audit`. |
 | `security` | OWASP/CWE review, secrets, threat modeling, dependency review, and container security. | None | `quality` | Skill: `security-code-review`; command: `review-security`; workflow: `security-audit-pipeline`; hook: `project-audit`. |
 

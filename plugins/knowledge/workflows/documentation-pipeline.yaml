@@ -1,0 +1,29 @@
+id: documentation-pipeline
+description: "Documentation: draft technical doc -> diagrams -> release notes"
+version: 1.0.0
+changelog:
+  1.0.0: "Initial workflow"
+
+input:
+  source: "$context.source"
+
+steps:
+  - id: draft
+    uses: knowledge/doc-write
+    input:
+      source: "$context.source"
+    gates: [pass]
+
+  - id: diagrams
+    uses: architecture/diagram-generate
+    depends: [draft]
+    input:
+      source: "$context.source"
+      document: "$steps.draft.output"
+
+  - id: release-notes
+    uses: knowledge/release-notes
+    depends: [draft]
+    input:
+      source: "$context.source"
+      document: "$steps.draft.output"

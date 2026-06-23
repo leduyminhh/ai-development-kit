@@ -44,7 +44,9 @@
     ],
     "rules": "none",
     "templates": "none",
-    "workflows": "none",
+    "workflows": [
+      "workflows/architecture-review-pipeline.yaml"
+    ],
     "schemas": [
       "schemas/architecture-review-context.schema.json"
     ]

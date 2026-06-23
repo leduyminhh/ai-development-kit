@@ -34,12 +34,15 @@
       "youtube-transcript"
     ],
     "commands": [
-      "commands/write-technical-doc.md"
+      "commands/write-technical-doc.md",
+      "commands/write-release-notes.md"
     ],
     "hooks": [],
     "rules": "none",
     "templates": "none",
-    "workflows": "none",
+    "workflows": [
+      "workflows/documentation-pipeline.yaml"
+    ],
     "schemas": [
       "schemas/documentation-context.schema.json"
     ]

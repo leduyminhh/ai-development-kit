@@ -37,6 +37,33 @@ test("loads one canonical namespaced command model", async () => {
   ]);
 });
 
+test("captures the optional outputSchema frontmatter when present", async () => {
+  const withSchema = await loadCanonicalCommand({
+    sourcePath: path.join(
+      repoRoot,
+      "plugins/security/commands/review-security.md",
+    ),
+    pluginId: "security",
+    pluginVersion: "1.0.0",
+    repositoryRoot: repoRoot,
+  });
+  assert.equal(
+    withSchema.outputSchema,
+    "schemas/security-review-context.schema.json",
+  );
+
+  const withoutSchema = await loadCanonicalCommand({
+    sourcePath: path.join(
+      repoRoot,
+      "plugins/application/commands/deliver-feature.md",
+    ),
+    pluginId: "application",
+    pluginVersion: "1.0.0",
+    repositoryRoot: repoRoot,
+  });
+  assert.equal(withoutSchema.outputSchema, undefined);
+});
+
 test("accepts a command without MCP metadata", async () => {
   const sourcePath = path.join(
     repoRoot,

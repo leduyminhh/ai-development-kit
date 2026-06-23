@@ -27,7 +27,9 @@ Thư mục plugin có cấu trúc:
 - `rules/`: rule do plugin sở hữu khi cần.
 - `templates/`: template do plugin sở hữu khi cần.
 - `workflows/`: workflow definition do plugin sở hữu khi cần.
-- `schemas/`: schema do plugin sở hữu khi cần.
+- `schemas/`: schema do plugin sở hữu khi cần. Một command có thể tham chiếu
+  output schema qua khóa frontmatter tùy chọn `outputSchema`; command sau khi
+  chiếu sẽ kèm mục `Output Schema`.
 
 Asset group chưa dùng vẫn giữ folder và khai báo `none` trong `plugin.yaml`.
 Không tạo README placeholder chỉ để giữ folder.
@@ -36,11 +38,11 @@ Không tạo README placeholder chỉ để giữ folder.
 
 | Plugin | Năng lực | Plugin bắt buộc | Plugin tùy chọn | Asset được cài |
 | --- | --- | --- | --- | --- |
-| `architecture` | System design, architecture review, ADR, DDD, integration design, shared design, pattern và diagram. | Không có | `application` | Skills: `java-analyze`, `architecture-onion-design`, `code-shared-design`, `code-design-pattern`, `diagram-generate`; command: `review-architecture`; hook: `project-audit`. |
+| `architecture` | System design, architecture review, ADR, DDD, integration design, shared design, pattern và diagram. | Không có | `application` | Skills: `java-analyze`, `architecture-onion-design`, `code-shared-design`, `code-design-pattern`, `diagram-generate`; command: `review-architecture`; workflow: `architecture-review-pipeline`; hook: `project-audit`. |
 | `application` | Workflow backend, frontend, API, Spring, React, Kafka, Redis và phân tích Java. | `architecture` | `quality`, `security`, `data` | Skills gồm API contract, feature delivery/fix/implement/integrate/plan/review/test, `java-analyze`, `python-backend-engineer`, `react-code-generate`, và các skill quality/data dùng chung; commands bao phủ plan, backend/frontend implementation, integration, review và test; workflow: `fullstack-feature`; hook: `project-audit`. |
 | `data` | Lập kế hoạch schema và data migration cho cơ sở dữ liệu quan hệ và document, gồm tương thích, rollback và kiểm chứng. | Không có | `application` | Skill: `data-migration`; command: `migration-plan`; workflow: `db-migration-pipeline`. |
-| `knowledge` | Tài liệu kỹ thuật, README, runbook, API docs, onboarding, changelog, diagram và transcript workflow. | Không có | `architecture` | Skills: `doc-write`, `diagram-generate`, `youtube-transcript`, `release-notes`; command: `write-technical-doc`. |
-| `platform` | Delivery, deployment, observability, incident response, vận hành workflow và git workflow. | Không có | `quality`, `security` | Skills: `git-workflow-design`, `using-workflow-kit`, `incident-response`; command: `deployment-plan`; workflow: `incident-response-pipeline`; hook: `project-audit`. |
+| `knowledge` | Tài liệu kỹ thuật, README, runbook, API docs, onboarding, changelog, diagram và transcript workflow. | Không có | `architecture` | Skills: `doc-write`, `diagram-generate`, `youtube-transcript`, `release-notes`; commands: `write-technical-doc`, `write-release-notes`; workflow: `documentation-pipeline`. |
+| `platform` | Delivery, deployment, observability, incident response, vận hành workflow và git workflow. | Không có | `quality`, `security` | Skills: `git-workflow-design`, `using-workflow-kit`, `incident-response`; commands: `deployment-plan`, `respond-incident`; workflow: `incident-response-pipeline`; hook: `project-audit`. |
 | `quality` | QA review, test automation, naming check, coverage, performance và quality verification. | Không có | Không có | Skills: `test-qa-review`, `test-automation-validate`, `naming-rule-validate`; command: `verify-quality`; workflow: `quality-verification-pipeline`; hook: `project-audit`. |
 | `security` | Review OWASP/CWE, secrets, threat modeling, dependency review và container security. | Không có | `quality` | Skill: `security-code-review`; command: `review-security`; workflow: `security-audit-pipeline`; hook: `project-audit`. |
 

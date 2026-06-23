@@ -34,7 +34,8 @@
       "using-workflow-kit"
     ],
     "commands": [
-      "commands/deployment-plan.md"
+      "commands/deployment-plan.md",
+      "commands/respond-incident.md"
     ],
     "hooks": [
       "project-audit"

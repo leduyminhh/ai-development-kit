@@ -80,6 +80,12 @@
       "file": "commands/migration-plan.md"
     },
     {
+      "id": "knowledge.write_release_notes",
+      "plugin": "knowledge",
+      "slug": "write-release-notes",
+      "file": "commands/write-release-notes.md"
+    },
+    {
       "id": "knowledge.write_technical_doc",
       "plugin": "knowledge",
       "slug": "write-technical-doc",
@@ -90,6 +96,12 @@
       "plugin": "platform",
       "slug": "deployment-plan",
       "file": "commands/deployment-plan.md"
+    },
+    {
+      "id": "platform.respond_incident",
+      "plugin": "platform",
+      "slug": "respond-incident",
+      "file": "commands/respond-incident.md"
     },
     {
       "id": "quality.verify_quality",

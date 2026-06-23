@@ -3,6 +3,7 @@ id: quality.verify_quality
 slug: verify-quality
 description: Design and execute focused verification for a software change.
 version: 1.0.0
+outputSchema: schemas/quality-verification-context.schema.json
 ---
 
 # Verify Quality

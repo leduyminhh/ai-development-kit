@@ -3,6 +3,7 @@ id: knowledge.write_technical_doc
 slug: write-technical-doc
 description: Create maintainable technical documentation from repository evidence.
 version: 1.0.0
+outputSchema: schemas/documentation-context.schema.json
 ---
 
 # Write Technical Documentation

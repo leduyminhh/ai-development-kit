@@ -3,6 +3,7 @@ id: platform.deployment_plan
 slug: deployment-plan
 description: Produce a deployment and rollback plan.
 version: 1.0.0
+outputSchema: schemas/deployment-context.schema.json
 ---
 
 # Deployment Plan

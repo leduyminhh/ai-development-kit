@@ -51,6 +51,7 @@ export async function buildProjectionInput({ root, graph, plugins, scope, provid
                 requiredSkills: command.requiredSkills,
                 steps: command.steps,
                 outputContract: command.outputContract,
+                outputSchema: command.outputSchema,
                 sourcePath: command.sourcePath,
                 markdown: command.markdown,
                 owners: ownersFor(graph, "commands", command.id),

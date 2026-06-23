@@ -13,6 +13,7 @@ export function loadCanonicalCommand(input: any): Promise<{
     requiredSkills: any[];
     steps: any[];
     outputContract: any[];
+    outputSchema: any;
     sourcePath: any;
     absoluteSourcePath: any;
     pluginVersion: any;
@@ -35,6 +36,7 @@ export function loadPluginCommands({ root, pluginId, plugin, knownSkills, valida
     requiredSkills: any[];
     steps: any[];
     outputContract: any[];
+    outputSchema: any;
     sourcePath: any;
     absoluteSourcePath: any;
     pluginVersion: any;

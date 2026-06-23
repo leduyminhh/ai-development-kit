@@ -1,0 +1,35 @@
+id: architecture-review-pipeline
+description: "Architecture review: analyze boundaries -> shared contracts -> patterns -> diagram"
+version: 1.0.0
+changelog:
+  1.0.0: "Initial workflow"
+
+input:
+  source: "$context.source"
+
+steps:
+  - id: analyze
+    uses: architecture/architecture-onion-design
+    input:
+      source: "$context.source"
+    gates: [pass]
+
+  - id: shared-contracts
+    uses: architecture/code-shared-design
+    depends: [analyze]
+    input:
+      source: "$context.source"
+      boundaries: "$steps.analyze.output"
+
+  - id: patterns
+    uses: architecture/code-design-pattern
+    depends: [analyze]
+    input:
+      source: "$context.source"
+      boundaries: "$steps.analyze.output"
+
+  - id: diagram
+    uses: architecture/diagram-generate
+    depends: [shared-contracts, patterns]
+    input:
+      source: "$context.source"

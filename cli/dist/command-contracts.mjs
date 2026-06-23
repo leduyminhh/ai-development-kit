@@ -6,6 +6,7 @@ const FRONTMATTER_KEYS = new Set([
     "slug",
     "description",
     "version",
+    "outputSchema",
 ]);
 const REQUIRED_SECTIONS = [
     "Intent",
@@ -132,6 +133,7 @@ export async function loadCanonicalCommand(input) {
         requiredSkills: sectionList(body, "Required Skills"),
         steps: [...sectionText(body, "Steps").matchAll(/^\d+\. (.+)$/gm)].map((item) => item[1].trim()),
         outputContract: sectionList(body, "Output Contract"),
+        outputSchema: metadata.outputSchema,
         sourcePath: relativeSourcePath(sourcePath, repositoryRoot),
         absoluteSourcePath: sourcePath,
         pluginVersion: pluginVersion ?? metadata.version,
