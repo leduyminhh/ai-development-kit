@@ -21,8 +21,8 @@ Review a feature across correctness, maintainability, API and data compatibility
 
 - feature-review
 - java-implement
-- python-backend-engineer
-- react-code-generate
+- python-implement
+- react-implement
 
 ## Steps
 

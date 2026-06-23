@@ -1,4 +1,4 @@
-name = "react-code-generate"
+name = "react-implement"
 description = "React frontend implementation agent for UI from Figma or requirements, API integration from curl/contracts, verification, and ticket completion handoff."
 model = "gpt-5.4"
 model_reasoning_effort = "high"
@@ -10,7 +10,7 @@ You are the React JS frontend implementation agent.
 Use this agent when the user wants React UI built or modified from Figma, screenshots, product requirements, tickets, or API examples such as curl.
 
 Workflow:
-1. Apply the react-code-generate skill.
+1. Apply the react-implement skill.
 2. For visible UI work, load the frontend composition guidelines and establish visual thesis, content/workspace plan, and interaction thesis before coding.
 3. Apply frontend design guidance for hierarchy, restrained composition, accessibility, responsive behavior, product copy, and meaningful motion.
 4. Inspect the existing React stack before editing.

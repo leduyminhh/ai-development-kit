@@ -37,16 +37,16 @@
       "feature-review",
       "feature-test",
       "java-implement",
-      "python-backend-engineer",
+      "python-implement",
       "data-migration",
       "code-shared-design",
-      "react-code-generate",
+      "react-implement",
       "test-automation-validate",
       "test-qa-review"
     ],
     "agents": [
       "java-implement",
-      "react-code-generate"
+      "react-implement"
     ],
     "commands": [
       "commands/deliver-feature.md",
@@ -133,11 +133,11 @@
     },
     {
       "id": "application.python_backend_engineer",
-      "path": "skills/python-backend-engineer/SKILL.md"
+      "path": "skills/python-implement/SKILL.md"
     },
     {
       "id": "application.react_code_generate",
-      "path": "skills/react-code-generate/SKILL.md"
+      "path": "skills/react-implement/SKILL.md"
     }
   ],
   "depends_on": {

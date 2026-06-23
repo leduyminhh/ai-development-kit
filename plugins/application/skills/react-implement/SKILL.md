@@ -1,5 +1,5 @@
 ---
-name: react-code-generate
+name: react-implement
 description: Use when acting as a React JS frontend implementation agent that can build or modify UI from Figma designs, text requirements, tickets, or API examples such as curl; integrate APIs into React app flows; apply strong frontend composition guidance; verify behavior; and prepare completion updates for Notion, Slack, or future automation.
 ---
 
