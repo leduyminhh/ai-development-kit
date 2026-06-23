@@ -137,7 +137,7 @@ Approved domains:
 
 Optional qualifiers:
 
-Any approved domain may also be used as a qualifier when it narrows another domain, for example `react-code-generate`.
+Any approved domain may also be used as a qualifier when it narrows another domain, for example `react-implement`.
 Additional qualifier tokens:
 
 `accessibility`, `activity`, `api`, `application`, `architecture`, `archimate`, `automation`, `audit`,
@@ -176,7 +176,7 @@ Examples:
 - `test-qa-review`
 - `architecture-onion-design`
 - `code-shared-design`
-- `java-analyze`
+- `java-implement`
 - `code-design-pattern`
 
 Approved capability noun exceptions:
@@ -191,8 +191,8 @@ Current approved agents:
 - `diagram-generate`
 - `doc-write`
 - `git-workflow-design`
-- `java-analyze`
-- `react-code-generate`
+- `java-implement`
+- `react-implement`
 - `security-code-review`
 - `test-qa-review`
 - `test-automation-validate`

@@ -20,7 +20,7 @@ Use this skill when:
 - The user asks how Codex, Claude Code, Cursor, or another IDE should invoke this kit.
 - A new workflow is added to `.codex/workflows/registry.toml`.
 
-Do not use it as a replacement for domain skills such as `java-analyze`, `react-code-generate`, or `security-code-review`.
+Do not use it as a replacement for domain skills such as `java-implement`, `react-implement`, or `security-code-review`.
 
 ## Core Process
 

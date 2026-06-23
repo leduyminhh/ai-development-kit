@@ -100,7 +100,7 @@ Use [resources/output-template-vi.md](resources/output-template-vi.md) for the u
 
 ### Relationship With Architecture Agents
 
-When used after `java-analyze` or another design agent:
+When used after `java-implement` or another design agent:
 
 - Treat architecture notes as input, not as proof.
 - Convert proposed flows and boundaries into observable test scenarios.
