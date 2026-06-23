@@ -128,7 +128,7 @@ Legacy aliases: plugin, uninstall, upgrade
 function formatAvailable(result) {
   const lines = ["Installable plugins:"];
   for (const plugin of result.plugins.available) {
-    lines.push(`- ${plugin.id}@${plugin.version}: ${plugin.description}`);
+    lines.push(`- ${plugin.metadata.id}@${plugin.metadata.version}: ${plugin.metadata.description}`);
     lines.push(`  required: ${plugin.dependencies.required.join(", ") || "none"}`);
     lines.push(`  optional: ${plugin.dependencies.optional.join(", ") || "none"}`);
     lines.push(`  skills: ${plugin.assets.skills.join(", ") || "none"}`);

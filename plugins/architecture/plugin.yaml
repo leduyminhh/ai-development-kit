@@ -55,10 +55,6 @@
     "supportsCopy": true,
     "supportsLink": true
   },
-  "id": "architecture",
-  "name": "Architecture Engineering",
-  "version": "1.0.0",
-  "description": "System design, architecture review, ADR, DDD, and integration design.",
   "category": "ai-ide-plugin",
   "triggers": {
     "keywords": [

@@ -66,10 +66,6 @@
     "supportsCopy": true,
     "supportsLink": true
   },
-  "id": "application",
-  "name": "Application Engineering",
-  "version": "1.0.0",
-  "description": "Backend, frontend, API, Spring, React, Kafka, and Redis application workflows.",
   "category": "ai-ide-plugin",
   "triggers": {
     "keywords": [
