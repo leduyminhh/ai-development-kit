@@ -69,6 +69,7 @@ function color(value, code) {
   return `${code}${value}${COLORS.reset}`;
 }
 
+import { checkCommandOutput } from "./schema-validate.mjs";
 import { detectInstallRecommendations } from "./install-detection.mjs";
 import {
   cancelInstallSession,
@@ -342,6 +343,39 @@ export async function run(args, streams = process) {
       );
     }
     return 0;
+  }
+
+  if (args[0] === "schema" && args[1] === "check") {
+    const positional = args.slice(2).filter((item) => !item.startsWith("--"));
+    const [pluginId, file] = positional;
+    const schemaFlagIndex = args.indexOf("--schema");
+    const schemaPath =
+      schemaFlagIndex >= 0 ? args[schemaFlagIndex + 1] : undefined;
+    if (!pluginId || !file) {
+      streams.stderr.write(
+        "usage: aie schema check <plugin> <json-file> [--schema <relpath>]\n",
+      );
+      return 1;
+    }
+    const result = await checkCommandOutput({
+      root: REPOSITORY_ROOT,
+      pluginId,
+      file,
+      schemaPath,
+    });
+    if (args.includes("--json")) {
+      streams.stdout.write(`${JSON.stringify(result)}\n`);
+    } else if (result.ok) {
+      streams.stdout.write(
+        `${file} is valid against ${pluginId}/${result.schema}.\n`,
+      );
+    } else {
+      streams.stdout.write(`${file} failed ${pluginId}/${result.schema}:\n`);
+      for (const error of result.errors) {
+        streams.stdout.write(`- ${error}\n`);
+      }
+    }
+    return result.ok ? 0 : 1;
   }
 
   if (args[0] === "build" && args.includes("--all")) {

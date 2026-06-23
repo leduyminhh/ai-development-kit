@@ -116,7 +116,7 @@ Managed instruction updates preserve user-owned content outside the AI Engineeri
 
 ### Agent projection
 
-Plugin `assets.agents` are projected into runnable agent definitions for **Codex** (`.codex/agents/<id>.toml`, copied) and **Claude** (`.claude/agents/<id>.md`, rendered from the canonical agent definition). Antigravity records the agent ids in its plugin manifest but ships no agent body. Cursor has no subagent concept and receives managed instructions (`AGENTS.md`) only.
+Plugin `assets.agents` are projected into runnable agent definitions for **Codex** (`.codex/agents/<id>.toml`, copied), **Claude** (`.claude/agents/<id>.md`), and **Antigravity** (`agents/<id>.md`) — the Markdown forms are rendered from the canonical agent definition. Cursor has no subagent concept and receives managed instructions (`AGENTS.md`) only.
 
 ## Repository Structure
 
@@ -137,6 +137,7 @@ Workflow definitions live in `core/workflows/` for shared orchestration and in `
 
 ```bash
 aie validate
+aie schema check <plugin> <json-file> [--schema <relpath>]
 aie build --all
 aie artifact verify --all
 aie registry generate

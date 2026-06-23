@@ -27,6 +27,18 @@ ${command.outputContract.map((item) => `- ${item}`).join("\n")}
 `;
 }
 
+function agentBody(agent) {
+  const definition = agent.definition ?? {};
+  const instructions = definition.instructions || `Apply the ${agent.id} skill.`;
+  return `---
+name: ${definition.name || agent.id}
+description: ${definition.description || ""}
+---
+
+${instructions}
+`;
+}
+
 function providerManifest(input) {
   return {
     apiVersion: "ai-engineering.dev/v1alpha1",
@@ -76,6 +88,17 @@ export function project(input) {
             owners: command.owners,
             shared: command.owners.length > 1,
           })),
+          ...(input.agents ?? [])
+            .filter((agent) => agent.definition)
+            .map((agent) => ({
+              operation: "render",
+              assetType: "agent",
+              assetId: agent.id,
+              destinationPath: `agents/${agent.id}.md`,
+              content: agentBody(agent),
+              owners: agent.owners,
+              shared: agent.owners.length > 1,
+            })),
           {
             operation: "render",
             assetType: "provider-manifest",

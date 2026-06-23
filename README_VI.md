@@ -116,7 +116,7 @@ Khi cập nhật instruction file, hệ thống giữ nguyên nội dung do ngư
 
 ### Chiếu agent
 
-`assets.agents` của plugin được chiếu thành định nghĩa agent chạy được cho **Codex** (`.codex/agents/<id>.toml`, copy) và **Claude** (`.claude/agents/<id>.md`, render từ định nghĩa agent chuẩn). Antigravity ghi id agent vào plugin manifest nhưng không kèm phần thân agent. Cursor không có khái niệm subagent nên chỉ nhận instruction được quản lý (`AGENTS.md`).
+`assets.agents` của plugin được chiếu thành định nghĩa agent chạy được cho **Codex** (`.codex/agents/<id>.toml`, copy), **Claude** (`.claude/agents/<id>.md`) và **Antigravity** (`agents/<id>.md`) — bản Markdown render từ định nghĩa agent chuẩn. Cursor không có khái niệm subagent nên chỉ nhận instruction được quản lý (`AGENTS.md`).
 
 ## Cấu Trúc Repository
 
@@ -137,6 +137,7 @@ Workflow definition nằm trong `core/workflows/` cho orchestration dùng chung 
 
 ```bash
 aie validate
+aie schema check <plugin> <json-file> [--schema <relpath>]
 aie build --all
 aie artifact verify --all
 aie registry generate
