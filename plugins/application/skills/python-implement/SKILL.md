@@ -1,9 +1,9 @@
 ---
-name: python-backend-engineer
+name: python-implement
 description: Use when designing, implementing, or reviewing Python backend features in FastAPI or Django REST Framework, including API contracts, validation, persistence, authorization, async behavior, and pytest verification.
 ---
 
-# Python Backend Engineer
+# Python Implementation
 
 ## Overview
 
@@ -11,7 +11,7 @@ Use this skill to design, implement, and review Python backend feature work in F
 
 ## When to Use
 
-Use this skill when a Python backend feature targets FastAPI or Django REST Framework, or when `feature-implement` routes an approved feature context to Python.
+Use this skill when a Python backend feature targets FastAPI or Django REST Framework in an approved feature context.
 
 ## Core Process
 
@@ -72,6 +72,6 @@ None.
 
 ## Notes
 
-- Preserve feature context gates from `feature-implement`.
+- Preserve feature context gates from the calling command.
 - Keep write actions inside the approved source scope.
 - Return user-facing results in Vietnamese.
