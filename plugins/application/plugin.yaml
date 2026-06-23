@@ -29,7 +29,7 @@
   "assets": {
     "skills": [
       "api-contract-design",
-      "feature-delivery",
+      "feature-deliver",
       "feature-fix",
       "feature-implement",
       "feature-integrate",
@@ -100,8 +100,8 @@
       "path": "skills/api-contract-design/SKILL.md"
     },
     {
-      "id": "application.feature_delivery",
-      "path": "skills/feature-delivery/SKILL.md"
+      "id": "application.feature_deliver",
+      "path": "skills/feature-deliver/SKILL.md"
     },
     {
       "id": "application.feature_fix",

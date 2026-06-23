@@ -193,7 +193,7 @@ test("application owns the full-stack orchestration skill set", async () => {
   assert.deepEqual(
     [
       "api-contract-design",
-      "feature-delivery",
+      "feature-deliver",
       "feature-fix",
       "feature-implement",
       "feature-integrate",

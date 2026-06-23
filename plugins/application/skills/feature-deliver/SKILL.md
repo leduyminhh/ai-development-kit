@@ -1,5 +1,5 @@
 ---
-name: feature-delivery
+name: feature-deliver
 description: Use when orchestrating an entire full-stack feature lifecycle from planning through implementation, integration, review, test, optional fix, and release-readiness reporting.
 ---
 
