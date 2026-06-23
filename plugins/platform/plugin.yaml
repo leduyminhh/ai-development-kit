@@ -31,7 +31,8 @@
     ],
     "agents": [
       "git-workflow-design",
-      "using-workflow-kit"
+      "using-workflow-kit",
+      "incident-response"
     ],
     "commands": [
       "commands/deployment-plan.md",

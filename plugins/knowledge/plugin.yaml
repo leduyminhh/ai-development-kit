@@ -31,7 +31,8 @@
     ],
     "agents": [
       "doc-write",
-      "youtube-transcript"
+      "youtube-transcript",
+      "release-notes"
     ],
     "commands": [
       "commands/write-technical-doc.md",

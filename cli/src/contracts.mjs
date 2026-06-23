@@ -389,6 +389,35 @@ async function validateRouting(root, plugins, errors, ownedSkillsByPack) {
       }
     }
   }
+  for (const [packId, pack] of plugins) {
+    let pluginCommands;
+    try {
+      pluginCommands = await loadPluginCommands({
+        root,
+        pluginId: packId,
+        plugin: pack,
+      });
+    } catch {
+      // Command load failures are already reported by the command registry
+      // check above; skip the schema pass for this plugin.
+      continue;
+    }
+    for (const command of pluginCommands) {
+      if (!command.outputSchema) continue;
+      if (!(pack.assets?.schemas ?? []).includes(command.outputSchema)) {
+        errors.push(
+          `command ${command.id} outputSchema must be declared in ${packId} assets.schemas`,
+        );
+      }
+      if (
+        !(await exists(path.join(pluginSource.root, packId, command.outputSchema)))
+      ) {
+        errors.push(
+          `command ${command.id} references missing schema ${command.outputSchema}`,
+        );
+      }
+    }
+  }
 }
 
 export async function validateRepository(root) {

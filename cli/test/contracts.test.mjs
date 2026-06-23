@@ -122,6 +122,32 @@ test("rejects unknown skills and missing commands", async () => {
   });
 });
 
+test("rejects a command outputSchema that is missing or undeclared", async () => {
+  await withRepositoryCopy(async (root) => {
+    const commandPath = path.join(
+      root,
+      "plugins/data/commands/migration-plan.md",
+    );
+    const original = await readFile(commandPath, "utf8");
+    await writeFile(
+      commandPath,
+      original.replace(
+        "outputSchema: schemas/data-migration-context.schema.json",
+        "outputSchema: schemas/missing-context.schema.json",
+      ),
+    );
+
+    await assert.rejects(validateRepository(root), (error) => {
+      assert.match(
+        error.message,
+        /references missing schema schemas\/missing-context\.schema\.json/,
+      );
+      assert.match(error.message, /must be declared in data assets\.schemas/);
+      return true;
+    });
+  });
+});
+
 test("rejects skills that are not mapped in the central skill registry", async () => {
   await withRepositoryCopy(async (root) => {
     const skillRoot = path.join(
