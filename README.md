@@ -2,6 +2,18 @@
 
 AI IDE plugin platform for Codex, Claude Code, Cursor, and Google Antigravity. Canonical capability content lives in `plugins/`; the CLI projects that content into provider-native files, workflow definitions, managed instructions, and optional MCP runtime registrations.
 
+**Version: [v1.1.0](CHANGELOG.md)** — Plugin standardization, shell completions, CI/CD automation
+
+## What's New in v1.1.0
+
+- **Standardized naming** across all 7 plugins: skills (noun-action), commands (verb-noun), workflows (domain-pipeline)
+- **Consolidated 7 phase-specific skills** into core implementation skills (java-implement, python-implement, react-implement)
+- **Shell completions** for bash/zsh with command, subcommand, and flag completion
+- **Release automation** with GitHub Actions CI/CD
+- **Comprehensive migration guide** for users upgrading from v1.0
+
+See [CHANGELOG.md](CHANGELOG.md) for details. Upgrading from v1.0? See [MIGRATION.md](MIGRATION.md).
+
 ## Install
 
 Requires Node.js 20 or newer.
@@ -15,6 +27,21 @@ npm link
 ```
 
 Both `ai-engineering` and `aie` invoke the CLI.
+
+### Shell Completions (Optional)
+
+Enable tab-completion in bash/zsh:
+
+```bash
+# Bash
+source /path/to/aie-repo/completions/aie.bash
+
+# Zsh
+fpath=(/path/to/aie-repo/completions $fpath)
+autoload -U compinit && compinit
+```
+
+See [SHELL_SETUP.md](SHELL_SETUP.md) for detailed setup.
 
 ## Quick Workflow
 
@@ -95,6 +122,34 @@ aie install --all --target codex -g
 ```
 
 Generated MCP registrations contain absolute local runtime paths, so run install on each machine that will use the provider integration.
+
+## Plugin Standardization (v1.1)
+
+All 7 plugins now follow uniform naming conventions:
+
+| Asset Type | Pattern | Examples |
+|----------|---------|----------|
+| **Skills** | noun-action | `java-implement`, `react-implement`, `test-qa-review` |
+| **Commands** | verb-noun | `plan-migration`, `plan-deployment`, `implement-backend` |
+| **Workflows** | domain-pipeline | `feature-delivery-pipeline`, `security-audit-pipeline` |
+
+**Key changes from v1.0:**
+
+- Removed 7 phase-specific feature-* skills; use stack-specific skills instead
+  - `feature-implement` → `java-implement`, `python-implement`, `react-implement`
+  - `feature-review` → use implementation skills with test skills
+  - `feature-plan`, `feature-integrate`, `feature-test`, `feature-fix` → consolidated into commands
+- Renamed core skills for consistency
+  - `java-analyze` → `java-implement`
+  - `python-backend-engineer` → `python-implement`
+  - `react-code-generate` → `react-implement`
+- Renamed commands to verb-noun order
+  - `migration-plan` → `plan-migration`
+  - `deployment-plan` → `plan-deployment`
+- Renamed workflows for clarity
+  - `fullstack-feature` → `feature-delivery-pipeline`
+
+**Migrating from v1.0?** See [MIGRATION.md](MIGRATION.md) for before/after examples.
 
 ## Upgrade Plan
 

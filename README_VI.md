@@ -2,6 +2,18 @@
 
 Nền tảng plugin AI IDE cho Codex, Claude Code, Cursor và Google Antigravity. Nội dung capability chuẩn nằm trong `plugins/`; CLI chiếu nội dung đó thành file native theo từng provider, workflow definition, instruction được quản lý và MCP runtime registration tùy chọn.
 
+**Phiên bản: [v1.1.0](CHANGELOG.md)** — Chuẩn hóa plugin, shell completions, CI/CD automation
+
+## Có Gì Mới ở v1.1.0
+
+- **Chuẩn hóa đặt tên** trên 7 plugin: skills (noun-action), commands (verb-noun), workflows (domain-pipeline)
+- **Gộp 7 phase-specific skills** thành core implementation skills (java-implement, python-implement, react-implement)
+- **Shell completions** cho bash/zsh với command, subcommand, và flag completion
+- **Release automation** với GitHub Actions CI/CD
+- **Hướng dẫn migration** toàn diện cho user upgrade từ v1.0
+
+Xem [CHANGELOG.md](CHANGELOG.md) để biết chi tiết. Upgrade từ v1.0? Xem [MIGRATION.md](MIGRATION.md).
+
 ## Cài Đặt
 
 Yêu cầu Node.js 20 trở lên.
@@ -15,6 +27,21 @@ npm link
 ```
 
 Có thể dùng cả `ai-engineering` và alias ngắn `aie`.
+
+### Shell Completions (Tùy Chọn)
+
+Bật tab-completion trong bash/zsh:
+
+```bash
+# Bash
+source /path/to/aie-repo/completions/aie.bash
+
+# Zsh
+fpath=(/path/to/aie-repo/completions $fpath)
+autoload -U compinit && compinit
+```
+
+Xem [SHELL_SETUP.md](SHELL_SETUP.md) để setup chi tiết.
 
 ## Workflow Nhanh
 
@@ -95,6 +122,34 @@ aie install --all --target codex -g
 ```
 
 MCP registration được sinh với đường dẫn runtime local tuyệt đối, vì vậy cần chạy install trên từng máy sẽ dùng provider integration.
+
+## Chuẩn Hóa Plugin (v1.1)
+
+Tất cả 7 plugin giờ tuân theo quy ước đặt tên thống nhất:
+
+| Loại Asset | Pattern | Ví Dụ |
+|----------|---------|----------|
+| **Skills** | noun-action | `java-implement`, `react-implement`, `test-qa-review` |
+| **Commands** | verb-noun | `plan-migration`, `plan-deployment`, `implement-backend` |
+| **Workflows** | domain-pipeline | `feature-delivery-pipeline`, `security-audit-pipeline` |
+
+**Thay đổi chính từ v1.0:**
+
+- Gỡ bỏ 7 phase-specific feature-* skills; dùng stack-specific skills thay thế
+  - `feature-implement` → `java-implement`, `python-implement`, `react-implement`
+  - `feature-review` → dùng implementation skills cùng test skills
+  - `feature-plan`, `feature-integrate`, `feature-test`, `feature-fix` → gộp vào commands
+- Đổi tên core skills để thống nhất
+  - `java-analyze` → `java-implement`
+  - `python-backend-engineer` → `python-implement`
+  - `react-code-generate` → `react-implement`
+- Đổi tên commands theo thứ tự verb-noun
+  - `migration-plan` → `plan-migration`
+  - `deployment-plan` → `plan-deployment`
+- Đổi tên workflows để rõ ràng hơn
+  - `fullstack-feature` → `feature-delivery-pipeline`
+
+**Nâng cấp từ v1.0?** Xem [MIGRATION.md](MIGRATION.md) để có ví dụ before/after.
 
 ## Kế Hoạch Nâng Cấp
 
