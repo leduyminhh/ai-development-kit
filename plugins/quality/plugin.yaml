@@ -39,7 +39,9 @@
     "rules": "none",
     "templates": "none",
     "workflows": "none",
-    "schemas": "none"
+    "schemas": [
+      "schemas/quality-verification-context.schema.json"
+    ]
   },
   "install": {
     "defaultScope": "project",

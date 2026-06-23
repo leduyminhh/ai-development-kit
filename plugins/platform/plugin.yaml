@@ -26,7 +26,8 @@
   "assets": {
     "skills": [
       "git-workflow-design",
-      "using-workflow-kit"
+      "using-workflow-kit",
+      "incident-response"
     ],
     "agents": [
       "git-workflow-design",
@@ -41,7 +42,9 @@
     "rules": "none",
     "templates": "none",
     "workflows": "none",
-    "schemas": "none"
+    "schemas": [
+      "schemas/deployment-context.schema.json"
+    ]
   },
   "install": {
     "defaultScope": "project",
@@ -84,6 +87,10 @@
     {
       "id": "platform.using_workflow_kit",
       "path": "skills/using-workflow-kit/SKILL.md"
+    },
+    {
+      "id": "platform.incident_response",
+      "path": "skills/incident-response/SKILL.md"
     }
   ],
   "depends_on": {

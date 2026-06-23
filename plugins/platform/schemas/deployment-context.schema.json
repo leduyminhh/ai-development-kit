@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-engineering.dev/schemas/platform/deployment-context.schema.json",
+  "title": "Deployment Context",
+  "type": "object",
+  "required": [
+    "releaseScope",
+    "targetEnvironment",
+    "deploymentStages",
+    "readinessGates",
+    "rollbackProcedure"
+  ],
+  "properties": {
+    "releaseScope": { "type": "string", "minLength": 1 },
+    "targetEnvironment": { "type": "string", "minLength": 1 },
+    "operationalConstraints": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "deploymentStages": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "readinessGates": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "verificationCommands": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "rollbackProcedure": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "additionalProperties": false
+}

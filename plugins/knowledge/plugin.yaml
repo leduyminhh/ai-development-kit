@@ -26,7 +26,8 @@
     "skills": [
       "doc-write",
       "diagram-generate",
-      "youtube-transcript"
+      "youtube-transcript",
+      "release-notes"
     ],
     "agents": [
       "doc-write",
@@ -39,7 +40,9 @@
     "rules": "none",
     "templates": "none",
     "workflows": "none",
-    "schemas": "none"
+    "schemas": [
+      "schemas/documentation-context.schema.json"
+    ]
   },
   "install": {
     "defaultScope": "project",
@@ -69,6 +72,10 @@
     {
       "id": "knowledge.youtube_transcript",
       "path": "skills/youtube-transcript/SKILL.md"
+    },
+    {
+      "id": "knowledge.release_notes",
+      "path": "skills/release-notes/SKILL.md"
     }
   ],
   "depends_on": {

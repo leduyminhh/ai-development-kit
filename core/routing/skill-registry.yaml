@@ -6,7 +6,7 @@
     "data": ["data-migration"],
     "security": ["security-code-review"],
     "quality": ["naming-rule-validate", "test-automation-validate", "test-qa-review"],
-    "platform": ["git-workflow-design", "using-workflow-kit"],
-    "knowledge": ["doc-write", "youtube-transcript"]
+    "platform": ["git-workflow-design", "using-workflow-kit", "incident-response"],
+    "knowledge": ["doc-write", "youtube-transcript", "release-notes"]
   }
 }

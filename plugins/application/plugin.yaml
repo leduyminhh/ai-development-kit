@@ -69,7 +69,9 @@
     "workflows": [
       "workflows/fullstack-feature.yaml"
     ],
-    "schemas": "none"
+    "schemas": [
+      "schemas/feature-context.schema.json"
+    ]
   },
   "install": {
     "defaultScope": "project",

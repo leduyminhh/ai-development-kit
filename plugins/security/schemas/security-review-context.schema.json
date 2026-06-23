@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-engineering.dev/schemas/security/security-review-context.schema.json",
+  "title": "Security Review Context",
+  "type": "object",
+  "required": [
+    "sourceScope",
+    "securitySummary",
+    "criticalFindings",
+    "remediation"
+  ],
+  "properties": {
+    "sourceScope": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "threatContext": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "securitySummary": { "type": "string", "minLength": 1 },
+    "criticalFindings": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "majorFindings": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "remediation": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "verification": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "additionalProperties": false
+}

@@ -36,7 +36,9 @@
     "workflows": [
       "workflows/db-migration-pipeline.yaml"
     ],
-    "schemas": "none"
+    "schemas": [
+      "schemas/data-migration-context.schema.json"
+    ]
   },
   "install": {
     "defaultScope": "project",

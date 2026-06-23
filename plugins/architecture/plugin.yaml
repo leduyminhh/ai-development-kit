@@ -45,7 +45,9 @@
     "rules": "none",
     "templates": "none",
     "workflows": "none",
-    "schemas": "none"
+    "schemas": [
+      "schemas/architecture-review-context.schema.json"
+    ]
   },
   "install": {
     "defaultScope": "project",

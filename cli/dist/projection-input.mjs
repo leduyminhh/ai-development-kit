@@ -1,8 +1,32 @@
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { findSkillPath } from "./contracts.mjs";
 import { loadPluginCommands } from "./command-contracts.mjs";
 function relativePath(root, absolutePath) {
     return path.relative(root, absolutePath).replaceAll("\\", "/");
+}
+// Codex agent definitions are authored as TOML under adapters/codex/agents.
+// Extract the provider-neutral fields so projectors that render Markdown agents
+// (e.g. Claude) do not need to re-read or re-parse the source.
+function parseAgentDefinition(text) {
+    const field = (key) => {
+        const match = text.match(new RegExp(`^${key}\\s*=\\s*"([^"]*)"`, "m"));
+        return match ? match[1] : "";
+    };
+    const instructions = text.match(/developer_instructions\s*=\s*"""\r?\n?([\s\S]*?)"""/);
+    return {
+        name: field("name"),
+        description: field("description"),
+        instructions: instructions ? instructions[1].trim() : "",
+    };
+}
+async function loadAgentDefinition(root, sourcePath) {
+    try {
+        return parseAgentDefinition(await readFile(path.join(root, sourcePath), "utf8"));
+    }
+    catch {
+        return undefined;
+    }
 }
 function ownersFor(graph, type, id) {
     return [...(graph.ownership?.[type]?.[id] ?? graph.pluginIds)].sort();
@@ -43,6 +67,16 @@ export async function buildProjectionInput({ root, graph, plugins, scope, provid
             owners: ownersFor(graph, "skills", id),
         });
     }
+    const agents = [];
+    for (const id of graph.agents) {
+        const sourcePath = `adapters/codex/agents/${id}.toml`;
+        agents.push({
+            id,
+            sourcePath,
+            owners: ownersFor(graph, "agents", id),
+            definition: await loadAgentDefinition(root, sourcePath),
+        });
+    }
     return {
         schemaVersion: 1,
         scope,
@@ -53,11 +87,7 @@ export async function buildProjectionInput({ root, graph, plugins, scope, provid
         })),
         skills,
         commands,
-        agents: graph.agents.map((id) => ({
-            id,
-            sourcePath: `adapters/codex/agents/${id}.toml`,
-            owners: ownersFor(graph, "agents", id),
-        })),
+        agents,
         hooks: graph.hooks.map((id) => ({
             id,
             owners: ownersFor(graph, "hooks", id),

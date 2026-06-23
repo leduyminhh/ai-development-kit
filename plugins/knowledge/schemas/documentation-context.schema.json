@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-engineering.dev/schemas/knowledge/documentation-context.schema.json",
+  "title": "Documentation Context",
+  "type": "object",
+  "required": [
+    "documentationGoal",
+    "sourceScope",
+    "documentSummary",
+    "technicalContent"
+  ],
+  "properties": {
+    "documentationGoal": { "type": "string", "minLength": 1 },
+    "sourceScope": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "documentSummary": { "type": "string", "minLength": 1 },
+    "technicalContent": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "diagrams": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "verificationNotes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "additionalProperties": false
+}

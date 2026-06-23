@@ -30,7 +30,16 @@ export function buildProjectionInput({ root, graph, plugins, scope, provider, mc
         markdown: string;
         owners: any[];
     }[];
-    agents: any;
+    agents: {
+        id: any;
+        sourcePath: string;
+        owners: any[];
+        definition: {
+            name: any;
+            description: any;
+            instructions: any;
+        } | undefined;
+    }[];
     hooks: any;
     workflows: any;
     mcpServers: any;

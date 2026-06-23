@@ -40,7 +40,9 @@
     "workflows": [
       "workflows/security-audit-pipeline.yaml"
     ],
-    "schemas": "none"
+    "schemas": [
+      "schemas/security-review-context.schema.json"
+    ]
   },
   "install": {
     "defaultScope": "project",

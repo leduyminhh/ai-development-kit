@@ -116,7 +116,7 @@ Khi cập nhật instruction file, hệ thống giữ nguyên nội dung do ngư
 
 ### Chiếu agent
 
-`assets.agents` của plugin chỉ được chiếu thành định nghĩa agent chạy được **cho Codex** (`.codex/agents/<id>.toml`). Antigravity ghi id agent vào plugin manifest nhưng không kèm phần thân agent. Claude và Cursor chỉ nhận instruction được quản lý (`CLAUDE.md` / `AGENTS.md`), không có file agent riêng. Khi viết plugin, hãy xem agent là năng lực ưu tiên Codex.
+`assets.agents` của plugin được chiếu thành định nghĩa agent chạy được cho **Codex** (`.codex/agents/<id>.toml`, copy) và **Claude** (`.claude/agents/<id>.md`, render từ định nghĩa agent chuẩn). Antigravity ghi id agent vào plugin manifest nhưng không kèm phần thân agent. Cursor không có khái niệm subagent nên chỉ nhận instruction được quản lý (`AGENTS.md`).
 
 ## Cấu Trúc Repository
 

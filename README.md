@@ -116,7 +116,7 @@ Managed instruction updates preserve user-owned content outside the AI Engineeri
 
 ### Agent projection
 
-Plugin `assets.agents` are projected into runnable agent definitions **only for Codex** (`.codex/agents/<id>.toml`). Antigravity records the agent ids in its plugin manifest but ships no agent body. Claude and Cursor receive managed instructions (`CLAUDE.md` / `AGENTS.md`) only — they do not get per-agent files. Treat agents as a Codex-first capability when authoring plugins.
+Plugin `assets.agents` are projected into runnable agent definitions for **Codex** (`.codex/agents/<id>.toml`, copied) and **Claude** (`.claude/agents/<id>.md`, rendered from the canonical agent definition). Antigravity records the agent ids in its plugin manifest but ships no agent body. Cursor has no subagent concept and receives managed instructions (`AGENTS.md`) only.
 
 ## Repository Structure
 

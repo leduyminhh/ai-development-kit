@@ -32,6 +32,49 @@ async function seedUserConfig(root, scope, provider) {
   return { pathname, parse: JSON.parse, marker: "userSetting" };
 }
 
+test("claude install renders agent definitions as markdown subagents", async () => {
+  const project = await mkdtemp(
+    path.join(os.tmpdir(), "ai-engineering-claude-agent-"),
+  );
+  const home = await mkdtemp(
+    path.join(os.tmpdir(), "ai-engineering-claude-agent-home-"),
+  );
+  try {
+    const context = resolveInstallContext({
+      scope: "project",
+      projectRoot: project,
+      homeRoot: home,
+    });
+    await installPlugins({
+      root: repoRoot,
+      target: context.targetRoot,
+      context,
+      pluginIds: ["security"],
+      providers: ["claude"],
+    });
+
+    const agentPath = path.join(
+      context.targetRoot,
+      ".claude/agents/security-code-review.md",
+    );
+    const agent = await readFile(agentPath, "utf8");
+    assert.match(agent, /^---\nname: security-code-review\n/);
+    assert.match(agent, /^description: .+/m);
+    assert.ok(agent.split("---")[2].trim().length > 0, "agent body is rendered");
+
+    await removePlugins({
+      root: repoRoot,
+      target: context.targetRoot,
+      context,
+      pluginIds: ["security"],
+    });
+    await assert.rejects(readFile(agentPath, "utf8"));
+  } finally {
+    await rm(project, { recursive: true, force: true });
+    await rm(home, { recursive: true, force: true });
+  }
+});
+
 test("all provider and scope combinations install, diagnose, and uninstall", async (t) => {
   for (const scope of ["project", "global"]) {
     for (const provider of ["antigravity", "codex", "claude", "cursor"]) {

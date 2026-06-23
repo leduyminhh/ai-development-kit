@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-engineering.dev/schemas/data/data-migration-context.schema.json",
+  "title": "Data Migration Context",
+  "type": "object",
+  "required": [
+    "currentDataContract",
+    "targetDataContract",
+    "migrationStages",
+    "rollbackProcedure"
+  ],
+  "properties": {
+    "currentDataContract": { "type": "string", "minLength": 1 },
+    "targetDataContract": { "type": "string", "minLength": 1 },
+    "availabilityConstraints": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "migrationStages": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "rollbackProcedure": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "validationQueries": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "operationalRisks": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "additionalProperties": false
+}
