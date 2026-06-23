@@ -25,6 +25,7 @@ Coordinate a bounded feature from planning through design, implementation, integ
 - feature-integrate
 - feature-review
 - feature-test
+- feature-fix
 
 ## Steps
 

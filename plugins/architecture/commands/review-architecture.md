@@ -21,6 +21,8 @@ Assess architecture quality and return evidence-backed design findings.
 
 - architecture-onion-design
 - code-shared-design
+- code-design-pattern
+- diagram-generate
 
 ## Steps
 

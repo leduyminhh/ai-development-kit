@@ -25,7 +25,7 @@ steps:
     uses: data/data-migration
     depends: [plan-migration]
     input:
-      plan: "$steps.migration-plan.output"
+      plan: "$steps.plan-migration.output"
     onError:
       policy: skip
 

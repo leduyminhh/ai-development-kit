@@ -126,7 +126,7 @@ test("rejects a command outputSchema that is missing or undeclared", async () =>
   await withRepositoryCopy(async (root) => {
     const commandPath = path.join(
       root,
-      "plugins/data/commands/migration-plan.md",
+      "plugins/data/commands/plan-migration.md",
     );
     const original = await readFile(commandPath, "utf8");
     await writeFile(

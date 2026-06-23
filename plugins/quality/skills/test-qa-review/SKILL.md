@@ -1,6 +1,6 @@
 ---
 name: test-qa-review
-description: Use when acting as a QA reviewer agent for any language or stack, especially after architecture or implementation work, to derive test scenarios, inspect regression risk, choose verification commands, validate behavior against requirements, and report concise findings in Vietnamese. Reserve automation-focused test generation and execution for a future test-automation-validate skill.
+description: Use when acting as a QA reviewer agent for any language or stack, especially after architecture or implementation work, to derive test scenarios, inspect regression risk, choose verification commands, validate behavior against requirements, and report concise findings in Vietnamese. Defer automation-focused test generation and execution to the test-automation-validate skill.
 ---
 
 # QA Reviewer

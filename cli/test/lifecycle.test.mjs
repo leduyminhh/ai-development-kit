@@ -114,7 +114,7 @@ test("installs globally with provider-native assets", async () => {
       true,
     );
     assert.equal(await exists(home, ".claude/skills/git-workflow-design/SKILL.md"), true);
-    assert.equal(await exists(home, ".claude/commands/deployment-plan.md"), true);
+    assert.equal(await exists(home, ".claude/commands/plan-deployment.md"), true);
     assert.equal(await exists(home, ".claude/CLAUDE.md"), true);
     assert.equal(await exists(home, ".claude.json"), false);
     assert.equal(await exists(home, ".cursor/mcp.json"), false);

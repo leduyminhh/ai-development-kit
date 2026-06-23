@@ -21,6 +21,7 @@ Derive regression risks and verify the requested behavior.
 
 - test-qa-review
 - test-automation-validate
+- naming-rule-validate
 
 ## Steps
 
