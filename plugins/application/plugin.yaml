@@ -67,7 +67,7 @@
     "rules": "none",
     "templates": "none",
     "workflows": [
-      "workflows/fullstack-feature.yaml"
+      "workflows/feature-delivery-pipeline.yaml"
     ],
     "schemas": [
       "schemas/feature-context.schema.json"

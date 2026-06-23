@@ -1,4 +1,4 @@
-﻿id: fullstack-feature
+﻿id: feature-delivery-pipeline
 description: "Feature delivery: architecture -> backend -> frontend -> integrate -> review -> test"
 version: 1.0.0
 changelog:

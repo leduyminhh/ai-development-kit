@@ -304,7 +304,7 @@ test("workflowInstall copies workflow definitions from plugin", async () => {
     await workflowInit({ target });
     const result = await workflowInstall({ root: repoRoot, target, pluginId: "application" });
     assert.equal(result.status, "pass");
-    assert.ok(result.installed.includes("fullstack-feature"));
+    assert.ok(result.installed.includes("feature-delivery-pipeline"));
   } finally {
     await rm(target, { recursive: true, force: true });
   }
