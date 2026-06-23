@@ -18,13 +18,12 @@
   },
   "dependencies": {
     "required": [
-      "architecture"
-    ],
-    "optional": [
+      "architecture",
       "quality",
       "security",
       "data"
-    ]
+    ],
+    "optional": []
   },
   "assets": {
     "skills": [
@@ -38,11 +37,7 @@
       "feature-test",
       "java-implement",
       "python-implement",
-      "data-migration",
-      "code-shared-design",
-      "react-implement",
-      "test-automation-validate",
-      "test-qa-review"
+      "react-implement"
     ],
     "agents": [
       "java-implement",
@@ -128,21 +123,24 @@
       "path": "skills/feature-test/SKILL.md"
     },
     {
-      "id": "application.java_analyze",
+      "id": "application.java_implement",
       "path": "skills/java-implement/SKILL.md"
     },
     {
-      "id": "application.python_backend_engineer",
+      "id": "application.python_implement",
       "path": "skills/python-implement/SKILL.md"
     },
     {
-      "id": "application.react_code_generate",
+      "id": "application.react_implement",
       "path": "skills/react-implement/SKILL.md"
     }
   ],
   "depends_on": {
     "plugins": [
-      "architecture"
+      "architecture",
+      "quality",
+      "security",
+      "data"
     ]
   },
   "displayName": "Application Engineering",
