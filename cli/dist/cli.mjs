@@ -102,6 +102,15 @@ function formatLifecycleSummary({ scope, providers, pluginsLine }) {
         pluginsLine,
     ].join("\n") + "\n";
 }
+function formatUpgradePreview(updates) {
+    if (!updates || updates.length === 0) {
+        return "All plugins are up to date.\n";
+    }
+    return [
+        "Available updates (dry run, no changes applied):",
+        ...updates.map((update) => `- ${update.id}: ${update.current} -> ${update.latest}`),
+    ].join("\n") + "\n";
+}
 function formatCheck(result) {
     const formatItems = (items) => items.length > 0
         ? items.map((item) => {
@@ -546,6 +555,26 @@ export async function run(args, streams = process) {
             target: context.targetRoot,
             context,
         });
+        // Dry run previews available updates without applying or requiring
+        // confirmation, so it must run before the non-interactive guard below.
+        if (args.includes("--dry-run")) {
+            const all = args[0] === "upgrade" || args.includes("--all");
+            const parsed = all
+                ? { plugins: [] }
+                : parseInstallArgs(args.slice(offset));
+            const result = await updatePlugins({
+                root,
+                target: context.targetRoot,
+                context,
+                pluginIds: parsed.plugins,
+                all,
+                dryRun: true,
+            });
+            streams.stdout.write(args.includes("--json")
+                ? `${JSON.stringify(result)}\n`
+                : formatUpgradePreview(result.updates));
+            return 0;
+        }
         // Non-interactive mode with explicit choices
         if (args.includes("--yes") || args.includes("--all") || args.slice(offset).some(arg => !arg.startsWith("--"))) {
             const all = args[0] === "upgrade" || args.includes("--all");

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, rmdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { checksumText, resolveInside, sha256File, writeJsonAtomic } from "./io.mjs";
 import { createInstallState, INSTALL_STATE_PATH, LOCK_PATH, OWNERSHIP_PATH, } from "./state.mjs";
@@ -17,6 +17,33 @@ async function readBytesIfExists(pathname) {
 async function readTextIfExists(pathname) {
     const bytes = await readBytesIfExists(pathname);
     return bytes === null ? null : bytes.toString("utf8");
+}
+// After removing managed files, their parent directories can be left behind
+// empty (e.g. .agents/skills/<skill>). Prune those empty ancestors so an
+// uninstall leaves no orphaned directories and `doctor` does not flag them.
+// `rmdir` only succeeds on empty directories, so non-empty (user-owned or
+// still-populated) directories are preserved automatically.
+async function pruneEmptyDirectories(target, removedRelativePaths) {
+    const targetRoot = path.resolve(target);
+    const stateRoot = path.join(targetRoot, ".ai-engineering");
+    const candidates = new Set();
+    for (const relativePath of removedRelativePaths) {
+        let dir = path.dirname(resolveInside(target, relativePath));
+        while (dir !== targetRoot && dir !== stateRoot && dir.startsWith(targetRoot)) {
+            candidates.add(dir);
+            dir = path.dirname(dir);
+        }
+    }
+    // Remove deepest directories first so parents become empty before pruning.
+    const ordered = [...candidates].sort((left, right) => right.length - left.length);
+    for (const dir of ordered) {
+        try {
+            await rmdir(dir);
+        }
+        catch {
+            // Directory is not empty or already gone; leave it in place.
+        }
+    }
 }
 export async function planTransaction({ target, desiredFiles, lock, ownership, force = false, validateApplied, }) {
     const previousOwnershipPath = path.join(target, OWNERSHIP_PATH);
@@ -144,6 +171,9 @@ export async function applyTransaction(plan) {
                 await writeFile(action.destination, action.content, "utf8");
             }
         }
+        await pruneEmptyDirectories(plan.target, plan.actions
+            .filter((action) => action.action === "remove-managed")
+            .map((action) => action.relativePath));
         if (plan.validateApplied) {
             await plan.validateApplied();
         }

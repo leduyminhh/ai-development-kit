@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -20,6 +20,15 @@ async function exists(root, relativePath) {
   try {
     await readFile(path.join(root, relativePath));
     return true;
+  } catch (error) {
+    if (error.code === "ENOENT") return false;
+    throw error;
+  }
+}
+
+async function dirExists(root, relativePath) {
+  try {
+    return (await stat(path.join(root, relativePath))).isDirectory();
   } catch (error) {
     if (error.code === "ENOENT") return false;
     throw error;
@@ -564,6 +573,51 @@ test("removes plugins by ownership and preserves user-owned files", async () => 
     await removePlugins({ root: repoRoot, target, all: true });
     assert.equal(await exists(target, ".ai-engineering/install-state.json"), false);
     assert.equal(await exists(target, "user-owned.txt"), true);
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
+test("remove prunes empty managed directories and leaves no orphans", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-remove-prune-"));
+  try {
+    await installPlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["platform"],
+      providers: ["codex"],
+    });
+    assert.equal(
+      await exists(target, ".agents/skills/git-workflow-design/SKILL.md"),
+      true,
+    );
+    assert.equal(await dirExists(target, ".agents/skills"), true);
+
+    await removePlugins({ root: repoRoot, target, all: true });
+
+    assert.equal(
+      await dirExists(target, ".agents/skills/git-workflow-design"),
+      false,
+    );
+    assert.equal(await dirExists(target, ".agents/skills"), false);
+    assert.equal(await dirExists(target, ".agents"), false);
+    assert.equal(await dirExists(target, ".codex/agents"), false);
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
+test("cli upgrade --dry-run previews without requiring confirmation", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-cli-dry-run-"));
+  try {
+    await runCli(["install", "platform", "--target", "codex", "--yes"], {
+      cwd: target,
+    });
+
+    const dryRun = await runCli(["upgrade", "--dry-run"], { cwd: target });
+    assert.equal(dryRun.exitCode, 0);
+    assert.doesNotMatch(dryRun.stdout, /requires confirmation/i);
+    assert.match(dryRun.stdout, /up to date/i);
   } finally {
     await rm(target, { recursive: true, force: true });
   }
