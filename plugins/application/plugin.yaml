@@ -22,7 +22,8 @@
     ],
     "optional": [
       "quality",
-      "security"
+      "security",
+      "data"
     ]
   },
   "assets": {
@@ -38,14 +39,12 @@
       "java-analyze",
       "python-backend-engineer",
       "data-migration",
-      "doc-write",
       "code-shared-design",
       "react-code-generate",
       "test-automation-validate",
       "test-qa-review"
     ],
     "agents": [
-      "doc-write",
       "java-analyze",
       "react-code-generate"
     ],
@@ -97,10 +96,6 @@
     {
       "id": "application.api_contract_design",
       "path": "skills/api-contract-design/SKILL.md"
-    },
-    {
-      "id": "application.doc_write",
-      "path": "skills/doc-write/SKILL.md"
     },
     {
       "id": "application.feature_delivery",

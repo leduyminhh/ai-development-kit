@@ -5,7 +5,7 @@
     "id": "data",
     "name": "Data Engineering",
     "version": "1.0.0",
-    "description": "Schema, indexing, migration, backup, restore, and CDC workflows."
+    "description": "Relational and document database schema and data migration workflows, including compatibility, rollback, and verification."
   },
   "compatibility": {
     "platform": ">=1.0.0 <2.0.0",
@@ -46,7 +46,7 @@
   "id": "data",
   "name": "Data Engineering",
   "version": "1.0.0",
-  "description": "Schema, indexing, migration, backup, restore, and CDC workflows.",
+  "description": "Relational and document database schema and data migration workflows, including compatibility, rollback, and verification.",
   "category": "ai-ide-plugin",
   "triggers": {
     "keywords": [
@@ -55,8 +55,7 @@
       "mongodb",
       "schema",
       "index",
-      "migration",
-      "cdc"
+      "migration"
     ]
   },
   "skills": [

@@ -18,7 +18,9 @@
   },
   "dependencies": {
     "required": [],
-    "optional": []
+    "optional": [
+      "application"
+    ]
   },
   "assets": {
     "skills": [

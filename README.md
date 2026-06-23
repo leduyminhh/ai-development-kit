@@ -114,6 +114,10 @@ All scopes store runtime, ownership, lock, and backup data under `<scope-root>/.
 
 Managed instruction updates preserve user-owned content outside the AI Engineering baseline block and write backups under `.ai-engineering/backups/`.
 
+### Agent projection
+
+Plugin `assets.agents` are projected into runnable agent definitions **only for Codex** (`.codex/agents/<id>.toml`). Antigravity records the agent ids in its plugin manifest but ships no agent body. Claude and Cursor receive managed instructions (`CLAUDE.md` / `AGENTS.md`) only — they do not get per-agent files. Treat agents as a Codex-first capability when authoring plugins.
+
 ## Repository Structure
 
 ```text

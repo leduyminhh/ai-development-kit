@@ -114,6 +114,10 @@ Mọi scope đều lưu runtime, ownership, lock và backup dưới `<scope-root
 
 Khi cập nhật instruction file, hệ thống giữ nguyên nội dung do người dùng sở hữu nằm ngoài AI Engineering baseline block và ghi backup dưới `.ai-engineering/backups/`.
 
+### Chiếu agent
+
+`assets.agents` của plugin chỉ được chiếu thành định nghĩa agent chạy được **cho Codex** (`.codex/agents/<id>.toml`). Antigravity ghi id agent vào plugin manifest nhưng không kèm phần thân agent. Claude và Cursor chỉ nhận instruction được quản lý (`CLAUDE.md` / `AGENTS.md`), không có file agent riêng. Khi viết plugin, hãy xem agent là năng lực ưu tiên Codex.
+
 ## Cấu Trúc Repository
 
 ```text

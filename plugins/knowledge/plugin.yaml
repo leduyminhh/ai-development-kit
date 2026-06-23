@@ -29,6 +29,7 @@
       "youtube-transcript"
     ],
     "agents": [
+      "doc-write",
       "youtube-transcript"
     ],
     "commands": [
@@ -61,6 +62,10 @@
     ]
   },
   "skills": [
+    {
+      "id": "knowledge.doc_write",
+      "path": "skills/doc-write/SKILL.md"
+    },
     {
       "id": "knowledge.youtube_transcript",
       "path": "skills/youtube-transcript/SKILL.md"
