@@ -15,7 +15,7 @@ steps:
       schema: "$context.schema"
     gates: [pass]
 
-  - id: migration-plan
+  - id: plan-migration
     uses: data/data-migration
     depends: [schema-review]
     input:
@@ -23,9 +23,9 @@ steps:
 
   - id: dry-run
     uses: data/data-migration
-    depends: [migration-plan]
+    depends: [plan-migration]
     input:
-      plan: "$steps.migration-plan.output"
+      plan: "$steps.plan-migration.output"
     onError:
       policy: skip
 
