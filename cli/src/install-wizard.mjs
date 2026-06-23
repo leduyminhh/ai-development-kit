@@ -4,6 +4,7 @@ import {
   applyDetectedProviders,
   toInstallIntent,
 } from "./install-request.mjs";
+import { renderInstallPlan } from "./install-plan.mjs";
 
 const COLORS = {
   reset: "\u001b[0m",
@@ -397,14 +398,32 @@ export function createTerminalPrompter({ input, output }) {
       const useChecklist = ["rootPlugins", "providers", "optionalPlugins", "scope"].includes(step);
       
       if (useChecklist) {
-        const stepType = step === "rootPlugins" ? "plugins" 
+        const stepType = step === "rootPlugins" ? "plugins"
           : step === "providers" ? "providers"
           : step === "optionalPlugins" ? "optional"
           : "scope";
         const result = await checklist(step, { ...options, stepType });
         if (result !== null) return result;
       }
-      
+
+      if (step === "confirm") {
+        const confirmChoices = options.choices ?? ["install", "back", "cancel"];
+        output.write(`\n${color("Ready to install", COLORS.bold + COLORS.cyan)}\n\n`);
+        if (options.plan) {
+          output.write(renderInstallPlan(options.plan));
+          output.write("\n");
+        }
+        confirmChoices.forEach((choice, index) => {
+          const label = choice === "install" ? color(choice, COLORS.green) : choice;
+          output.write(`  ${index + 1}. ${label}\n`);
+        });
+        const answer = await readline.question("> ");
+        const parsed = answer.trim().toLowerCase();
+        if (parsed === "1" || parsed === "install") return "install";
+        if (parsed === "2" || parsed === "back" || parsed === "b") return "back";
+        return "cancel";
+      }
+
       const choices = options.choices ?? [];
       output.write(`\n${step}:\n`);
       choices.forEach((choice, index) => {

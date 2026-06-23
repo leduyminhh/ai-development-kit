@@ -559,3 +559,37 @@ test("terminal prompter falls back to numbered readline selections without a TTY
   prompter.close();
   assert.match(output.text, /Quality workflow/);
 });
+
+test("terminal prompter confirm renders the plan and accepts numbered choices", async () => {
+  const input = new PassThrough();
+  const output = new MemoryOutput();
+  const prompter = createTerminalPrompter({ input, output });
+
+  const plan = {
+    providers: ["codex"],
+    scope: "project",
+    targetRoot: "/tmp/project",
+    rootPlugins: ["platform"],
+    requiredPlugins: [],
+    optionalPlugins: [],
+    managedFiles: [1, 2, 3],
+    managedMerges: [],
+  };
+
+  const installPromise = prompter.ask("confirm", {
+    choices: ["install", "back", "cancel"],
+    plan,
+  });
+  setTimeout(() => input.write("1\n"), 0);
+  assert.equal(await installPromise, "install");
+  assert.match(output.text, /Ready to install/);
+  assert.match(output.text, /Root plugins: platform/);
+
+  const cancelPromise = prompter.ask("confirm", {
+    choices: ["install", "back", "cancel"],
+  });
+  setTimeout(() => input.write("3\n"), 0);
+  assert.equal(await cancelPromise, "cancel");
+
+  prompter.close();
+});
