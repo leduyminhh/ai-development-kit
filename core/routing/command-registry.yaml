@@ -74,10 +74,10 @@
       "file": "commands/review-architecture.md"
     },
     {
-      "id": "data.migration_plan",
+      "id": "data.plan_migration",
       "plugin": "data",
-      "slug": "migration-plan",
-      "file": "commands/migration-plan.md"
+      "slug": "plan-migration",
+      "file": "commands/plan-migration.md"
     },
     {
       "id": "knowledge.write_release_notes",
@@ -92,10 +92,10 @@
       "file": "commands/write-technical-doc.md"
     },
     {
-      "id": "platform.deployment_plan",
+      "id": "platform.plan_deployment",
       "plugin": "platform",
-      "slug": "deployment-plan",
-      "file": "commands/deployment-plan.md"
+      "slug": "plan-deployment",
+      "file": "commands/plan-deployment.md"
     },
     {
       "id": "platform.respond_incident",

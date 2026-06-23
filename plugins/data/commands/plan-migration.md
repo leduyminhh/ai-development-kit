@@ -1,6 +1,6 @@
 ---
-id: data.migration_plan
-slug: migration-plan
+id: data.plan_migration
+slug: plan-migration
 description: Generate a safe data migration plan.
 version: 1.0.0
 outputSchema: schemas/data-migration-context.schema.json

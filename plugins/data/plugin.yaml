@@ -28,7 +28,7 @@
     ],
     "agents": [],
     "commands": [
-      "commands/migration-plan.md"
+      "commands/plan-migration.md"
     ],
     "hooks": [],
     "rules": "none",
