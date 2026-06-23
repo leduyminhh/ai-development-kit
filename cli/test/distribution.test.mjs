@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -43,23 +43,16 @@ test("prepares equivalent npm and GitHub release plugin artifacts", async () => 
   }
 });
 
-test("documents AI Engineering lifecycle commands in both readmes", async () => {
-  const expected = [
+test("documents AI Engineering wizard commands in both readmes", async () => {
+  const sharedExpected = [
     "aie init",
+    "aie install",
     "aie doctor",
-    "aie available",
-    "aie installed",
-    "aie install --all --target codex",
-    "aie install --all --target claude",
-    "aie install --all --target cursor",
-    "aie install --all --target codex,claude,cursor",
+    "Install all plugins",
+    ".ai-engineering/install/session.json",
+    "aie install application --target codex --yes",
+    "aie install --all --target codex --yes",
     "aie install --all --target codex -g",
-    "aie update application",
-    "aie update --all",
-    "aie remove security",
-    "aie remove --all",
-    "aie install application --target codex",
-    "aie install security quality --target cursor",
     ".agents/skills",
     ".codex/agents",
     ".codex/workflows/commands.md",
@@ -72,10 +65,14 @@ test("documents AI Engineering lifecycle commands in both readmes", async () => 
     "npm install",
     "npm run build",
   ];
+  const languageExpected = {
+    "README.md": ["Interactive CLI Flow"],
+    "README_VI.md": ["Flow CLI Tương Tác"],
+  };
   for (const file of ["README.md", "README_VI.md"]) {
     const content = await readFile(path.join(repoRoot, file), "utf8");
-    for (const text of expected) {
-      assert.match(content, new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    for (const text of [...sharedExpected, ...languageExpected[file]]) {
+      assert.ok(content.includes(text), file + " is missing " + text);
     }
   }
 });
@@ -91,9 +88,9 @@ test("keeps Vietnamese documentation readable as UTF-8", async () => {
     "core/standards/output-format-standard.md",
     "core/standards/skill-authoring-standard.md",
   ];
-  const mojibake = /Ã|Ä|á»|áº|Â|Æ|Å/;
+  const mojibake = /Ãƒ|Ã„|Ã¡Â»|Ã¡Âº|Ã‚|Ã†|Ã…/;
   const vietnameseDiacritic =
-    /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i;
+    /[Ã Ã¡áº¡áº£Ã£Ã¢áº§áº¥áº­áº©áº«Äƒáº±áº¯áº·áº³áºµÃ¨Ã©áº¹áº»áº½Ãªá»áº¿á»‡á»ƒá»…Ã¬Ã­á»‹á»‰Ä©Ã²Ã³á»á»ÃµÃ´á»“á»‘á»™á»•á»—Æ¡á»á»›á»£á»Ÿá»¡Ã¹Ãºá»¥á»§Å©Æ°á»«á»©á»±á»­á»¯á»³Ã½á»µá»·á»¹Ä‘]/i;
 
   for (const file of files) {
     const content = await readFile(path.join(repoRoot, file), "utf8");
@@ -120,7 +117,7 @@ test("documents concise install notes and canonical command contracts", async ()
       assert.ok(content.includes(text), `${file} is missing ${text}`);
     }
     assert.equal(
-      /## Hybrid Install|## Cài Đặt Kết Hợp|## Hợp Đồng Cài Đặt Kết Hợp/.test(content),
+      /## Hybrid Install|## CÃ i Äáº·t Káº¿t Há»£p|## Há»£p Äá»“ng CÃ i Äáº·t Káº¿t Há»£p/.test(content),
       false,
       `${file} should not have a standalone hybrid install section`,
     );
@@ -151,3 +148,4 @@ test("exposes package-name and canonical CLI aliases", async () => {
   assert.equal(packageLock.packages[""].bin.aie, "cli/dist/index.js");
   assert.equal(packageLock.packages.cli.bin.aie, "dist/index.js");
 });
+

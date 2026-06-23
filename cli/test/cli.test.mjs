@@ -1,17 +1,28 @@
 ﻿import assert from "node:assert/strict";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { runCli, repoRoot } from "./helpers.mjs";
+import { runCli } from "./helpers.mjs";
 
-test("displays help text with available commands", async () => {
+test("displays wizard-first install help text", async () => {
   const result = await runCli(["--help"]);
   assert.equal(result.exitCode, 0);
-  assert.match(result.stdout, /aie install --all --target codex,claude,cursor,antigravity/);
-  assert.match(result.stdout, /aie install <plugin\.\.\.> --target <provider\[,provider\.\.\.\]>/);
-  assert.match(result.stdout, /aie install --all --target <provider\[,provider\.\.\.\]>/);
+  assert.match(result.stdout, /aie install \[plugin\.\.\.\] \[options\]/);
+  assert.match(result.stdout, /Step 1: Install\s+aie install/);
+  assert.match(result.stdout, /Detect providers\/plugins, including antigravity/);
+  assert.match(result.stdout, /Space toggles selections/);
+  assert.match(result.stdout, /Enter continues/);
+  assert.match(result.stdout, /Install all plugins toggles every plugin on/);
+  assert.match(result.stdout, /\.ai-engineering\/install\/session\.json/);
+  assert.match(result.stdout, /aie install application --target codex --yes/);
+  assert.match(result.stdout, /aie install --all --target antigravity --yes/);
+  assert.match(result.stdout, /Step 2: Check/);
+  assert.match(result.stdout, /aie check/);
+  assert.match(result.stdout, /Step 3: Uninstall/);
+  assert.match(result.stdout, /aie remove|uninstall/);
+  assert.match(result.stdout, /antigravity/);
 });
 
 test("prints scope-aware installed output", async () => {

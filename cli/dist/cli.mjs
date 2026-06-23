@@ -16,6 +16,22 @@ import { finalizeNonInteractiveDraft, parseInstallRequest, } from "./install-req
 import { detectProviders } from "./provider-detection.mjs";
 import { buildInstallPlan, renderInstallPlan } from "./install-plan.mjs";
 import { createTerminalPrompter, runInstallWizard, } from "./install-wizard.mjs";
+import { createUpgradeTerminalPrompter, runUpgradeWizard, } from "./upgrade-wizard.mjs";
+import { createUninstallTerminalPrompter, runUninstallWizard, } from "./uninstall-wizard.mjs";
+const COLORS = {
+    reset: "\u001b[0m",
+    dim: "\u001b[2m",
+    cyan: "\u001b[36m",
+    green: "\u001b[32m",
+    yellow: "\u001b[33m",
+    red: "\u001b[31m",
+    bold: "\u001b[1m",
+};
+function color(value, code) {
+    return `${code}${value}${COLORS.reset}`;
+}
+import { detectInstallRecommendations } from "./install-detection.mjs";
+import { cancelInstallSession, completeInstallSession, readInstallSession, writeInstallSession, } from "./install-session.mjs";
 export const VERSION = "1.0.0";
 const REPOSITORY_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const HELP = `AI Engineering Platform
@@ -24,68 +40,71 @@ Alias:
   aie = ai-engineering
 
 Usage:
+  aie install [plugin...] [options]
   aie <command> [options]
 
 Quick start:
   aie init
-  aie install --all --target codex,claude,cursor,antigravity
+  aie install
   aie check
 
-Plugin lifecycle:
-  aie available
-  aie install <plugin...> --target <provider[,provider...]> [--scope <project|global>]
-  aie install --all --target <provider[,provider...]> [--scope <project|global>]
-  aie update <plugin...> [--dry-run]
-  aie update --all
-  aie remove <plugin...>
-  aie remove --all
+Interactive install wizard:
+  Step 1: Install                 aie install
+    Detect providers/plugins, including antigravity, and open wizard
+    Space toggles selections, Enter continues, Esc/q cancels, b goes back
+    Install all plugins toggles every plugin on; toggle again clears all
+    Interrupted sessions can resume from .ai-engineering/install/session.json
 
-Status and discovery:
-  aie installed [--scope <project|global>|-g]
-  aie check [--scope <project|global>|-g]
-  aie doctor [--scope <project|global>|-g]
-  aie list [--available]
+  Step 2: Check                   aie check
+    Verify installed plugins, skills, commands, agents, workflows, and provider files
 
-Maintainer commands:
-  aie validate
-  aie build --all
-  aie artifact verify --all
-  aie registry generate
-  aie migrate --dry-run
-  aie migrate --delete-legacy
-  aie generate-adapter <plugin...> --target <provider[,provider...]>
+  Step 3: Uninstall               aie remove
+    Remove managed plugin assets with interactive wizard
+    Space toggles selections, Enter continues, remove all uninstalls everything
 
-Legacy aliases: plugin, uninstall, upgrade
+  Step 4: Upgrade                 aie upgrade
+    Check for outdated plugins and open wizard to select updates
+    Space toggles selections, Enter continues, upgrade all updates everything
 
-Options:
-  --target <providers>      codex, claude, cursor, antigravity
+Install examples:
+  aie install application --target codex --yes
+  aie install --all --target antigravity --yes
+  aie install --all --target codex -g
+
+Remove examples:
+  aie remove                             Interactive wizard
+  aie remove --all --yes                 Remove all plugins without prompt
+  aie remove platform security --yes     Remove specific plugins
+
+Upgrade examples:
+  aie upgrade                            Interactive wizard
+  aie upgrade --all --yes                Upgrade all plugins without prompt
+  aie update platform security --yes     Upgrade specific plugins
+  aie upgrade --dry-run                  Preview available updates
+
+Install options:
+  --target <providers>      antigravity, codex, claude, cursor
   --provider <providers>    Alias for --target
-  --scope <project|global>  Installation scope
+  --scope <project|global>  Installation scope (default: project)
   -g, --global              Install to global AI IDE settings
   --all                     Select every installed or available plugin
   --with <plugins>          Select optional dependencies
-  --yes                     Skip confirmation with explicit plugin/provider input
+  --yes                     Skip wizard confirmation with explicit choices
   --force                   Replace managed drift or unmanaged conflicts
-  --dry-run                 Plan update or migration without writing changes
-  --delete-legacy           Delete legacy paths during migration after backup
   --json                    Print machine-readable output
 
-Default scope: project
+Discovery and status:
+  aie available
+  aie installed [--scope <project|global>|-g]
+  aie check [--scope <project|global>|-g]
+  aie doctor [--scope <project|global>|-g]
 
-Workflow:
-  aie workflow init                        Create workflow directory structure
-  aie workflow list                        List workflow definitions
-  aie workflow validate                    Validate workflow definitions
-  aie workflow build <id>                  Build workflow step instructions
-  aie workflow run <id>                    Start workflow execution
-  aie workflow step-next <id> [run]        Get next step to execute
-  aie workflow step-complete <id> <run> <step>  Mark a step as completed
-  aie workflow step-fail <id> <run> <step>     Mark a step as failed
-  aie workflow status <id> [run]           Show workflow run status
-  aie workflow history <id>                Show workflow run history
-  aie workflow logs <id> <run>             Show workflow run logs
-  aie workflow clean                       Remove workflow run data
-  aie workflow install <plugin>            Install workflow definitions from plugin
+Other command groups:
+  aie workflow <subcommand>            Workflow definitions and runs
+  aie update|remove <plugin...>        Plugin lifecycle maintenance
+  aie validate|build|migrate           Maintainer commands
+
+Legacy aliases: plugin, uninstall, upgrade
 `;
 function formatAvailable(result) {
     const lines = ["Installable plugins:"];
@@ -322,6 +341,15 @@ export async function run(args, streams = process) {
             });
         }
         else {
+            const projectRoot = process.cwd();
+            const detectedProvidersForWizard = await detectProviders({ projectRoot });
+            const detectedRecommendations = await detectInstallRecommendations({ projectRoot });
+            const sessionContext = resolveInstallContext({
+                scope: draft.scope.value,
+                projectRoot,
+                homeRoot: os.homedir(),
+            });
+            const existingSession = await readInstallSession({ target: sessionContext.targetRoot });
             const catalog = await listAvailable({ root });
             const prompter = createTerminalPrompter({
                 input: streams.stdin,
@@ -331,9 +359,18 @@ export async function run(args, streams = process) {
                 const wizard = await runInstallWizard({
                     draft,
                     availablePlugins: catalog.plugins.available,
-                    detectedProviders: await detectProviders({
-                        projectRoot: process.cwd(),
+                    detectedPlugins: detectedRecommendations.plugins,
+                    existingSession,
+                    onSession: async (sessionDraft, currentStep, planHash) => writeInstallSession({
+                        target: sessionContext.targetRoot,
+                        currentStep,
+                        draft: sessionDraft,
+                        detectedProviders: detectedProvidersForWizard,
+                        detectedPlugins: detectedRecommendations.plugins,
+                        planHash: planHash || "",
                     }),
+                    availablePlugins: catalog.plugins.available,
+                    detectedProviders: detectedProvidersForWizard,
                     preparePlan: async (candidate) => {
                         const candidateContext = resolveInstallContext({
                             scope: candidate.scope,
@@ -359,6 +396,7 @@ export async function run(args, streams = process) {
                 });
                 if (wizard.action === "cancel") {
                     streams.stdout.write("Installation cancelled.\n");
+                    await cancelInstallSession({ target: sessionContext.targetRoot });
                     return 0;
                 }
                 intent = wizard.intent;
@@ -397,6 +435,7 @@ export async function run(args, streams = process) {
             context,
             force: intent.force,
         });
+        await completeInstallSession({ target: context.targetRoot });
         streams.stdout.write(args.includes("--json")
             ? `${JSON.stringify(result)}\n`
             : `Installed ${result.plugins.join(", ")} to ${context.scope} scope.\n`);
@@ -406,27 +445,75 @@ export async function run(args, streams = process) {
         args[0] === "remove" ||
         args[0] === "uninstall") {
         const root = REPOSITORY_ROOT;
-        const all = args[0] === "remove" && args.includes("--all");
         const offset = args[0] === "plugin" ? 2 : 1;
-        const parsed = all
-            ? { plugins: [], scope: resolveContext(args).scope }
-            : parseInstallArgs(args.slice(offset));
-        const context = resolveInstallContext({
-            scope: parsed.scope,
-            projectRoot: process.cwd(),
-            homeRoot: os.homedir(),
+        const context = resolveContext(args);
+        // Non-interactive mode with explicit choices
+        if (args.includes("--yes") || args.includes("--all") || args.slice(offset).some(arg => !arg.startsWith("--"))) {
+            const all = args[0] === "remove" && args.includes("--all");
+            const parsed = all
+                ? { plugins: [], scope: context.scope }
+                : parseInstallArgs(args.slice(offset));
+            const result = await removePlugins({
+                root,
+                target: context.targetRoot,
+                context,
+                pluginIds: parsed.plugins,
+                all,
+                force: args.includes("--force"),
+            });
+            streams.stdout.write(args.includes("--json")
+                ? `${JSON.stringify(result)}\n`
+                : `Remaining plugins: ${result.plugins.join(", ")}.\n`);
+            return 0;
+        }
+        // Interactive wizard mode
+        const interactive = Boolean(streams.stdin?.isTTY && streams.stdout?.isTTY);
+        if (!interactive) {
+            throw new PlatformError("Remove requires confirmation in non-interactive mode. Pass --yes with plugin names, --all, or run in an interactive terminal.", {
+                code: "AI_ENGINEERING_MISSING_REMOVE_CHOICES",
+                exitCode: 2,
+            });
+        }
+        const installed = await listInstalled({ target: context.targetRoot, context });
+        const prompter = createUninstallTerminalPrompter({
+            input: streams.stdin,
+            output: streams.stdout,
         });
-        const result = await removePlugins({
-            root,
-            target: context.targetRoot,
-            context,
-            pluginIds: parsed.plugins,
-            all,
-            force: args.includes("--force"),
-        });
-        streams.stdout.write(args.includes("--json")
-            ? `${JSON.stringify(result)}\n`
-            : `Remaining plugins: ${result.plugins.join(", ")}.\n`);
+        try {
+            const wizard = await runUninstallWizard({
+                installed,
+                prompter,
+                onConfirm: async (selectedPlugins) => {
+                    streams.stdout.write(color("\nPreparing removal...\n", COLORS.dim));
+                },
+            });
+            if (wizard.action === "cancel") {
+                streams.stdout.write("Removal cancelled.\n");
+                return 0;
+            }
+            if (wizard.action === "noop") {
+                const message = wizard.reason === "no-plugins"
+                    ? "No plugins installed.\n"
+                    : "No plugins selected for removal.\n";
+                streams.stdout.write(message);
+                return 0;
+            }
+            // Execute the removal
+            const result = await removePlugins({
+                root,
+                target: context.targetRoot,
+                context,
+                pluginIds: wizard.pluginIds,
+                all: wizard.all,
+                force: args.includes("--force"),
+            });
+            streams.stdout.write(args.includes("--json")
+                ? `${JSON.stringify(result)}\n`
+                : `Removed ${wizard.pluginIds.length} plugin(s). Remaining: ${result.plugins.join(", ") || "none"}.\n`);
+        }
+        finally {
+            prompter.close();
+        }
         return 0;
     }
     if ((args[0] === "plugin" && args[1] === "list") ||
@@ -461,28 +548,82 @@ export async function run(args, streams = process) {
         args[0] === "update" ||
         args[0] === "upgrade") {
         const root = REPOSITORY_ROOT;
-        const all = args[0] === "upgrade" || args.includes("--all");
         const offset = args[0] === "plugin" ? 2 : 1;
-        const parsed = all
-            ? { plugins: [], scope: resolveContext(args).scope }
-            : parseInstallArgs(args.slice(offset));
-        const context = resolveInstallContext({
-            scope: parsed.scope,
-            projectRoot: process.cwd(),
-            homeRoot: os.homedir(),
-        });
-        const result = await updatePlugins({
+        const context = resolveContext(args);
+        // Check for outdated plugins first
+        const outdated = await findOutdated({
             root,
             target: context.targetRoot,
             context,
-            pluginIds: parsed.plugins,
-            all,
-            dryRun: args.includes("--dry-run"),
-            force: args.includes("--force"),
         });
-        streams.stdout.write(args.includes("--json")
-            ? `${JSON.stringify(result)}\n`
-            : `${result.changed ? "Updated" : "No updates"}.\n`);
+        // Non-interactive mode with explicit choices
+        if (args.includes("--yes") || args.includes("--all") || args.slice(offset).some(arg => !arg.startsWith("--"))) {
+            const all = args[0] === "upgrade" || args.includes("--all");
+            const parsed = all
+                ? { plugins: [], scope: context.scope }
+                : parseInstallArgs(args.slice(offset));
+            const result = await updatePlugins({
+                root,
+                target: context.targetRoot,
+                context,
+                pluginIds: parsed.plugins,
+                all,
+                dryRun: args.includes("--dry-run"),
+                force: args.includes("--force"),
+            });
+            streams.stdout.write(args.includes("--json")
+                ? `${JSON.stringify(result)}\n`
+                : `${result.changed ? "Updated" : "No updates"}.\n`);
+            return 0;
+        }
+        // Interactive wizard mode
+        const interactive = Boolean(streams.stdin?.isTTY && streams.stdout?.isTTY);
+        if (!interactive) {
+            throw new PlatformError("Upgrade requires confirmation in non-interactive mode. Pass --yes with plugin names, --all, or run in an interactive terminal.", {
+                code: "AI_ENGINEERING_MISSING_UPGRADE_CHOICES",
+                exitCode: 2,
+            });
+        }
+        const prompter = createUpgradeTerminalPrompter({
+            input: streams.stdin,
+            output: streams.stdout,
+        });
+        try {
+            const wizard = await runUpgradeWizard({
+                outdated,
+                prompter,
+                onConfirm: async (selectedPlugins) => {
+                    streams.stdout.write(color("\nPreparing upgrade...\n", COLORS.dim));
+                },
+            });
+            if (wizard.action === "cancel") {
+                streams.stdout.write("Upgrade cancelled.\n");
+                return 0;
+            }
+            if (wizard.action === "noop") {
+                const message = wizard.reason === "no-updates"
+                    ? "All plugins are up to date.\n"
+                    : "No plugins selected for upgrade.\n";
+                streams.stdout.write(message);
+                return 0;
+            }
+            // Execute the upgrade
+            const result = await updatePlugins({
+                root,
+                target: context.targetRoot,
+                context,
+                pluginIds: wizard.pluginIds,
+                all: wizard.all,
+                dryRun: args.includes("--dry-run"),
+                force: args.includes("--force"),
+            });
+            streams.stdout.write(args.includes("--json")
+                ? `${JSON.stringify(result)}\n`
+                : `${result.changed ? `Upgraded ${wizard.pluginIds.length} plugin(s) successfully.\n` : "No updates applied.\n"}`);
+        }
+        finally {
+            prompter.close();
+        }
         return 0;
     }
     if (args[0] === "workflow") {
