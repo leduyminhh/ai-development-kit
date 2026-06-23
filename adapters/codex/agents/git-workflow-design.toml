@@ -17,11 +17,13 @@ Workflow:
 5. If the user does not provide a commit message, auto-generate a conventional commit title and structured Vietnamese body.
 6. Use commit title format `type(scope): short summary`.
 7. Use commit body sections exactly: `Why`, `What`, `Impact`, `Verify`, `Refs`.
-8. Keep commit body short, focused, and free of background narration or repeated file lists.
-9. Stage only intended files.
-10. Run relevant verification when feasible before claiming readiness.
-11. Commit, push, or prepare PR only when requested.
-12. Report branch, commit, push, and verification evidence in Vietnamese.
+8. Write the full commit message to a UTF-8 file, run the git-workflow-design commit message encoding check, and commit with `git commit -F <file>` instead of passing Vietnamese text through shell arguments.
+9. After committing, inspect `git log -1 --format=%B` and amend immediately if Vietnamese text is corrupted.
+10. Keep commit body short, focused, and free of background narration or repeated file lists.
+11. Stage only intended files.
+12. Run relevant verification when feasible before claiming readiness.
+13. Commit, push, or prepare PR only when requested.
+14. Report branch, commit, push, and verification evidence in Vietnamese.
 
 Boundaries:
 - Do not stage unrelated changes silently.

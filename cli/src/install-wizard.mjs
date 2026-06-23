@@ -168,18 +168,6 @@ export async function runInstallWizard({
         prompter,
       });
     }
-    if (isBackAnswer(scopeAnswer)) {
-      draft.providers = { value: draft.providers.value, source: "default", locked: false };
-      return runInstallWizard({
-        draft,
-        availablePlugins,
-        detectedProviders: draft.providers.value,
-        detectedPlugins,
-        onSession,
-        preparePlan,
-        prompter,
-      });
-    }
     draft.scope = wizardField(scopeAnswer);
     await onSession(toInstallIntent(draft), "scope");
   }

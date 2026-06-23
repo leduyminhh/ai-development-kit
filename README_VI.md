@@ -1,6 +1,6 @@
 # AI Engineering Platform
 
-Nền tảng plugin AI IDE cho Codex, Claude Code, Cursor và Google Antigravity. Nội dung capability chuẩn nằm trong `plugins/`; CLI project nội dung đó thành file native theo từng provider, workflow definition, instruction được quản lý và MCP runtime registration tùy chọn.
+Nền tảng plugin AI IDE cho Codex, Claude Code, Cursor và Google Antigravity. Nội dung capability chuẩn nằm trong `plugins/`; CLI chiếu nội dung đó thành file native theo từng provider, workflow definition, instruction được quản lý và MCP runtime registration tùy chọn.
 
 ## Cài Đặt
 
@@ -24,7 +24,11 @@ cd /path/to/project
 aie init
 aie install
 aie check
+aie remove
+aie upgrade
 ```
+
+Dùng `aie -h` hoặc `aie --help` để in cùng hướng dẫn CLI ưu tiên wizard ngay trong terminal.
 
 ## Flow CLI Tương Tác
 
@@ -61,12 +65,28 @@ aie doctor
 
 ### Step 3: Uninstall
 
-Chạy `aie remove` để gỡ asset plugin do hệ thống quản lý nhưng vẫn giữ file người dùng sở hữu.
+Chạy `aie remove` trong terminal tương tác để mở uninstall wizard. Wizard liệt kê plugin đã cài, mặc định không chọn mục nào để an toàn, hỗ trợ quay lại/thoát, và yêu cầu xác nhận cuối trước khi gỡ asset do hệ thống quản lý nhưng vẫn giữ file người dùng sở hữu.
 
 ```bash
+aie remove
 aie remove security
-aie remove --all
+aie remove --all --yes
 ```
+
+Với CI hoặc script không tương tác, truyền tên plugin rõ ràng hoặc dùng `--all --yes`.
+
+### Step 4: Upgrade
+
+Chạy `aie upgrade` trong terminal tương tác để mở upgrade wizard. Wizard kiểm tra plugin lỗi thời, chọn sẵn các bản cập nhật khả dụng, hỗ trợ quay lại/thoát, và yêu cầu xác nhận trước khi áp dụng thay đổi.
+
+```bash
+aie upgrade
+aie upgrade --all --yes
+aie update platform security --yes
+aie upgrade --dry-run
+```
+
+Dùng alias lifecycle `aie update` khi muốn nâng cấp trực tiếp một số plugin cụ thể.
 
 Scope mặc định là project. Dùng `-g` hoặc `--scope global` để cài vào vị trí global của người dùng:
 
@@ -78,7 +98,7 @@ MCP registration được sinh với đường dẫn runtime local tuyệt đố
 
 ## Kế Hoạch Nâng Cấp
 
-- v1 hiện có wizard cài đặt tương tác, tự phát hiện provider/plugin, lựa chọn cài tất cả, preview plan, và state cài đặt có thể resume.
+- v1 hiện có wizard cài đặt, gỡ cài đặt và nâng cấp tương tác, tự phát hiện provider/plugin, lựa chọn cài tất cả, preview plan, state cài đặt có thể resume, và coverage wizard cho các luồng CLI chính.
 - Nâng cấp tiếp theo: màn hình wizard sinh từ template, prompt resume rõ ràng, phát hiện ngữ cảnh project sâu hơn, và trang help riêng cho nhóm lệnh workflow/maintainer.
 
 ## Đường Dẫn Provider

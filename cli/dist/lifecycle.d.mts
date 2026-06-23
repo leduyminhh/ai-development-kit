@@ -216,5 +216,5 @@ export function removePlugins({ root, target, context, pluginIds, all, force, }:
     status: string;
     scope: any;
     plugins: any[];
-    providers: any[];
+    providers: any;
 }>;

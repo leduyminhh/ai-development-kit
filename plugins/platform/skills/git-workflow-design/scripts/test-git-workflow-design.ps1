@@ -30,6 +30,7 @@ $configEnvRules = Join-Path $SkillRoot 'resources/commit-convention/config-env-r
 $aiRules = Join-Path $SkillRoot 'resources/commit-convention/ai-generation-rules.md'
 $examples = Join-Path $SkillRoot 'resources/commit-convention/examples.md'
 $outputTemplate = Join-Path $SkillRoot 'resources/output-template-vi.md'
+$encodingCheck = Join-Path $SkillRoot 'scripts/test-commit-message-encoding.ps1'
 
 Assert-FileContainsRegex -Path $skill -Pattern 'UTF-8 with diacritics' 'SKILL.md should require UTF-8 Vietnamese with diacritics.'
 Assert-FileContainsRegex -Path $skill -Pattern 'resources/output-template-vi\.md' 'SKILL.md should link to the Vietnamese output template resource.'
@@ -42,8 +43,13 @@ Assert-FileContainsRegex -Path $convention -Pattern 'Do not silently remove Viet
 Assert-FileContainsRegex -Path $bodyRules -Pattern 'Commit Body Rules' 'Commit convention body rules should be split into a focused resource.'
 Assert-FileContainsRegex -Path $configEnvRules -Pattern 'Mandatory Environment Disclosure' 'Commit convention config/env rules should be split into a focused resource.'
 Assert-FileContainsRegex -Path $aiRules -Pattern 'AI Generation And Encoding Rules' 'Commit convention AI generation rules should be split into a focused resource.'
+Assert-FileContainsRegex -Path $aiRules -Pattern 'git commit -F <file>' 'Commit convention AI rules should require UTF-8 file based commits.'
+Assert-FileContainsRegex -Path $aiRules -Pattern 'test-commit-message-encoding\.ps1 -MessageFile <file>' 'Commit convention AI rules should require commit message encoding validation.'
 Assert-FileContainsRegex -Path $examples -Pattern 'Th\u00eam c\u1ea5u h\u00ecnh reconnect cho lu\u1ed3ng RTSP qua FFmpeg\.' 'Commit convention examples should be stored as readable UTF-8 Vietnamese.'
 Assert-FileContainsRegex -Path $examples -Pattern 'Script parse t\u00ean file c\u0169 c\u00f3 th\u1ec3 c\u1ea7n c\u1eadp nh\u1eadt l\u1ea1i pattern\.' 'Commit convention examples should keep Vietnamese diacritics in impact notes.'
+Assert-FileContainsRegex -Path $skill -Pattern 'test-commit-message-encoding\.ps1 -MessageFile <file>' 'SKILL.md should require commit message encoding validation before commit.'
+Assert-FileContainsRegex -Path $skill -Pattern 'git commit -F <file>' 'SKILL.md should require UTF-8 file based commits.'
+Assert-FileContainsRegex -Path $encodingCheck -Pattern 'Generated Vietnamese commit body contains question marks' 'Encoding check script should reject suspicious question marks in generated Vietnamese commit bodies.'
 
 $commitConventionFiles = @($convention, $bodyRules, $configEnvRules, $aiRules, $examples, $outputTemplate)
 
@@ -62,6 +68,40 @@ foreach ($snippet in $badSnippets) {
     foreach ($commitConventionFile in $commitConventionFiles) {
         Assert-FileNotContainsRegex -Path $commitConventionFile -Pattern $snippet "Commit convention resources should not contain mojibake or stripped Vietnamese marker: $snippet"
     }
+}
+
+$tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString('n'))
+New-Item -ItemType Directory -Path $tempDir | Out-Null
+try {
+    $goodMessage = Join-Path $tempDir 'good-commit-message.txt'
+    $badMessage = Join-Path $tempDir 'bad-commit-message.txt'
+    @'
+feat(cli): expand interactive plugin lifecycle wizards
+
+What changed:
+- Mở rộng CLI wizard cho luồng install.
+
+Why changed:
+- Giúp người dùng kiểm chứng thay đổi.
+'@ | Set-Content -LiteralPath $goodMessage -Encoding utf8
+    @'
+feat(cli): expand interactive plugin lifecycle wizards
+
+What changed:
+- M? r?ng CLI wizard cho lu?ng install.
+
+Why changed:
+- Gi?p ng??i d?ng ki?m ch?ng thay ??i.
+'@ | Set-Content -LiteralPath $badMessage -Encoding utf8
+
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $encodingCheck -MessageFile $goodMessage | Out-Null
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $encodingCheck -MessageFile $badMessage *> $null
+    $ErrorActionPreference = $previousErrorActionPreference
+    Assert-True ($LASTEXITCODE -ne 0) 'Encoding check should reject generated Vietnamese commit bodies with lost diacritics.'
+} finally {
+    Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue
 }
 
 Write-Output 'git-workflow-design tests passed.'

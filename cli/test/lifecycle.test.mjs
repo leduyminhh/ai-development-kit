@@ -584,3 +584,31 @@ test("cli removes an installed plugin", async () => {
     await rm(target, { recursive: true, force: true });
   }
 });
+
+test("cli lifecycle reports scope and providers in human output", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-cli-report-"));
+  try {
+    const install = await runCli(
+      ["install", "platform", "--target", "codex,cursor", "--yes"],
+      { cwd: target },
+    );
+    assert.equal(install.exitCode, 0);
+    assert.match(install.stdout, /Scope: project/);
+    assert.match(install.stdout, /Providers: codex, cursor/);
+    assert.match(install.stdout, /Installed plugins: platform/);
+
+    const check = await runCli(["check"], { cwd: target });
+    assert.equal(check.exitCode, 0);
+    assert.match(check.stdout, /Current: installed/);
+    assert.match(check.stdout, /Scope: project/);
+    assert.match(check.stdout, /Providers: codex, cursor/);
+
+    const remove = await runCli(["remove", "platform", "--yes"], { cwd: target });
+    assert.equal(remove.exitCode, 0);
+    assert.match(remove.stdout, /Scope: project/);
+    assert.match(remove.stdout, /Providers: codex, cursor/);
+    assert.match(remove.stdout, /Remaining plugins: none/);
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});

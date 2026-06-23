@@ -24,7 +24,11 @@ cd /path/to/project
 aie init
 aie install
 aie check
+aie remove
+aie upgrade
 ```
+
+Use `aie -h` or `aie --help` to print the same wizard-first command guide from the CLI.
 
 ## Interactive CLI Flow
 
@@ -61,12 +65,28 @@ aie doctor
 
 ### Step 3: Uninstall
 
-Run `aie remove` to uninstall managed plugin assets while preserving user-owned files.
+Run `aie remove` in an interactive terminal to open the uninstall wizard. It lists installed plugins, starts with nothing selected for safety, supports back/cancel navigation, and requires a final confirmation before removing managed assets while preserving user-owned files.
 
 ```bash
+aie remove
 aie remove security
-aie remove --all
+aie remove --all --yes
 ```
+
+Use explicit plugin names or `--all --yes` for CI and non-interactive scripts.
+
+### Step 4: Upgrade
+
+Run `aie upgrade` in an interactive terminal to open the upgrade wizard. It checks for outdated plugins, selects available updates by default, supports back/cancel navigation, and requires confirmation before applying changes.
+
+```bash
+aie upgrade
+aie upgrade --all --yes
+aie update platform security --yes
+aie upgrade --dry-run
+```
+
+Use `aie update` as the lifecycle alias when you want to upgrade specific plugins directly.
 
 Project scope is the default. Use `-g` or `--scope global` for user-global provider locations:
 
@@ -78,7 +98,7 @@ Generated MCP registrations contain absolute local runtime paths, so run install
 
 ## Upgrade Plan
 
-- v1 now has the interactive install wizard, provider/plugin auto-detection, install-all selection, plan preview, and resumable install state.
+- v1 now has interactive install, uninstall, and upgrade wizards, provider/plugin auto-detection, install-all selection, plan preview, resumable install state, and wizard coverage across the main CLI lifecycle tests.
 - Next upgrades: template-driven wizard screens, explicit resume prompt, richer project context detection, and dedicated help pages for workflow/maintainer command groups.
 
 ## Provider Paths

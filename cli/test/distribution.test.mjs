@@ -53,6 +53,10 @@ test("documents AI Engineering wizard commands in both readmes", async () => {
     "aie install application --target codex --yes",
     "aie install --all --target codex --yes",
     "aie install --all --target codex -g",
+    "aie remove --all --yes",
+    "aie upgrade --all --yes",
+    "aie update platform security --yes",
+    "aie -h",
     ".agents/skills",
     ".codex/agents",
     ".codex/workflows/commands.md",
@@ -66,8 +70,8 @@ test("documents AI Engineering wizard commands in both readmes", async () => {
     "npm run build",
   ];
   const languageExpected = {
-    "README.md": ["Interactive CLI Flow"],
-    "README_VI.md": ["Flow CLI Tương Tác"],
+    "README.md": ["Interactive CLI Flow", "Step 4: Upgrade"],
+    "README_VI.md": ["Flow CLI Tương Tác", "Step 4: Upgrade"],
   };
   for (const file of ["README.md", "README_VI.md"]) {
     const content = await readFile(path.join(repoRoot, file), "utf8");

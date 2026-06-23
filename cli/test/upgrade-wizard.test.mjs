@@ -1,11 +1,43 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { PassThrough } from "node:stream";
 import {
   renderUpgradeStep,
   parseChecklistKey,
   applyChecklistAction,
   runUpgradeWizard,
+  createUpgradeTerminalPrompter,
 } from "../src/upgrade-wizard.mjs";
+
+class TtyInput extends PassThrough {
+  constructor() {
+    super();
+    this.isTTY = true;
+    this.rawModes = [];
+  }
+
+  setRawMode(value) {
+    this.rawModes.push(value);
+    return this;
+  }
+}
+
+class MemoryOutput {
+  constructor() {
+    this.text = "";
+  }
+
+  write(chunk) {
+    this.text += String(chunk);
+    return true;
+  }
+}
+
+function writeChunks(input, chunks) {
+  chunks.forEach((chunk, index) => {
+    setTimeout(() => input.write(chunk), index * 5);
+  });
+}
 
 test("renderUpgradeStep with no updates", () => {
   const output = renderUpgradeStep({
@@ -289,4 +321,135 @@ test("runUpgradeWizard with back from confirm", async () => {
   
   assert.equal(result.action, "upgrade");
   assert.equal(askCount, 4);
+});
+
+test("applyChecklistAction deselects existing update and all shortcut clears selection", () => {
+  const updates = [
+    { id: "platform", current: "1.0.0", latest: "1.1.0" },
+    { id: "security", current: "2.0.0", latest: "2.1.0" },
+  ];
+
+  const deselected = applyChecklistAction({
+    action: "toggle",
+    updates,
+    selected: ["platform", "security"],
+    cursor: 0,
+    all: true,
+    allowAll: true,
+  });
+  assert.deepEqual(deselected.selected, ["security"]);
+  assert.equal(deselected.all, false);
+
+  const cleared = applyChecklistAction({
+    action: "all",
+    updates,
+    selected: ["platform", "security"],
+    cursor: 1,
+    all: true,
+    allowAll: true,
+  });
+  assert.deepEqual(cleared.selected, []);
+  assert.equal(cleared.all, false);
+});
+
+test("terminal upgrade prompter handles empty TTY checklist", async () => {
+  const input = new TtyInput();
+  const output = new MemoryOutput();
+  const prompter = createUpgradeTerminalPrompter({ input, output });
+
+  const result = await prompter.ask("selectPlugins", { updates: [] });
+
+  prompter.close();
+  assert.deepEqual(result, { all: false, selected: [] });
+  assert.match(output.text, /All plugins are up to date/);
+});
+
+test("terminal upgrade prompter drives raw checklist submit, back, and cancel", async () => {
+  const input = new TtyInput();
+  const output = new MemoryOutput();
+  const prompter = createUpgradeTerminalPrompter({ input, output });
+  const updates = [
+    { id: "platform", current: "1.0.0", latest: "1.1.0" },
+    { id: "security", current: "2.0.0", latest: "2.1.0" },
+  ];
+
+  const selectedPromise = prompter.ask("selectPlugins", { updates, selected: [], allowAll: true });
+  writeChunks(input, ["j", "j", " ", "\r"]);
+  assert.deepEqual(await selectedPromise, { all: false, selected: ["security"] });
+
+  const backPromise = prompter.ask("selectPlugins", { updates, selected: [], allowAll: true });
+  writeChunks(input, ["b"]);
+  assert.equal(await backPromise, "back");
+
+  const cancelPromise = prompter.ask("selectPlugins", { updates, selected: [], allowAll: true });
+  writeChunks(input, ["q"]);
+  assert.equal(await cancelPromise, "cancel");
+
+  prompter.close();
+  assert.deepEqual(input.rawModes, [true, false, true, false, true, false]);
+});
+
+test("terminal upgrade confirm accepts upgrade, back, and cancel choices", async () => {
+  const input = new PassThrough();
+  const output = new MemoryOutput();
+  const prompter = createUpgradeTerminalPrompter({ input, output });
+  const summary = [{ id: "platform", current: "1.0.0", latest: "1.1.0" }];
+
+  const upgradePromise = prompter.ask("confirm", { summary });
+  setTimeout(() => input.write("upgrade\n"), 0);
+  assert.equal(await upgradePromise, "upgrade");
+
+  const backPromise = prompter.ask("confirm", { summary });
+  setTimeout(() => input.write("b\n"), 0);
+  assert.equal(await backPromise, "back");
+
+  const explicitCancelPromise = prompter.ask("confirm", { summary });
+  setTimeout(() => input.write("3\n"), 0);
+  assert.equal(await explicitCancelPromise, "cancel");
+
+  const cancelPromise = prompter.ask("unknown", {});
+  assert.equal(await cancelPromise, "cancel");
+
+  prompter.close();
+  assert.match(output.text, /Ready to upgrade/);
+  assert.match(output.text, /platform/);
+});
+
+test("runUpgradeWizard cancels when confirmation is not upgrade", async () => {
+  const result = await runUpgradeWizard({
+    outdated: { updates: [{ id: "platform", current: "1.0.0", latest: "1.1.0" }] },
+    prompter: {
+      ask: async (step) => (step === "selectPlugins" ? ["platform"] : "cancel"),
+      close: () => {},
+    },
+  });
+
+  assert.equal(result.action, "cancel");
+});
+
+test("terminal upgrade prompter falls back to cancel without a TTY checklist", async () => {
+  const input = new PassThrough();
+  const output = new MemoryOutput();
+  const prompter = createUpgradeTerminalPrompter({ input, output });
+
+  const result = await prompter.ask("selectPlugins", {
+    updates: [{ id: "platform", current: "1.0.0", latest: "1.1.0" }],
+    selected: [],
+    allowAll: true,
+  });
+
+  prompter.close();
+  assert.equal(result, "cancel");
+});
+
+test("runUpgradeWizard treats selection back as cancel", async () => {
+  const result = await runUpgradeWizard({
+    outdated: { updates: [{ id: "platform", current: "1.0.0", latest: "1.1.0" }] },
+    prompter: {
+      ask: async () => "back",
+      close: () => {},
+    },
+  });
+
+  assert.equal(result.action, "cancel");
 });

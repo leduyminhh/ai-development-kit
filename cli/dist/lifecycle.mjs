@@ -501,6 +501,6 @@ export async function removePlugins({ root, target, context, pluginIds = [], all
         status: "pass",
         scope: installContext.scope,
         plugins: desired.plugins,
-        providers: desired.providers,
+        providers: installed.providers,
     };
 }

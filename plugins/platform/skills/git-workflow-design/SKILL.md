@@ -78,7 +78,7 @@ Use this skill when the user asks to commit, push, stage, create or switch branc
 
 ## Scripts
 
-- None; this skill does not require dedicated scripts.
+- [scripts/test-commit-message-encoding.ps1](scripts/test-commit-message-encoding.ps1): verify generated Vietnamese commit messages are still readable UTF-8 before `git commit -F`.
 
 ## Output Format
 
@@ -123,8 +123,10 @@ Basic expectation:
 3. If needed, load [resources/branch-convention.md](resources/branch-convention.md), then create or switch to the generated working branch from that convention.
 4. Stage only the files for the current commit unit.
 5. Generate or normalize the commit message.
-6. Run relevant verification when feasible.
-7. Commit, push, and report the result in Vietnamese.
+6. Save the commit message to a UTF-8 file and run `scripts/test-commit-message-encoding.ps1 -MessageFile <file>` before committing.
+7. Commit with `git commit -F <file>` instead of passing Vietnamese text through shell arguments.
+8. Run relevant verification when feasible.
+9. Commit, push, and report the result in Vietnamese.
 
 ### Release / Changelog Flow
 
@@ -167,9 +169,11 @@ Basic expectation:
    - avoid file-by-file narration when the deeper workflow or maintenance intent is visible
    - never invent reasons or impact that cannot be supported by the staged change
 6. For changelog or release-note requests, choose the smallest useful comparison range, group commits into categories, and rewrite raw commit language into the audience style the user asked for.
-7. Stage only the files for the current commit group, then run relevant verification when feasible. Do not commit failing work unless the user explicitly wants a checkpoint commit.
-8. After a successful push, create a pull request when the user asks to publish or when the workflow naturally reaches PR preparation.
-9. Report branch, commit, push, PR, verification, changelog scope, and relevant notes in Vietnamese.
+7. Before committing, write the full message to a temporary UTF-8 file, run `scripts/test-commit-message-encoding.ps1 -MessageFile <file>`, and commit with `git commit -F <file>`. If the check fails, fix UTF-8 handling first; do not remove Vietnamese diacritics as a workaround.
+8. Stage only the files for the current commit group, then run relevant verification when feasible. Do not commit failing work unless the user explicitly wants a checkpoint commit.
+9. After a successful commit, inspect `git log -1 --format=%B` for readable Vietnamese; amend immediately if encoding was corrupted.
+10. After a successful push, create a pull request when the user asks to publish or when the workflow naturally reaches PR preparation.
+11. Report branch, commit, push, PR, verification, changelog scope, and relevant notes in Vietnamese.
 
 ### Changelog Guidance
 

@@ -1,8 +1,45 @@
 ﻿import assert from "node:assert/strict";
+import { PassThrough } from "node:stream";
 import test from "node:test";
 
-import { renderChecklistStep, parseChecklistKey, runInstallWizard, applyChecklistAction } from "../src/install-wizard.mjs";
+import {
+  renderChecklistStep,
+  parseChecklistKey,
+  runInstallWizard,
+  applyChecklistAction,
+  createTerminalPrompter,
+} from "../src/install-wizard.mjs";
 import { parseInstallRequest } from "../src/install-request.mjs";
+
+class TtyInput extends PassThrough {
+  constructor() {
+    super();
+    this.isTTY = true;
+    this.rawModes = [];
+  }
+
+  setRawMode(value) {
+    this.rawModes.push(value);
+    return this;
+  }
+}
+
+class MemoryOutput {
+  constructor() {
+    this.text = "";
+  }
+
+  write(chunk) {
+    this.text += String(chunk);
+    return true;
+  }
+}
+
+function writeChunks(input, chunks) {
+  chunks.forEach((chunk, index) => {
+    setTimeout(() => input.write(chunk), index * 5);
+  });
+}
 
 function stripAnsi(value) {
   return value.replace(/\u001b\[[0-9;]*m/g, "");
@@ -177,6 +214,34 @@ test("install all toggle selects all choices and toggling again clears them", ()
   assert.deepEqual(second.selected, []);
 });
 
+test("checklist action deselects an existing choice", () => {
+  const result = applyChecklistAction({
+    action: "toggle",
+    choices: ["platform", "quality"],
+    selected: ["platform", "quality"],
+    cursor: 0,
+    all: true,
+    allowAll: true,
+  });
+
+  assert.equal(result.all, false);
+  assert.deepEqual(result.selected, ["quality"]);
+});
+
+test("checklist action selects a new non-all choice", () => {
+  const result = applyChecklistAction({
+    action: "toggle",
+    choices: ["platform", "quality"],
+    selected: ["platform"],
+    cursor: 1,
+    all: false,
+    allowAll: true,
+  });
+
+  assert.equal(result.all, true);
+  assert.deepEqual(result.selected, ["platform", "quality"]);
+});
+
 
 test("renders colorized sections and visual separators", () => {
   const output = renderChecklistStep({
@@ -210,4 +275,287 @@ test("provider step includes antigravity as install target", async () => {
 
   assert.ok(calls.find((call) => call.step === "providers").choices.includes("antigravity"));
   assert.deepEqual(result.intent.providers, ["antigravity"]);
+});
+
+test("resumes an interrupted install session as editable wizard defaults", async () => {
+  const calls = [];
+  const sessions = [];
+  const answers = [["platform"], ["codex"], ["quality"], "global", "install"];
+  const result = await runInstallWizard({
+    draft: parseInstallRequest([]),
+    availablePlugins: [
+      { id: "platform", dependencies: { optional: ["quality"] } },
+      { id: "quality", dependencies: { optional: [] } },
+    ],
+    detectedProviders: ["codex"],
+    detectedPlugins: [],
+    existingSession: {
+      status: "running",
+      draft: {
+        rootPlugins: ["platform"],
+        all: false,
+        providers: ["codex"],
+        optionalPlugins: [],
+        scope: "global",
+      },
+    },
+    onSession: async (intent, step) => sessions.push({ intent, step }),
+    preparePlan: async (intent) => ({ summary: [`${intent.scope}: ${intent.rootPlugins.join(",")}`] }),
+    prompter: {
+      async ask(step, options) {
+        calls.push(step);
+        if (step === "rootPlugins") assert.deepEqual(options.selected, ["platform"]);
+        if (step === "providers") assert.deepEqual(options.selected, ["codex"]);
+        if (step === "scope") assert.equal(options.selected, "global");
+        return answers.shift();
+      },
+    },
+  });
+
+  assert.deepEqual(calls, ["rootPlugins", "providers", "optionalPlugins", "scope", "confirm"]);
+  assert.equal(result.action, "install");
+  assert.equal(result.intent.scope, "global");
+  assert.deepEqual(result.intent.optionalPlugins, ["quality"]);
+  assert.deepEqual(sessions.map((item) => item.step), ["plugins", "providers", "optionalPlugins", "scope", "confirm"]);
+});
+
+test("supports optional plugin back navigation and confirm cancellation", async () => {
+  const calls = [];
+  const answers = [
+    ["platform"],
+    ["codex"],
+    "back",
+    ["cursor"],
+    ["quality"],
+    "project",
+    "cancel",
+  ];
+
+  const result = await runInstallWizard({
+    draft: parseInstallRequest([]),
+    availablePlugins: [
+      { id: "platform", dependencies: { optional: ["quality"] } },
+      { id: "quality", dependencies: { optional: [] } },
+    ],
+    detectedProviders: [],
+    detectedPlugins: [],
+    preparePlan: async () => ({ summary: ["preview"] }),
+    prompter: {
+      async ask(step) {
+        calls.push(step);
+        return answers.shift();
+      },
+    },
+  });
+
+  assert.equal(result.action, "cancel");
+  assert.deepEqual(calls, [
+    "rootPlugins",
+    "providers",
+    "optionalPlugins",
+    "rootPlugins",
+    "providers",
+    "scope",
+    "confirm",
+  ]);
+});
+
+test("handles all plugin answer and scope back navigation", async () => {
+  const calls = [];
+  const answers = [
+    { all: true, selected: ["platform", "quality"] },
+    ["codex"],
+    "back",
+    { all: true, selected: ["platform", "quality"] },
+    ["claude"],
+    "global",
+    "install",
+  ];
+
+  const result = await runInstallWizard({
+    draft: parseInstallRequest([]),
+    availablePlugins: [
+      { id: "platform", dependencies: { optional: [] } },
+      { id: "quality", dependencies: { optional: [] } },
+    ],
+    detectedProviders: [],
+    detectedPlugins: [],
+    preparePlan: async () => ({ summary: [] }),
+    prompter: {
+      async ask(step) {
+        calls.push(step);
+        return answers.shift();
+      },
+    },
+  });
+
+  assert.equal(result.action, "install");
+  assert.equal(result.intent.all, true);
+  assert.deepEqual(result.intent.rootPlugins, []);
+  assert.deepEqual(result.intent.providers, ["claude"]);
+  assert.equal(result.intent.scope, "global");
+  assert.deepEqual(calls, ["rootPlugins", "providers", "scope", "rootPlugins", "providers", "scope", "confirm"]);
+});
+
+test("normalizes a scalar plugin answer as an empty selection", async () => {
+  const result = await runInstallWizard({
+    draft: parseInstallRequest([]),
+    availablePlugins: [{ id: "platform", dependencies: { optional: [] } }],
+    detectedProviders: [],
+    detectedPlugins: [],
+    preparePlan: async () => ({ summary: [] }),
+    prompter: {
+      async ask(step) {
+        if (step === "rootPlugins") return "platform";
+        if (step === "providers") return ["codex"];
+        if (step === "scope") return "project";
+        return "install";
+      },
+    },
+  });
+
+  assert.equal(result.action, "install");
+  assert.deepEqual(result.intent.rootPlugins, []);
+});
+
+test("scope back returns to optional plugin selection when optional candidates exist", async () => {
+  const calls = [];
+  const answers = [
+    ["platform"],
+    ["codex"],
+    [],
+    "back",
+    ["platform"],
+    ["codex"],
+    ["quality"],
+    "global",
+    "install",
+  ];
+
+  const result = await runInstallWizard({
+    draft: parseInstallRequest([]),
+    availablePlugins: [
+      { id: "platform", dependencies: { optional: ["quality"] } },
+      { id: "quality", dependencies: { optional: [] } },
+    ],
+    detectedProviders: [],
+    detectedPlugins: [],
+    preparePlan: async () => ({ summary: [] }),
+    prompter: {
+      async ask(step) {
+        calls.push(step);
+        return answers.shift();
+      },
+    },
+  });
+
+  assert.equal(result.action, "install");
+  assert.deepEqual(result.intent.optionalPlugins, ["quality"]);
+  assert.deepEqual(calls, [
+    "rootPlugins",
+    "providers",
+    "optionalPlugins",
+    "scope",
+    "rootPlugins",
+    "providers",
+    "optionalPlugins",
+    "scope",
+    "confirm",
+  ]);
+});
+
+test("confirm back reopens scope before installing", async () => {
+  const calls = [];
+  const answers = [["platform"], ["codex"], "global", "back", ["platform"], ["codex"], "project", "install"];
+
+  const result = await runInstallWizard({
+    draft: parseInstallRequest([]),
+    availablePlugins: [{ id: "platform", dependencies: { optional: [] } }],
+    detectedProviders: [],
+    detectedPlugins: [],
+    preparePlan: async () => ({ summary: [] }),
+    prompter: {
+      async ask(step) {
+        calls.push(step);
+        return answers.shift();
+      },
+    },
+  });
+
+  assert.equal(result.action, "install");
+  assert.equal(result.intent.scope, "project");
+  assert.deepEqual(calls, ["rootPlugins", "providers", "scope", "confirm", "rootPlugins", "providers", "scope", "confirm"]);
+});
+
+test("terminal prompter drives raw checklist and single-select scope", async () => {
+  const input = new TtyInput();
+  const output = new MemoryOutput();
+  const prompter = createTerminalPrompter({ input, output });
+
+  const pluginPromise = prompter.ask("rootPlugins", {
+    choices: ["platform", "quality"],
+    selected: [],
+    allowAll: true,
+  });
+  writeChunks(input, [" ", "\r"]);
+  assert.deepEqual(await pluginPromise, { all: true, selected: ["platform", "quality"] });
+
+  const scopePromise = prompter.ask("scope", {
+    choices: ["project", "global"],
+    selected: "project",
+  });
+  writeChunks(input, ["\u001b[B", " ", "\r"]);
+  assert.equal(await scopePromise, "global");
+
+  prompter.close();
+  assert.deepEqual(input.rawModes, [true, false, true, false]);
+  assert.match(output.text, /rootPlugins/);
+  assert.match(output.text, /scope/);
+});
+
+test("terminal prompter returns raw cancel and back actions", async () => {
+  const input = new TtyInput();
+  const output = new MemoryOutput();
+  const prompter = createTerminalPrompter({ input, output });
+
+  const cancelPromise = prompter.ask("rootPlugins", {
+    choices: ["platform"],
+    selected: [],
+    allowAll: true,
+  });
+  writeChunks(input, ["q"]);
+  assert.equal(await cancelPromise, "cancel");
+
+  const backPromise = prompter.ask("providers", {
+    choices: ["codex"],
+    selected: [],
+  });
+  writeChunks(input, ["b"]);
+  assert.equal(await backPromise, "back");
+
+  prompter.close();
+});
+
+test("terminal prompter falls back to numbered readline selections without a TTY", async () => {
+  const input = new PassThrough();
+  const output = new MemoryOutput();
+  const prompter = createTerminalPrompter({ input, output });
+
+  const pluginsPromise = prompter.ask("rootPlugins", {
+    choices: ["platform", "quality"],
+    selected: [],
+    descriptions: { quality: "Quality workflow" },
+  });
+  setTimeout(() => input.write("1,2\n"), 0);
+  assert.deepEqual(await pluginsPromise, ["platform", "quality"]);
+
+  const confirmPromise = prompter.ask("confirm", {
+    choices: ["install", "back", "cancel"],
+    selected: "cancel",
+  });
+  setTimeout(() => input.write("2\n"), 0);
+  assert.equal(await confirmPromise, "back");
+
+  prompter.close();
+  assert.match(output.text, /Quality workflow/);
 });

@@ -669,6 +669,6 @@ export async function removePlugins({
     status: "pass",
     scope: installContext.scope,
     plugins: desired.plugins,
-    providers: desired.providers,
+    providers: installed.providers,
   };
 }

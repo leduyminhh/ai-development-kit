@@ -92,45 +92,12 @@ Alias:
 Usage:
   aie install [plugin...] [options]
   aie <command> [options]
+  aie -h | --help
 
 Quick start:
   aie init
   aie install
   aie check
-
-Interactive install wizard:
-  Step 1: Install                 aie install
-    Detect providers/plugins, including antigravity, and open wizard
-    Space toggles selections, Enter continues, Esc/q cancels, b goes back
-    Install all plugins toggles every plugin on; toggle again clears all
-    Interrupted sessions can resume from .ai-engineering/install/session.json
-
-  Step 2: Check                   aie check
-    Verify installed plugins, skills, commands, agents, workflows, and provider files
-
-  Step 3: Uninstall               aie remove
-    Remove managed plugin assets with interactive wizard
-    Space toggles selections, Enter continues, remove all uninstalls everything
-
-  Step 4: Upgrade                 aie upgrade
-    Check for outdated plugins and open wizard to select updates
-    Space toggles selections, Enter continues, upgrade all updates everything
-
-Install examples:
-  aie install application --target codex --yes
-  aie install --all --target antigravity --yes
-  aie install --all --target codex -g
-
-Remove examples:
-  aie remove                             Interactive wizard
-  aie remove --all --yes                 Remove all plugins without prompt
-  aie remove platform security --yes     Remove specific plugins
-
-Upgrade examples:
-  aie upgrade                            Interactive wizard
-  aie upgrade --all --yes                Upgrade all plugins without prompt
-  aie update platform security --yes     Upgrade specific plugins
-  aie upgrade --dry-run                  Preview available updates
 
 Install options:
   --target <providers>      antigravity, codex, claude, cursor
@@ -178,19 +145,32 @@ function formatInstalled(result, scope) {
   return `${result.plugins.map((item) => `${item.id}@${item.version}`).join("\n")}\n`;
 }
 
+function formatProviders(providers) {
+  return providers?.length ? providers.join(", ") : "none";
+}
+
+function formatLifecycleSummary({ scope, providers, pluginsLine }) {
+  return [
+    `Scope: ${scope}`,
+    `Providers: ${formatProviders(providers)}`,
+    pluginsLine,
+  ].join("\n") + "\n";
+}
+
 function formatCheck(result) {
   const formatItems = (items) =>
     items.length > 0
       ? items.map((item) => {
-          const owners = item.owners?.length ? ` owners=${item.owners.join(",")}` : "";
-          const providers = item.providers?.length ? ` providers=${item.providers.join(",")}` : "";
-          const pathInfo = item.path ? ` path=${item.path}` : "";
-          return `- ${item.id ?? item.name}${owners}${providers}${pathInfo}`;
-        })
+        const owners = item.owners?.length ? ` owners=${item.owners.join(",")}` : "";
+        const providers = item.providers?.length ? ` providers=${item.providers.join(",")}` : "";
+        const pathInfo = item.path ? ` path=${item.path}` : "";
+        return `- ${item.id ?? item.name}${owners}${providers}${pathInfo}`;
+      })
       : ["- none"];
   const lines = [
     `Current: ${result.current.state}`,
     `Scope: ${result.current.scope}`,
+    `Providers: ${formatProviders(result.providers)}`,
     `Platform: ${result.current.platformVersion ?? "unknown"}`,
     `Install state: ${result.current.installState}`,
     "",
@@ -525,7 +505,11 @@ export async function run(args, streams = process) {
     streams.stdout.write(
       args.includes("--json")
         ? `${JSON.stringify(result)}\n`
-        : `Installed ${result.plugins.join(", ")} to ${context.scope} scope.\n`,
+        : formatLifecycleSummary({
+          scope: result.scope,
+          providers: result.providers,
+          pluginsLine: `Installed plugins: ${result.plugins.join(", ") || "none"}`,
+        }),
     );
     return 0;
   }
@@ -538,14 +522,14 @@ export async function run(args, streams = process) {
     const root = REPOSITORY_ROOT;
     const offset = args[0] === "plugin" ? 2 : 1;
     const context = resolveContext(args);
-    
+
     // Non-interactive mode with explicit choices
     if (args.includes("--yes") || args.includes("--all") || args.slice(offset).some(arg => !arg.startsWith("--"))) {
       const all = args[0] === "remove" && args.includes("--all");
       const parsed = all
         ? { plugins: [], scope: context.scope }
         : parseInstallArgs(args.slice(offset));
-      
+
       const result = await removePlugins({
         root,
         target: context.targetRoot,
@@ -557,7 +541,11 @@ export async function run(args, streams = process) {
       streams.stdout.write(
         args.includes("--json")
           ? `${JSON.stringify(result)}\n`
-          : `Remaining plugins: ${result.plugins.join(", ")}.\n`,
+          : formatLifecycleSummary({
+            scope: result.scope,
+            providers: result.providers,
+            pluginsLine: `Remaining plugins: ${result.plugins.join(", ") || "none"}`,
+          }),
       );
       return 0;
     }
@@ -598,7 +586,7 @@ export async function run(args, streams = process) {
       }
 
       if (wizard.action === "noop") {
-        const message = wizard.reason === "no-plugins" 
+        const message = wizard.reason === "no-plugins"
           ? "No plugins installed.\n"
           : "No plugins selected for removal.\n";
         streams.stdout.write(message);
@@ -618,7 +606,11 @@ export async function run(args, streams = process) {
       streams.stdout.write(
         args.includes("--json")
           ? `${JSON.stringify(result)}\n`
-          : `Removed ${wizard.pluginIds.length} plugin(s). Remaining: ${result.plugins.join(", ") || "none"}.\n`,
+          : formatLifecycleSummary({
+            scope: result.scope,
+            providers: result.providers,
+            pluginsLine: `Removed plugins: ${wizard.pluginIds.join(", ") || "none"}; remaining plugins: ${result.plugins.join(", ") || "none"}`,
+          }),
       );
     } finally {
       prompter.close();
@@ -673,7 +665,7 @@ export async function run(args, streams = process) {
     const root = REPOSITORY_ROOT;
     const offset = args[0] === "plugin" ? 2 : 1;
     const context = resolveContext(args);
-    
+
     // Check for outdated plugins first
     const outdated = await findOutdated({
       root,
@@ -687,7 +679,7 @@ export async function run(args, streams = process) {
       const parsed = all
         ? { plugins: [], scope: context.scope }
         : parseInstallArgs(args.slice(offset));
-      
+
       const result = await updatePlugins({
         root,
         target: context.targetRoot,
@@ -740,7 +732,7 @@ export async function run(args, streams = process) {
       }
 
       if (wizard.action === "noop") {
-        const message = wizard.reason === "no-updates" 
+        const message = wizard.reason === "no-updates"
           ? "All plugins are up to date.\n"
           : "No plugins selected for upgrade.\n";
         streams.stdout.write(message);
@@ -861,33 +853,33 @@ export async function run(args, streams = process) {
     }
 
 
-      if (sub === "step-next") {
-        if (!subargs[0]) {
-          streams.stdout.write("Usage: aie workflow step-next <workflow-id> [run-id]\n");
-          return 1;
-        }
-        const result = await workflowStepNext({ target, workflowId: subargs[0], runId: subargs[1] });
-        streams.stdout.write(JSON.stringify(result, null, 2) + "\n");
-        return 0;
+    if (sub === "step-next") {
+      if (!subargs[0]) {
+        streams.stdout.write("Usage: aie workflow step-next <workflow-id> [run-id]\n");
+        return 1;
       }
-      if (sub === "step-complete") {
-        if (!subargs[0] || !subargs[1] || !subargs[2]) {
-          streams.stdout.write("Usage: aie workflow step-complete <workflow-id> <run-id> <step-id>\n");
-          return 1;
-        }
-        const result = await workflowStepComplete({ target, workflowId: subargs[0], runId: subargs[1], stepId: subargs[2] });
-        streams.stdout.write(JSON.stringify(result, null, 2) + "\n");
-        return 0;
+      const result = await workflowStepNext({ target, workflowId: subargs[0], runId: subargs[1] });
+      streams.stdout.write(JSON.stringify(result, null, 2) + "\n");
+      return 0;
+    }
+    if (sub === "step-complete") {
+      if (!subargs[0] || !subargs[1] || !subargs[2]) {
+        streams.stdout.write("Usage: aie workflow step-complete <workflow-id> <run-id> <step-id>\n");
+        return 1;
       }
-      if (sub === "step-fail") {
-        if (!subargs[0] || !subargs[1] || !subargs[2]) {
-          streams.stdout.write("Usage: aie workflow step-fail <workflow-id> <run-id> <step-id>\n");
-          return 1;
-        }
-        const result = await workflowStepFail({ target, workflowId: subargs[0], runId: subargs[1], stepId: subargs[2] });
-        streams.stdout.write(JSON.stringify(result, null, 2) + "\n");
-        return 0;
+      const result = await workflowStepComplete({ target, workflowId: subargs[0], runId: subargs[1], stepId: subargs[2] });
+      streams.stdout.write(JSON.stringify(result, null, 2) + "\n");
+      return 0;
+    }
+    if (sub === "step-fail") {
+      if (!subargs[0] || !subargs[1] || !subargs[2]) {
+        streams.stdout.write("Usage: aie workflow step-fail <workflow-id> <run-id> <step-id>\n");
+        return 1;
       }
+      const result = await workflowStepFail({ target, workflowId: subargs[0], runId: subargs[1], stepId: subargs[2] });
+      streams.stdout.write(JSON.stringify(result, null, 2) + "\n");
+      return 0;
+    }
     streams.stdout.write(WORKFLOW_HELP);
     return 0;
   }
