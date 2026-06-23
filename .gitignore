@@ -4,6 +4,7 @@
 /audit/
 /node_modules/
 /dist/
+/cli/dist/
 .ai-engineering/
 /cli/scripts/flows/
 *.tgz

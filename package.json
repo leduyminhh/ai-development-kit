@@ -15,6 +15,7 @@
     "test": "npm run build:cli && node --test \"cli/test/*.mjs\"",
     "build": "npm run build:cli",
     "build:cli": "tsc -p cli/tsconfig.json",
+    "prepare": "npm run build:cli",
     "validate": "node cli/dist/index.js validate",
     "doctor": "node cli/dist/index.js doctor",
     "migrate:dry-run": "node cli/dist/index.js migrate --dry-run"
