@@ -1,4 +1,0 @@
-interface:
-  display_name: "YouTube Transcript"
-  short_description: "Download or transcribe YouTube captions and subtitles with yt-dlp"
-  default_prompt: "Use $youtube-transcript when the user provides a YouTube URL or asks to download, fetch, transcribe, or clean up a YouTube transcript, captions, or subtitles."

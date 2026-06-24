@@ -25,12 +25,10 @@
   "assets": {
     "skills": [
       "doc-write",
-      "youtube-transcript",
       "release-notes"
     ],
     "agents": [
       "doc-write",
-      "youtube-transcript",
       "release-notes"
     ],
     "commands": [
@@ -67,10 +65,6 @@
     {
       "id": "knowledge.doc_write",
       "path": "skills/doc-write/SKILL.md"
-    },
-    {
-      "id": "knowledge.youtube_transcript",
-      "path": "skills/youtube-transcript/SKILL.md"
     },
     {
       "id": "knowledge.release_notes",

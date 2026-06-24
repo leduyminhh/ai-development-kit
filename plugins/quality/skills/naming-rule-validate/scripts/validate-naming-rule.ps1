@@ -60,8 +60,7 @@ function Test-CapabilityName {
 
     $approvedCapabilityNames = @(
         'code-design-pattern',
-        'using-workflow-kit',
-        'youtube-transcript'
+        'using-workflow-kit'
     )
     if ($approvedCapabilityNames -contains $Name) {
         return $true

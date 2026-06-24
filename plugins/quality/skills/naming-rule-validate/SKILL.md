@@ -183,7 +183,6 @@ Approved capability noun exceptions:
 
 - `code-design-pattern`
 - `using-workflow-kit`
-- `youtube-transcript`
 
 Current approved agents:
 
@@ -204,7 +203,6 @@ Current skill-only capabilities:
 - `code-shared-design`
 - `naming-rule-validate`
 - `using-workflow-kit`
-- `youtube-transcript`
 
 Scripts and hooks may use command-style verbs when they are operational wrappers, for example:
 
