@@ -22,7 +22,7 @@ test("builds a deterministic standalone application artifact", async () => {
     for (const relative of [
       "plugin.json",
       "commands/review-backend.md",
-      "skills/java-analyze/SKILL.md",
+      "skills/java-implement/SKILL.md",
       ".codex/agents/openai.yaml",
       ".claude-plugin/plugin.json",
       ".cursor/rules/provider.json",

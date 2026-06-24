@@ -21,7 +21,7 @@ test("doctor validates initialized projects and generated adapters", async () =>
 
     const result = await doctorProject({ target });
     assert.equal(result.status, "pass");
-    assert.deepEqual(result.plugins, ["architecture", "application"]);
+    assert.deepEqual(result.plugins, ["architecture", "data", "quality", "security", "application"]);
   } finally {
     await rm(target, { recursive: true, force: true });
   }

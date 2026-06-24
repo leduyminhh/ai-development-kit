@@ -14,12 +14,20 @@ test("resolves required dependencies and deduplicates shared assets", async () =
     providers: ["codex"],
   });
 
-  assert.deepEqual(application.pluginIds, ["architecture", "application"]);
+  assert.deepEqual(application.pluginIds, [
+    "architecture",
+    "data",
+    "quality",
+    "security",
+    "application",
+  ]);
   assert.equal(
     application.skills.filter((id) => id === "code-shared-design").length,
     1,
   );
-  assert.equal(application.pluginIds.includes("security"), false);
+  // application pulls its required extras but not unrelated plugins.
+  assert.equal(application.pluginIds.includes("security"), true);
+  assert.equal(application.pluginIds.includes("platform"), false);
 
   const combined = resolvePluginGraph({
     requested: ["security", "application"],
@@ -27,28 +35,34 @@ test("resolves required dependencies and deduplicates shared assets", async () =
     platformVersion: "1.0.0",
     providers: ["codex", "claude"],
   });
-  assert.deepEqual(combined.pluginIds, ["architecture", "application", "security"]);
+  assert.deepEqual(combined.pluginIds, [
+    "architecture",
+    "data",
+    "quality",
+    "security",
+    "application",
+  ]);
 });
 
 test("separates root required and selected optional plugins", async () => {
   const plugins = await loadPlugins(repoRoot);
+  // platform has no required deps and offers quality/security as optional.
   const graph = resolvePluginGraph({
-    requested: ["application"],
-    optional: ["quality"],
+    requested: ["platform"],
+    optional: ["security"],
     plugins,
     platformVersion: "1.0.0",
     providers: ["codex", "claude"],
   });
 
-  assert.deepEqual(graph.rootPlugins, ["application"]);
-  assert.deepEqual(graph.requiredPlugins, ["architecture"]);
-  assert.deepEqual(graph.optionalPlugins, ["quality"]);
+  assert.deepEqual(graph.rootPlugins, ["platform"]);
+  assert.deepEqual(graph.requiredPlugins, []);
+  assert.deepEqual(graph.optionalPlugins, ["security"]);
   assert.deepEqual(graph.pluginIds, [
-    "architecture",
-    "application",
-    "quality",
+    "platform",
+    "security",
   ]);
-  assert.ok(graph.commands.includes("application.review_backend"));
+  assert.ok(graph.commands.includes("platform.respond_incident"));
 });
 
 test("rejects unknown plugins and required dependency cycles", async () => {

@@ -18,25 +18,26 @@ test("builds a deterministic read-only install plan", async () => {
       homeRoot: target,
     });
     const before = await readdir(target);
+    // platform has no required deps and offers quality/security as optional.
     const prepared = await prepareInstallation({
       root: repoRoot,
       context,
-      rootPlugins: ["application"],
-      optionalPlugins: ["quality"],
+      rootPlugins: ["platform"],
+      optionalPlugins: ["security"],
       providers: ["claude"],
     });
     const plan = await buildInstallPlan({ prepared, context });
     const after = await readdir(target);
 
-    assert.deepEqual(plan.rootPlugins, ["application"]);
-    assert.deepEqual(plan.requiredPlugins, ["architecture"]);
-    assert.deepEqual(plan.optionalPlugins, ["quality"]);
+    assert.deepEqual(plan.rootPlugins, ["platform"]);
+    assert.deepEqual(plan.requiredPlugins, []);
+    assert.deepEqual(plan.optionalPlugins, ["security"]);
     assert.deepEqual(plan.providers, ["claude"]);
     assert.ok(
       plan.managedFiles.some(
         (item) =>
           item.assetType === "command" &&
-          item.assetId === "application.review_backend",
+          item.assetId === "platform.respond_incident",
       ),
     );
     assert.deepEqual(after, before);

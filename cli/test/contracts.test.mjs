@@ -185,7 +185,7 @@ test("loads canonical plugin contracts from plugins root", async () => {
   });
 });
 
-test("application owns the full-stack orchestration skill set", async () => {
+test("application owns the implementation skill set", async () => {
   const plugins = await loadPlugins(repoRoot);
   const application = plugins.get("application");
   const owned = application.skills.map((item) => path.basename(path.dirname(item.path)));
@@ -193,13 +193,9 @@ test("application owns the full-stack orchestration skill set", async () => {
   assert.deepEqual(
     [
       "api-contract-design",
-      "feature-deliver",
-      "feature-fix",
-      "feature-implement",
-      "feature-integrate",
-      "feature-plan",
-      "feature-review",
-      "feature-test",
+      "java-implement",
+      "python-implement",
+      "react-implement",
     ].filter((skill) => !owned.includes(skill)),
     [],
   );
@@ -207,11 +203,11 @@ test("application owns the full-stack orchestration skill set", async () => {
 
 test("Java and React canonical skills expose implementation subagents", async () => {
   const java = await readFile(
-    path.join(repoRoot, "plugins/application/skills/java-analyze/SKILL.md"),
+    path.join(repoRoot, "plugins/application/skills/java-implement/SKILL.md"),
     "utf8",
   );
   const react = await readFile(
-    path.join(repoRoot, "plugins/application/skills/react-code-generate/SKILL.md"),
+    path.join(repoRoot, "plugins/application/skills/react-implement/SKILL.md"),
     "utf8",
   );
 
@@ -223,7 +219,7 @@ test("application owns one Python backend skill with FastAPI and Django routing"
   const skill = await readFile(
     path.join(
       repoRoot,
-      "plugins/application/skills/python-backend-engineer/SKILL.md",
+      "plugins/application/skills/python-implement/SKILL.md",
     ),
     "utf8",
   );

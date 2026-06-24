@@ -52,11 +52,12 @@ test("installs application project-locally with required dependencies", async ()
       ),
     );
 
-    assert.deepEqual(result.plugins, ["architecture", "application"]);
-    assert.deepEqual(lock.plugins.map((item) => item.id), ["architecture", "application"]);
+    const expectedPlugins = ["architecture", "data", "quality", "security", "application"];
+    assert.deepEqual(result.plugins, expectedPlugins);
+    assert.deepEqual(lock.plugins.map((item) => item.id), expectedPlugins);
     assert.deepEqual(
       installedPlugins.plugins.map((item) => item.id),
-      ["architecture", "application"],
+      expectedPlugins,
     );
     assert.equal(
       await exists(target, ".agents/skills/code-shared-design/SKILL.md"),
@@ -66,8 +67,8 @@ test("installs application project-locally with required dependencies", async ()
       await exists(target, ".codex/skills/code-shared-design/SKILL.md"),
       false,
     );
-    assert.equal(await exists(target, ".codex/agents/java-analyze.toml"), true);
-    assert.equal(await exists(target, "agents/java-analyze.toml"), false);
+    assert.equal(await exists(target, ".codex/agents/java-implement.toml"), true);
+    assert.equal(await exists(target, "agents/java-implement.toml"), false);
     assert.equal(await exists(target, ".codex/agents/openai.yaml"), true);
     assert.equal(await exists(target, ".codex/config.toml"), false);
     assert.equal(await exists(target, ".mcp.json"), false);
@@ -176,14 +177,14 @@ test("installs Claude project-native skills and commands", async () => {
       providers: ["claude"],
     });
 
-    assert.deepEqual(result.plugins, ["architecture", "application"]);
-    assert.equal(await exists(target, ".claude/skills/java-analyze/SKILL.md"), true);
+    assert.deepEqual(result.plugins, ["architecture", "data", "quality", "security", "application"]);
+    assert.equal(await exists(target, ".claude/skills/java-implement/SKILL.md"), true);
     assert.equal(await exists(target, ".claude/commands/review-backend.md"), true);
     assert.equal(await exists(target, "CLAUDE.md"), true);
     assert.equal(await exists(target, ".mcp.json"), false);
-    assert.equal(await exists(target, "agents/java-analyze.toml"), false);
-    assert.equal(await exists(target, ".codex/agents/java-analyze.toml"), false);
-    assert.equal(await exists(target, "skills/java-analyze/SKILL.md"), false);
+    assert.equal(await exists(target, "agents/java-implement.toml"), false);
+    assert.equal(await exists(target, ".codex/agents/java-implement.toml"), false);
+    assert.equal(await exists(target, "skills/java-implement/SKILL.md"), false);
     assert.equal(await exists(target, "commands/review-backend.md"), false);
   } finally {
     await rm(target, { recursive: true, force: true });
@@ -244,12 +245,12 @@ test("installs Claude global-native skills and commands", async () => {
       providers: ["claude"],
     });
 
-    assert.deepEqual(result.plugins, ["architecture", "application"]);
-    assert.equal(await exists(home, ".claude/skills/java-analyze/SKILL.md"), true);
+    assert.deepEqual(result.plugins, ["architecture", "data", "quality", "security", "application"]);
+    assert.equal(await exists(home, ".claude/skills/java-implement/SKILL.md"), true);
     assert.equal(await exists(home, ".claude/commands/review-backend.md"), true);
     assert.equal(await exists(home, ".claude.json"), false);
-    assert.equal(await exists(project, ".claude/skills/java-analyze/SKILL.md"), false);
-    assert.equal(await exists(home, "skills/java-analyze/SKILL.md"), false);
+    assert.equal(await exists(project, ".claude/skills/java-implement/SKILL.md"), false);
+    assert.equal(await exists(home, "skills/java-implement/SKILL.md"), false);
   } finally {
     await rm(project, { recursive: true, force: true });
     await rm(home, { recursive: true, force: true });
@@ -380,7 +381,13 @@ test("lists, detects outdated plugins, and supports dry-run updates", async () =
       providers: ["codex"],
     });
     const installed = await listInstalled({ target });
-    assert.deepEqual(installed.plugins.map((item) => item.id), ["architecture", "application"]);
+    assert.deepEqual(installed.plugins.map((item) => item.id), [
+      "architecture",
+      "data",
+      "quality",
+      "security",
+      "application",
+    ]);
 
     const registry = {
       application: { latest: "1.1.0" },
@@ -445,7 +452,7 @@ test("updates from canonical source and preserves unrelated root plugins", async
     assert.deepEqual(updated.rootPlugins, ["application", "quality"]);
     assert.deepEqual(
       updated.plugins.map((item) => item.id),
-      ["architecture", "application", "quality"],
+      ["architecture", "data", "quality", "security", "application"],
     );
     assert.equal(
       updated.plugins.find((item) => item.id === "application").version,
@@ -468,7 +475,7 @@ test("cli lists installed plugins and reports outdated plugins", async () => {
     assert.equal(list.exitCode, 0);
     assert.deepEqual(
       JSON.parse(list.stdout).plugins.map((item) => item.id),
-      ["architecture", "application"],
+      ["architecture", "data", "quality", "security", "application"],
     );
 
     const outdated = await runCli(["plugin", "outdated", "--json"], { cwd: target });
@@ -486,8 +493,13 @@ test("lists installable plugins with their commands and skills", async () => {
   const application = catalog.plugins.available.find((item) => item.id === "application");
   assert.equal(application.name, "Application Engineering");
   assert.equal(application.install.defaultScope, "project");
-  assert.deepEqual(application.dependencies.required, ["architecture"]);
-  assert.ok(application.assets.skills.includes("react-code-generate"));
+  assert.deepEqual(application.dependencies.required, [
+    "architecture",
+    "quality",
+    "security",
+    "data",
+  ]);
+  assert.ok(application.assets.skills.includes("react-implement"));
   assert.ok(
     application.assets.commands.includes("commands/review-backend.md"),
   );
@@ -510,20 +522,26 @@ test("checks installed skills, commands, agents, and no active MCP servers", asy
     const check = await checkInstalled({ target });
     assert.equal(check.status, "pass");
     assert.equal(check.current.state, "installed");
-    assert.deepEqual(check.plugins.installed.map((item) => item.id), ["architecture", "application"]);
+    assert.deepEqual(check.plugins.installed.map((item) => item.id), [
+      "architecture",
+      "data",
+      "quality",
+      "security",
+      "application",
+    ]);
     assert.deepEqual(check.providers, ["codex"]);
     assert.equal(check.mcp.count, 0);
     assert.deepEqual(check.mcp.servers, []);
     assert.equal(check.commands.count, 0);
     assert.equal(check.skills.count > 0, true);
     assert.equal(check.agents.count > 0, true);
-    assert.ok(check.skills.installed.some((item) => item.id === "java-analyze"));
-    assert.ok(check.skills.installed.some((item) => item.id === "react-code-generate"));
+    assert.ok(check.skills.installed.some((item) => item.id === "java-implement"));
+    assert.ok(check.skills.installed.some((item) => item.id === "react-implement"));
     assert.ok(
       check.agents.installed.some(
         (item) =>
-          item.id === "java-analyze" &&
-          item.path === ".codex/agents/java-analyze.toml",
+          item.id === "java-implement" &&
+          item.path === ".codex/agents/java-implement.toml",
       ),
     );
 
