@@ -839,6 +839,7 @@ export async function run(args, streams = process) {
           ? `${JSON.stringify(result)}\n`
           : `${result.changed ? `Upgraded ${wizard.pluginIds.length} plugin(s) successfully.\n` : "No updates applied.\n"}`,
       );
+      writeWarnings(streams, result.warnings);
     } finally {
       prompter.close();
     }
