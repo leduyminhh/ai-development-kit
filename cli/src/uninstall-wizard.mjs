@@ -55,10 +55,10 @@ export function renderUninstallStep({
   }
 
   plugins.forEach((plugin, index) => {
-    const checked = selected.includes(plugin.metadata.id);
+    const checked = selected.includes(plugin.id);
     const marker = cursor === index ? color("›", COLORS.green) : " ";
-    const versionInfo = color(`v${plugin.metadata.version}`, COLORS.dim);
-    lines.push(`${marker} [${checked ? color("x", COLORS.red) : " "}] ${color(plugin.metadata.id, COLORS.bold)} ${versionInfo}`);
+    const versionInfo = color(`v${plugin.version}`, COLORS.dim);
+    lines.push(`${marker} [${checked ? color("x", COLORS.red) : " "}] ${color(plugin.id, COLORS.bold)} ${versionInfo}`);
   });
 
   lines.push("", divider, color("Warning: Selected plugins and their assets will be removed.", COLORS.red), "");
@@ -215,7 +215,7 @@ export function createUninstallTerminalPrompter({ input, output }) {
         if (options.summary) {
           output.write(color("⚠ Warning: The following plugins will be REMOVED:", COLORS.red) + "\n");
           for (const plugin of options.summary) {
-            output.write(`  ${color("•", COLORS.red)} ${plugin.metadata.id} ${color(`v${plugin.metadata.version}`, COLORS.dim)}\n`);
+            output.write(`  ${color("•", COLORS.red)} ${plugin.id} ${color(`v${plugin.version}`, COLORS.dim)}\n`);
           }
           output.write("\n");
           output.write(color("This action will remove all associated assets (skills, commands, agents, etc.).", COLORS.dim) + "\n");
