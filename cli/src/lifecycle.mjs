@@ -1,4 +1,4 @@
-import { readFile, rm, stat } from "node:fs/promises";
+import { lstat, readFile, rm, stat } from "node:fs/promises";
 import path from "node:path";
 
 import {
@@ -10,7 +10,7 @@ import { projectProvider } from "./providers.mjs";
 import { buildProjectionInput } from "./projection-input.mjs";
 import { resolvePluginGraph } from "./resolver.mjs";
 import { readPlatformState } from "./state.mjs";
-import { applyTransaction, planTransaction } from "./transaction.mjs";
+import { applyTransaction, BUILD_DIR, planTransaction } from "./transaction.mjs";
 import {
   initializeProject,
   prepareInstructionFileContent,
@@ -525,14 +525,34 @@ export async function checkInstalled({ target }) {
   const lock = state.lock;
   const assets = collectInstalledAssets(state.ownership);
   const mcpServers = [];
+  const linkMode = lock?.linkMode ?? "copy";
+  const broken = [];
+  if (linkMode === "symlink") {
+    for (const [relativePath, metadata] of Object.entries(
+      state.ownership?.files ?? {},
+    )) {
+      if (!metadata.link) continue;
+      const destination = path.join(target, relativePath);
+      const buildPath = path.join(target, BUILD_DIR, relativePath);
+      try {
+        const info = await lstat(destination);
+        if (!info.isSymbolicLink()) continue; // file copy fallback — bỏ qua
+        await stat(buildPath); // ném nếu build target mất
+      } catch {
+        broken.push(relativePath);
+      }
+    }
+  }
   return {
     status: "pass",
     current: {
       state: lock ? "installed" : "not-installed",
       scope: lock?.scope ?? "project",
+      linkMode,
       platformVersion: lock?.platformVersion,
       installState: state.installState?.status ?? (lock ? "unknown" : "none"),
     },
+    links: { mode: linkMode, broken },
     plugins: {
       installed: lock?.plugins ?? [],
       roots: lock?.rootPlugins ?? [],

@@ -720,6 +720,23 @@ test("install records linkMode symlink and returns warnings array", async () => 
   }
 });
 
+test("check reports linkMode and link integrity", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-check-link-"));
+  try {
+    await installPlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["application"],
+      providers: ["codex"],
+    });
+    const result = await checkInstalled({ target });
+    assert.equal(result.current.linkMode, "symlink");
+    assert.ok(Array.isArray(result.links.broken));
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
 test("cli lifecycle reports scope and providers in human output", async () => {
   const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-cli-report-"));
   try {
