@@ -39,6 +39,9 @@ staged diff and nearby source context.
 Use an English commit header by default. Body notes may be English or Vietnamese.
 Use Vietnamese with diacritics unless repository instructions say otherwise.
 
+Commit messages render as plain text; write the body without Markdown backticks
+around file names, identifiers, section names, commands, or flags.
+
 ## Entry-Point Rules
 
 - Title must be imperative English and should normally stay under 72 characters.

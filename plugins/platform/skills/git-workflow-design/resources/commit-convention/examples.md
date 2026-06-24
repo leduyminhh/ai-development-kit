@@ -22,7 +22,7 @@ Important notes / Breaking impact:
   • RTSP_RECONNECT_TIMEOUT
   • FFMPEG_MAX_QUEUE
 
-- Cần cập nhật `.env` cho staging và production trước khi deploy.
+- Cần cập nhật .env cho staging và production trước khi deploy.
 ```
 
 ## Fix

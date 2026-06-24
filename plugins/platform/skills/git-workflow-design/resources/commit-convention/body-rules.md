@@ -13,6 +13,16 @@
 - Do not invent performance gains, security impact, migration needs, or breaking
   changes unless they are directly supported by the staged diff.
 
+## Plain Text Output
+
+Commit messages render as plain text, not Markdown. In the generated body:
+
+- Do not wrap file names, identifiers, section names, commands, or flags in
+  backticks.
+- Write them as plain words, for example: update .env, run aie install, the
+  Changed section.
+- Use backticks only when a token is genuinely unreadable without them.
+
 ## Required Sections
 
 `Changed` and `Reason` are mandatory.

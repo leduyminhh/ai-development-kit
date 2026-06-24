@@ -87,7 +87,7 @@ Important notes / Breaking impact:
 - Xóa:
   • LEGACY_AUTH_MODE
 
-- Staging và production cần cập nhật `.env` trước khi deploy.
+- Staging và production cần cập nhật .env trước khi deploy.
 ```
 
 ## Breaking Change Rule
