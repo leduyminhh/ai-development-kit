@@ -15,7 +15,7 @@
 
 ## Required Sections
 
-`What changed` and `Why changed` are mandatory.
+`Changed` and `Reason` are mandatory.
 
 Each section should contain:
 

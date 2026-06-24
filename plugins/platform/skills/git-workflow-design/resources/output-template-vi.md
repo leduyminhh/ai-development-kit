@@ -10,15 +10,15 @@ Commit đề xuất:
 Lý do chọn type/scope:
 Files sẽ stage:
 Commit body:
-What changed:
+Changed:
 - ...
   • ...
 
 - ...
 
-Why changed:
+Reason:
 - ...
-Important notes / breaking impact:
+Important notes / Breaking impact:
 - ...
 Verification:
 ```

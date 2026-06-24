@@ -75,7 +75,7 @@ Avoid vague wording:
 Vietnamese output snippet for explicit wording:
 
 ```text
-Important notes / breaking impact:
+Important notes / Breaking impact:
 - Thêm biến môi trường bắt buộc:
   • JWT_SECRET
   • JWT_EXPIRE_MINUTES
@@ -96,7 +96,7 @@ If the application cannot run correctly without new configuration values, the
 commit must include:
 
 ```text
-Important notes / breaking impact:
+Important notes / Breaking impact:
 ```
 
 This section becomes mandatory even if the rest of the change is small.

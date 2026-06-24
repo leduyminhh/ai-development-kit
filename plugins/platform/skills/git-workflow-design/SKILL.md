@@ -164,9 +164,9 @@ Basic expectation:
    - load [resources/commit-convention/templates.md](resources/commit-convention/templates.md) when the change needs a daily, structured, multi-module, refactor, fix, breaking-change, architecture, or PR template
    - a title using `type(scope): short summary`
    - use an English commit header by default
-   - a Vietnamese body with sections `What changed`, `Why changed`, and optional `Important notes / breaking impact`
+   - a Vietnamese body with sections `Changed`, `Reason`, and optional `Important notes / breaking impact`
    - keep the Vietnamese body in UTF-8 with diacritics; do not strip accents unless the user explicitly asks for that compromise
-   - `What changed` and `Why changed` should each contain 1 to 5 main rows depending on the real change size
+   - `Changed` and `Reason` should each contain 1 to 5 main rows depending on the real change size
    - each main row may have optional detail lines prefixed with `-`; keep them only when the diff shows meaningful supporting behavior, side effects, constraints, or secondary flow
    - derive all rows from the real diff and nearby source context, from a developer's point of view: what they improved, fixed, simplified, or enabled
    - summarize the main flow first, then the supporting flow

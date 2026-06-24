@@ -41,7 +41,7 @@ foreach ($pattern in $lostDiacriticPatterns) {
     }
 }
 
-$usesGeneratedVietnameseSections = $content -match '(?m)^What changed:$' -and $content -match '(?m)^Why changed:$'
+$usesGeneratedVietnameseSections = $content -match '(?m)^Changed:$' -and $content -match '(?m)^Reason:$'
 if ($usesGeneratedVietnameseSections -and $content -match '\?') {
     throw 'Generated Vietnamese commit body contains question marks; verify UTF-8 handling before committing.'
 }

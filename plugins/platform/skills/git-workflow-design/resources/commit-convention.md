@@ -19,16 +19,16 @@ referenced detail files only when the change requires that level of guidance.
 ```text
 type(scope): short summary
 
-What changed:
+Changed:
 - ...
   • ...
 
 - ...
 
-Why changed:
+Reason:
 - ...
 
-Important notes / breaking impact:
+Important notes / Breaking impact:
 - ...
   • ...
 ```
@@ -39,23 +39,33 @@ staged diff and nearby source context.
 Use an English commit header by default. Body notes may be English or Vietnamese.
 Use Vietnamese with diacritics unless repository instructions say otherwise.
 
-## Required Rules
+## Entry-Point Rules
 
 - Title must be imperative English and should normally stay under 72 characters.
 - Use the smallest truthful scope for the changed feature, module, workflow, or
   documentation target.
-- `What changed` and `Why changed` are mandatory.
-- `Important notes / breaking impact` is optional unless config, environment, or
-  compatibility impact makes it mandatory.
 - Breaking changes must use `!` in the header and include `BREAKING CHANGE:` plus
   a `Migration:` section when consumers need action.
-- Derive every bullet from the staged diff and nearby source context.
-- Do not invent performance gains, security impact, migrations, or breaking
-  changes.
-- Do not add `Co-Authored-By` or assistant attribution trailers unless the user
-  explicitly asks for them.
-- Preserve Vietnamese diacritics and UTF-8 encoding.
-- Do not silently remove Vietnamese diacritics unless the user explicitly approves that compromise.
+
+Body content, generation grounding, encoding safety, and config/environment
+rules live in the files below; do not restate them here.
+
+## Detail References
+
+- [commit-convention/templates.md](commit-convention/templates.md): size-based
+  templates (daily, structured, multi-module, refactor, fix, breaking,
+  architecture, and PR notes).
+- [commit-convention/body-rules.md](commit-convention/body-rules.md): mandatory
+  `Changed` / `Reason` sections, bullet formatting, commit splitting,
+  refactor/perf bodies, and the "do not invent impact" rule.
+- [commit-convention/ai-generation-rules.md](commit-convention/ai-generation-rules.md):
+  automatic generation grounding, the no-`Co-Authored-By` rule, and UTF-8 /
+  Vietnamese diacritics encoding safety.
+- [commit-convention/config-env-rules.md](commit-convention/config-env-rules.md):
+  when `Important notes / Breaking impact` becomes mandatory and how to disclose
+  config/environment changes.
+- [commit-convention/examples.md](commit-convention/examples.md): full Vietnamese
+  commit message examples.
 
 ## Commit Type Reference
 

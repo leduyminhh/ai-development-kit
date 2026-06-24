@@ -40,8 +40,7 @@ Assert-FileContainsRegex -Path $outputTemplate -Pattern 'Branch \u0111\u1ec1 xu\
 Assert-FileContainsRegex -Path $outputTemplate -Pattern '\u2022' 'Output template should use a readable detail bullet marker.'
 
 Assert-FileContainsRegex -Path $convention -Pattern 'Use Vietnamese with diacritics unless repository instructions say otherwise\.' 'Commit convention should explicitly require Vietnamese diacritics.'
-Assert-FileContainsRegex -Path $convention -Pattern 'Do not silently remove Vietnamese diacritics unless the user explicitly approves that compromise' 'Commit convention should forbid silently stripping diacritics.'
-Assert-FileContainsRegex -Path $convention -Pattern 'Do not add `Co-Authored-By`' 'Commit convention should forbid assistant co-author trailers by default.'
+Assert-FileContainsRegex -Path $aiRules -Pattern 'Do not silently strip accents unless the user explicitly approves that' 'AI generation rules should forbid silently stripping diacritics.'
 Assert-FileContainsRegex -Path $bodyRules -Pattern 'Commit Body Rules' 'Commit convention body rules should be split into a focused resource.'
 Assert-FileContainsRegex -Path $configEnvRules -Pattern 'Mandatory Environment Disclosure' 'Commit convention config/env rules should be split into a focused resource.'
 Assert-FileContainsRegex -Path $aiRules -Pattern 'AI Generation And Encoding Rules' 'Commit convention AI generation rules should be split into a focused resource.'
@@ -98,30 +97,30 @@ try {
     [System.Text.RegularExpressions.Regex]::Unescape(@'
 feat(cli): expand interactive plugin lifecycle wizards
 
-What changed:
+Changed:
 - M\u1edf r\u1ed9ng CLI wizard cho lu\u1ed3ng install.
 
-Why changed:
+Reason:
 - Gi\u00fap ng\u01b0\u1eddi d\u00f9ng ki\u1ec3m ch\u1ee9ng thay \u0111\u1ed5i.
 '@) | Set-Content -LiteralPath $goodMessage -Encoding utf8
 
     @'
 feat(cli): expand interactive plugin lifecycle wizards
 
-What changed:
+Changed:
 - M? r?ng CLI wizard cho lu?ng install.
 
-Why changed:
+Reason:
 - Gi?p ng??i d?ng ki?m ch?ng thay ??i.
 '@ | Set-Content -LiteralPath $badMessage -Encoding utf8
 
     @'
 feat(cli): expand interactive plugin lifecycle wizards
 
-What changed:
+Changed:
 - Update git workflow checks.
 
-Why changed:
+Reason:
 - Keep commit attribution policy explicit.
 
 Co-Authored-By: Claude Opus <noreply@example.com>

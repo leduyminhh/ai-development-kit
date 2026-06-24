@@ -28,8 +28,8 @@ Return:
 - recommended scope
 - commit title
 - Vietnamese body with diacritics and exactly three bullets:
-  - `What changed`
-  - `Why changed`
+  - `Changed`
+  - `Reason`
   - `Important notes / breaking impact`
 - recommended auto branch name
 - files that belong in the commit
