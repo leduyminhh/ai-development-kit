@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-06-24
+
+### Fixed
+
+- **Runtime crash in `aie remove` and `aie upgrade`** — `findOutdated` and the uninstall wizard read `plugin.metadata.id` on flat lock entries (which only carry `id`/`version`), throwing `Cannot read properties of undefined (reading 'id')`. Reverted those code paths to read `id`/`version` from lock entries while keeping `metadata.id` where plugin manifests are read.
+- **Broken test suite** — The v1.1.0 standardization series was merged without running `npm test`, leaving 17 failing tests. Updated fixtures to the shipped behavior (renamed skills, new `application` dependency set) and removed tests for the deleted `detect-feature-stack.mjs` script.
+
+### Added
+
+- **Core/plugin workflow sync validator** — `aie validate` now fails loud when a `core/workflows/*.yaml` global fallback drifts from its plugin-owned source, preventing the duplication bug class seen with the old `fullstack-feature` workflow.
+
+### Removed
+
+- **`youtube-transcript` skill** — Removed the empty `knowledge` skill (no command or workflow consumed it) and all references across the plugin manifest, skill registry, naming rules, READMEs, and the Codex agent adapter.
+
 ## [1.1.0] - 2026-06-23
 
 ### Changed
