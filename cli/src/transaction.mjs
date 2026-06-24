@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, rm, rmdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, rmdir, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { checksumText, resolveInside, sha256File, writeJsonAtomic } from "./io.mjs";
@@ -9,6 +9,14 @@ import {
   LOCK_PATH,
   OWNERSHIP_PATH,
 } from "./state.mjs";
+
+export const BUILD_DIR = ".ai-engineering/build";
+
+export const DEVELOPER_MODE_GUIDANCE =
+  "Một số file đã được sao chép thay vì symlink vì không tạo được symlink.\n" +
+  "Để dùng symlink (skills tự cập nhật khi build đổi): bật Windows Developer Mode\n" +
+  "(Settings > Privacy & security > For developers > Developer Mode) hoặc chạy lại\n" +
+  "với quyền admin. Sau khi đổi nội dung nguồn, chạy lại `aie update` để làm mới.";
 
 async function readBytesIfExists(pathname) {
   try {
@@ -60,6 +68,7 @@ export async function planTransaction({
   ownership,
   force = false,
   validateApplied,
+  linkMode = "copy",
 }) {
   const previousOwnershipPath = path.join(target, OWNERSHIP_PATH);
   let previousOwnership = { schemaVersion: 1, files: {} };
@@ -107,6 +116,7 @@ export async function planTransaction({
       relativePath,
       destination,
       content,
+      link: linkMode === "symlink" && !mergeManaged,
     });
   }
   for (const relativePath of Object.keys(previousOwnership.files ?? {})) {
@@ -133,9 +143,11 @@ export async function planTransaction({
   const files = {};
   for (const [relativePath, metadata] of Object.entries(ownership.files ?? {})) {
     const content = desiredFiles.get(relativePath);
+    const linkable = linkMode === "symlink" && !metadata.mergeStrategy;
     files[relativePath] = {
       ...metadata,
       checksum: content === undefined ? metadata.checksum : checksumText(content),
+      ...(linkable ? { link: true } : {}),
     };
   }
 
@@ -153,7 +165,7 @@ export async function planTransaction({
   };
 }
 
-export async function applyTransaction(plan) {
+export async function applyTransaction(plan, { symlinkImpl = symlink } = {}) {
   const backups = new Map();
   const stateFiles = [LOCK_PATH, OWNERSHIP_PATH, INSTALL_STATE_PATH];
   for (const action of plan.actions) {
@@ -193,13 +205,39 @@ export async function applyTransaction(plan) {
   }
 
   try {
+    const warnings = [];
+    let usedCopyFallback = false;
     for (const action of plan.actions) {
       if (action.action === "remove-managed") {
         await rm(action.destination, { force: true });
-      } else {
-        await mkdir(path.dirname(action.destination), { recursive: true });
+        continue;
+      }
+      await mkdir(path.dirname(action.destination), { recursive: true });
+      if (!action.link) {
+        await writeFile(action.destination, action.content, "utf8");
+        continue;
+      }
+      const buildPath = resolveInside(
+        plan.target,
+        path.join(BUILD_DIR, action.relativePath),
+      );
+      await mkdir(path.dirname(buildPath), { recursive: true });
+      await writeFile(buildPath, action.content, "utf8");
+      // Xoá đích cũ (file thường hoặc symlink cũ) để tạo lại idempotent.
+      await rm(action.destination, { force: true });
+      try {
+        const linkTarget = path.relative(
+          path.dirname(action.destination),
+          buildPath,
+        );
+        await symlinkImpl(linkTarget, action.destination, "file");
+      } catch {
+        usedCopyFallback = true;
         await writeFile(action.destination, action.content, "utf8");
       }
+    }
+    if (usedCopyFallback) {
+      warnings.push(DEVELOPER_MODE_GUIDANCE);
     }
     await pruneEmptyDirectories(
       plan.target,
@@ -225,6 +263,7 @@ export async function applyTransaction(plan) {
     return {
       status: "pass",
       written: plan.actions.map((action) => action.relativePath),
+      warnings,
     };
   } catch (error) {
     await restore();
