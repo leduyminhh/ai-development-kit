@@ -290,6 +290,15 @@ export async function run(args, streams = process) {
   }
 
   if (args[0] === "doctor") {
+    if (path.resolve(process.cwd()) === REPOSITORY_ROOT) {
+      const result = await validateRepository(REPOSITORY_ROOT);
+      streams.stdout.write(
+        args.includes("--json")
+          ? `${JSON.stringify({ status: "pass", scope: "source", ...result })}\n`
+          : `Doctor passed for source repository: ${result.pluginCount} plugins, ${result.providerCount} providers.\n`,
+      );
+      return 0;
+    }
     const context = resolveContext(args);
     const result = await doctorProject({
       target: context.targetRoot,

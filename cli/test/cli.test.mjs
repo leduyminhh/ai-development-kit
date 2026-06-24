@@ -40,6 +40,12 @@ test("prints scope-aware installed output", async () => {
   }
 });
 
+test("doctor validates the source repository when run from repo root", async () => {
+  const result = await runCli(["doctor"]);
+  assert.equal(result.exitCode, 0);
+  assert.match(result.stdout, /Doctor passed for source repository/);
+});
+
 test("supports direct plugin install with target adapter", async () => {
   const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-direct-install-"));
   try {
