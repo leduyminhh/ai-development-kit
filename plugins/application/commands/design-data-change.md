@@ -1,7 +1,7 @@
 ---
 id: application.design_data_change
 slug: design-data-change
-description: Design a safe data change for a full-stack feature.
+description: Capture feature data impact and hand off operational migration planning.
 version: 1.0.0
 ---
 
@@ -9,12 +9,13 @@ version: 1.0.0
 
 ## Intent
 
-Design schema, index, migration, backfill, reconciliation, rollback, and data gates for a feature that changes persistent data.
+Identify the data impact of a full-stack feature, define the application-facing data contract, and hand off migration execution details to `data.plan_migration` when persistent data must change.
 
 ## Inputs
 
 - feature context
 - current data contract
+- target application behavior
 - availability constraints
 
 ## Required Skills
@@ -23,16 +24,16 @@ Design schema, index, migration, backfill, reconciliation, rollback, and data ga
 
 ## Steps
 
-1. Inspect the feature context and current data contract.
-2. Identify schema, index, query, retention, and migration impact.
-3. Define staged migration, backfill, reconciliation, and rollback actions.
-4. Define availability constraints and operational data gates.
-5. Report blockers when rollback or reconciliation cannot be proven.
+1. Inspect the feature context, current data contract, target behavior, and consumers.
+2. Identify required schema, index, query, retention, compatibility, and data-shape changes.
+3. Define the application-facing contract and data assumptions needed by frontend and backend work.
+4. Produce a handoff for `data.plan_migration` when staged migration, backfill, reconciliation, or rollback is required.
+5. Report feature blockers when the data contract, compatibility, or migration handoff cannot be proven.
 
 ## Output Contract
 
 - schema changes
-- migration stages
-- rollback
-- reconciliation
-- data gates
+- application data contract
+- migration handoff
+- compatibility risks
+- feature blockers

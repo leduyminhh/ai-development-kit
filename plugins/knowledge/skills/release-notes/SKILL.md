@@ -10,6 +10,8 @@ description: Use when generating or reviewing a changelog or release notes from 
 Use this skill to turn a range of merged changes into a changelog and
 audience-appropriate release notes: group by change type, call out breaking
 changes and migrations, and keep entries verifiable against the source history.
+It is the canonical writing policy for release notes; git workflow skills may
+collect the source range, but final classification and prose belong here.
 
 ## When to Use
 
@@ -19,8 +21,9 @@ user-facing release notes.
 
 ## Core Process
 
-1. Establish the change range (previous tag or release to the current head) and
-   collect the merged commits, pull requests, or tickets in it.
+1. Establish the change range (previous tag or release to the current head), or
+   accept a verified range collected by a git workflow skill, and collect the
+   merged commits, pull requests, or tickets in it.
 2. Classify each change: feature, fix, performance, deprecation, breaking change,
    security, or internal-only.
 3. Filter internal-only noise out of user-facing notes; keep it in the full

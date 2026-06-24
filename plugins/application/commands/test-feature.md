@@ -1,7 +1,7 @@
 ---
 id: application.test_feature
 slug: test-feature
-description: Verify a full-stack feature against acceptance criteria.
+description: Route full-stack feature verification through the canonical quality command.
 version: 1.0.0
 ---
 
@@ -9,12 +9,13 @@ version: 1.0.0
 
 ## Intent
 
-Turn feature acceptance criteria into unit, integration, contract, and end-to-end verification with evidence.
+Scope a full-stack feature for verification, then delegate executable quality verification to `quality.verify_quality` so feature testing and general change verification share one canonical quality flow.
 
 ## Inputs
 
 - feature context
 - changed-file scope
+- acceptance criteria
 
 ## Required Skills
 
@@ -23,16 +24,16 @@ Turn feature acceptance criteria into unit, integration, contract, and end-to-en
 
 ## Steps
 
-1. Inspect acceptance criteria, changed files, existing tests, and integration points.
-2. Derive the risk-based test matrix from user-visible behavior and contracts.
-3. Add or run focused tests through the canonical quality skills.
-4. Keep production source unchanged in test mode.
-5. Report executed tests, failures, and release exit criteria.
+1. Inspect the feature context, acceptance criteria, changed files, existing tests, and integration points.
+2. Convert the feature scope into a `quality.verify_quality` change scope with acceptance criteria and integration boundaries.
+3. Run QA review and automated verification through the canonical quality flow.
+4. Keep production source unchanged unless the user explicitly asks to add or repair tests.
+5. Report quality evidence, feature-specific gaps, and release exit criteria.
 
 ## Output Contract
 
 - test matrix
-- added tests
 - executed tests
 - failures
+- feature-specific gaps
 - exit criteria

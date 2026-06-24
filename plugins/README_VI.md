@@ -60,6 +60,24 @@ Không tạo README placeholder chỉ để giữ folder.
   toàn repo và managed agent baseline trong `core/agents`, không đặt trong
   runtime plugin skill.
 
+## Ranh Giới Command Và Skill
+
+- Command là entry point hướng người dùng. Command định nghĩa intent, input,
+  required skill, bước điều phối và output contract.
+- Skill là quy trình domain có thể tái sử dụng. Skill sở hữu operating mode chi
+  tiết, reference, subagent prompt, script, quy tắc verification và output style
+  cho capability của nó.
+- Khi command trong một plugin cần capability do plugin khác sở hữu, hãy giữ
+  command đó là wrapper có scope hẹp và delegate sang command hoặc skill
+  canonical. Không sao chép toàn bộ quy trình của plugin khác.
+- Command theo scope feature trong `application` có thể chuẩn bị context cho
+  `quality`, `data`, `security` hoặc `knowledge`, nhưng các plugin đó vẫn là
+  canonical owner cho verification, migration planning, security review và prose
+  release notes.
+- Nếu hai command có thể đáp ứng cùng một yêu cầu người dùng, hãy ghi rõ command
+  nào là canonical và biến command còn lại thành compatibility wrapper hoặc
+  entry point có scope cụ thể hơn.
+
 ## Quy Tắc Dependency
 
 - Dependency bắt buộc được cài trước plugin được yêu cầu. Ví dụ, cài

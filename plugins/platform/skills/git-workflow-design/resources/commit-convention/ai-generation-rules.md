@@ -33,5 +33,6 @@ If intent is unclear:
 - Before committing, run `scripts/test-commit-message-encoding.ps1 -MessageFile <file>` from this skill when the generated body contains Vietnamese text.
 - After committing, inspect `git log -1 --format=%B` and amend immediately if Vietnamese text was corrupted.
 - If terminal encoding is broken, fix encoding handling first.
+- Do not add `Co-Authored-By` or assistant attribution trailers unless the user explicitly asks for them.
 - Do not silently strip accents unless the user explicitly approves that
   compromise.

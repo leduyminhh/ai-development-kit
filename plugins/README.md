@@ -59,6 +59,23 @@ Unused asset groups remain as folders and are declared as `none` in
   policy and managed agent baselines in `core/agents`, not in a runtime plugin
   skill.
 
+## Command And Skill Boundaries
+
+- Commands are user-facing entry points. They define intent, inputs, required
+  skills, orchestration steps, and output contracts.
+- Skills are reusable domain procedures. They own the detailed operating mode,
+  references, subagent prompts, scripts, verification rules, and output style for
+  their capability.
+- When a command in one plugin needs a capability owned by another plugin, keep
+  the command as a thin scoped wrapper and delegate to the canonical command or
+  skill. Do not duplicate the other plugin's full process.
+- Feature-scoped commands in `application` may prepare context for `quality`,
+  `data`, `security`, or `knowledge`, but those plugins remain canonical owners
+  for verification, migration planning, security review, and release-note prose.
+- If two commands can satisfy the same user request, document which one is
+  canonical and make the other command a compatibility wrapper or more specific
+  scoped entry point.
+
 ## Dependency Rules
 
 - Required dependencies are installed before the requested plugin. For example,

@@ -38,6 +38,8 @@ Use Vietnamese with diacritics unless repository instructions say otherwise.
 - Derive every bullet from the staged diff and nearby source context.
 - Do not invent performance gains, security impact, migrations, or breaking
   changes.
+- Do not add `Co-Authored-By` or assistant attribution trailers unless the user
+  explicitly asks for them.
 - Preserve Vietnamese diacritics and UTF-8 encoding.
 - Do not silently remove Vietnamese diacritics unless the user explicitly approves that compromise.
 

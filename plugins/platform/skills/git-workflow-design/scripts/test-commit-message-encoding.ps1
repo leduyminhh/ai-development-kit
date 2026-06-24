@@ -46,4 +46,8 @@ if ($usesGeneratedVietnameseSections -and $content -match '\?') {
     throw 'Generated Vietnamese commit body contains question marks; verify UTF-8 handling before committing.'
 }
 
+if ($content -match '(?im)^Co-Authored-By:') {
+    throw 'Commit message must not contain Co-Authored-By trailers when using git-workflow-design.'
+}
+
 Write-Output 'commit message encoding check passed.'

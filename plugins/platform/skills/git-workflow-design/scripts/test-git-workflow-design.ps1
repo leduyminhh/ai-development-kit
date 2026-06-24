@@ -40,16 +40,20 @@ Assert-FileContainsRegex -Path $outputTemplate -Pattern '\u2022' 'Output templat
 
 Assert-FileContainsRegex -Path $convention -Pattern 'Use Vietnamese with diacritics unless repository instructions say otherwise\.' 'Commit convention should explicitly require Vietnamese diacritics.'
 Assert-FileContainsRegex -Path $convention -Pattern 'Do not silently remove Vietnamese diacritics unless the user explicitly approves that compromise' 'Commit convention should forbid silently stripping diacritics.'
+Assert-FileContainsRegex -Path $convention -Pattern 'Do not add `Co-Authored-By`' 'Commit convention should forbid assistant co-author trailers by default.'
 Assert-FileContainsRegex -Path $bodyRules -Pattern 'Commit Body Rules' 'Commit convention body rules should be split into a focused resource.'
 Assert-FileContainsRegex -Path $configEnvRules -Pattern 'Mandatory Environment Disclosure' 'Commit convention config/env rules should be split into a focused resource.'
 Assert-FileContainsRegex -Path $aiRules -Pattern 'AI Generation And Encoding Rules' 'Commit convention AI generation rules should be split into a focused resource.'
 Assert-FileContainsRegex -Path $aiRules -Pattern 'git commit -F <file>' 'Commit convention AI rules should require UTF-8 file based commits.'
 Assert-FileContainsRegex -Path $aiRules -Pattern 'test-commit-message-encoding\.ps1 -MessageFile <file>' 'Commit convention AI rules should require commit message encoding validation.'
+Assert-FileContainsRegex -Path $aiRules -Pattern 'Do not add `Co-Authored-By`' 'AI generation rules should forbid assistant co-author trailers by default.'
 Assert-FileContainsRegex -Path $examples -Pattern 'Th\u00eam c\u1ea5u h\u00ecnh reconnect cho lu\u1ed3ng RTSP qua FFmpeg\.' 'Commit convention examples should be stored as readable UTF-8 Vietnamese.'
 Assert-FileContainsRegex -Path $examples -Pattern 'Script parse t\u00ean file c\u0169 c\u00f3 th\u1ec3 c\u1ea7n c\u1eadp nh\u1eadt l\u1ea1i pattern\.' 'Commit convention examples should keep Vietnamese diacritics in impact notes.'
 Assert-FileContainsRegex -Path $skill -Pattern 'test-commit-message-encoding\.ps1 -MessageFile <file>' 'SKILL.md should require commit message encoding validation before commit.'
 Assert-FileContainsRegex -Path $skill -Pattern 'git commit -F <file>' 'SKILL.md should require UTF-8 file based commits.'
+Assert-FileContainsRegex -Path $skill -Pattern 'never add `Co-Authored-By` trailers' 'SKILL.md should forbid assistant co-author trailers by default.'
 Assert-FileContainsRegex -Path $encodingCheck -Pattern 'Generated Vietnamese commit body contains question marks' 'Encoding check script should reject suspicious question marks in generated Vietnamese commit bodies.'
+Assert-FileContainsRegex -Path $encodingCheck -Pattern 'Co-Authored-By' 'Encoding check script should reject assistant co-author trailers.'
 
 $commitConventionFiles = @($convention, $bodyRules, $configEnvRules, $aiRules, $examples, $outputTemplate)
 
@@ -75,15 +79,18 @@ New-Item -ItemType Directory -Path $tempDir | Out-Null
 try {
     $goodMessage = Join-Path $tempDir 'good-commit-message.txt'
     $badMessage = Join-Path $tempDir 'bad-commit-message.txt'
-    @'
+    $trailerMessage = Join-Path $tempDir 'trailer-commit-message.txt'
+
+    [System.Text.RegularExpressions.Regex]::Unescape(@'
 feat(cli): expand interactive plugin lifecycle wizards
 
 What changed:
-- Mở rộng CLI wizard cho luồng install.
+- M\u1edf r\u1ed9ng CLI wizard cho lu\u1ed3ng install.
 
 Why changed:
-- Giúp người dùng kiểm chứng thay đổi.
-'@ | Set-Content -LiteralPath $goodMessage -Encoding utf8
+- Gi\u00fap ng\u01b0\u1eddi d\u00f9ng ki\u1ec3m ch\u1ee9ng thay \u0111\u1ed5i.
+'@) | Set-Content -LiteralPath $goodMessage -Encoding utf8
+
     @'
 feat(cli): expand interactive plugin lifecycle wizards
 
@@ -94,12 +101,28 @@ Why changed:
 - Gi?p ng??i d?ng ki?m ch?ng thay ??i.
 '@ | Set-Content -LiteralPath $badMessage -Encoding utf8
 
+    @'
+feat(cli): expand interactive plugin lifecycle wizards
+
+What changed:
+- Update git workflow checks.
+
+Why changed:
+- Keep commit attribution policy explicit.
+
+Co-Authored-By: Claude Opus <noreply@example.com>
+'@ | Set-Content -LiteralPath $trailerMessage -Encoding utf8
+
     & powershell -NoProfile -ExecutionPolicy Bypass -File $encodingCheck -MessageFile $goodMessage | Out-Null
     $previousErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
     & powershell -NoProfile -ExecutionPolicy Bypass -File $encodingCheck -MessageFile $badMessage *> $null
+    $badExitCode = $LASTEXITCODE
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $encodingCheck -MessageFile $trailerMessage *> $null
+    $trailerExitCode = $LASTEXITCODE
     $ErrorActionPreference = $previousErrorActionPreference
-    Assert-True ($LASTEXITCODE -ne 0) 'Encoding check should reject generated Vietnamese commit bodies with lost diacritics.'
+    Assert-True ($badExitCode -ne 0) 'Encoding check should reject generated Vietnamese commit bodies with lost diacritics.'
+    Assert-True ($trailerExitCode -ne 0) 'Encoding check should reject Co-Authored-By trailers by default.'
 } finally {
     Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue
 }
