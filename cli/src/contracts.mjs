@@ -199,6 +199,37 @@ async function exists(pathname) {
   }
 }
 
+// `core/workflows/` ships global fallback workflows that are byte-identical
+// copies of plugin-owned sources. Nothing regenerates them, so they silently
+// drift when a plugin workflow changes. Fail loud when a core copy diverges
+// from its plugin source so the duplication stays in sync.
+async function validateCoreWorkflowSync(root, plugins, errors) {
+  const coreRoot = path.join(root, "core", "workflows");
+  if (!(await exists(coreRoot))) return;
+  const pluginWorkflows = new Map();
+  for (const [pluginId, plugin] of plugins) {
+    for (const wfAsset of plugin.assets?.workflows ?? []) {
+      pluginWorkflows.set(path.basename(wfAsset), {
+        pluginId,
+        source: path.join(root, "plugins", pluginId, wfAsset),
+      });
+    }
+  }
+  const normalize = (text) => text.replace(/^﻿/, "").replace(/\r\n/g, "\n");
+  const coreFiles = (await readdir(coreRoot)).filter((name) => name.endsWith(".yaml"));
+  for (const name of coreFiles) {
+    const owner = pluginWorkflows.get(name);
+    if (!owner) continue;
+    const coreContent = normalize(await readFile(path.join(coreRoot, name), "utf8"));
+    const pluginContent = normalize(await readFile(owner.source, "utf8"));
+    if (coreContent !== pluginContent) {
+      errors.push(
+        `core/workflows/${name} is out of sync with plugin ${owner.pluginId} source`,
+      );
+    }
+  }
+}
+
 function sortedUnique(values) {
   return [...new Set(values ?? [])].sort();
 }
@@ -541,6 +572,7 @@ export async function validateRepository(root) {
     }
   }
   detectCycles(plugins, errors);
+  await validateCoreWorkflowSync(root, plugins, errors);
   await validateRouting(
     root,
     plugins,
