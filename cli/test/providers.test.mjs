@@ -53,7 +53,11 @@ test("projects canonical command semantics for all providers", async () => {
   assert.equal(antigravity.mcpConfig.path, "mcp/mcp.json");
   assert.deepEqual(
     codex.files.map((file) => file.path),
-    [".codex/agents/openai.yaml", ".codex/workflows/commands.md"],
+    [
+      ".codex/agents/openai.yaml",
+      ".codex/workflows/commands.md",
+      ".codex/workflows/commands/review-backend.md",
+    ],
   );
   assert.deepEqual(
     claude.files.map((file) => file.path),
@@ -117,7 +121,11 @@ test("global projections expose native files and user-level MCP configs", async 
 
   assert.deepEqual(
     outputs.codex.files.map((file) => file.path),
-    [".codex/agents/openai.yaml", ".codex/workflows/commands.md"],
+    [
+      ".codex/agents/openai.yaml",
+      ".codex/workflows/commands.md",
+      ".codex/workflows/commands/review-backend.md",
+    ],
   );
   assert.deepEqual(
     outputs.claude.files.map((file) => file.path),
@@ -184,6 +192,7 @@ test("projects exact provider-native project layouts", () => {
       ".codex/agents/java-analyze.toml",
       ".codex/agents/openai.yaml",
       ".codex/workflows/commands.md",
+      ".codex/workflows/commands/review-backend.md",
     ],
   );
   assert.deepEqual(

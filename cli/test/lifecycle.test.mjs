@@ -70,6 +70,11 @@ test("installs application project-locally with required dependencies", async ()
     assert.equal(await exists(target, ".codex/agents/java-implement.toml"), true);
     assert.equal(await exists(target, "agents/java-implement.toml"), false);
     assert.equal(await exists(target, ".codex/agents/openai.yaml"), true);
+    assert.equal(await exists(target, ".codex/workflows/commands.md"), true);
+    assert.equal(await exists(target, ".codex/workflows/commands/test-feature.md"), true);
+    const agents = await readFile(path.join(target, "AGENTS.md"), "utf8");
+    assert.match(agents, /\.codex\/workflows\/commands\.md/);
+    assert.match(agents, /command catalog/i);
     assert.equal(await exists(target, ".codex/config.toml"), false);
     assert.equal(await exists(target, ".mcp.json"), false);
     assert.equal(await exists(target, ".ai-engineering/mcp-servers/application/src/index.js"), false);
@@ -532,9 +537,16 @@ test("checks installed skills, commands, agents, and no active MCP servers", asy
     assert.deepEqual(check.providers, ["codex"]);
     assert.equal(check.mcp.count, 0);
     assert.deepEqual(check.mcp.servers, []);
-    assert.equal(check.commands.count, 0);
+    assert.equal(check.commands.count > 0, true);
     assert.equal(check.skills.count > 0, true);
     assert.equal(check.agents.count > 0, true);
+    assert.ok(
+      check.commands.installed.some(
+        (item) =>
+          item.id === "application.test_feature" &&
+          item.path === ".codex/workflows/commands/test-feature.md",
+      ),
+    );
     assert.ok(check.skills.installed.some((item) => item.id === "java-implement"));
     assert.ok(check.skills.installed.some((item) => item.id === "react-implement"));
     assert.ok(

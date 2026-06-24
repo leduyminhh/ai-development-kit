@@ -9,6 +9,12 @@ function owners(input) {
 function commandBody(command) {
   return `# ${command.id} (${command.slug})
 
+${command.description}
+
+## Inputs
+
+${command.inputs.map((item) => `- ${item}`).join("\n")}
+
 ## Intent
 
 ${command.intent}
@@ -25,6 +31,27 @@ ${command.steps.map((step, index) => `${index + 1}. ${step}`).join("\n")}
 
 ${command.outputContract.map((item) => `- ${item}`).join("\n")}
 ${command.outputSchema ? `\n## Output Schema\n\n- ${command.outputSchema}\n` : ""}`;
+}
+
+function commandCatalog(commands) {
+  const index = commands
+    .map((command) => `- \`${command.slug}\` / \`${command.id}\`: ${command.description}`)
+    .join("\n");
+  return `# Codex Command Catalog
+
+Use this catalog when the user asks for an installed AI Engineering command,
+flow, workflow, or capability entry point. Prefer the matching command file
+under \`.codex/workflows/commands/<slug>.md\` for the full contract, then load
+the required skills listed there.
+
+## Index
+
+${index}
+
+## Commands
+
+${commands.map(commandBody).join("\n\n")}
+`;
 }
 
 function providerManifest(input) {
@@ -87,10 +114,19 @@ export function project(input) {
       assetType: "command-catalog",
       assetId: "codex.commands",
       destinationPath: ".codex/workflows/commands.md",
-      content: input.commands.map(commandBody).join("\n"),
+      content: commandCatalog(input.commands),
       owners: allOwners,
       shared: allOwners.length > 1,
     },
+    ...input.commands.map((command) => ({
+      operation: "render",
+      assetType: "command",
+      assetId: command.id,
+      destinationPath: `.codex/workflows/commands/${command.slug}.md`,
+      content: commandBody(command),
+      owners: command.owners,
+      shared: command.owners.length > 1,
+    })),
   ].sort((left, right) =>
     left.destinationPath.localeCompare(right.destinationPath),
   );

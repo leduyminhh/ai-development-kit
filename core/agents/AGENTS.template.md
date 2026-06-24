@@ -50,6 +50,19 @@ For every task:
 5. Run deterministic validation that proves the request, then report exact
    commands, skipped checks, blockers, and residual risk.
 
+### Command Routing
+
+- When the user asks for an installed command, flow, workflow, or capability
+  entry point, check the provider command catalog before choosing skills.
+- For Codex installs, read `.codex/workflows/commands.md` first, then open the
+  matching command file under `.codex/workflows/commands/<slug>.md` when it
+  exists.
+- Treat command files as orchestration contracts: follow their intent, required
+  skills, steps, and output contract, then load the listed skills for the
+  detailed operating procedure.
+- If no matching command exists, fall back to the most specific installed skill
+  and report that no command route was available.
+
 ### Must-Have Rules
 
 1. Think before coding. Inspect relevant code, config, skill, or test paths
