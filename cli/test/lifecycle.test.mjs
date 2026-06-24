@@ -472,6 +472,37 @@ test("updates from canonical source and preserves unrelated root plugins", async
   }
 });
 
+test("force update re-projects even when version is unchanged", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-force-"));
+  try {
+    await installPlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["application"],
+      providers: ["codex"],
+    });
+
+    // Version không đổi => findOutdated trả rỗng. Không force => no-op.
+    const noForce = await updatePlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["application"],
+    });
+    assert.equal(noForce.changed, false);
+
+    // Force => re-project bất kể version.
+    const forced = await updatePlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["application"],
+      force: true,
+    });
+    assert.equal(forced.changed, true);
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
 test("cli lists installed plugins and reports outdated plugins", async () => {
   const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-cli-update-"));
   try {

@@ -607,7 +607,12 @@ export async function updatePlugins({
   const applicable = outdated.updates.filter((item) =>
     selected.includes(item.id),
   );
-  if (dryRun || applicable.length === 0) {
+  if (dryRun) {
+    return { status: "pass", changed: false, updates: applicable };
+  }
+  // `--force` re-projects nội dung mới nhất kể cả khi version trùng (lúc đó
+  // `applicable` rỗng); không force thì version trùng = không có gì để làm.
+  if (applicable.length === 0 && !force) {
     return { status: "pass", changed: false, updates: applicable };
   }
   const result = await installPlugins({
