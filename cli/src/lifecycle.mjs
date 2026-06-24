@@ -248,6 +248,7 @@ async function buildDesiredState({
     schemaVersion: 1,
     platformVersion: platform.product.version,
     scope: installContext.scope,
+    linkMode: "symlink",
     providers: activeProviders,
     rootPlugins: rootPlugins ?? requested,
     optionalPlugins: graph.optionalPlugins,
@@ -321,8 +322,9 @@ export async function applyPreparedInstallation({
     lock: prepared.lock,
     ownership: prepared.ownership,
     force,
+    linkMode: prepared.lock.linkMode ?? "copy",
   });
-  await applyTransaction(plan);
+  const applied = await applyTransaction(plan);
   await writeLifecycleState(context.targetRoot, prepared.lock);
   return {
     status: "pass",
@@ -330,6 +332,7 @@ export async function applyPreparedInstallation({
     plugins: prepared.plugins,
     providers: prepared.providers,
     optionalPlugins: prepared.lock.optionalPlugins ?? [],
+    warnings: applied.warnings ?? [],
   };
 }
 
@@ -608,12 +611,12 @@ export async function updatePlugins({
     selected.includes(item.id),
   );
   if (dryRun) {
-    return { status: "pass", changed: false, updates: applicable };
+    return { status: "pass", changed: false, updates: applicable, warnings: [] };
   }
   // `--force` re-projects nội dung mới nhất kể cả khi version trùng (lúc đó
   // `applicable` rỗng); không force thì version trùng = không có gì để làm.
   if (applicable.length === 0 && !force) {
-    return { status: "pass", changed: false, updates: applicable };
+    return { status: "pass", changed: false, updates: applicable, warnings: [] };
   }
   const result = await installPlugins({
     root,

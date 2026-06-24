@@ -700,6 +700,26 @@ test("cli removes an installed plugin", async () => {
   }
 });
 
+test("install records linkMode symlink and returns warnings array", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-linkmode-"));
+  try {
+    const result = await installPlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["application"],
+      providers: ["codex"],
+    });
+    assert.ok(Array.isArray(result.warnings));
+
+    const lock = JSON.parse(
+      await readFile(path.join(target, ".ai-engineering/platform.lock"), "utf8"),
+    );
+    assert.equal(lock.linkMode, "symlink");
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
 test("cli lifecycle reports scope and providers in human output", async () => {
   const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-cli-report-"));
   try {

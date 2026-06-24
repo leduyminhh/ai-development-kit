@@ -78,6 +78,12 @@ import {
   writeInstallSession,
 } from "./install-session.mjs";
 
+function writeWarnings(streams, warnings) {
+  for (const warning of warnings ?? []) {
+    streams.stderr.write(`warning: ${warning}\n`);
+  }
+}
+
 export const VERSION = "1.0.0";
 const REPOSITORY_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -564,6 +570,7 @@ export async function run(args, streams = process) {
           pluginsLine: `Installed plugins: ${result.plugins.join(", ") || "none"}`,
         }),
     );
+    writeWarnings(streams, result.warnings);
     return 0;
   }
 
@@ -770,6 +777,7 @@ export async function run(args, streams = process) {
           ? `${JSON.stringify(result)}\n`
           : `${result.changed ? "Updated" : "No updates"}.\n`,
       );
+      writeWarnings(streams, result.warnings);
       return 0;
     }
 
