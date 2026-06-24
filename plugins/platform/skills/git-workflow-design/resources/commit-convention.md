@@ -3,6 +3,17 @@
 Use this file as the entry point for writing commit messages. Load the
 referenced detail files only when the change requires that level of guidance.
 
+## Selection Flow
+
+1. Detect the change size: `small`, `medium`, `large`, or `breaking`.
+2. Choose the smallest truthful commit type and scope.
+3. Load [commit-convention/templates.md](commit-convention/templates.md) when a
+   daily, structured, multi-module, refactor, fix, breaking, architecture, or PR
+   template would make the output clearer.
+4. Use a one-line commit only when the change is small and the title fully
+   explains it.
+5. Split unrelated changes instead of hiding them inside one large template.
+
 ## Format
 
 ```text
@@ -25,6 +36,7 @@ Important notes / breaking impact:
 If the user does not provide a message, generate both title and body from the
 staged diff and nearby source context.
 
+Use an English commit header by default. Body notes may be English or Vietnamese.
 Use Vietnamese with diacritics unless repository instructions say otherwise.
 
 ## Required Rules
@@ -35,6 +47,8 @@ Use Vietnamese with diacritics unless repository instructions say otherwise.
 - `What changed` and `Why changed` are mandatory.
 - `Important notes / breaking impact` is optional unless config, environment, or
   compatibility impact makes it mandatory.
+- Breaking changes must use `!` in the header and include `BREAKING CHANGE:` plus
+  a `Migration:` section when consumers need action.
 - Derive every bullet from the staged diff and nearby source context.
 - Do not invent performance gains, security impact, migrations, or breaking
   changes.

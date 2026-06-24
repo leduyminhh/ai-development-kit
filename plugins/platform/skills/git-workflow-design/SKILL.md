@@ -64,6 +64,7 @@ Use this skill when the user asks to commit, push, stage, create or switch branc
 ## Resource Map
 
 - [resources/commit-convention.md](resources/commit-convention.md): commit type, scope, title, and Vietnamese body rules.
+- [resources/commit-convention/templates.md](resources/commit-convention/templates.md): size-based daily, structured, multi-module, refactor, fix, breaking-change, architecture, and PR templates.
 - [resources/branch-convention.md](resources/branch-convention.md): branch role prefixes and naming rules.
 - [resources/gitflow-checklist.md](resources/gitflow-checklist.md): concise safety checklist for staging, commit, push, merge, revert, release, and hotfix.
 - [resources/output-template-vi.md](resources/output-template-vi.md): Vietnamese git workflow response templates.
@@ -159,7 +160,10 @@ Basic expectation:
 3. If the user already gave a commit message, preserve its intent and only normalize obvious format issues.
 4. If the current branch is `main`, `master`, `develop`, or `dev`, load [resources/branch-convention.md](resources/branch-convention.md) and create/switch to the generated branch from that convention before committing. This skill convention takes precedence over the Codex app default `codex/` branch prefix.
 5. If the user did not provide a commit message, generate:
+   - Detect the change size first: `small`, `medium`, `large`, or `breaking`
+   - load [resources/commit-convention/templates.md](resources/commit-convention/templates.md) when the change needs a daily, structured, multi-module, refactor, fix, breaking-change, architecture, or PR template
    - a title using `type(scope): short summary`
+   - use an English commit header by default
    - a Vietnamese body with sections `What changed`, `Why changed`, and optional `Important notes / breaking impact`
    - keep the Vietnamese body in UTF-8 with diacritics; do not strip accents unless the user explicitly asks for that compromise
    - `What changed` and `Why changed` should each contain 1 to 5 main rows depending on the real change size
@@ -169,12 +173,14 @@ Basic expectation:
    - avoid file-by-file narration when the deeper workflow or maintenance intent is visible
    - never invent reasons or impact that cannot be supported by the staged change
    - never add `Co-Authored-By` trailers or other assistant attribution trailers unless the user explicitly asks for them
+   - for breaking changes, add `!` to the header and include `BREAKING CHANGE:` plus a `Migration:` section when users or consumers must take action
 6. For changelog or release-note requests, choose the smallest useful comparison range, read the git history, and hand the verified source list to `release-notes` for grouping and audience-specific writing when available. If `release-notes` is unavailable, produce a minimal fallback summary and state that the canonical release-note skill was not available.
 7. Before committing, write the full message to a temporary UTF-8 file, run `scripts/test-commit-message-encoding.ps1 -MessageFile <file>`, and commit with `git commit -F <file>`. If the check fails, fix UTF-8 handling first; do not remove Vietnamese diacritics or attribution trailers as a workaround.
 8. Stage only the files for the current commit group, then run relevant verification when feasible. Do not commit failing work unless the user explicitly wants a checkpoint commit.
 9. After a successful commit, inspect `git log -1 --format=%B` for readable Vietnamese; amend immediately if encoding was corrupted.
 10. After a successful push, create a pull request when the user asks to publish or when the workflow naturally reaches PR preparation.
-11. Report branch, commit, push, PR, verification, changelog scope, and relevant notes in Vietnamese.
+11. When preparing a PR, use the Pull Request Notes Template in [resources/commit-convention/templates.md](resources/commit-convention/templates.md) and keep migration, testing, risk, and notes explicit.
+12. Report branch, commit, push, PR, verification, changelog scope, and relevant notes in Vietnamese.
 
 ### Changelog Handoff
 
