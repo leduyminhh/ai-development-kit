@@ -184,12 +184,24 @@ function formatCheck(result) {
         return `- ${item.id ?? item.name}${owners}${providers}${pathInfo}`;
       })
       : ["- none"];
+  const formatLinks = (links) => {
+    if (!links?.checked?.length) return ["- none"];
+    return links.checked.map((item) => {
+      const target = item.linkTarget ?? item.target;
+      return `- ${item.path} status=${item.status} source=${item.source} target=${target}`;
+    });
+  };
   const lines = [
     `Current: ${result.current.state}`,
     `Scope: ${result.current.scope}`,
     `Providers: ${formatProviders(result.providers)}`,
     `Platform: ${result.current.platformVersion ?? "unknown"}`,
     `Install state: ${result.current.installState}`,
+    `Link mode: ${result.links?.mode ?? result.current.linkMode ?? "copy"}`,
+    `Broken links: ${result.links?.broken?.length ?? 0}`,
+    "",
+    "Symlink sources:",
+    ...formatLinks(result.links),
     "",
     `Plugins (${result.plugins.installed.length}):`,
     ...(result.plugins.installed.length > 0

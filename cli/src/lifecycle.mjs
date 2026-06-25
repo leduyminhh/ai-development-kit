@@ -1,4 +1,4 @@
-import { lstat, readFile, rm, stat } from "node:fs/promises";
+import { lstat, readFile, readlink, rm, stat } from "node:fs/promises";
 import path from "node:path";
 
 import {
@@ -527,6 +527,7 @@ export async function checkInstalled({ target }) {
   const mcpServers = [];
   const linkMode = lock?.linkMode ?? "copy";
   const broken = [];
+  const checked = [];
   if (linkMode === "symlink") {
     for (const [relativePath, metadata] of Object.entries(
       state.ownership?.files ?? {},
@@ -534,12 +535,35 @@ export async function checkInstalled({ target }) {
       if (!metadata.link) continue;
       const destination = path.join(target, relativePath);
       const buildPath = path.join(target, BUILD_DIR, relativePath);
+      const source = path.join(BUILD_DIR, relativePath).replaceAll("\\", "/");
       try {
+        await stat(buildPath);
         const info = await lstat(destination);
-        if (!info.isSymbolicLink()) continue; // file copy fallback — bỏ qua
-        await stat(buildPath); // ném nếu build target mất
+        if (!info.isSymbolicLink()) {
+          checked.push({
+            path: relativePath,
+            source,
+            target: destination,
+            status: "copy-fallback",
+          });
+          continue;
+        }
+        const linkTarget = await readlink(destination);
+        checked.push({
+          path: relativePath,
+          source,
+          target: path.resolve(path.dirname(destination), linkTarget),
+          linkTarget,
+          status: "symlink",
+        });
       } catch {
         broken.push(relativePath);
+        checked.push({
+          path: relativePath,
+          source,
+          target: destination,
+          status: "broken",
+        });
       }
     }
   }
@@ -552,7 +576,7 @@ export async function checkInstalled({ target }) {
       platformVersion: lock?.platformVersion,
       installState: state.installState?.status ?? (lock ? "unknown" : "none"),
     },
-    links: { mode: linkMode, broken },
+    links: { mode: linkMode, broken, checked },
     plugins: {
       installed: lock?.plugins ?? [],
       roots: lock?.rootPlugins ?? [],

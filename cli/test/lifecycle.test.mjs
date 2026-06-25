@@ -732,6 +732,39 @@ test("check reports linkMode and link integrity", async () => {
     const result = await checkInstalled({ target });
     assert.equal(result.current.linkMode, "symlink");
     assert.ok(Array.isArray(result.links.broken));
+    assert.ok(result.links.checked.length > 0);
+    const skill = result.links.checked.find(
+      (item) => item.path === ".agents/skills/code-shared-design/SKILL.md",
+    );
+    assert.ok(skill);
+    assert.equal(skill.status, "symlink");
+    assert.equal(skill.source, ".ai-engineering/build/.agents/skills/code-shared-design/SKILL.md");
+    assert.match(skill.target, /\.ai-engineering[\\/]build[\\/]\.agents[\\/]skills[\\/]code-shared-design[\\/]SKILL\.md$/);
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
+});
+
+test("check reports copy fallback when symlink metadata is not a link", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "ai-engineering-check-link-fallback-"));
+  try {
+    await installPlugins({
+      root: repoRoot,
+      target,
+      pluginIds: ["application"],
+      providers: ["codex"],
+    });
+    const linkPath = path.join(target, ".agents/skills/code-shared-design/SKILL.md");
+    const content = await readFile(linkPath, "utf8");
+    await rm(linkPath, { force: true });
+    await writeFile(linkPath, content, "utf8");
+
+    const result = await checkInstalled({ target });
+    const skill = result.links.checked.find(
+      (item) => item.path === ".agents/skills/code-shared-design/SKILL.md",
+    );
+    assert.equal(skill.status, "copy-fallback");
+    assert.equal(result.links.broken.includes(".agents/skills/code-shared-design/SKILL.md"), false);
   } finally {
     await rm(target, { recursive: true, force: true });
   }
@@ -754,6 +787,9 @@ test("cli lifecycle reports scope and providers in human output", async () => {
     assert.match(check.stdout, /Current: installed/);
     assert.match(check.stdout, /Scope: project/);
     assert.match(check.stdout, /Providers: codex, cursor/);
+    assert.match(check.stdout, /Link mode: symlink/);
+    assert.match(check.stdout, /Symlink sources:/);
+    assert.match(check.stdout, /\.ai-engineering\/build\//);
 
     const remove = await runCli(["remove", "platform", "--yes"], { cwd: target });
     assert.equal(remove.exitCode, 0);
