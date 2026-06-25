@@ -11,7 +11,7 @@ This repository does not ship active MCP tools by default. MCP entries here are
 registry, policy, schema, and example files so future integrations have a stable
 structure without coupling plugins to executable MCP server source.
 
-## Layout
+## Structure
 
 ```text
 providers/
@@ -31,3 +31,9 @@ providers/
 - Do not add MCP server implementation source under this directory.
 - Provider adapters may read this directory for policy and schema guidance, but
   plugins remain capability manifests, not runtime server projects.
+
+## Change Checklist
+
+- Update English `README.md` first, then synchronize `README_VI.md`.
+- Keep the MCP registry inactive by default; do not add executable server source here.
+- Run `npm run validate` after MCP registry, policy, schema, or example changes.

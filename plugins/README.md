@@ -13,7 +13,7 @@ policy, and examples are configured through `providers/`.
 Supported provider targets are `codex`, `claude`, `cursor`, and `antigravity`.
 Each plugin declares support under `compatibility.providers` in `plugin.yaml`.
 
-## Plugin Anatomy
+## Structure
 
 Plugin directories follow this shape:
 

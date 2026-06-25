@@ -8,7 +8,7 @@ Use this directory when a rule or contract is provider-neutral and reusable by
 more than one AI IDE plugin. Keep plugin-specific behavior in
 `plugins/<plugin>/`.
 
-## Folder Map
+## Structure
 
 | Folder | What It Owns | Edit When |
 | --- | --- | --- |

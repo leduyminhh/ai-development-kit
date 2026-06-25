@@ -7,7 +7,7 @@ single task or PR.
 Do not use this directory as a dumping ground for generated reports. Promote a
 report into `docs/` only when it becomes a maintained project reference.
 
-## Folder Map
+## Structure
 
 | Folder | What It Owns | Edit When |
 | --- | --- | --- |

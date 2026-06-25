@@ -20,6 +20,8 @@ async function withRepositoryCopy(run) {
   try {
     for (const entry of [
       "ai-engineering.config.yaml",
+      "README.md",
+      "README_VI.md",
       "plugins",
       "adapters",
       "cli",
@@ -42,6 +44,8 @@ async function withPluginsRepositoryCopy(run) {
   try {
     for (const entry of [
       "ai-engineering.config.yaml",
+      "README.md",
+      "README_VI.md",
       "adapters",
       "cli",
       "core",

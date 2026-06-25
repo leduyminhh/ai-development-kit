@@ -5,9 +5,6 @@ Nội dung chuẩn của skills, commands, agents, hooks, workflows, schemas và
 templates nằm trong `plugins/`; CLI `aie` chiếu nội dung đó thành file native cho
 Codex, Claude Code, Cursor và Google Antigravity.
 
-**Phiên bản: [v1.1.0](CHANGELOG.md)** - chuẩn hóa plugin, shell completions và
-tự động hóa CI/CD.
-
 ## Quickstart
 
 Yêu cầu Node.js 20 trở lên.
@@ -39,16 +36,15 @@ aie doctor
 
 ## Contents
 
-- [Quickstart](#quickstart)
-- [Cấu Trúc Project](#cấu-trúc-project)
+- [Cấu Trúc](#cấu-trúc)
 - [Cấu Trúc Chi Tiết](#cấu-trúc-chi-tiết)
 - [Danh Mục Plugin](#danh-mục-plugin)
 - [Getting Started](#getting-started)
 - [Provider Outputs](#provider-outputs)
-- [Development](#development)
+- [Maintainer Workflow](#maintainer-workflow)
 - [Migration And Docs](#migration-and-docs)
 
-## Cấu Trúc Project
+## Cấu Trúc
 
 | Đường dẫn | Mục đích |
 | --- | --- |
@@ -191,7 +187,7 @@ Khi cập nhật instruction file, hệ thống giữ nguyên nội dung ngườ
 nằm ngoài AI Engineering baseline block và ghi backup dưới
 `.ai-engineering/backups/`.
 
-## Development
+## Maintainer Workflow
 
 Lệnh maintainer:
 
@@ -239,3 +235,9 @@ v1.1 chuẩn hóa 7 plugin quanh noun-action skills, verb-noun commands và
 domain-pipeline workflows. Phiên bản này cũng gộp các phase-specific feature
 skills thành stack và domain skills như `java-implement`, `python-implement`,
 `react-implement`, `test-qa-review` và `test-automation-validate`.
+
+## Checklist Thay Đổi
+
+- Cập nhật `README.md` tiếng Anh trước, rồi đồng bộ `README_VI.md`.
+- Giữ bảng lệnh, provider path và plugin khớp với `plugins/`, `adapters/` và `core/routing/`.
+- Chạy `npm run validate` sau thay đổi về cấu trúc, command id, provider path hoặc danh mục plugin.

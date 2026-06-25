@@ -3,7 +3,7 @@
 This directory contains shell-native hook utilities that are not duplicated by
 the TypeScript CLI.
 
-## Layout
+## Structure
 
 | Path | Purpose |
 | --- | --- |

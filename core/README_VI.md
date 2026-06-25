@@ -8,7 +8,7 @@ Dùng thư mục này khi một rule hoặc hợp đồng trung lập provider v
 dụng bởi nhiều AI IDE plugin. Hành vi riêng của từng plugin phải nằm trong
 `plugins/<plugin>/`.
 
-## Bản Đồ Thư Mục
+## Cấu Trúc
 
 | Thư mục | Sở hữu nội dung gì | Sửa khi nào |
 | --- | --- | --- |

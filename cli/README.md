@@ -3,7 +3,7 @@
 `cli/` owns the published `ai-engineering` and `aie` executables, lifecycle
 runtime, provider projection, diagnostics, distribution tooling, and tests.
 
-## Folder Map
+## Structure
 
 | Path | Purpose |
 | --- | --- |
@@ -94,3 +94,9 @@ npm run build:cli
 ```
 
 After changing `cli/src/`, rebuild `dist/`.
+
+## Change Checklist
+
+- Update English `README.md` first, then synchronize `README_VI.md`.
+- Keep command and provider path tables aligned with `cli/src/` behavior.
+- Run `npm run validate` after CLI command, provider projection, or workflow changes.

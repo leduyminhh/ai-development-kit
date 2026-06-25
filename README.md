@@ -46,7 +46,7 @@ wizard-first command guide.
 
 ## Contents
 
-- [Project Structure](#project-structure)
+- [Structure](#structure)
 - [Detail Structure](#detail-structure)
 - [Plugin Catalog](#plugin-catalog)
 - [Getting Started](#getting-started)
@@ -54,7 +54,7 @@ wizard-first command guide.
 - [Maintainer Workflow](#maintainer-workflow)
 - [Migration And Docs](#migration-and-docs)
 
-## Project Structure
+## Structure
 
 | Path | Owns |
 | --- | --- |
@@ -247,3 +247,9 @@ v1.1 standardizes all 7 plugins around noun-action skills, verb-noun commands,
 and domain-pipeline workflows. It consolidates phase-specific feature skills into
 stack and domain skills such as `java-implement`, `python-implement`,
 `react-implement`, `test-qa-review`, and `test-automation-validate`.
+
+## Change Checklist
+
+- Update English `README.md` first, then synchronize `README_VI.md`.
+- Keep command, provider path, and plugin tables aligned with `plugins/`, `adapters/`, and `core/routing/`.
+- Run `npm run validate` after structure, command id, provider path, or plugin catalog changes.

@@ -31,3 +31,9 @@ providers/
 - Không thêm source code MCP server implementation vào thư mục này.
 - Provider adapters có thể đọc thư mục này để lấy policy và schema, còn plugin
   vẫn là capability manifest, không phải runtime server project.
+
+## Checklist Thay Đổi
+
+- Cập nhật `README.md` tiếng Anh trước, rồi đồng bộ `README_VI.md`.
+- Giữ MCP registry không active mặc định; không thêm source server executable ở đây.
+- Chạy `npm run validate` sau thay đổi registry, policy, schema hoặc ví dụ MCP.

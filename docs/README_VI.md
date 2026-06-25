@@ -6,7 +6,7 @@ lý do cleanup và ghi chú triển khai cần tồn tại lâu hơn một task 
 Không dùng thư mục này như nơi đổ report sinh tự động. Chỉ đưa report vào
 `docs/` khi nó trở thành tài liệu tham chiếu được bảo trì của dự án.
 
-## Bản Đồ Thư Mục
+## Cấu Trúc
 
 | Thư mục | Sở hữu nội dung gì | Sửa khi nào |
 | --- | --- | --- |

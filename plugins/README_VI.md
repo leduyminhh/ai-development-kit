@@ -14,7 +14,7 @@ Các provider target hiện được hỗ trợ là `codex`, `claude`, `cursor` 
 `antigravity`. Mỗi plugin khai báo hỗ trợ trong `compatibility.providers` của
 `plugin.yaml`.
 
-## Cấu Trúc Một Plugin
+## Cấu Trúc
 
 Thư mục plugin có cấu trúc:
 

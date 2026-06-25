@@ -199,6 +199,89 @@ async function exists(pathname) {
   }
 }
 
+const README_TIER_A_DIRS = ["", "core", "plugins", "providers", "docs", "cli"];
+const README_TIER_B_DIRS = [
+  "cli/scripts",
+  "adapters/codex",
+  "adapters/antigravity",
+];
+
+async function readTextIfExists(pathname) {
+  try {
+    return await readFile(pathname, "utf8");
+  } catch {
+    return null;
+  }
+}
+
+function countHeadings(text, depth) {
+  const body = text.replace(/^﻿/, "").replace(/```[\s\S]*?```/g, "");
+  const matcher = new RegExp(`^${"#".repeat(depth)} `, "gm");
+  return (body.match(matcher) || []).length;
+}
+
+export async function validateReadmeStandard(root, errors) {
+  if (
+    (await readTextIfExists(
+      path.join(root, "core/standards/readme-authoring-standard.md"),
+    )) === null
+  ) {
+    errors.push(
+      "README standard: core/standards/readme-authoring-standard.md is missing",
+    );
+  }
+  for (const dir of README_TIER_A_DIRS) {
+    const label = dir === "" ? "root" : dir;
+    const en = await readTextIfExists(path.join(root, dir, "README.md"));
+    const vi = await readTextIfExists(path.join(root, dir, "README_VI.md"));
+    if (en === null) {
+      errors.push(`README standard: ${label} is missing README.md`);
+    }
+    if (vi === null) {
+      errors.push(`README standard: ${label} is missing README_VI.md`);
+    }
+    for (const [name, text] of [
+      ["README.md", en],
+      ["README_VI.md", vi],
+    ]) {
+      if (text === null) continue;
+      const h1 = countHeadings(text, 1);
+      if (h1 !== 1) {
+        errors.push(
+          `README standard: ${label}/${name} must have exactly one H1 (found ${h1})`,
+        );
+      }
+    }
+    if (en !== null && vi !== null) {
+      const enH2 = countHeadings(en, 2);
+      const viH2 = countHeadings(vi, 2);
+      if (enH2 !== viH2) {
+        errors.push(
+          `README standard: ${label} EN/VI heading count mismatch (README.md ${enH2}, README_VI.md ${viH2})`,
+        );
+      }
+    }
+  }
+  for (const dir of README_TIER_B_DIRS) {
+    const en = await readTextIfExists(path.join(root, dir, "README.md"));
+    if (en === null) {
+      errors.push(`README standard: ${dir} is missing README.md`);
+    } else if (countHeadings(en, 1) !== 1) {
+      errors.push(`README standard: ${dir}/README.md must have exactly one H1`);
+    }
+  }
+  for (const dir of [...README_TIER_A_DIRS, ...README_TIER_B_DIRS]) {
+    const label = dir === "" ? "root" : dir;
+    const vi = await readTextIfExists(path.join(root, dir, "README_VI.md"));
+    const en = await readTextIfExists(path.join(root, dir, "README.md"));
+    if (vi !== null && en === null) {
+      errors.push(
+        `README standard: ${label} has README_VI.md without README.md`,
+      );
+    }
+  }
+}
+
 // `core/workflows/` ships global fallback workflows that are byte-identical
 // copies of plugin-owned sources. Nothing regenerates them, so they silently
 // drift when a plugin workflow changes. Fail loud when a core copy diverges
@@ -630,6 +713,8 @@ export async function validateRepository(root) {
       errors.push(`missing CLI module ${required}`);
     }
   }
+
+  await validateReadmeStandard(root, errors);
 
   if (errors.length > 0) {
     throw new PlatformError(errors.sort().join("\n"), {

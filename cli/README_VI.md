@@ -3,7 +3,7 @@
 `cli/` sở hữu executable `ai-engineering` và `aie`, lifecycle runtime, provider
 projection, chẩn đoán, công cụ distribution và test.
 
-## Bản Đồ Thư Mục
+## Cấu Trúc
 
 | Path | Mục đích |
 | --- | --- |
@@ -94,3 +94,9 @@ npm run build:cli
 ```
 
 Sau khi thay đổi `cli/src/`, cần build lại `dist/`.
+
+## Checklist Thay Đổi
+
+- Cập nhật `README.md` tiếng Anh trước, rồi đồng bộ `README_VI.md`.
+- Giữ bảng command và provider path khớp với hành vi trong `cli/src/`.
+- Chạy `npm run validate` sau thay đổi command CLI, provider projection hoặc workflow.
