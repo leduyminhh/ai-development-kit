@@ -173,6 +173,7 @@ async function buildDesiredState({
   providers,
   rootPlugins,
   optionalPlugins = [],
+  project = projectProvider,
 }) {
   const installContext = normalizeContext(target, context);
   const platform = await loadPlatform(root);
@@ -207,7 +208,7 @@ async function buildDesiredState({
       provider,
       mcpServers,
     });
-    const projection = projectProvider(projectionInput);
+    const projection = project(projectionInput);
     projections[provider] = projection;
     if (graph.pluginIds.length > 0) {
       for (const asset of projection.assets) {
@@ -277,6 +278,7 @@ export async function prepareInstallation({
   providers,
   force = false,
   all = false,
+  project = projectProvider,
 }) {
   return buildDesiredState({
     root,
@@ -288,6 +290,7 @@ export async function prepareInstallation({
     providers,
     force,
     all,
+    project,
   });
 }
 
@@ -685,6 +688,7 @@ export async function removePlugins({
   pluginIds = [],
   all = false,
   force = false,
+  project = projectProvider,
 }) {
   const installContext = normalizeContext(target, context);
   const installed = await listInstalled({ target: installContext.targetRoot });
@@ -707,6 +711,7 @@ export async function removePlugins({
     ),
     rootPlugins: remainingRoots,
     force,
+    project,
   });
   const plan = await planTransaction({
     target: installContext.targetRoot,
