@@ -1,7 +1,7 @@
 import { PlatformError } from "./errors.mjs";
 import { validateRepository } from "./contracts.mjs";
 import { buildAllPlugins, verifyPluginArtifact } from "./builder.mjs";
-import { readdir } from "node:fs/promises";
+import { readdir, writeFile } from "node:fs/promises";
 import os from "node:os";
 import { generateRegistry } from "./registry.mjs";
 import {
@@ -70,6 +70,17 @@ function color(value, code) {
 }
 
 import { checkCommandOutput } from "./schema-validate.mjs";
+import { platformProjector } from "./platform/install/platform-projector.mjs";
+import { validatePlatformContracts } from "./platform/validation/validate-platform-contracts.mjs";
+import { resolvePlatform } from "./platform/resolver/resolve-platform.mjs";
+import { generatePlatformLockfile } from "./platform/lockfile/generate-lockfile.mjs";
+import {
+  selectValidationEngine,
+  loadPlatformConfigDefaults,
+  parseResolveArgs,
+  resolutionToJson,
+  formatResolution,
+} from "./platform/cli-routing.mjs";
 import { detectInstallRecommendations } from "./install-detection.mjs";
 import {
   cancelInstallSession,
@@ -309,6 +320,15 @@ export async function run(args, streams = process) {
 
   if (args[0] === "doctor") {
     if (path.resolve(process.cwd()) === REPOSITORY_ROOT) {
+      if (selectValidationEngine(args) === "platform") {
+        const platformResult = await validatePlatformContracts({ root: REPOSITORY_ROOT });
+        streams.stdout.write(
+          args.includes("--json")
+            ? `${JSON.stringify({ status: "pass", scope: "source-platform", ...platformResult })}\n`
+            : `Doctor (platform) passed: ${platformResult.pluginCount} plugins, ${platformResult.assetCount} assets.\n`,
+        );
+        return 0;
+      }
       const result = await validateRepository(REPOSITORY_ROOT);
       streams.stdout.write(
         args.includes("--json")
@@ -359,7 +379,42 @@ export async function run(args, streams = process) {
     return 0;
   }
 
+  if (args[0] === "resolve") {
+    const defaults = await loadPlatformConfigDefaults(REPOSITORY_ROOT);
+    const options = parseResolveArgs(args.slice(1), defaults);
+    if (options.writeLockRequested && !options.writeLockPath) {
+      streams.stderr.write("usage: aie resolve [plugin...] --write-lock <path>\n");
+      return 1;
+    }
+    const resolution = await resolvePlatform({
+      root: REPOSITORY_ROOT,
+      requested: options.requested,
+      optional: options.optional,
+      platformVersion: options.platformVersion,
+      providers: options.providers,
+    });
+    if (options.writeLockPath) {
+      const lockfile = generatePlatformLockfile(resolution);
+      await writeFile(options.writeLockPath, `${JSON.stringify(lockfile, null, 2)}\n`, "utf8");
+    }
+    streams.stdout.write(
+      options.json
+        ? `${JSON.stringify(resolutionToJson(resolution))}\n`
+        : formatResolution(resolution),
+    );
+    return 0;
+  }
+
   if (args[0] === "validate") {
+    if (selectValidationEngine(args) === "platform") {
+      const platformResult = await validatePlatformContracts({ root: REPOSITORY_ROOT });
+      streams.stdout.write(
+        args.includes("--json")
+          ? `${JSON.stringify(platformResult)}\n`
+          : `Validated ${platformResult.pluginCount} plugins and ${platformResult.assetCount} assets (platform contracts).\n`,
+      );
+      return 0;
+    }
     const root = REPOSITORY_ROOT;
     const result = await validateRepository(root);
     if (args.includes("--json")) {
@@ -457,6 +512,35 @@ export async function run(args, streams = process) {
   }
 
   if (
+    args[0] === "install" &&
+    args.includes("--platform") &&
+    args.includes("--dry-run")
+  ) {
+    const draft = parseInstallRequest(args.slice(1));
+    const intent = finalizeNonInteractiveDraft(draft);
+    const context = resolveInstallContext({
+      scope: intent.scope,
+      projectRoot: process.cwd(),
+      homeRoot: os.homedir(),
+    });
+    const prepared = await prepareInstallation({
+      root: REPOSITORY_ROOT,
+      context,
+      rootPlugins: intent.rootPlugins,
+      optionalPlugins: intent.optionalPlugins,
+      all: intent.all,
+      providers: intent.providers,
+      force: intent.force,
+      project: platformProjector,
+    });
+    const plan = await buildInstallPlan({ prepared, context, force: intent.force });
+    streams.stdout.write(
+      draft.json ? `${JSON.stringify(plan)}\n` : renderInstallPlan(plan),
+    );
+    return 0;
+  }
+
+  if (
     (args[0] === "plugin" && args[1] === "install") ||
     args[0] === "install" ||
     args[0] === "generate-adapter"
@@ -464,6 +548,10 @@ export async function run(args, streams = process) {
     const root = REPOSITORY_ROOT;
     const offset = args[0] === "plugin" ? 2 : 1;
     const draft = parseInstallRequest(args.slice(offset));
+    const project =
+      args[0] === "install" && args.includes("--platform")
+        ? platformProjector
+        : undefined;
     const interactive = Boolean(
       streams.stdin?.isTTY && streams.stdout?.isTTY,
     );
@@ -523,6 +611,7 @@ export async function run(args, streams = process) {
               all: candidate.all,
               providers: candidate.providers,
               force: candidate.force,
+              project,
             });
             return buildInstallPlan({
               prepared: candidatePrepared,
@@ -555,6 +644,7 @@ export async function run(args, streams = process) {
       all: intent.all,
       providers: intent.providers,
       force: intent.force,
+      project,
     });
     const plan = await buildInstallPlan({
       prepared,
@@ -594,6 +684,10 @@ export async function run(args, streams = process) {
     const root = REPOSITORY_ROOT;
     const offset = args[0] === "plugin" ? 2 : 1;
     const context = resolveContext(args);
+    const project =
+      (args[0] === "remove" || args[0] === "uninstall") && args.includes("--platform")
+        ? platformProjector
+        : undefined;
 
     // Non-interactive mode with explicit choices
     if (args.includes("--yes") || args.includes("--all") || args.slice(offset).some(arg => !arg.startsWith("--"))) {
@@ -609,6 +703,7 @@ export async function run(args, streams = process) {
         pluginIds: parsed.plugins,
         all,
         force: args.includes("--force"),
+        project,
       });
       streams.stdout.write(
         args.includes("--json")
@@ -673,6 +768,7 @@ export async function run(args, streams = process) {
         pluginIds: wizard.pluginIds,
         all: wizard.all,
         force: args.includes("--force"),
+        project,
       });
 
       streams.stdout.write(
