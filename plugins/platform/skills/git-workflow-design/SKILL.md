@@ -159,7 +159,12 @@ Basic expectation:
 2. Before staging, decide whether the diff is one logical change or several. Split commits when different goals are mixed, but keep code, tests, and small supporting docs together when they serve one change goal.
 3. If the user already gave a commit message, preserve its intent and only normalize obvious format issues.
 4. If the current branch is `main`, `master`, `develop`, or `dev`, load [resources/branch-convention.md](resources/branch-convention.md) and create/switch to the generated branch from that convention before committing. This skill convention takes precedence over the Codex app default `codex/` branch prefix.
-5. If the user did not provide a commit message, generate:
+5. If the user did not provide a commit message, first load [resources/commit-convention.md](resources/commit-convention.md), then load its referenced detail files that match the change:
+   - [resources/commit-convention/body-rules.md](resources/commit-convention/body-rules.md) for body section and bullet rules
+   - [resources/commit-convention/ai-generation-rules.md](resources/commit-convention/ai-generation-rules.md) for grounded generation, attribution, and UTF-8 safety
+   - [resources/commit-convention/config-env-rules.md](resources/commit-convention/config-env-rules.md) when config, environment, migration, or deployment behavior changes
+   - [resources/commit-convention/examples.md](resources/commit-convention/examples.md) when examples are needed to match style
+   Generate:
    - Detect the change size first: `small`, `medium`, `large`, or `breaking`
    - load [resources/commit-convention/templates.md](resources/commit-convention/templates.md) when the change needs a daily, structured, multi-module, refactor, fix, breaking-change, architecture, or PR template
    - a title using `type(scope): short summary`
@@ -179,7 +184,7 @@ Basic expectation:
 8. Stage only the files for the current commit group, then run relevant verification when feasible. Do not commit failing work unless the user explicitly wants a checkpoint commit.
 9. After a successful commit, inspect `git log -1 --format=%B` for readable Vietnamese; amend immediately if encoding was corrupted.
 10. After a successful push, create a pull request when the user asks to publish or when the workflow naturally reaches PR preparation.
-11. When preparing a PR, use the Pull Request Notes Template in [resources/commit-convention/templates.md](resources/commit-convention/templates.md) and keep migration, testing, risk, and notes explicit.
+11. When preparing a PR, load [resources/commit-convention.md](resources/commit-convention.md) first, then use the Pull Request Notes Template in [resources/commit-convention/templates.md](resources/commit-convention/templates.md) and keep migration, testing, risk, and notes explicit.
 12. Report branch, commit, push, PR, verification, changelog scope, and relevant notes in Vietnamese.
 
 ### Changelog Handoff

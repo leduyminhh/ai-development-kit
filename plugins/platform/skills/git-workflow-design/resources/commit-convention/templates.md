@@ -190,41 +190,41 @@ Migration:
 Use when the user asks for PR preparation.
 
 ```md
-## Summary
+Summary:
 
 - 
 - 
 
-## Changes
+Changes:
 
-### Added
+Added:
 - 
 
-### Changed
+Changed:
 - 
 
-### Fixed
+Fixed:
 - 
 
-### Removed
+Removed:
 - 
 
-## Migration
+Migration:
 
 - 
 
-## Testing
+Testing:
 
 - [ ] Unit tests
 - [ ] Integration tests
 - [ ] Manual test
 - [ ] Build passed
 
-## Risk
+Risk:
 
 - Low / Medium / High
 
-## Notes
+Notes:
 
 - 
 ```
