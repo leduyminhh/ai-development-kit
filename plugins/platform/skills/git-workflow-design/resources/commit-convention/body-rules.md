@@ -60,6 +60,30 @@ Rules:
 - Prefer 0 to 3 detail lines per bullet.
 - Keep bullets short and review-friendly.
 
+## Long Body Grouping
+
+Treat a body as long when it is `large` or `breaking`, or when a section would
+need 3 or more main bullets with multiple clauses or related facts.
+
+For a long body:
+
+- Write each main bullet as a short summary, then move supporting facts into 1
+  to 3 nested detail bullets.
+- Group affected components, flags, artifacts, constraints, and secondary
+  flows under the parent behavior they support.
+- Keep independent concerns as separate main bullets; do not nest unrelated
+  changes merely to reduce the top-level count.
+- Prefer a scannable hierarchy over a dense paragraph disguised as one bullet.
+
+Example:
+
+```text
+- Thêm layout PostgreSQL combined/per-db và hỗ trợ backup theo bảng.
+  • per-db ghi mỗi database vào một thư mục con.
+  • Mode full kèm globals.sql.gz.
+  • Cờ --table ánh xạ từ POSTGRES_BACKUP_TABLES.
+```
+
 ## Commit Splitting
 
 Split commits automatically when changes represent:

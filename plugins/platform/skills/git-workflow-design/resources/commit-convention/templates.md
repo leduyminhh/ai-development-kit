@@ -94,6 +94,35 @@ Documentation:
 Omit modules that are not touched. Do not invent module impact that is not in
 the staged diff.
 
+## Long Body Template
+
+Use for `large` or `breaking` changes, or when a section would otherwise contain
+3 or more dense main bullets. Keep the parent bullet concise and place related
+facts beneath it.
+
+```text
+<type>(<scope>): <summary>
+
+Changed:
+- <parent behavior or workflow change>
+  • <supporting component, flag, artifact, or secondary flow>
+  • <supporting constraint or operational detail>
+
+- <independent behavior or workflow change>
+  • <supporting detail>
+
+Reason:
+- <why the parent changes were needed>
+  • <supporting operational or maintenance reason>
+
+Important notes / Breaking impact:
+- <required consumer action>
+  • <migration or compatibility detail>
+```
+
+Do not use nested bullets to hide unrelated changes that should be separate
+main bullets or separate commits.
+
 ## Refactor Commit Template
 
 Use when improving structure without intended behavior changes.

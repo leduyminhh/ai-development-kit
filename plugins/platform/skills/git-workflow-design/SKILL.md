@@ -172,7 +172,9 @@ Basic expectation:
    - a Vietnamese body with sections `Changed`, `Reason`, and optional `Important notes / breaking impact`
    - keep the Vietnamese body in UTF-8 with diacritics; do not strip accents unless the user explicitly asks for that compromise
    - `Changed` and `Reason` should each contain 1 to 5 main rows depending on the real change size
-   - each main row may have optional detail lines prefixed with `-`; keep them only when the diff shows meaningful supporting behavior, side effects, constraints, or secondary flow
+   - each main row may have detail lines prefixed with `•`; keep them only when the diff shows meaningful supporting behavior, side effects, constraints, or secondary flow
+   - for a long body, use nested detail bullets under a short parent summary; treat `large` and `breaking` changes, or any section that would otherwise need 3 or more dense main rows, as long
+   - keep independent concerns as separate main rows; group only supporting facts, affected components, flags, constraints, or secondary flows under their shared parent
    - derive all rows from the real diff and nearby source context, from a developer's point of view: what they improved, fixed, simplified, or enabled
    - summarize the main flow first, then the supporting flow
    - avoid file-by-file narration when the deeper workflow or maintenance intent is visible
