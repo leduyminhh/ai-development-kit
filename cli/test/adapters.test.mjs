@@ -16,6 +16,7 @@ test("claude: skill copyDir + command render + instruction CLAUDE.md", () => {
   const out = claude.build(model(), { scope: "project" });
   assert.ok(out.files.some((f) => f.path.startsWith(".claude/skills/") && f.copyDir));
   assert.ok(out.files.some((f) => f.path.startsWith(".claude/commands/") && typeof f.content === "string"));
+  assert.ok(out.files.some((f) => f.path === ".claude-plugin/plugin.json" && typeof f.content === "string"));
   assert.equal(out.instruction.path, "CLAUDE.md");
   assert.equal(out.mcp.path, ".mcp.json");
 });

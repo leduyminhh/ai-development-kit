@@ -1,9 +1,5 @@
 // adapters/claude/adapter.mjs
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { agentBody, jsonFile } from "../_shared/lib.mjs";
-
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 function commandBody(c) {
   const skills = c.requiredSkills.map((s) => `- ${s}`).join("\n");
