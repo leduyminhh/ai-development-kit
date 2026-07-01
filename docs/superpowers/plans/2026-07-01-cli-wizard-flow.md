@@ -377,9 +377,14 @@ function stripFrontmatter(text) {
 }
 
 function sectionBlock(body, heading) {
-  const re = new RegExp(`^##\\s+${heading}\\s*$([\\s\\S]*?)(?=^##\\s+|\\Z)`, "m");
-  const m = body.match(re);
-  return m ? m[1].trim() : "";
+  const lines = body.split(/\r?\n/);
+  const start = lines.findIndex((l) => new RegExp(`^##\\s+${heading}\\s*$`).test(l));
+  if (start === -1) return "";
+  let end = lines.length;
+  for (let i = start + 1; i < lines.length; i++) {
+    if (/^##\s+/.test(lines[i])) { end = i; break; }
+  }
+  return lines.slice(start + 1, end).join("\n").trim();
 }
 
 function bulletList(block) {
