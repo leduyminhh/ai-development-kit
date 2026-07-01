@@ -33,3 +33,16 @@ test("runWizard install thu thập scope/providers/plugins", async () => {
   assert.deepEqual(out.plugins, ["application"]);
   assert.equal(out.scope, "project");
 });
+
+test("runWizard install trả null khi confirmStep từ chối", async () => {
+  const deps = {
+    selectOne: async () => "project",
+    selectMany: async () => ["claude"],
+    confirmStep: async () => false,
+    providers: ["antigravity", "claude", "codex", "cursor"],
+    pluginIds: ["application"],
+    installed: [],
+  };
+  const out = await runWizard("install", deps);
+  assert.equal(out, null);
+});

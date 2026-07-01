@@ -30,7 +30,7 @@ export async function runWizard(action, deps) {
       { key: "ok", run: (s) => deps.confirmStep("Xác nhận cài đặt", [
         `scope=${s.scope}`, `providers=${s.providers.join(", ")}`, `plugins=${s.plugins.join(", ")}`]) },
     ]);
-    return st ? { action, scope: st.scope, providers: st.providers, plugins: st.plugins } : null;
+    return (st && st.ok) ? { action, scope: st.scope, providers: st.providers, plugins: st.plugins } : null;
   }
 
   if (action === "uninstall") {
@@ -43,7 +43,7 @@ export async function runWizard(action, deps) {
       { key: "ok", run: (s) => deps.confirmStep("Xác nhận gỡ", [
         `scope=${s.scope}`, `providers=${s.providers.join(", ")}`]) },
     ]);
-    return st ? { action, scope: st.scope, providers: st.providers, plugins: "all" } : null;
+    return (st && st.ok) ? { action, scope: st.scope, providers: st.providers, plugins: "all" } : null;
   }
 
   if (action === "build") {
@@ -51,7 +51,7 @@ export async function runWizard(action, deps) {
       { key: "providers", run: () => deps.selectMany("Chọn provider để build", providerItems, { min: 1 }) },
       { key: "ok", run: (s) => deps.confirmStep("Xác nhận build", [`providers=${s.providers.join(", ")}`]) },
     ]);
-    return st ? { action, providers: st.providers } : null;
+    return (st && st.ok) ? { action, providers: st.providers } : null;
   }
 
   if (action === "check") {
