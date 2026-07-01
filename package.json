@@ -4,21 +4,17 @@
   "description": "AI IDE plugin platform with generated adapters for AI engineering agents.",
   "type": "module",
   "bin": {
-    "ai-engineering-platform": "./cli/dist/index.js",
-    "ai-engineering": "./cli/dist/index.js",
-    "aie": "./cli/dist/index.js"
+    "ai-engineering-platform": "./cli/index.mjs",
+    "ai-engineering": "./cli/index.mjs",
+    "aie": "./cli/index.mjs"
   },
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "test": "npm run build:cli && node --test \"cli/test/*.mjs\"",
-    "build": "npm run build:cli",
-    "build:cli": "tsc -p cli/tsconfig.json",
-    "prepare": "npm run build:cli",
-    "validate": "node cli/dist/index.js validate",
-    "doctor": "node cli/dist/index.js doctor",
-    "migrate:dry-run": "node cli/dist/index.js migrate --dry-run"
+    "test": "node --test \"cli/test/*.test.mjs\"",
+    "build": "node cli/build.mjs",
+    "check": "node cli/index.mjs check"
   },
   "workspaces": [
     "cli"
@@ -33,12 +29,7 @@
     "README.md"
   ],
   "license": "MIT",
-  "devDependencies": {
-    "@types/node": "^22.15.0",
-    "typescript": "^5.8.3"
-  },
   "dependencies": {
-    "doctor": "^0.1.26",
     "js-yaml": "^5.0.0"
   }
 }
