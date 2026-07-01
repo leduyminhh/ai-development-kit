@@ -47,7 +47,7 @@ function defaultDeps() {
         const onKey = (_str, key) => {
           process.stdin.off("keypress", onKey);
           if (process.stdin.isTTY) process.stdin.setRawMode(false);
-          resolve(key.ctrl ? "c" : key.name);
+          resolve({ name: key.name, ctrl: Boolean(key.ctrl) });
         };
         process.stdin.on("keypress", onKey);
       }),
@@ -63,8 +63,8 @@ export async function selectMany(title, items, { min = 1 } = {}, deps = defaultD
       const point = i === state.cursor ? ">" : " ";
       deps.write(`${point} ${mark} ${it.label}\n`);
     });
-    const name = await deps.readKey();
-    const action = keyToAction(name, {});
+    const key = await deps.readKey();
+    const action = keyToAction(key.name, { ctrl: key.ctrl });
     if (action === "quit") return CANCEL;
     if (action === "back") return BACK;
     const next = reduceMany(state, action, { count: items.length, min });
@@ -78,7 +78,8 @@ export async function selectOne(title, items, deps = defaultDeps()) {
   for (;;) {
     deps.write(`\n${title}\n`);
     items.forEach((it, i) => deps.write(`${i === cursor ? ">" : " "} ${it.label}\n`));
-    const action = keyToAction(await deps.readKey(), {});
+    const key = await deps.readKey();
+    const action = keyToAction(key.name, { ctrl: key.ctrl });
     if (action === "quit") return CANCEL;
     if (action === "back") return BACK;
     if (action === "up") cursor = (cursor - 1 + items.length) % items.length;

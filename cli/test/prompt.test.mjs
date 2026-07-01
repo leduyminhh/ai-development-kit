@@ -28,7 +28,7 @@ test("reduceMany confirm bị chặn khi dưới min", () => {
 });
 
 test("selectMany với readKey giả trả về lựa chọn", async () => {
-  const keys = ["space", "return"]; // chọn item 0 rồi confirm
+  const keys = [{ name: "space" }, { name: "return" }]; // chọn item 0 rồi confirm
   let i = 0;
   const deps = { readKey: async () => keys[i++], write: () => {} };
   const items = [{ label: "A", value: "a" }, { label: "B", value: "b" }];
