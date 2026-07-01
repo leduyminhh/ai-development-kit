@@ -12,8 +12,9 @@ function readManifest(file) {
 export function loadPlugins(root) {
   const dir = path.join(root, PLUGINS_DIR);
   const plugins = new Map();
-  for (const name of fs.readdirSync(dir)) {
-    const manifestFile = path.join(dir, name, "plugin.yaml");
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const manifestFile = path.join(dir, entry.name, "plugin.yaml");
     if (!fs.existsSync(manifestFile)) continue;
     const manifest = readManifest(manifestFile);
     const id = manifest?.metadata?.id;
