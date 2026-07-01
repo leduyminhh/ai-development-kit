@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { PROVIDERS, isProvider } from "./lib/paths.mjs";
 import { knownPluginIds } from "./lib/plugins.mjs";
-import { runBuild, ADAPTERS } from "./build.mjs";
+import { runBuild } from "./build.mjs";
 import { install, uninstall, check, readManifest } from "./lib/install.mjs";
 import { runWizard } from "./lib/wizard.mjs";
 import { selectOne, selectMany, confirmStep } from "./lib/prompt.mjs";
