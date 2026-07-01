@@ -31,6 +31,18 @@ test("install claude ghi skills + CLAUDE.md managed + manifest", () => {
   });
 });
 
+test("install không đè file MCP có sẵn của người dùng", () => {
+  withTarget((dir) => {
+    const fs2 = fs;
+    fs2.writeFileSync(path.join(dir, ".mcp.json"), JSON.stringify({ mcpServers: { mine: { url: "x" } } }), "utf8");
+    install({ root: ROOT, providers: ["claude"], plugins: ["application"], scope: "project" });
+    const mcp = JSON.parse(fs2.readFileSync(path.join(dir, ".mcp.json"), "utf8"));
+    assert.ok(mcp.mcpServers.mine, "user MCP server phải được giữ nguyên");
+    const entry = readManifest("project").installs.find((e) => e.provider === "claude");
+    assert.deepEqual(entry.mcp, []);
+  });
+});
+
 test("install bảo toàn nội dung người dùng ngoài khối managed", () => {
   withTarget((dir) => {
     fs.writeFileSync(path.join(dir, "CLAUDE.md"), "# Ghi chú của tôi\n\nGiữ nguyên dòng này.\n", "utf8");

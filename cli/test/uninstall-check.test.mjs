@@ -5,7 +5,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { install, uninstall, check } from "../lib/install.mjs";
+import { install, uninstall, check, readManifest } from "../lib/install.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -24,6 +24,18 @@ test("check báo present/total sau khi install", () => {
     const claude = report.installs.find((e) => e.provider === "claude");
     assert.ok(claude.total > 0);
     assert.equal(claude.missing, 0);
+  });
+});
+
+test("gỡ một provider giữ managed block AGENTS.md cho provider còn lại", () => {
+  withTarget((dir) => {
+    install({ root: ROOT, providers: ["codex", "cursor", "antigravity"], plugins: ["application"], scope: "project" });
+    uninstall({ root: ROOT, providers: ["codex"], plugins: "all", scope: "project" });
+    const agents = fs.readFileSync(path.join(dir, "AGENTS.md"), "utf8");
+    assert.match(agents, /AGENTS_BASELINE/, "AGENTS.md block phải còn vì cursor/antigravity vẫn cài");
+    uninstall({ root: ROOT, providers: ["cursor", "antigravity"], plugins: "all", scope: "project" });
+    const after = fs.existsSync(path.join(dir, "AGENTS.md")) ? fs.readFileSync(path.join(dir, "AGENTS.md"), "utf8") : "";
+    assert.doesNotMatch(after, /AGENTS_BASELINE/, "sau khi gỡ hết, block phải biến mất");
   });
 });
 

@@ -73,7 +73,9 @@ export function install({ root = REPO_ROOT, providers, plugins, scope = "project
       else files.push(res.file);
     }
     const managed = out.instruction ? [applyInstruction(root, targetRoot, out.instruction.path)] : [];
-    const mcp = out.mcp ? [writeMcp(targetRoot, out.mcp, model.mcpServers)] : [];
+    const mcp = out.mcp && model.mcpServers && Object.keys(model.mcpServers).length
+      ? [writeMcp(targetRoot, out.mcp, model.mcpServers)]
+      : [];
 
     const idx = manifest.installs.findIndex((e) => e.provider === provider && e.scope === scope);
     const record = {
@@ -95,11 +97,12 @@ export function install({ root = REPO_ROOT, providers, plugins, scope = "project
   return { scope, root: targetRoot, results };
 }
 
-function removeEntry(targetRoot, entry) {
+function removeEntry(targetRoot, entry, survivingManaged) {
   for (const rel of [...(entry.files ?? []), ...(entry.links ?? []), ...(entry.mcp ?? [])]) {
     removeFileAndPruneEmpty(path.join(targetRoot, rel), targetRoot);
   }
   for (const rel of entry.managed ?? []) {
+    if (survivingManaged.has(rel)) continue;
     const abs = path.join(targetRoot, rel);
     const existing = readIfExists(abs);
     if (existing === null) continue;
@@ -118,6 +121,7 @@ export function uninstall({ root = REPO_ROOT, providers, plugins, scope = "proje
   const removed = [];
   const reinstall = [];
   const keep = [];
+  const matched = [];
 
   for (const entry of manifest.installs) {
     const providerMatch = !wantProviders || wantProviders.includes(entry.provider);
@@ -125,20 +129,23 @@ export function uninstall({ root = REPO_ROOT, providers, plugins, scope = "proje
     if (wantPlugins) {
       const remaining = entry.plugins.filter((p) => !wantPlugins.includes(p));
       if (remaining.length === entry.plugins.length) { keep.push(entry); continue; }
-      removeEntry(targetRoot, entry);
+      matched.push(entry);
       removed.push(entry.provider);
       if (remaining.length) reinstall.push({ provider: entry.provider, plugins: remaining });
     } else {
-      removeEntry(targetRoot, entry);
+      matched.push(entry);
       removed.push(entry.provider);
     }
   }
 
+  const survivingManaged = new Set();
+  for (const e of keep) for (const m of e.managed ?? []) survivingManaged.add(m);
+
+  for (const e of matched) removeEntry(targetRoot, e, survivingManaged);
+
   manifest.installs = keep;
   writeManifest(scope, manifest);
-  for (const r of reinstall) {
-    install({ root, providers: [r.provider], plugins: r.plugins, scope });
-  }
+  for (const r of reinstall) install({ root, providers: [r.provider], plugins: r.plugins, scope });
   return { removed, scope };
 }
 

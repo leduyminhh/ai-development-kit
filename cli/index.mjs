@@ -16,8 +16,15 @@ export function parseArgs(argv) {
     const v = argv[i];
     if (v === "-g" || v === "--global") a.scope = "global";
     else if (v === "--yes" || v === "-y") a.yes = true;
-    else if (v === "--provider" || v === "--target") { a.providers = argv[++i].split(","); a.explicit = true; }
-    else if (v === "--plugin") { a.plugins = argv[++i].split(","); a.explicit = true; }
+    else if (v === "--provider" || v === "--target") {
+      const val = argv[++i];
+      if (!val) throw new Error(`Thiếu giá trị cho ${v}`);
+      a.providers = val.split(","); a.explicit = true;
+    } else if (v === "--plugin") {
+      const val = argv[++i];
+      if (!val) throw new Error(`Thiếu giá trị cho ${v}`);
+      a.plugins = val.split(","); a.explicit = true;
+    }
     else a._.push(v);
   }
   return a;
@@ -59,7 +66,7 @@ export async function run(argv, streams = { stdout: process.stdout, stderr: proc
     selectOne, selectMany, confirmStep,
     providers: PROVIDERS,
     pluginIds: knownPluginIds(REPO_ROOT),
-    installed: readManifest(args.scope).installs,
+    readInstalled: (s) => readManifest(s).installs,
   };
 
   // Menu tổng khi không có lệnh

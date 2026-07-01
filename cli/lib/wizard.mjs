@@ -34,16 +34,17 @@ export async function runWizard(action, deps) {
   }
 
   if (action === "uninstall") {
-    const installedProviders = [...new Set(deps.installed.map((e) => e.provider))];
-    if (installedProviders.length === 0) return { action, providers: [], plugins: "all", empty: true };
+    const scope = await deps.selectOne("Chọn scope gỡ", SCOPE_ITEMS);
+    if (scope === CANCEL || scope === BACK) return null;
+    const installed = deps.readInstalled(scope);
+    const installedProviders = [...new Set(installed.map((e) => e.provider))];
+    if (installedProviders.length === 0) return { action, scope, providers: [], plugins: "all", empty: true };
     const items = installedProviders.map((p) => ({ label: p, value: p }));
     const st = await runSteps([
-      { key: "scope", run: () => deps.selectOne("Chọn scope gỡ", SCOPE_ITEMS) },
       { key: "providers", run: () => deps.selectMany("Chọn provider để gỡ", items, { min: 1 }) },
-      { key: "ok", run: (s) => deps.confirmStep("Xác nhận gỡ", [
-        `scope=${s.scope}`, `providers=${s.providers.join(", ")}`]) },
+      { key: "ok", run: (s) => deps.confirmStep("Xác nhận gỡ", [`scope=${scope}`, `providers=${s.providers.join(", ")}`]) },
     ]);
-    return (st && st.ok) ? { action, scope: st.scope, providers: st.providers, plugins: "all" } : null;
+    return (st && st.ok) ? { action, scope, providers: st.providers, plugins: "all" } : null;
   }
 
   if (action === "build") {
