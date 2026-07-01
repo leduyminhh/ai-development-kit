@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mergeManagedBlock, removeManagedBlock } from "../lib/managed-block.mjs";
+import { mergeManagedBlock, removeManagedBlock, hasOnlyWhitespace } from "../lib/managed-block.mjs";
 
 const BEGIN = "<!-- AI-ENGINEERING:BEGIN AGENTS_BASELINE -->";
 const END = "<!-- AI-ENGINEERING:END AGENTS_BASELINE -->";
@@ -36,4 +36,9 @@ test("remove gỡ khối, giữ nội dung ngoài", () => {
 test("remove trả rỗng khi file chỉ còn khối managed", () => {
   const existing = `${BEGIN}\nOLD\n${END}\n`;
   assert.equal(removeManagedBlock(existing).trim(), "");
+});
+
+test("hasOnlyWhitespace phân biệt chuỗi rỗng và có nội dung", () => {
+  assert.equal(hasOnlyWhitespace("  \n\t "), true);
+  assert.equal(hasOnlyWhitespace("x"), false);
 });
